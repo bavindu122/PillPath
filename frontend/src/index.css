@@ -1,12 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap');
 @import "tailwindcss";
+@import "./styles/animations.css"; 
 
 @theme {
-  --color-pButton: #0D7377;
-  --color-pButtonH: #095e61;
-  --color-upload-bg: #F8FAFCC7;
-  --color-upload-bg-hover: #A0E2E1;
+  /* Updated pharmacy-friendly color palette */
+  --color-primary: #2D5DA0;     /* Primary blue - trust/healthcare */
+  --color-primary-hover: #1D4A80; /* Darker blue for hover states */
+  --color-secondary: #4CAF50;   /* Secondary green - health/wellness */
+  --color-secondary-hover: #3D8C40; /* Darker green for hover */
+  --color-accent: #8E44AD;      /* Pharmaceutical purple */
+  --color-bg-light: #F8FBFF;    /* Light background */
+  --color-text-dark: #2C3E50;   /* Dark text for contrast */
+  --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
+  --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
 }
 
+/* Base font styles */
+body {
+  font-family: 'Nunito', sans-serif;
+  color: var(--color-text-dark);
+}
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
 
-
+/* Apply the new color variables to existing classes */
+.bg-pButton { background-color: var(--color-primary); }
+.bg-pButtonH { background-color: var(--color-primary-hover); }
+.text-pButton { color: var(--color-primary); }
+.text-pButtonH { color: var(--color-primary-hover); }
+.bg-upload-bg { background-color: var(--color-upload-bg); }
+.bg-upload-bg-hover { background-color: var(--color-upload-bg-hover); }
