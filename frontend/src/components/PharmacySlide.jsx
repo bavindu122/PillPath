@@ -111,10 +111,10 @@ const PharmacySlide = () => {
         <div className="fade-in" style={{ animationDelay: "0.4s" }}>
           <div className="flex flex-col items-center justify-center mb-6 h-50 w-80 bg-white/90 backdrop-blur-md rounded-xl gap-3 hover:translate-y-[-5px] transition-all duration-300 shadow-xl card-shine">
             <div className="bg-upload-bg-hover p-4 rounded-t-xl flex flex-col justify-center items-center w-full">
-              <p className="mb-4 text-sm font-medium text-accent">
+              <p className="mb-4 text-sm font-medium text-primary">
                 Discover pharmacies in your area
               </p>
-              <MapPin className="w-10 h-10 text-accent animate-pulse drop-shadow-md" />
+              <MapPin className="w-10 h-10 text-primary animate-pulse drop-shadow-md" />
             </div>
             <button className="px-4 my-3 bg-secondary text-white py-3 rounded-full hover:bg-secondary-hover transition-all pulse-on-hover shadow-md">
               <div className="flex gap-2 items-center font-medium">
