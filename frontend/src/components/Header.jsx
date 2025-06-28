@@ -27,7 +27,7 @@ const Header = () => {
         </h1>
       </div>
 
-      <div className='flex items-center justify-between mx-auto relative z-10'>
+      <div className='flex items-center justify-between mx-auto relative z-10 gap-20'>
         <div className="flex flex-col justify-center my-6 gap-8 fade-in" style={{animationDelay: '0.2s'}}>
           <p className="text-2xl font-medium text-white">All your Medicine <br/> needs in one place</p>
           <ul className="text-base space-y-4 text-white stagger-fade-in">
