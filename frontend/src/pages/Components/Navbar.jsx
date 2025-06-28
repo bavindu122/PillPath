@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { assets } from "../assets/assets";
+import { assets } from "../../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { BellDot, Menu, LogOutIcon } from "lucide-react";
 
@@ -40,7 +40,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Spacer div to prevent content from jumping when navbar becomes fixed */}
       <div className="h-[72px] md:h-[80px]"></div>
 
       <div

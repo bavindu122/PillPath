@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "framer-motion": "^12.19.2"
+    "framer-motion": "^12.19.2",
+    "prop-types": "^15.8.1"
   }
 }

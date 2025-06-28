@@ -35,14 +35,3 @@ h1, h2, h3, h4, h5, h6 {
 .bg-upload-bg-hover { background-color: var(--color-upload-bg-hover); }
 
 
-/* Enhanced background glass elements */
-.bg-secondary\/20, .bg-primary\/20 {
-  filter: blur(40px);
-  opacity: 0.25;
-  transition: all 0.7s ease;
-}
-
-.bg-secondary\/20:hover, .bg-primary\/20:hover {
-  opacity: 0.35;
-  transform: scale(1.15);
-}
