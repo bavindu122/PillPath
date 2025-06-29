@@ -9,10 +9,11 @@ import {
   Mail,
   AlertCircle,
 } from "lucide-react";
-import { assets } from "../assets/assets";
+import { assets } from "../../../assets/assets";
 import { Link } from "react-router-dom";
-import Navbar from "./Components/Navbar";
-import GradientButton from "../components/UIs/GradientButton";
+import Navbar from "../../../components/Layout/Navbar";
+import GradientButton from "../../../components/UIs/GradientButton";
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -221,7 +222,7 @@ const Login = () => {
           <p className="text-white/80 text-xs sm:text-sm text-center">
             Don't have an account?{" "}
             <Link
-              to="/signup"
+              to="/register"
               className="text-white font-medium hover:underline transition-all duration-200"
             >
               Create Account

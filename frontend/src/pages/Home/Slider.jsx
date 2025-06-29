@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Hero1 from "./Hero1";
 import Hero2 from "./Hero2";
-import Navbar from "../Components/Navbar";
+import Navbar from "../../components/Layout/Navbar";
 
 const Slider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

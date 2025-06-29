@@ -6,8 +6,9 @@ import Otc from "./pages/Otc";
 
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
-import Login from "./pages/Login";
+import Login from "./features/auth/pages/Login";
 import Footer from "./components/Layout/Footer";
+import Register from "./features/auth/pages/Register";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
       <Footer />
     </div>
