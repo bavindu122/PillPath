@@ -13,42 +13,55 @@ const Hero2 = () => {
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-secondary/10 rounded-full blur-xl animate-float-slow"></div>
       </div>
       {/* Title Section */}
-      <div className="w-full text-center md:text-left mb-4 md:mb-8 fade-in relative z-10">
-        <h1 className="text-4xl font-bold flex flex-col sm:flex-row items-center justify-center gap-2">
-          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-white transition-all duration-700 animate-title-entrance opacity-0 transform translate-y-10">
-            PHAR
-          </span>
-          <img
-            src={assets.logo2}
-            alt="icon"
-            className="w-20 h-20 sm:w-28 sm:h-28 md:w-34 md:h-34 filter drop-shadow-lg transition-all duration-700 delay-200 animate-logo-entrance opacity-0 transform scale-50"
-          />
-          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-white transition-all duration-700 delay-400 animate-title-entrance opacity-0 transform translate-y-10">
-            MACY
-          </span>
-        </h1>
-      </div>
+           <div className="w-full text-center mb-8 md:mb-12 fade-in relative z-10">
+             <h1 className="flex flex-row sm:flex-row items-center justify-center gap-1 sm:gap-3 relative">
+               {/* 3D PILL text with less glow */}
+               <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transform transition-all duration-700 animate-title-entrance opacity-0 translate-y-10 ">
+                 PHAR
+               </span>
+     
+               <div className="bottom-[-35px] relative mx-0 sm:mx-2 my-2 sm:my-0 transform-gpu">
+                 {/* Subtle background for 3D depth */}
+                 <div className="absolute -inset-1 bg-secondary/10 rounded-full blur-md"></div>
+     
+                 {/* Logo with 3D shadow effect */}
+                 <div className="relative transform-gpu animate-logo-entrance opacity-0 scale-70">
+                   <img
+                     src={assets.logo2}
+                     alt="PillPath logo"
+                     className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain filter drop-shadow-[2px_4px_6px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-transform duration-300"
+                   />
+                 </div>
+               </div>
+     
+               {/* 3D PATH text with less glow */}
+               <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 ">
+                 MARCY
+               </span>
+             </h1>
+     
+           </div>
 
       {/* Main Content Area */}
-      <div className="flex flex-col lg:flex-row items-center justify-between mx-auto relative z-10 w-full gap-8 lg:gap-12 xl:gap-20">
+      <div className="p-5 flex flex-col lg:flex-row items-center justify-between mx-auto relative z-10 w-full gap-8 lg:gap-12 xl:gap-20">
         {/* Left Text Content */}
         <div className="flex flex-col justify-center my-2 md:my-6 gap-4 md:gap-8 w-full lg:w-auto animate-fade-in-left delay-200">
-          <p className="text-xl md:text-2xl font-medium text-white text-center lg:text-left">
+          <p className="text-xl md:text-2xl font-medium text-accent-purple text-center lg:text-left">
             Find pharmacies <br /> near you
           </p>
           <ul className="text-sm md:text-base space-y-3 md:space-y-4 text-white">
             <li className="flex items-center gap-3 animate-fade-in-left delay-300">
-              <span className="w-2 md:w-3 h-2 md:h-3 bg-secondary rounded-full shadow-glow"></span>
+              <span className="w-2 md:w-3 h-2 md:h-3 bg-accent rounded-full shadow-glow"></span>
               <span className="font-medium">
                 Click Find the Nearest Pharmacy
               </span>
             </li>
             <li className="flex items-center gap-3 animate-fade-in-left delay-400">
-              <span className="w-2 md:w-3 h-2 md:h-3 bg-secondary rounded-full shadow-glow"></span>
+              <span className="w-2 md:w-3 h-2 md:h-3 bg-accent rounded-full shadow-glow"></span>
               <span className="font-medium">Allow GPS Access</span>
             </li>
             <li className="flex items-center gap-3 animate-fade-in-left delay-500">
-              <span className="w-2 md:w-3 h-2 md:h-3 bg-secondary rounded-full shadow-glow"></span>
+              <span className="w-2 md:w-3 h-2 md:h-3 bg-accent rounded-full shadow-glow"></span>
               <span className="font-medium">Browse Your Favorite Pharmacy</span>
             </li>
           </ul>
