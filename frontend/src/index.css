@@ -9,8 +9,24 @@
   --color-secondary: #4CAF50;   /* Secondary green - health/wellness */
   --color-secondary-hover: #3D8C40; /* Darker green for hover */
   --color-accent: #8E44AD;      /* Pharmaceutical purple */
+  --color-accent-light: #A569BD; /* Lighter purple for subtle accents */
   --color-bg-light: #F8FBFF;    /* Light background */
-  --color-text-dark: #2C3E50;   /* Dark text for contrast */
+  
+  /* Enhanced text color palette for glassmorphic UI */
+  --color-text-dark: #1A2530;      /* Deeper, richer dark for better contrast */
+  --color-text-muted: #D1D5E0;     /* Much lighter muted text that's clearly visible on glass */
+  --color-text-light: #FFFFFF;     /* Pure white for maximum contrast on dark backgrounds */
+  --color-text-primary: #4FA4FF;   /* Brighter, more vibrant blue that pops on glass */
+  --color-text-secondary: #3EE686; /* More vibrant green with higher contrast */
+  --color-text-accent: #B45CFF;    /* Brighter purple that stands out on glass */
+
+  /* Updated semantic colors to match */
+  --color-text-success: #2EE07A;   /* Brighter success green */
+  --color-text-warning: #FFA726;   /* More vibrant warning orange */
+  --color-text-danger: #FF5252;    /* Brighter error red */
+  --color-text-info: #42A5F5;      /* Brighter info blue */
+  
+  /* Additional useful colors */
   --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
 }
@@ -34,4 +50,42 @@ h1, h2, h3, h4, h5, h6 {
 .bg-upload-bg { background-color: var(--color-upload-bg); }
 .bg-upload-bg-hover { background-color: var(--color-upload-bg-hover); }
 
+/* New text color utility classes */
+.text-dark { color: var(--color-text-dark); }
+.text-muted { color: var(--color-text-muted); }
+.text-light { color: var(--color-text-light); }
+.text-primary-blue { color: var(--color-text-primary); }
+.text-secondary-green { color: var(--color-text-secondary); }
+.text-accent-purple { color: var(--color-text-accent); }
 
+/* Semantic text color utilities */
+.text-success { color: var(--color-text-success); }
+.text-warning { color: var(--color-text-warning); }
+.text-danger { color: var(--color-text-danger); }
+.text-info { color: var(--color-text-info); }
+
+/* Gradient text utilities */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #4FA4FF, #2D7FFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #B45CFF, #9332EA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+/* New gradient */
+.text-gradient-secondary {
+  background: linear-gradient(135deg, #3EE686, #28C06B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

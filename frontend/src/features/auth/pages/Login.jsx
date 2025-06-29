@@ -14,7 +14,6 @@ import { Link } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import GradientButton from "../../../components/UIs/GradientButton";
 
-
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -69,8 +68,9 @@ const Login = () => {
             alt="icon"
             className="w-20 h-20 sm:w-28 sm:h-28 md:w-34 md:h-34 filter drop-shadow-lg animate-fade-in-scale"
           />
-          <p className="text-white/80 text-sm mt-1 animate-fade-in-up delay-200">
-            Your health journey starts here
+          <p className="text-light text-sm mt-1 animate-fade-in-up delay-200">
+            Your <span className="text-secondary-green">health</span> journey
+            starts <span className="text-accent-purple">here</span>
           </p>
 
           {/* Animated rings */}
@@ -85,7 +85,7 @@ const Login = () => {
 
         {/* Email input */}
         <div className="w-full relative z-10 animate-fade-in-up delay-300">
-          <label className="block text-white/90 text-sm font-medium mb-2">
+          <label className="block text-light text-sm font-medium mb-2">
             Email or Username
           </label>
           <div className="relative group">
@@ -104,7 +104,7 @@ const Login = () => {
 
         {/* Password input */}
         <div className="w-full relative z-10 animate-fade-in-up delay-400">
-          <label className="block text-white/90 text-sm font-medium mb-2">
+          <label className="block text-light text-sm font-medium mb-2">
             Password
           </label>
           <div className="relative group">
@@ -129,7 +129,7 @@ const Login = () => {
 
         {/* Forgot password */}
         <div className="w-full text-right relative z-10 animate-fade-in-up delay-500">
-          <button className="text-white/80 text-sm hover:text-white hover:underline transition-all duration-200">
+          <button className="text-info text-sm hover:text-primary-blue hover:underline transition-all duration-200">
             Forgot Password?
           </button>
         </div>
@@ -152,7 +152,7 @@ const Login = () => {
         {/* Social login divider */}
         <div className="flex items-center w-full my-1 relative z-10 animate-fade-in-up delay-700">
           <div className="flex-1 h-px bg-white/20"></div>
-          <span className="text-white/60 text-xs sm:text-sm px-4">
+          <span className="text-muted text-xs sm:text-sm px-4">
             Or continue with
           </span>
           <div className="flex-1 h-px bg-white/20"></div>
@@ -219,11 +219,11 @@ const Login = () => {
 
         {/* Create account */}
         <div className="w-full mt-2 relative z-10 animate-fade-in-up delay-900">
-          <p className="text-white/80 text-xs sm:text-sm text-center">
+          <p className="text-muted text-xs sm:text-sm text-center">
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-white font-medium hover:underline transition-all duration-200"
+              className="text-secondary-green font-medium hover:underline transition-all duration-200"
             >
               Create Account
             </Link>
