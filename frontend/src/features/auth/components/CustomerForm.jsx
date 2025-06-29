@@ -260,7 +260,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 name="termsAccepted"
                 checked={formData.termsAccepted}
                 onChange={handleChange}
-                className="appearance-none w-5 h-5 border border-white/30 rounded checked:bg-secondary checked:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all duration-300"
+                className="peer appearance-none w-5 h-5 border border-white/30 rounded checked:bg-secondary checked:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all duration-300"
               />
               <Check size={16} className="absolute top-0.5 left-0.5 text-white opacity-0 transition-opacity duration-300 pointer-events-none peer-checked:opacity-100" />
             </div>
