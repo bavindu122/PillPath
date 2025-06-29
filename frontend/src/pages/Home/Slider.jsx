@@ -155,7 +155,7 @@ const Slider = () => {
         </div>
 
         {/* Timer Progress Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/10 z-10">
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/10 z-10">
           <div
             className="h-full bg-secondary transition-all ease-linear rounded-r-full"
             style={{ width: `${progress}%` }}

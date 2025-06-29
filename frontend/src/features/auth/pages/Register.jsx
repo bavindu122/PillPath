@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Clock, ClipboardCheck, HelpCircle, MessageSquare } from "lucide-react";
 import RoleSelector from "../components/RoleSelector";
 import RegisterForm from "../components/RegisterForm";
 import Navbar from "../../../components/Layout/Navbar";
@@ -10,6 +11,7 @@ export const Register = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
+  const [submittedData, setSubmittedData] = useState(null);
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -26,8 +28,10 @@ export const Register = () => {
   const handleRegistrationSubmit = (formData) => {
     // Here you would typically handle the API call to register the user
     console.log("Registration submitted:", formData);
+    // Save the form data to state
+    setSubmittedData(formData);
 
-    // For demonstration, we'll just set registration complete
+    // Set registration complete
     setRegistrationComplete(true);
   };
 
@@ -52,23 +56,108 @@ export const Register = () => {
         <div className="relative z-10 w-full py-10">
           {registrationComplete ? (
             <div className="w-full max-w-md mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center">
-              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Check size={40} className="text-green-500" />
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
+                  selectedRole === "customer"
+                    ? "bg-green-500/20"
+                    : "bg-yellow-500/20"
+                }`}
+              >
+                {selectedRole === "customer" ? (
+                  <Check size={40} className="text-green-500" />
+                ) : (
+                  <ClipboardCheck size={40} className="text-yellow-500" />
+                )}
               </div>
+
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Registration Successful!
-              </h2>
-              <p className="text-white/80 mb-8">
                 {selectedRole === "customer"
-                  ? "Your account has been created successfully. You can now log in to access all features."
-                  : "Your pharmacy registration has been submitted for review. We'll notify you once your account is approved."}
-              </p>
-              <Link to="/login">
-                <button className="px-8 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center justify-center gap-2 w-full">
-                  Go to Login
-                  <ArrowRight size={16} className="animate-bounce-gentle" />
-                </button>
-              </Link>
+                  ? "Customer Registration Successful!"
+                  : "Pharmacy Registration Complete"}
+              </h2>
+
+              {selectedRole === "customer" ? (
+                <p className="text-white/80 mb-8">
+                  Your account has been created successfully. You can now log in
+                  to access all features.
+                </p>
+              ) : (
+                <div className="space-y-4 mb-8">
+                  <p className="text-white/80">
+                    Thank you for registering your pharmacy with PillPath!
+                  </p>
+
+                  <div className="bg-white/10 rounded-xl p-4 border border-white/10">
+                    <h3 className="text-white font-medium mb-2 flex items-center justify-center gap-2">
+                      <Clock size={18} className="text-yellow-400" />
+                      Pending Admin Review
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      Your registration data has been received and is awaiting
+                      review by our administrators. You will receive an email
+                      notification at{" "}
+                      <span className="text-white">
+                        {submittedData?.email || "your registered email"}
+                      </span>{" "}
+                      once your account is approved.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+                      <h4 className="text-white/90 font-medium mb-1 flex items-center gap-1">
+                        <Clock size={14} className="text-accent/80" /> Review
+                        Timeline
+                      </h4>
+                      <p className="text-white/70">
+                        Typically 1-2 business days
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 rounded-lg p-3 border border-white/10">
+                      <h4 className="text-white/90 font-medium mb-1 flex items-center gap-1">
+                        <HelpCircle size={14} className="text-accent/80" /> Need
+                        Help?
+                      </h4>
+                      <p className="text-white/70">Contact our support team</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 text-white/70 text-xs">
+                    <p>
+                      We verify all pharmacy information to ensure platform
+                      integrity and safety.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                <Link to="/login">
+                  <button
+                    className={`px-8 py-3 rounded-xl text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center justify-center gap-2 w-full
+          ${
+            selectedRole === "customer"
+              ? "bg-secondary hover:bg-secondary/90"
+              : "bg-white/20 hover:bg-white/30"
+          }`}
+                  >
+                    {selectedRole === "customer"
+                      ? "Go to Login"
+                      : "Return to Login"}
+                    <ArrowRight size={16} className="animate-bounce-gentle" />
+                  </button>
+                </Link>
+
+                {selectedRole === "pharmacy" && (
+                  <Link to="/contact">
+                    <button className="px-8 py-3 rounded-xl bg-accent/20 hover:bg-accent/30 text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center justify-center gap-2 w-full">
+                      Contact Support
+                      <MessageSquare size={16} />
+                    </button>
+                  </Link>
+                )}
+              </div>
             </div>
           ) : !showForm ? (
             <>

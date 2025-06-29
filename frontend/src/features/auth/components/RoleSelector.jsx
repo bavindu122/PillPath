@@ -19,12 +19,12 @@ const RoleSelector = ({ onRoleSelect }) => {
 
   return (
     <div className="w-full max-w-5xl mx-auto">
-      <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-3 animate-fade-in-up">
+      <h2 className="text-3xl md:text-4xl font-bold text-gradient-primary text-center mb-3 animate-fade-in-up">
         Choose your account type
       </h2>
-      <p className="text-white/80 text-center mb-10 max-w-lg mx-auto animate-fade-in-up delay-100">
+      <p className="text-light text-center mb-10 max-w-lg mx-auto animate-fade-in-up delay-100">
         Select the type of account you want to create to get started with
-        PillPath
+        <span className="text-secondary-green font-semibold"> PillPath</span>
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
@@ -81,49 +81,48 @@ const RoleSelector = ({ onRoleSelect }) => {
                 </div>
               </div>
 
-             
-              {/* Title */}
-              <h3 className="text-xl md:text-2xl font-bold text-white text-center mb-3">
+              {/* Title - updated */}
+              <h3 className="text-xl md:text-2xl font-bold text-light text-center mb-3">
                 Customer
               </h3>
 
-              {/* Description */}
-              <p className="text-white/80 text-center mb-6">
+              {/* Description - updated */}
+              <p className="text-secondary-green text-center mb-6">
                 Create a personal account to search for medications, upload
                 prescriptions, and order from pharmacies near you.
               </p>
 
-              {/* Feature List */}
+              {/* Feature List - updated */}
               <ul className="space-y-3 text-sm mb-6 flex-grow">
                 <li className="flex items-start gap-2">
-                  <div className="text-secondary mt-0.5">
+                  <div className="text-secondary-green mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Upload and manage prescriptions
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-secondary mt-0.5">
+                  <div className="text-secondary-green mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Order medications from local pharmacies
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-secondary mt-0.5">
+                  <div className="text-secondary-green mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Track delivery status in real-time
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-secondary mt-0.5">
+                  <div className="text-secondary-green mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Receive medication reminders
                   </span>
                 </li>
@@ -204,48 +203,48 @@ const RoleSelector = ({ onRoleSelect }) => {
                 </div>
               </div>
 
-              {/* Title */}
-              <h3 className="text-xl md:text-2xl font-bold text-white text-center mb-3">
+              {/* Title - updated */}
+              <h3 className="text-xl md:text-2xl font-bold text-light text-center mb-3">
                 Pharmacy
               </h3>
 
-              {/* Description */}
-              <p className="text-white/80 text-center mb-6">
+              {/* Description - updated */}
+              <p className="text-accent-purple text-center mb-6">
                 Register your pharmacy to receive prescription orders, manage
                 inventory, and grow your business with PillPath.
               </p>
 
-              {/* Feature List */}
+              {/* Feature List - updated */}
               <ul className="space-y-3 text-sm mb-6 flex-grow">
                 <li className="flex items-start gap-2">
-                  <div className="text-accent mt-0.5">
+                  <div className="text-accent-purple mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Receive and manage digital prescriptions
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-accent mt-0.5">
+                  <div className="text-accent-purple mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Manage your pharmacy's inventory
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-accent mt-0.5">
+                  <div className="text-accent-purple mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Process orders and arrange deliveries
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="text-accent mt-0.5">
+                  <div className="text-accent-purple mt-0.5">
                     <CheckCircle2 size={16} />
                   </div>
-                  <span className="text-white/90">
+                  <span className="text-light">
                     Increase your pharmacy's visibility
                   </span>
                 </li>
@@ -275,11 +274,11 @@ const RoleSelector = ({ onRoleSelect }) => {
         </div>
       </div>
 
-     
+      {/* Login link - updated */}
       <div className="mt-8 text-center">
         <Link to="/login">
-          <button className="px-8 py-3 rounded-xl text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center gap-2 border-1 border-white/30 bg-primary/20 hover:bg-primary/90 shadow-primary/30">
-            Already have an account? Log in
+          <button className="px-8 py-3 rounded-xl text-light font-medium transition-all duration-300 shadow-lg inline-flex items-center gap-2 border-1 border-white/30 bg-primary/20 hover:bg-primary/90 shadow-primary/30">
+            <span className="text-info">Already have an account?</span> Log in
             <ArrowRight size={16} className="animate-bounce-gentle" />
           </button>
         </Link>
