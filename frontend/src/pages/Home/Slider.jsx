@@ -11,6 +11,7 @@ const Slider = () => {
   const slideInterval = 10000; // 10 seconds
   const timerRef = useRef(null);
   const progressIntervalRef = useRef(null);
+  const slideRefs = useRef([]);
 
   // Function to reset and start timer
   const resetTimer = () => {
@@ -63,35 +64,45 @@ const Slider = () => {
     }
   }, [isPaused]);
 
-  // Reset animations when slide changes
+  // Reset animations ONLY in the current hero section when slide changes
   useEffect(() => {
-    const titleElements = document.querySelectorAll(".animate-title-entrance");
-    const logoElements = document.querySelectorAll(".animate-logo-entrance");
-    const fadeUpElements = document.querySelectorAll(".animate-fade-in-up");
-    const fadeLeftElements = document.querySelectorAll(".animate-fade-in-left");
-    const fadeRightElements = document.querySelectorAll(
-      ".animate-fade-in-right"
-    );
-    const scaleInElements = document.querySelectorAll(".animate-scale-in");
-    const fadeScaleElements = document.querySelectorAll(
-      ".animate-fade-in-scale"
-    );
+    // Wait for the transition to complete before resetting animations
+    const transitionTimeout = setTimeout(() => {
+      // Find the current slide element
+      const currentSlideElement = slideRefs.current[currentSlide];
+      
+      if (currentSlideElement) {
+        // Only query for animated elements within the current slide
+        const titleElements = currentSlideElement.querySelectorAll(".animate-title-entrance");
+        const logoElements = currentSlideElement.querySelectorAll(".animate-logo-entrance");
+        const fadeUpElements = currentSlideElement.querySelectorAll(".animate-fade-in-up");
+        const fadeLeftElements = currentSlideElement.querySelectorAll(".animate-fade-in-left");
+        const fadeRightElements = currentSlideElement.querySelectorAll(".animate-fade-in-right");
+        const scaleInElements = currentSlideElement.querySelectorAll(".animate-scale-in");
+        const fadeScaleElements = currentSlideElement.querySelectorAll(".animate-fade-in-scale");
 
-    const allAnimatedElements = [
-      ...titleElements,
-      ...logoElements,
-      ...fadeUpElements,
-      ...fadeLeftElements,
-      ...fadeRightElements,
-      ...scaleInElements,
-      ...fadeScaleElements,
-    ];
-    allAnimatedElements.forEach((el) => {
-      el.style.animation = "none";
-      el.offsetHeight; // Trigger reflow
-      el.style.animation = null;
-    });
+        const allAnimatedElements = [
+          ...titleElements,
+          ...logoElements,
+          ...fadeUpElements,
+          ...fadeLeftElements,
+          ...fadeRightElements,
+          ...scaleInElements,
+          ...fadeScaleElements,
+        ];
+        
+        // Reset animations only for elements in the current slide
+        allAnimatedElements.forEach((el) => {
+          el.style.animation = "none";
+          el.offsetHeight; // Trigger reflow
+          el.style.animation = null;
+        });
+      }
+    }, 500); // Slight delay to ensure the slide transition has completed
+
+    return () => clearTimeout(transitionTimeout);
   }, [currentSlide]);
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === totalSlides - 1 ? 0 : prev + 1));
     resetTimer();
@@ -119,14 +130,15 @@ const Slider = () => {
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
-          <div className="min-w-full">
+          <div className="min-w-full" ref={el => slideRefs.current[0] = el}>
             <Hero1 />
           </div>
-          <div className="min-w-full">
+          <div className="min-w-full" ref={el => slideRefs.current[1] = el}>
             <Hero2 />
           </div>
         </div>
 
+        {/* Rest of the component remains unchanged */}
         {/* Modern Navigation Dots */}
         <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-3 z-10">
           {[...Array(totalSlides)].map((_, i) => (
@@ -161,6 +173,7 @@ const Slider = () => {
             style={{ width: `${progress}%` }}
           ></div>
         </div>
+        
         {/* Navigation Arrows */}
         <button
           onClick={prevSlide}
