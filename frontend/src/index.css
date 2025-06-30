@@ -31,7 +31,7 @@
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
 }
 
-Base font styles
+/* Base font styles */
 body {
   font-family: 'Nunito', sans-serif;
   color: var(--color-text-dark);
