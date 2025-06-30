@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "framer-motion": "^12.19.2",
-    "lottie-react": "^2.4.1",
-    "prop-types": "^15.8.1"
-  }
-}
