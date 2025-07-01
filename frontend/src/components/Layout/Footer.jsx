@@ -5,7 +5,7 @@ import { Mail, Phone, Facebook, Twitter, Instagram } from "lucide-react";
 
 const Footer = () => {
   return (
-    <div className="md:mx-10  rounded-2xl bg-white/90 backdrop-blur-lg p-5 shadow-lg">
+    <div className="  rounded-2xl bg-white/90 backdrop-blur-lg p-5 shadow-lg">
       <div className="flex flex-col sm:grid grid-cols-[2fr_1fr_1fr_1fr] gap-10 my-10 mt-10 text-sm">
         {/*1*/}
         <div>
