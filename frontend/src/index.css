@@ -29,6 +29,10 @@
   /* Additional useful colors */
   --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
+   /* New vibrant colors */
+  --color-step-yellow: #FFC107; /* Eye-catching yellow for steps */
+  --color-step-pink: #E91E63;   /* Bold pink accent */
+
 }
 
 /* Base font styles */
