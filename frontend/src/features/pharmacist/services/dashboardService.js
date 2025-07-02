@@ -1,13 +1,21 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 class DashboardService {
+  _getHeaders() {
+    return {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    };
+  }
+
+  _getUrl(endpoint) {
+    return `${API_BASE_URL}${endpoint}`;
+  }
+
   async getStats() {
     try {
-      const response = await fetch(`${API_BASE_URL}/pharmacist/stats`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await fetch(this._getUrl('/pharmacist/stats'), {
+        headers: this._getHeaders()
       });
       
       if (!response.ok) throw new Error('Failed to fetch stats');
