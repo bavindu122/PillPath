@@ -14,7 +14,7 @@ const Sidebar = () => {
   const [activeItem, setActiveItem] = useState('dashboard');
 
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', active: true },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'prescriptions', icon: FileText, label: 'Prescription Queue' },
     { id: 'inventory', icon: Package, label: 'Inventory' },
     { id: 'orders', icon: ShoppingCart, label: 'Orders' },
