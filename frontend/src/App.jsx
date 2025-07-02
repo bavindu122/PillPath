@@ -10,6 +10,8 @@ import Services from "./pages/Services";
 import Login from "./features/auth/pages/Login";
 import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
+import Pharmacist from "./features/pharmacist/pages/Pharmacist";
+
 
 const App = () => {
   return (
@@ -22,8 +24,8 @@ const App = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
-
       </Routes>
       <Footer />
     </div>
