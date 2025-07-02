@@ -23,9 +23,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [fadeIn, setFadeIn] = useState(false);
   
-  // Mock data - replace with actual API calls
   useEffect(() => {
-    // Load dashboard data with animation delay
     setTimeout(() => {
       loadDashboardData();
       setFadeIn(true);
@@ -89,13 +87,17 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full animate-pulse">
-              <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
+              <div className="flex space-x-1">
+                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-1"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-2"></div>
+                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
+              </div>
             </div>
-            <p className="text-gray-600 font-medium">Loading Dashboard...</p>
+            <p className="text-gray-600 font-medium animate-pulse">Loading Dashboard...</p>
           </div>
         </div>
       </div>
@@ -105,27 +107,27 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
       {/* Animated Sidebar */}
-      <div className="transform transition-transform duration-300 ease-in-out">
+      <div className="sidebar-slide-in">
         <Sidebar />
       </div>
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Animated Header */}
-        <div className={`transform transition-all duration-500 ${fadeIn ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
+        <div className="dashboard-fade-in-1">
           <Header />
         </div>
         
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6">
           {/* Animated Stats Cards */}
-          <div className={`transform transition-all duration-700 delay-100 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+          <div className="dashboard-fade-in-2">
             <StatsCards stats={statsData} />
           </div>
           
-          {/* Main Content Grid with Staggered Animation */}
+          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            {/* Prescription Queue - Takes 2 columns */}
-            <div className={`lg:col-span-2 transform transition-all duration-700 delay-200 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+            {/* Prescription Queue */}
+            <div className="lg:col-span-2 dashboard-fade-in-3">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
                 <PrescriptionQueue 
                   prescriptions={prescriptions}
                   onApprove={(id) => console.log('Approve:', id)}
@@ -135,12 +137,12 @@ const Dashboard = () => {
               </div>
             </div>
             
-            {/* Right sidebar with alerts and messages */}
-            <div className={`space-y-6 transform transition-all duration-700 delay-300 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+            {/* Right sidebar */}
+            <div className="space-y-6 dashboard-fade-in-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
                 <InventoryAlerts alerts={inventoryAlerts} />
               </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
                 <PatientMessages messages={messages} />
               </div>
             </div>
@@ -148,7 +150,7 @@ const Dashboard = () => {
 
           {/* Floating Action Button */}
           <div className="fixed bottom-6 right-6">
-            <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200">
+            <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
               <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
             </button>
           </div>

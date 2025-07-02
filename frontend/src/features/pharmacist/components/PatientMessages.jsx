@@ -5,7 +5,7 @@ const PatientMessages = ({ messages }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center animate-fade-in-left">
           <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-3"></div>
           Patient Messages
         </h2>
@@ -19,17 +19,21 @@ const PatientMessages = ({ messages }) => {
         {messages.map((message, index) => (
           <div
             key={message.id}
-            className="flex items-start space-x-3 p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-lg cursor-pointer transition-all duration-300 group transform hover:scale-102"
+            className="flex items-start space-x-3 p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-lg cursor-pointer transition-all duration-300 group transform hover:scale-102 animate-fade-up"
             style={{
-              animationDelay: `${index * 100}ms`,
-              animation: 'fadeInUp 0.5s ease-out forwards'
+              animationDelay: `${index * 100}ms`
             }}
           >
             <div className="relative flex-shrink-0">
               <div className="w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
                 <User className="h-5 w-5 text-gray-600" />
               </div>
-              {message.unread && <UnreadIndicator />}
+              {message.unread && (
+                <>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                </>
+              )}
             </div>
             
             <div className="flex-1 min-w-0">
