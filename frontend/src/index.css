@@ -18,7 +18,7 @@
   --color-text-light: #FFFFFF;     /* Pure white for maximum contrast on dark backgrounds */
   --color-text-primary: #4FA4FF;   /* Brighter, more vibrant blue that pops on glass */
   --color-text-secondary: #3EE686; /* More vibrant green with higher contrast */
-  --color-text-accent: #B45CFF;    /* Brighter purple that stands out on glass */
+   --color-text-accent: #BF40BF;  /* Brighter purple that stands out on glass */
 
   /* Updated semantic colors to match */
   --color-text-success: #2EE07A;   /* Brighter success green */
@@ -29,6 +29,10 @@
   /* Additional useful colors */
   --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
+   /* New vibrant colors */
+  --color-step-yellow: #FFC107; /* Eye-catching yellow for steps */
+  --color-step-pink: #E91E63;   /* Bold pink accent */
+
 }
 
 /* Base font styles */
@@ -56,7 +60,11 @@ h1, h2, h3, h4, h5, h6 {
 .text-light { color: var(--color-text-light); }
 .text-primary-blue { color: var(--color-text-primary); }
 .text-secondary-green { color: var(--color-text-secondary); }
-.text-accent-purple { color: var(--color-text-accent); }
+.text-accent-purple {
+  color: #e040fb; /* Brighter, more vibrant purple */
+  
+  letter-spacing: 0.02em;
+}
 
 /* Semantic text color utilities */
 .text-success { color: var(--color-text-success); }
