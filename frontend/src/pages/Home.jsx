@@ -5,6 +5,7 @@ import HowItWorks from "./Home/HowItWorks";
 import TrustSafety from "./Home/TrustSafety";
 import Statistics from "./Home/Statistics";
 import Benefits from "./Home/Benefits";
+import OtcProducts from "./Home/OtcProducts";
 
 
 const Home = () => {
@@ -13,9 +14,10 @@ const Home = () => {
       <Slider />  
       <HowItWorks />
       <CoreFeatures />
-      <TrustSafety />
+      <OtcProducts />
       <Statistics />
       <Benefits />
+      <TrustSafety />
     </div>
   );
 };
