@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Camera, MapPin, Phone, Mail, Store, Edit } from 'lucide-react'; // Changed BuildingStore to Store
 
+import { useEffect, useRef } from 'react';
+
 export default function PharmacySettings() {
   const [pharmacyName, setPharmacyName] = useState('PharmaCare Pharmacy');
   const [address, setAddress] = useState('123 Main Street, Anytown, USA 12345');
@@ -9,11 +11,26 @@ export default function PharmacySettings() {
   const [pharmacyImages, setPharmacyImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Track created object URLs for cleanup
+  const objectUrlsRef = useRef([]);
+
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
-    const newImages = files.map(file => URL.createObjectURL(file));
+    const newImages = files.map(file => {
+      const url = URL.createObjectURL(file);
+      objectUrlsRef.current.push(url);
+      return url;
+    });
     setPharmacyImages(prevImages => [...prevImages, ...newImages]);
   };
+
+  useEffect(() => {
+    // Cleanup function to revoke object URLs on unmount
+    return () => {
+      objectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      objectUrlsRef.current = [];
+    };
+  }, []);
 
   const handleSave = () => {
     // In a real application, you would send this data to a backend
