@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { BellDot, Menu, LogOutIcon } from "lucide-react";
+import ProfileModal from "../../features/customer/components/ProfileModal";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
 
   // Track scroll position for styling changes
   useEffect(() => {
@@ -145,7 +148,15 @@ const Navbar = () => {
                 }`}
               >
                 <div className="min-w-48 bg-white rounded-lg shadow-lg flex flex-col gap-4 p-4">
-                  <p className="cursor-pointer hover:text-pButton">Profile</p>
+                  <p
+  onClick={() => {
+    setShowDropdown(false);         // close dropdown
+    setShowProfileModal(true);      // open modal
+  }}
+  className="cursor-pointer hover:text-pButton"
+>
+  Profile
+</p>
                   <p className="cursor-pointer hover:text-pButton">Settings</p>
                   <div className="border-t border-gray-200 pt-2">
                     <p
@@ -215,6 +226,9 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      
+      {/* Profile Modal */}
+      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
     </>
   );
 };
