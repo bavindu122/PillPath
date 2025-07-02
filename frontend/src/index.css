@@ -97,8 +97,6 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
 }
 
-/* Add these keyframes to your existing CSS */
-
 @keyframes slideInUp {
   from {
     opacity: 0;
