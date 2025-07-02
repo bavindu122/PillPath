@@ -1,8 +1,9 @@
 import React from "react";
-import { Route, Routes , useLocation} from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
+import CustomerProfile from "./features/customer/pages/CustomerProfile";
 
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
@@ -15,10 +16,11 @@ import PharmacyAdminLayout from "./pharmacy-admin/components/PharmacyProfile/Pha
 import PharmacySettings from "./pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
 import StaffManagement from "./pharmacy-admin/pages/ManageStaff/ManageStaff";
 
+import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
-    const location = useLocation();
-    const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
   return (
     <div className="mx-4 sm:mx-[0%]">
       {!isAdminPath && <Navbar />}
@@ -30,14 +32,12 @@ const App = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-
-                {/* Admin nested routes */}
         <Route path="/pharmacyadmin/*" element={<PharmacyAdminLayout />}>
-          <Route path="pharmacyprofile" element={<PharmacySettings />} />
-          <Route path="pharmacystaff" element={<StaffManagement />} />
-          
+        <Route path="pharmacyprofile" element={<PharmacySettings />} />
+        <Route path="pharmacystaff" element={<StaffManagement />} />
         </Route>
+        <Route path="/pharmacist/*" element={<Pharmacist />} />
+        <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
       {!isAdminPath && <Footer />}
       {/* <Footer /> */}

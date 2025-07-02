@@ -266,3 +266,349 @@
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+/* ===============================================
+   6. DASHBOARD SPECIFIC ANIMATIONS
+   =============================================== */
+
+/* Slide animations for dashboard */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dashboard specific animation classes */
+.animate-slide-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideInUp 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  opacity: 0;
+  transform: translateX(30px);
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.animate-fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* ===============================================
+   7. INTERACTIVE HOVER ANIMATIONS
+   =============================================== */
+
+/* Scale animations for interactive elements */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+
+/* Rotation animations */
+@keyframes rotate-90 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(90deg); }
+}
+
+.group:hover .group-hover\:rotate-90 {
+  animation: rotate-90 0.3s ease-out forwards;
+}
+
+.group:hover .group-hover\:rotate-12 {
+  transform: rotate(12deg);
+}
+
+/* Progress bar animation */
+@keyframes progressExpand {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.group:hover .progress-animate {
+  animation: progressExpand 1s ease-out forwards;
+}
+
+/* ===============================================
+   8. NOTIFICATION & STATUS ANIMATIONS
+   =============================================== */
+
+/* Status indicator animations */
+@keyframes statusPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.1); 
+  }
+}
+
+.status-indicator {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* Priority badge animations */
+@keyframes priorityGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+  }
+}
+
+.priority-high {
+  animation: priorityGlow 2s ease-in-out infinite;
+}
+
+/* Loading animations */
+@keyframes loadingDots {
+  0%, 20% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+  80%, 100% { opacity: 0; transform: scale(0.8); }
+}
+
+.loading-dot-1 { animation: loadingDots 1.4s infinite ease-in-out; }
+.loading-dot-2 { animation: loadingDots 1.4s infinite ease-in-out 0.2s; }
+.loading-dot-3 { animation: loadingDots 1.4s infinite ease-in-out 0.4s; }
+
+/* ===============================================
+   9. CARD & CONTAINER ANIMATIONS
+   =============================================== */
+
+/* Card entrance animations */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-slide-in {
+  animation: cardSlideIn 0.4s ease-out forwards;
+}
+
+/* Glass morphism hover effect */
+@keyframes glassHover {
+  from {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.8);
+  }
+  to {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.glass-hover:hover {
+  animation: glassHover 0.3s ease-out forwards;
+}
+
+/* ===============================================
+   10. FLOATING ACTION BUTTON ANIMATIONS
+   =============================================== */
+
+/* FAB animations */
+@keyframes fabBounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(180deg); }
+}
+
+.fab-bounce:hover {
+  animation: fabBounce 0.6s ease-in-out;
+}
+
+@keyframes fabPulse {
+  0% { 
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.fab-pulse {
+  animation: fabPulse 2s ease-in-out infinite;
+}
+
+/* ===============================================
+   11. SIDEBAR & NAVIGATION ANIMATIONS
+   =============================================== */
+
+/* Sidebar slide animations */
+@keyframes sidebarSlideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar-slide-in {
+  animation: sidebarSlideIn 0.3s ease-out forwards;
+}
+
+/* Navigation item hover effect */
+@keyframes navItemHover {
+  from {
+    background-color: transparent;
+    transform: translateX(0);
+  }
+  to {
+    background-color: rgba(59, 130, 246, 0.1);
+    transform: translateX(5px);
+  }
+}
+
+.nav-item:hover {
+  animation: navItemHover 0.2s ease-out forwards;
+}
+
+/* ===============================================
+   12. DASHBOARD SPECIFIC DELAYS
+   =============================================== */
+
+/* Extended delay classes for dashboard staggered animations */
+.delay-1100 { animation-delay: 1.1s; }
+.delay-1200 { animation-delay: 1.2s; }
+.delay-1300 { animation-delay: 1.3s; }
+.delay-1400 { animation-delay: 1.4s; }
+.delay-1500 { animation-delay: 1.5s; }
+
+/* Dashboard fade-in sequence */
+.dashboard-fade-in-1 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.1s forwards;
+}
+
+.dashboard-fade-in-2 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.3s forwards;
+}
+
+.dashboard-fade-in-3 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.5s forwards;
+}
+
+.dashboard-fade-in-4 {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out 0.7s forwards;
+}
+
+/* ===============================================
+   13. UTILITY ANIMATIONS
+   =============================================== */
+
+/* Breathing animation for important elements */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Gentle shake for errors */
+@keyframes gentleShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+.animate-gentle-shake {
+  animation: gentleShake 0.5s ease-in-out;
+}
+
+/* Success checkmark animation */
+@keyframes checkmark {
+  0% { 
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1) rotate(-45deg);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) rotate(-45deg);
+  }
+}
+
+.animate-checkmark {
+  animation: checkmark 0.6s ease-out forwards;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
