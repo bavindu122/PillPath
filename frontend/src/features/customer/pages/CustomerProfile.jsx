@@ -17,7 +17,7 @@ const CustomerProfile = () => {
             <div className="space-y-6">
   <DetailCard className="flex flex-col items-center p-6">
     <img
-      src={assets.profile_pic} alt="logo"
+      src={assets.profile_pic} alt="Customer profile picture"
       
       className="w-28 h-28 rounded-full mb-4 object-cover"
     />
