@@ -1,0 +1,161 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Bell, 
+  MessageSquare, 
+  Settings, 
+  User,
+  Calendar,
+  Filter,
+  Plus,
+  Search
+} from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import StatsCards from '../components/StatsCards';
+import PrescriptionQueue from '../components/PrescriptionQueue';
+import InventoryAlerts from '../components/InventoryAlerts';
+import PatientMessages from '../components/PatientMessages';
+import Header from '../components/Header';
+
+const Dashboard = () => {
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [inventoryAlerts, setInventoryAlerts] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
+  
+  // Mock data - replace with actual API calls
+  useEffect(() => {
+    // Load dashboard data with animation delay
+    setTimeout(() => {
+      loadDashboardData();
+      setFadeIn(true);
+    }, 300);
+  }, []);
+
+  const loadDashboardData = () => {
+    // Mock prescription queue data
+    setPrescriptions([
+      {
+        id: 1,
+        patientName: "John Smith",
+        medication: "Amoxicillin 500mg - 30 tablets",
+        priority: "High Priority",
+        prescribedBy: "Dr. Wilson",
+        time: "10:30 AM",
+        avatar: "/api/placeholder/40/40"
+      },
+      {
+        id: 2,
+        patientName: "Maria Garcia",
+        medication: "Metformin 850mg - 60 tablets",
+        priority: "Medium Priority",
+        prescribedBy: "Dr. Brown",
+        time: "11:15 AM",
+        avatar: "/api/placeholder/40/40"
+      },
+      {
+        id: 3,
+        patientName: "Robert Davis",
+        medication: "Lisinopril 10mg - 30 tablets",
+        priority: "Low Priority",
+        prescribedBy: "Dr. Martinez",
+        time: "2:45 PM",
+        avatar: "/api/placeholder/40/40"
+      }
+    ]);
+
+    // Mock inventory alerts
+    setInventoryAlerts([
+      { id: 1, medication: "Aspirin 325mg", status: "Only 12 left", type: "low" },
+      { id: 2, medication: "Ibuprofen 200mg", status: "25 remaining", type: "medium" },
+      { id: 3, medication: "Acetaminophen", status: "Critical: 8 left", type: "critical" }
+    ]);
+
+    // Mock messages
+    setMessages([
+      { id: 1, name: "Emma Wilson", message: "Question about dosage...", unread: true },
+      { id: 2, name: "Michael Chen", message: "Prescription ready?", unread: false }
+    ]);
+
+    setIsLoading(false);
+  };
+
+  const statsData = [
+    { title: "Pending Prescriptions", value: "24", subtitle: "14 from yesterday", color: "blue" },
+    { title: "Today's Orders", value: "87", subtitle: "+12% from last week", color: "green" },
+    { title: "Low Stock Alerts", value: "7", subtitle: "Requires attention", color: "orange" },
+    { title: "Patient Messages", value: "15", subtitle: "3 unread", color: "purple" }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full animate-pulse">
+              <div className="w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+            </div>
+            <p className="text-gray-600 font-medium">Loading Dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+      {/* Animated Sidebar */}
+      <div className="transform transition-transform duration-300 ease-in-out">
+        <Sidebar />
+      </div>
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Animated Header */}
+        <div className={`transform transition-all duration-500 ${fadeIn ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}>
+          <Header />
+        </div>
+        
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6">
+          {/* Animated Stats Cards */}
+          <div className={`transform transition-all duration-700 delay-100 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+            <StatsCards stats={statsData} />
+          </div>
+          
+          {/* Main Content Grid with Staggered Animation */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            {/* Prescription Queue - Takes 2 columns */}
+            <div className={`lg:col-span-2 transform transition-all duration-700 delay-200 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+                <PrescriptionQueue 
+                  prescriptions={prescriptions}
+                  onApprove={(id) => console.log('Approve:', id)}
+                  onReject={(id) => console.log('Reject:', id)}
+                  onClarify={(id) => console.log('Clarify:', id)}
+                />
+              </div>
+            </div>
+            
+            {/* Right sidebar with alerts and messages */}
+            <div className={`space-y-6 transform transition-all duration-700 delay-300 ${fadeIn ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+                <InventoryAlerts alerts={inventoryAlerts} />
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+                <PatientMessages messages={messages} />
+              </div>
+            </div>
+          </div>
+
+          {/* Floating Action Button */}
+          <div className="fixed bottom-6 right-6">
+            <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200">
+              <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
+            </button>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

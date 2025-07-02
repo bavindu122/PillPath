@@ -160,7 +160,18 @@ const HowItWorks = () => {
             Get Started
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
+          
+          {/* Temporary Pharmacist Dashboard Access */}
+          <Link
+            to="../pharmacist/dashboard"
+            className="inline-flex items-center px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:bg-secondary-hover transition-colors duration-300"
+          >
+            Pharmacist Dashboard (Demo)
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+          
         </div>
+        
       </div>
     </section>
   );
