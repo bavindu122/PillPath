@@ -65,7 +65,7 @@ const HowItWorks = () => {
             How PillPath Works
           </h2>
           
-          <div className="w-16 h-1 bg-primary mx-auto mb-4"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-4"></div>
           
           <p className="text-dark max-w-lg mx-auto">
             Get your medications in three simple steps
