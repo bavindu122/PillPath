@@ -10,7 +10,7 @@ import Services from "./pages/Services";
 import Login from "./features/auth/pages/Login";
 import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
-import PharmacistDashboard from "./features/pharmacist/pages/PharmacistDashboard";
+import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 
 const App = () => {
@@ -24,7 +24,7 @@ const App = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pharmacist/dashboard" element={<PharmacistDashboard />} />
+        <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
       <Footer />
