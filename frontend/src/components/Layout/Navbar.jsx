@@ -145,7 +145,10 @@ const Navbar = () => {
                 }`}
               >
                 <div className="min-w-48 bg-white rounded-lg shadow-lg flex flex-col gap-4 p-4">
-                  <p className="cursor-pointer hover:text-pButton">Profile</p>
+                  <NavLink 
+                    to="/customer-profile">
+                    <span className="cursor-pointer hover:text-pButton">Profile</span>
+                  </NavLink>
                   <p className="cursor-pointer hover:text-pButton">Settings</p>
                   <div className="border-t border-gray-200 pt-2">
                     <p
