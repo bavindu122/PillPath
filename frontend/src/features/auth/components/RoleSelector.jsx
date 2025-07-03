@@ -60,7 +60,7 @@ const RoleSelector = ({ onRoleSelect }) => {
                   <Lottie
                     animationData={customerAnimation}
                     loop={true}
-                    className="w-full h-full"
+                    className="w-full h-full" 
                     onMouseEnter={(e) => {
                       // Play animation at higher speed on hover
                       e.currentTarget.setSpeed(1.5);
