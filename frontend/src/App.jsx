@@ -15,7 +15,7 @@ import Navbar from "./components/Layout/Navbar";
 import PharmacyAdminLayout from "./pharmacy-admin/components/PharmacyProfile/PharmacyLayout";
 import PharmacySettings from "./pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
 import StaffManagement from "./pharmacy-admin/pages/ManageStaff/ManageStaff";
-
+import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
     const location = useLocation();
