@@ -4,20 +4,20 @@ import CoreFeatures from "./Home/CoreFeatures";
 import HowItWorks from "./Home/HowItWorks";
 import TrustSafety from "./Home/TrustSafety";
 import Statistics from "./Home/Statistics";
-import Benefits from "./Home/Benefits";
 import OtcProducts from "./Home/OtcProducts";
-
+import Testimonial from "./Home/Components/Testimonials";
+import { Cta } from "./Home/Components/Cta";
 
 const Home = () => {
   return (
     <div className="overflow-hidden">
-      <Slider />  
+      <Slider />
       <HowItWorks />
       <CoreFeatures />
       <OtcProducts />
       <Statistics />
-      <Benefits />
-      <TrustSafety />
+      <Testimonial />
+      <Cta />
     </div>
   );
 };
