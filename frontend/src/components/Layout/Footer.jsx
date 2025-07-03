@@ -27,7 +27,7 @@ const Footer = () => {
                 <img
                   src={logo}
                   alt="Pharma Logo"
-                  className=" h-24 mb-4 z-20 backdrop-blur-md rounded-full shadow-lg"
+                  className=" h-24 mb-4 z-20"
                 />
                 <p className="text-light/80 mb-6">
                   Your trusted partner for fast, secure, and affordable pharmacy
