@@ -139,32 +139,30 @@ const OtcProducts = () => {
   const duplicatedProducts = [...otcProducts, ...otcProducts];
   // Auto-scroll functionality
   useEffect(() => {
-    if (!isAutoScrolling) return;
-
-    autoScrollRef.current = setInterval(() => {
+    const interval = setInterval(() => {
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current;
         const cardWidth = 240; // w-56 + gap
         const maxScroll = cardWidth * otcProducts.length;
 
-        // If we've scrolled past the original set, reset to beginning
-        if (container.scrollLeft >= maxScroll) {
-          container.scrollLeft = 0;
-        } else {
-          container.scrollBy({
-            left: cardWidth,
-            behavior: "smooth",
-          });
-        }
+        setCurrentIndex((prevIndex) => {
+          let nextIndex = prevIndex + 1;
+          if (container.scrollLeft >= maxScroll - cardWidth) {
+            container.scrollLeft = 0;
+            nextIndex = 0;
+          } else {
+            container.scrollBy({
+              left: cardWidth,
+              behavior: "smooth",
+            });
+          }
+          return nextIndex;
+        });
       }
-    }, 2000);
+    }, 4000);
 
-    return () => {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
-      }
-    };
-  }, [isAutoScrolling]);
+    return () => clearInterval(interval);
+  }, [otcProducts.length]);
 
   const scrollToIndex = (index) => {
     if (scrollContainerRef.current) {
@@ -365,7 +363,7 @@ const OtcProducts = () => {
                         {category.description}
                       </p>
                     </div>
-                    <div >
+                    <div>
                       <span className="flex text-xs text-muted font-medium">
                         {category.count}
                       </span>
