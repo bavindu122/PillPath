@@ -1,5 +1,6 @@
-import React from "react";
+ import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { assets } from "../../../assets/assets";
 
 const profiles = [
@@ -22,7 +23,18 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   const handleProfileSelect = (profile) => {
     onClose(); // Close the modal
-    navigate("/customer-profile"); // Navigate to customer profile page
+    navigate("/medical-records"); // Navigate to customer profile page
+  };
+
+  const handleViewMedicalRecords = (profile) => {
+    onClose(); // Close the modal
+    navigate("/medical-records"); // Navigate to medical records page
+  };
+
+  const handleAddMember = () => {
+    // Handle adding new family member
+    console.log("Add new family member");
+    // You can implement the add member functionality here
   };
 
   return (
@@ -33,20 +45,33 @@ export default function ProfileModal({ isOpen, onClose }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {profiles.map((profile, index) => (
-            <div
-              key={index}
-              className="border rounded-lg p-4 flex flex-col items-center hover:shadow-md transition cursor-pointer hover:bg-gray-50"
-              onClick={() => handleProfileSelect(profile)}
-            >
-              <img
-                src={profile.image}
-                alt={profile.name}
-                className="w-16 h-16 rounded-full mb-3"
-              />
-              <h3 className="font-semibold">{profile.name}</h3>
-              <p className="text-gray-500 text-sm">{profile.title}</p>
+            <div key={index} className="space-y-3">
+              <div
+                className="border rounded-lg p-4 flex flex-col items-center hover:shadow-md transition cursor-pointer hover:bg-gray-50"
+                onClick={() => handleProfileSelect(profile)}
+              >
+                <img
+                  src={profile.image}
+                  alt={profile.name}
+                  className="w-16 h-16 rounded-full mb-3"
+                />
+                <h3 className="font-semibold">{profile.name}</h3>
+                <p className="text-gray-500 text-sm">{profile.title}</p>
+              </div>
             </div>
           ))}
+          
+          {/* Add New Member Button */}
+          <div
+            className="border border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center hover:shadow-md transition cursor-pointer hover:bg-gray-50 hover:border-gray-400"
+            onClick={handleAddMember}
+          >
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+              <Plus className="w-8 h-8 text-gray-500" />
+            </div>
+            <h3 className="font-semibold text-gray-600">Add Member</h3>
+            <p className="text-gray-400 text-sm">Add family member</p>
+          </div>
         </div>
 
         {/* Close Button */}

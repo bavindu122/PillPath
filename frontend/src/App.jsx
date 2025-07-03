@@ -3,7 +3,10 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
+
 import CustomerProfile from "./features/customer/pages/CustomerProfile";
+import MedicalRecordCard from "./features/customer/components/MedicalRecordCard";
+import MedicalRecords from "./features/customer/pages/MedicalRecords";
 
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
@@ -38,6 +41,7 @@ const App = () => {
         </Route>
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
+        <Route path="/medical-records" element={<MedicalRecords />} />
       </Routes>
       {!isAdminPath && <Footer />}
       {/* <Footer /> */}
