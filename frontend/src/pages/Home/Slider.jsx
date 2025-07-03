@@ -121,7 +121,6 @@ const Slider =({ openPrescriptionModal })  => {
 
   return (
     <>
-      <Navbar />
       <div
         className="relative overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}

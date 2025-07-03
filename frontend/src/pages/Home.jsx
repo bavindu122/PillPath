@@ -20,7 +20,6 @@ const Home = () => {
   return (
     <div className="overflow-hidden">
       <Slider openPrescriptionModal={openPrescriptionModal} />
-
       <HowItWorks openPrescriptionModal={openPrescriptionModal} />
       <OtcProducts />
       <Statistics />
