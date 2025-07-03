@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link,useLocation  } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Navbar from "../components/Layout/Navbar";
 import Footer from "../components/Layout/Footer";
 import TrustSafety from "./Home/TrustSafety";
@@ -334,8 +334,25 @@ const serviceFeatures = [
 const Services = () => {
   const [activeFeature, setActiveFeature] = useState(1);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [expandedGuide, setExpandedGuide] = useState(null);
+  // expandedGuide is now an object keyed by feature id
+  const [expandedGuide, setExpandedGuide] = useState({});
   const location = useLocation();
+
+  // Helper to get the expanded guide for the current feature
+  const getExpandedGuide = () => expandedGuide[activeFeature] ?? null;
+
+  // Helper to set the expanded guide for the current feature
+  const handleSetExpandedGuide = (guideIndex) => {
+    setExpandedGuide((prev) => ({
+      ...prev,
+      [activeFeature]: prev[activeFeature] === guideIndex ? null : guideIndex,
+    }));
+  };
+
+  // Optionally, reset expanded guide when activeFeature changes
+  // useEffect(() => {
+  //   setExpandedGuide(prev => ({ ...prev, [activeFeature]: null }));
+  // }, [activeFeature]);
 
   const activeService = serviceFeatures.find((f) => f.id === activeFeature);
   useEffect(() => {
@@ -625,13 +642,7 @@ const Services = () => {
                       <div
                         key={index}
                         className="group p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 cursor-pointer"
-                        onClick={() =>
-                          setExpandedGuide(
-                            expandedGuide === `${activeService.id}-${index}`
-                              ? null
-                              : `${activeService.id}-${index}`
-                          )
-                        }
+                        onClick={() => handleSetExpandedGuide(index)}
                       >
                         <div className="flex items-start gap-3">
                           <div
@@ -647,14 +658,12 @@ const Services = () => {
                           <ChevronDown
                             size={16}
                             className={`text-dark/60 transition-transform duration-300 ${
-                              expandedGuide === `${activeService.id}-${index}`
-                                ? "rotate-180"
-                                : ""
+                              getExpandedGuide() === index ? "rotate-180" : ""
                             }`}
                           />
                         </div>
 
-                        {expandedGuide === `${activeService.id}-${index}` && (
+                        {getExpandedGuide() === index && (
                           <div className="mt-3 pt-3 border-t border-white/20 animate-fade-in">
                             <p className="text-dark/70 text-sm">
                               Pro tip: This feature helps ensure the best

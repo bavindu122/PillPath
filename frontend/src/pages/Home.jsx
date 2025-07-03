@@ -1,4 +1,4 @@
-import React ,{useState} from "react";
+import React, { useState } from "react";
 import Slider from "./Home/Slider";
 import CoreFeatures from "./Home/CoreFeatures";
 import HowItWorks from "./Home/HowItWorks";
@@ -10,7 +10,6 @@ import { Cta } from "./Home/Components/Cta";
 import Hero1 from "./Home/Hero1";
 import PrescriptionUploadModal from "../components/Prescription/PrescriptionUploadModal";
 
-
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,7 +19,9 @@ const Home = () => {
   return (
     <div className="overflow-hidden">
       <Slider openPrescriptionModal={openPrescriptionModal} />
-      <HowItWorks openPrescriptionModal={openPrescriptionModal} />
+      {/* Remove the prop from HowItWorks */}
+      <HowItWorks />
+      <CoreFeatures />
       <OtcProducts />
       <Statistics />
       <Testimonial />
