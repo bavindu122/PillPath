@@ -16,14 +16,17 @@ export default function Sidebar({ activeMenuItem, setActiveMenuItem, isSidebarOp
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
       <div className="flex h-16 shrink-0 items-center px-4 border-b border-gray-200 rounded-tr-lg">
-        <span className="text-xl font-bold text-blue-700">PharmaCare</span>
+        <span className="flex text-xl font-bold text-blue-700 ">Pillpath 
+          <img src='{assets.logo1}' className="ml-2 h-6 w-auto" />
+        </span>
+
       </div>
 
       <nav className="flex flex-1 flex-col py-4 px-2">
         <ul className="space-y-1">
           {[
             { name: 'Dashboard', icon: LayoutDashboard },
-            { name: 'Pharmacy Settings', icon: Settings },
+            { name: 'Pharmacy Profile', icon: Settings },
             { name: 'Staff Management', icon: Users },
             { name: 'Inventory', icon: Package },
             { name: 'OTC Storefront', icon: Store },
