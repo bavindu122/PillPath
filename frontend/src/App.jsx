@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes , useLocation} from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
@@ -15,11 +15,12 @@ import Navbar from "./components/Layout/Navbar";
 import PharmacyAdminLayout from "./pharmacy-admin/components/PharmacyProfile/PharmacyLayout";
 import PharmacySettings from "./pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
 import StaffManagement from "./pharmacy-admin/pages/ManageStaff/ManageStaff";
+
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
-    const location = useLocation();
-    const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
   return (
     <div className="mx-4 sm:mx-[0%]">
       {!isAdminPath && <Navbar />}
