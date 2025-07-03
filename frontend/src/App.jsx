@@ -3,6 +3,7 @@ import { Route, Routes , useLocation} from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
+import CustomerProfile from "./features/customer/pages/CustomerProfile";
 
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
@@ -30,14 +31,12 @@ const App = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-
-                {/* Admin nested routes */}
         <Route path="/pharmacyadmin/*" element={<PharmacyAdminLayout />}>
-          <Route path="pharmacyprofile" element={<PharmacySettings />} />
-          <Route path="pharmacystaff" element={<StaffManagement />} />
-          
+        <Route path="pharmacyprofile" element={<PharmacySettings />} />
+        <Route path="pharmacystaff" element={<StaffManagement />} />
         </Route>
+        <Route path="/pharmacist/*" element={<Pharmacist />} />
+        <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
       {!isAdminPath && <Footer />}
       {/* <Footer /> */}
