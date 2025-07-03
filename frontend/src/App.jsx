@@ -21,9 +21,11 @@ import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 const App = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
+  const isPharmacistPath = location.pathname.startsWith("/pharmacist");
+
   return (
     <div className="mx-4 sm:mx-[0%]">
-      {!isAdminPath && <Navbar />}
+      {!isAdminPath && <Navbar /> && !isPharmacistPath}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -33,13 +35,13 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/pharmacyadmin/*" element={<PharmacyAdminLayout />}>
-        <Route path="pharmacyprofile" element={<PharmacySettings />} />
-        <Route path="pharmacystaff" element={<StaffManagement />} />
+          <Route path="pharmacyprofile" element={<PharmacySettings />} />
+          <Route path="pharmacystaff" element={<StaffManagement />} />
         </Route>
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
-      {!isAdminPath && <Footer />}
+      {!isAdminPath && <Footer /> && !isPharmacistPath}
       {/* <Footer /> */}
     </div>
   );
