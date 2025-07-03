@@ -3,8 +3,14 @@ import { MapPin, Locate, Search } from "lucide-react";
 import { assets } from "../../assets/assets";
 import GradientButton from "../../components/UIs/GradientButton";
 import GlassCard from "../../components/UIs/GlassCard";
+import { useNavigate } from 'react-router-dom';
+
+
+
 
 const Hero2 = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="relative flex flex-col min-h-[75vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
       {/* Background Elements */}
@@ -102,7 +108,7 @@ const Hero2 = () => {
             gradient="from-accent to-accent"
             hoverGradient="hover:from-accent hover:to-accent/90"
             animationDelay="delay-600"
-            onClick={() => console.log("Finding nearby pharmacies...")}
+            onClick={() => navigate('/map')}
           />
 
           <p className="text-[10px] md:text-[11px] text-center text-gray-900 mt-2 md:mt-3 flex items-center justify-center gap-1">
