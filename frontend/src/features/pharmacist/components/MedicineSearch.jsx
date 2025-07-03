@@ -10,7 +10,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
   const mockMedicines = [
     {
       id: 1,
-      name: "Paracetamol 500mg",
+      name: "Paracetamol",
       genericName: "Generic Name: Acetaminophen",
       price: 15.99,
       available: true,
@@ -18,19 +18,11 @@ const MedicineSearch = ({ onAddMedicine }) => {
     },
     {
       id: 2,
-      name: "Amoxicillin 250mg",
+      name: "Amoxicillin",
       genericName: "Antibiotic",
       price: 24.50,
       available: true,
       defaultQuantity: 14
-    },
-    {
-      id: 3,
-      name: "Ibuprofen 200mg",
-      genericName: "Anti-inflammatory",
-      price: 12.99,
-      available: false,
-      defaultQuantity: 20
     }
   ];
 

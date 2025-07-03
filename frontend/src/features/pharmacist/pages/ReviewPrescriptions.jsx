@@ -90,15 +90,8 @@ const ReviewPrescriptions = () => {
   };
 
   const handleAddMedicine = (medicine) => {
-    const newItem = {
-      id: Date.now(),
-      name: medicine.name,
-      genericName: medicine.genericName,
-      quantity: medicine.defaultQuantity || 1,
-      price: medicine.price,
-      available: medicine.available
-    };
-    setOrderItems(prev => [...prev, newItem]);
+    // Add the new medicine to orderItems
+    setOrderItems(prev => [...prev, medicine]);
   };
 
   const handleRemoveMedicine = (itemId) => {
@@ -199,6 +192,7 @@ const ReviewPrescriptions = () => {
                   onUpdateQuantity={handleUpdateQuantity}
                   onSendOrder={handleSendOrder}
                   onSaveDraft={handleSaveDraft}
+                  onAddMedicine={handleAddMedicine}
                 />
               </div>
             </div>
