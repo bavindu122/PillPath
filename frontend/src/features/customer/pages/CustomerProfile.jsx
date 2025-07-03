@@ -16,12 +16,11 @@ const CustomerProfile = () => {
       <div >
         
         <Navbar />
-        relative z-10 w-full
         <div className="max-w-5xl mx-auto">
           <div className="relative w-full z-10  mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center
 ">
-          <h1 className="text-3xl font-bold mb-2">Customer Dashboard</h1>
-          <p className="text-gray-600 mb-6">Manage your profile and medical information</p>
+          <h1 className="text-3xl text-white font-bold mb-2">Customer Dashboard</h1>
+          <p className="text-gray-600 text-white mb-6">Manage your profile and medical information</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-6">
               {/* ...existing code for DetailCards... */}
@@ -43,7 +42,7 @@ const CustomerProfile = () => {
                 <p className="text-base">Keep earning more rewards!</p>
               </DetailCard>
 
-              <DetailCard className="flex items-center justify-center cursor-pointer min-h-[120px]">
+<DetailCard className="flex items-center justify-center cursor-pointer min-h-[120px] transition-all duration-200 hover:shadow-2xl hover:bg-white/80 hover:border-primary">
                 <div>
                   <p
                     onClick={() => {
@@ -57,7 +56,7 @@ const CustomerProfile = () => {
                 </div>
               </DetailCard>
 
-              <DetailCard className="flex items-center justify-center cursor-pointer min-h-[120px]">
+<DetailCard className="flex items-center justify-center cursor-pointer min-h-[120px] transition-all duration-200 hover:shadow-2xl hover:bg-white/80 hover:border-primary">
                 <div>
                   <p className="font-semibold text-lg">Manage Reminders</p>
                   <p className="text-base text-gray-500">Set medication alerts</p>
@@ -74,7 +73,7 @@ const CustomerProfile = () => {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-left">
                   <div>
                     <p className="text-lg text-gray-500 font-poppins mb-1">Full Name</p>
                     <p className="font-semibold text-xl">Senuja Udugampola</p>

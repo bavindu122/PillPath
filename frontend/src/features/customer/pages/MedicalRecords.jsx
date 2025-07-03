@@ -62,22 +62,24 @@ const MedicalRecords = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden px-4 py-20">
+    <div >
       <Navbar />
       
       <div className="max-w-4xl mx-auto p-6 pt-8">
         {/* Header */}
-        <div className="mb-8 flex items-center space-x-4">
+        <div className="mb-8 flex items-center font-poppins space-x-4">
           <img
             src={assets.profile_pic}
             alt="Senuja Udugampola"
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
           />
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Senuja Udugampola
             </h1>
-            <p className="text-gray-600">
+            <p className="text-white">
               Manage your prescription history
             </p>
           </div>
@@ -107,6 +109,9 @@ const MedicalRecords = () => {
         </div>
       </div>
     </div>
+     
+    </section>
+    </>
   );
 };
 
