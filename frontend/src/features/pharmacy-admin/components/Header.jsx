@@ -1,5 +1,6 @@
 import React from 'react';
 import { BellDot, CircleUser } from 'lucide-react';
+import { assets } from '../../../assets/assets'; // Adjust the path as necessary
 
 export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
   return (

@@ -12,15 +12,12 @@ import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
 import Navbar from "./components/Layout/Navbar";
 
-import PharmacyAdminLayout from "./pharmacy-admin/components/PharmacyProfile/PharmacyLayout";
-import PharmacySettings from "./pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
-import StaffManagement from "./pharmacy-admin/pages/ManageStaff/ManageStaff";
-
+import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith("/pharmacyadmin");
+  const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
     <div className="mx-4 sm:mx-[0%]">
       {!isAdminPath && <Navbar />}
@@ -32,10 +29,7 @@ const App = () => {
         <Route path="/services" element={<Services />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pharmacyadmin/*" element={<PharmacyAdminLayout />}>
-        <Route path="pharmacyprofile" element={<PharmacySettings />} />
-        <Route path="pharmacystaff" element={<StaffManagement />} />
-        </Route>
+        <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
