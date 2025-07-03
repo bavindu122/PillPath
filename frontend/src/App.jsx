@@ -12,11 +12,13 @@ import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
 import Navbar from "./components/Layout/Navbar";
 
-import PharmacyAdminLayout from "./pharmacy-admin/components/PharmacyProfile/PharmacyLayout";
-import PharmacySettings from "./pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
-import StaffManagement from "./pharmacy-admin/pages/ManageStaff/ManageStaff";
+import PharmacyAdminLayout from "./features/pharmacy-admin/components/PharmacyProfile/PharmacyLayout";
+import PharmacySettings from "./features/pharmacy-admin/pages/ManagePharmacy/PharmacySettings";
+import StaffManagement from "./features/pharmacy-admin/pages/ManageStaff/ManageStaff";
+import InventoryManagementPage from "./features/pharmacy-admin/pages/ManagePharmacy/InventoryManagement";
 
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
+
 
 const App = () => {
   const location = useLocation();
@@ -35,6 +37,7 @@ const App = () => {
         <Route path="/pharmacyadmin/*" element={<PharmacyAdminLayout />}>
         <Route path="pharmacyprofile" element={<PharmacySettings />} />
         <Route path="pharmacystaff" element={<StaffManagement />} />
+        <Route path="pharmacyinventory" element={<InventoryManagementPage />} />
         </Route>
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />

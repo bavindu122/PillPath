@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, MapPin, Phone, Mail, Store, Edit } from 'lucide-react'; // Changed BuildingStore to Store
-import GradientButton from '../../../components/UIs/GradientButton';
+
 
 import { useEffect, useRef } from 'react';
 
