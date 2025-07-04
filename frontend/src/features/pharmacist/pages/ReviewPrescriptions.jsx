@@ -41,7 +41,8 @@ const ReviewPrescriptions = () => {
       setOrderItems([
         {
           id: 1,
-          name: "Salicylic Acid 500mg",
+          name: "Salicylic Acid",
+          dosage: "150mg",
           genericName: "Modern equivalent of Ac. Salicyl",
           quantity: 30,
           price: 15.99,
@@ -170,13 +171,13 @@ const ReviewPrescriptions = () => {
         <div className="dashboard-fade-in-1 flex-shrink-0">
           <Header />
         </div>
-        
+
         <main className="flex-1 overflow-y-auto p-6">
           {/* Back button */}
-          <div className="flex items-center mb-6 dashboard-fade-in-1">
+          <div className="flex items-center mb-6 animate-fade-in-up">
             <button
               onClick={() => navigate('/pharmacist/dashboard')}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 hover:bg-white/50 px-3 py-2 rounded-lg"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:bg-white/60 hover:shadow-md px-4 py-2 rounded-lg group"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Back to Dashboard</span>
