@@ -103,7 +103,7 @@ const CustomerProfile = () => {
 
                   <div>
                     <p className="text-lg text-gray-500 mb-1">Phone Number</p>
-                    <p className="font-semibold text-xl">+94 703034515</p>
+                    <p className="c-semibold text-xl">+94 703034515</p>
                   </div>
                   <div>
                     <p className="text-lg text-gray-500 mb-1">Email Address</p>
