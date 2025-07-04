@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trash2, Send, Save, X, Plus, Minus } from 'lucide-react';
 
-const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSaveDraft }) => {
+const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSaveDraft, onAddMedicine }) => {
   const [notes, setNotes] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState(null);
@@ -74,13 +74,6 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Order Preview</h3>
-            <button
-              onClick={() => handleAddMedicine({ name: 'Sample Medicine', genericName: 'Generic Name', price: 10.00 })}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Medicine</span>
-            </button>
           </div>
           
           {items.length === 0 ? (

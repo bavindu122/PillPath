@@ -41,7 +41,7 @@ const App = () => {
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
-      {!isAdminPath && <Footer /> }
+      {!isAdminPath && <Footer /> && !isPharmacistPath}
     </div>
   );
 };

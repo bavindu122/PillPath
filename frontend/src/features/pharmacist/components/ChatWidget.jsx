@@ -28,9 +28,9 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-fit flex flex-col">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-[640px] flex flex-col">
       {/* Chat Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
             <User className="h-6 w-6 text-blue-600" />
@@ -46,7 +46,7 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
       </div>
 
       {/* Messages */}
-      <div className="p-4 flex-1">
+      <div className="p-4 flex-1 overflow-y-auto">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -74,7 +74,7 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 flex-shrink-0">
         <div className="flex space-x-2">
           <input
             type="text"

@@ -15,9 +15,13 @@ const ReviewPrescriptions = () => {
   const [orderItems, setOrderItems] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
-    loadPrescriptionData();
+    setTimeout(() => {
+      loadPrescriptionData();
+      setFadeIn(true);
+    }, 300);
   }, [prescriptionId]);
 
   const loadPrescriptionData = () => {
@@ -90,7 +94,12 @@ const ReviewPrescriptions = () => {
   };
 
   const handleAddMedicine = (medicine) => {
-    // Add the new medicine to orderItems
+    // This will be called by OrderPreview when the modal form is submitted
+    setOrderItems(prev => [...prev, medicine]);
+  };
+
+  const handleAddMedicineFromSearch = (medicine) => {
+    // This receives the complete medicine object from the modal
     setOrderItems(prev => [...prev, medicine]);
   };
 
@@ -142,7 +151,7 @@ const ReviewPrescriptions = () => {
                 <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
               </div>
             </div>
-            <p className="text-gray-600 font-medium">Loading prescription...</p>
+            <p className="text-gray-600 font-medium animate-pulse">Loading prescription...</p>
           </div>
         </div>
       </div>
@@ -178,32 +187,42 @@ const ReviewPrescriptions = () => {
             {/* Left Column - Prescription Review */}
             <div className="lg:col-span-2 space-y-6">
               <div className="dashboard-fade-in-2">
-                <PrescriptionViewer prescription={prescription} />
-              </div>
-              
-              <div className="dashboard-fade-in-3">
-                <MedicineSearch onAddMedicine={handleAddMedicine} />
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+                  <PrescriptionViewer prescription={prescription} />
+                </div>
               </div>
               
               <div className="dashboard-fade-in-4">
-                <OrderPreview 
-                  items={orderItems}
-                  onRemoveItem={handleRemoveMedicine}
-                  onUpdateQuantity={handleUpdateQuantity}
-                  onSendOrder={handleSendOrder}
-                  onSaveDraft={handleSaveDraft}
-                  onAddMedicine={handleAddMedicine}
-                />
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+                  <OrderPreview 
+                    items={orderItems}
+                    onRemoveItem={handleRemoveMedicine}
+                    onUpdateQuantity={handleUpdateQuantity}
+                    onSendOrder={handleSendOrder}
+                    onSaveDraft={handleSaveDraft}
+                    onAddMedicine={handleAddMedicine}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Right Column - Chat */}
-            <div className="dashboard-fade-in-4">
-              <ChatWidget 
-                messages={chatMessages}
-                onSendMessage={handleSendMessage}
-                patientName={prescription?.patientName}
-              />
+            {/* Right Column - Chat and Medicine Search */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="dashboard-fade-in-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+                  <ChatWidget 
+                    messages={chatMessages}
+                    onSendMessage={handleSendMessage}
+                    patientName={prescription?.patientName}
+                  />
+                </div>
+              </div>
+              
+              <div className="dashboard-fade-in-3">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+                  <MedicineSearch onAddMedicine={handleAddMedicineFromSearch} />
+                </div>
+              </div>
             </div>
           </div>
         </main>
