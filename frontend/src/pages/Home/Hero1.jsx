@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { assets } from "../../assets/assets";
 import GlassCard from "../../components/UIs/GlassCard";
 import GradientButton from "../../components/UIs/GradientButton";
 import { Camera, Upload, PlusCircle } from "lucide-react";
 
-const Hero1 = () => {
+const Hero1 = ({ openPrescriptionModal })  => {
   return (
-    <div className="relative flex flex-col min-h-[75vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
+    <div className="relative flex flex-col min-h-[75vh] sm:max-h-[90vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
       {/* Background Elements remain unchanged */}
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
         {/* Keep existing background elements */}
@@ -52,7 +52,6 @@ const Hero1 = () => {
             PATH
           </span>
         </h1>
-
       </div>
 
       {/* Main Content Area - Improved responsive layout */}
@@ -111,7 +110,7 @@ const Hero1 = () => {
             icon={Upload}
             iconSize={16}
             animationDelay="delay-600"
-            onClick={() => console.log("Upload clicked")}
+            onClick={openPrescriptionModal}
           />
 
           <p className="text-[10px] md:text-[11px] text-center text-gray-300 mt-2 md:mt-3 flex items-center justify-center gap-1">
@@ -136,6 +135,7 @@ const Hero1 = () => {
           ></path>
         </svg>
       </div>
+      {/* Prescription Upload Modal */}
     </div>
   );
 };
