@@ -20,6 +20,9 @@ const Sidebar = () => {
     if (path === '/pharmacist' || path === '/pharmacist/dashboard') {
       return 'dashboard';
     }
+    if (path === '/pharmacist/queue') {
+      return 'prescriptions';
+    }
     if (path.includes('/review')) {
       return 'prescriptions';
     }
@@ -40,7 +43,7 @@ const Sidebar = () => {
       id: 'prescriptions', 
       icon: FileText, 
       label: 'Prescription Queue',
-      path: '/pharmacist/dashboard' // For now, this goes to dashboard where queue is shown
+      path: '/pharmacist/queue'
     },
     { 
       id: 'inventory', 

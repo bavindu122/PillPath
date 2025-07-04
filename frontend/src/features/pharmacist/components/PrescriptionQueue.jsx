@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Clock, User, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
+import { Filter, Clock, Calendar, User, XCircle, MessageCircle, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) => {
@@ -48,7 +48,7 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
                 </div>
                 
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
+                  <div className="flex items-center space-x-3 mb-4">
                     <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
                       {prescription.patientName}
                     </h3>
@@ -57,12 +57,10 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
                     </span>
                   </div>
                   
-                  <p className="text-sm text-gray-700 mb-3 font-medium">{prescription.medication}</p>
-                  
                   <div className="flex items-center space-x-6 text-xs text-gray-500">
                     <span className="flex items-center space-x-1">
-                      <User className="h-3 w-3" />
-                      <span>Dr. {prescription.prescribedBy}</span>
+                      <Calendar className="h-3 w-3" />
+                      <span>{prescription.date}</span>
                     </span>
                     <span className="flex items-center space-x-1">
                       <Clock className="h-3 w-3" />
@@ -75,24 +73,24 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
               <div className="flex space-x-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
                 <Link
                   to={`/pharmacist/review/${prescription.id}`}
-                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-green-100 to-green-200 text-green-800 text-xs font-medium rounded-lg hover:from-green-200 hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:from-blue-200 hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                 >
-                  <CheckCircle className="h-3 w-3" />
+                  <Eye className="h-3 w-3" />
                   <span>Review</span>
                 </Link>
+                <button
+                  onClick={() => onClarify(prescription.id)}
+                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-medium rounded-lg hover:from-yellow-200 hover:to-yellow-300 hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                >
+                  <MessageCircle className="h-3 w-3" />
+                  <span>Clarify</span>
+                </button>
                 <button
                   onClick={() => onReject(prescription.id)}
                   className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-800 text-xs font-medium rounded-lg hover:from-red-200 hover:to-red-300 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                 >
                   <XCircle className="h-3 w-3" />
                   <span>Reject</span>
-                </button>
-                <button
-                  onClick={() => onClarify(prescription.id)}
-                  className="flex items-center space-x-1 px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 text-xs font-medium rounded-lg hover:from-gray-200 hover:to-gray-300 hover:shadow-md transform hover:scale-105 transition-all duration-200"
-                >
-                  <MessageCircle className="h-3 w-3" />
-                  <span>Clarify</span>
                 </button>
               </div>
             </div>
