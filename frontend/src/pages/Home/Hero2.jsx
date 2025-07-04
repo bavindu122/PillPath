@@ -6,7 +6,7 @@ import GlassCard from "../../components/UIs/GlassCard";
 
 const Hero2 = () => {
   return (
-    <div className="relative flex flex-col min-h-[75vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
+    <div className="relative flex flex-col min-h-[75vh] sm:max-h-[90vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
       {/* Background Elements */}
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
         <div className="absolute top-10 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float-delay"></div>
