@@ -21,7 +21,7 @@ const App = () => {
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
     <div className="mx-4 sm:mx-[0%]">
-      {!isAdminPath && <Navbar /> && !isPharmacistPath}
+      {!isAdminPath && !isPharmacistPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
