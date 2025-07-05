@@ -5,7 +5,6 @@ import About from "./pages/About";
 import Otc from "./pages/Otc";
 
 import CustomerProfile from "./features/customer/pages/CustomerProfile";
-import MedicalRecordCard from "./features/customer/components/MedicalRecordCard";
 import MedicalRecords from "./features/customer/pages/MedicalRecords";
 import MedicalRecordsDetailed from "./features/customer/pages/MedicalRecordsDetailed";
 
