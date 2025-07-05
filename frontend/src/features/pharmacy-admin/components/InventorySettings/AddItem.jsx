@@ -53,7 +53,7 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 flex bg-primary/20 backdrop-blur-sm justify-center items-center z-50">
       <div className="bg-slate-800 rounded-lg shadow-xl p-8 w-full max-w-2xl mx-auto" >
         {/* //style={{ background: 'linear-gradient(to bottom right, #e0f2f7, #c1d9e7)' }} */}
         <div className="flex justify-between items-center mb-6">
