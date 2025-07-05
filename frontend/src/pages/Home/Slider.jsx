@@ -3,7 +3,8 @@ import Hero1 from "./Hero1";
 import Hero2 from "./Hero2";
 import Navbar from "../../components/Layout/Navbar";
 
-const Slider = () => {
+
+const Slider =({ openPrescriptionModal })  => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -120,7 +121,6 @@ const Slider = () => {
 
   return (
     <>
-      <Navbar />
       <div
         className="relative overflow-hidden"
         onMouseEnter={() => setIsPaused(true)}
@@ -131,7 +131,7 @@ const Slider = () => {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           <div className="min-w-full" ref={el => slideRefs.current[0] = el}>
-            <Hero1 />
+            <Hero1 openPrescriptionModal={openPrescriptionModal} />
           </div>
           <div className="min-w-full" ref={el => slideRefs.current[1] = el}>
             <Hero2 />

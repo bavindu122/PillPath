@@ -139,32 +139,30 @@ const OtcProducts = () => {
   const duplicatedProducts = [...otcProducts, ...otcProducts];
   // Auto-scroll functionality
   useEffect(() => {
-    if (!isAutoScrolling) return;
-
-    autoScrollRef.current = setInterval(() => {
+    const interval = setInterval(() => {
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current;
         const cardWidth = 240; // w-56 + gap
         const maxScroll = cardWidth * otcProducts.length;
 
-        // If we've scrolled past the original set, reset to beginning
-        if (container.scrollLeft >= maxScroll) {
-          container.scrollLeft = 0;
-        } else {
-          container.scrollBy({
-            left: cardWidth,
-            behavior: "smooth",
-          });
-        }
+        setCurrentIndex((prevIndex) => {
+          let nextIndex = prevIndex + 1;
+          if (container.scrollLeft >= maxScroll - cardWidth) {
+            container.scrollLeft = 0;
+            nextIndex = 0;
+          } else {
+            container.scrollBy({
+              left: cardWidth,
+              behavior: "smooth",
+            });
+          }
+          return nextIndex;
+        });
       }
-    }, 2000);
+    }, 4000);
 
-    return () => {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
-      }
-    };
-  }, [isAutoScrolling]);
+    return () => clearInterval(interval);
+  }, [otcProducts.length]);
 
   const scrollToIndex = (index) => {
     if (scrollContainerRef.current) {
@@ -318,57 +316,58 @@ const OtcProducts = () => {
             <div className="w-16 h-0.5 bg-secondary mx-auto mt-4 rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 max-[100px]:grid-cols-1 sm:grid-cols-6 gap-4">
             {otcCategories.map((category) => (
               <div
-                key={category.id}
-                className={`group cursor-pointer transition-all duration-500 ${
-                  hoveredCategory === category.id ? "scale-105" : ""
+                className={`relative bg-white/15 backdrop-blur-xl rounded-2xl shadow-xl border overflow-hidden transition-all duration-500 p-4 min-h-[40px] flex flex-col justify-center ${
+                  hoveredCategory === category.id
+                    ? "border-primary/50 bg-white/20 shadow-primary/20"
+                    : "border-white/20 hover:bg-white/20 hover:shadow-2xl"
                 }`}
                 onClick={() => handleCategoryClick(category.id)}
                 onMouseEnter={() => setHoveredCategory(category.id)}
                 onMouseLeave={() => setHoveredCategory(null)}
               >
-                <div
-                  className={`relative bg-white/15 backdrop-blur-xl rounded-2xl shadow-xl border overflow-hidden transition-all duration-500 p-4 ${
-                    hoveredCategory === category.id
-                      ? "border-primary/50 bg-white/20 shadow-primary/20"
-                      : "border-white/20 hover:bg-white/20 hover:shadow-2xl"
-                  }`}
-                >
-                  {/* Background Blurs */}
-                  <div className="absolute top-[-20px] right-[-15px] w-32 h-32 bg-primary/10 rounded-full blur-xl group-hover:scale-110 transition-transform duration-700"></div>
+                {/* Background Blurs */}
+                <div className="absolute top-[-20px] right-[-15px] w-32 h-32 bg-primary/10 rounded-full blur-xl group-hover:scale-110 transition-transform duration-700"></div>
 
-                  {/* Glass edge highlights */}
-                  <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/30"></div>
-                  <div className="absolute bottom-0 left-[15%] right-[15%] h-[1px] bg-black/5"></div>
+                {/* Glass edge highlights */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/30"></div>
+                <div className="absolute bottom-0 left-[15%] right-[15%] h-[1px] bg-black/5"></div>
 
-                  <div className="text-center relative z-10">
-                    <div
-                      className={`inline-flex p-2 rounded-lg mb-2 transition-all duration-300 ${
-                        hoveredCategory === category.id
-                          ? "bg-primary text-accent-purple shadow-md scale-110"
-                          : "bg-white/20 text-secondary-green"
-                      }`}
-                    >
-                      {category.icon}
+                <div className="relative z-10 flex flex-row gap-4 items-center sm:gap-3 h-full">
+                  {" "}
+                  {/* Icon */}
+                  <div
+                    className={`inline-flex p-2 rounded-lg mb-2 sm:mb-0 transition-all duration-300 ${
+                      hoveredCategory === category.id
+                        ? "bg-primary text-accent-purple shadow-md scale-110"
+                        : "bg-white/20 text-secondary-green"
+                    }`}
+                  >
+                    {category.icon}
+                  </div>
+                  {/* Info */}
+                  <div className="flex flex-row sm:flex-col gap-4 items-center sm:items-start">
+                    <div>
+                      <h4
+                        className={`font-semibold text-xs mb-1 ${
+                          hoveredCategory === category.id
+                            ? "text-accent-purple"
+                            : "text-secondary-green"
+                        }`}
+                      >
+                        {category.name}
+                      </h4>
+                      <p className="text-light text-xs mb-1">
+                        {category.description}
+                      </p>
                     </div>
-
-                    <h4
-                      className={`font-semibold text-xs mb-1 ${
-                        hoveredCategory === category.id
-                          ? "text-accent-purple"
-                          : "text-secondary-green"
-                      }`}
-                    >
-                      {category.name}
-                    </h4>
-                    <p className="text-light text-xs mb-1">
-                      {category.description}
-                    </p>
-                    <span className="text-xs text-muted font-medium">
-                      {category.count}
-                    </span>
+                    <div>
+                      <span className="flex text-xs text-muted font-medium">
+                        {category.count}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
