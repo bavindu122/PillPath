@@ -17,10 +17,11 @@ import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
   const location = useLocation();
+  const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
     <div className="mx-4 sm:mx-[0%]">
-      {!isAdminPath && <Navbar />}
+      {!isAdminPath && !isPharmacistPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -33,8 +34,7 @@ const App = () => {
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
       </Routes>
-      {!isAdminPath && <Footer />}
-      {/* <Footer /> */}
+      {!isAdminPath && !isPharmacistPath && <Footer />}
     </div>
   );
 };
