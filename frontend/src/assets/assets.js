@@ -6,7 +6,11 @@ import pharmacy_img from './hero_2_img.png'
 import pharmacyAnimation from './animations/pharmacy-person.json'
 import customerAnimation from './animations/customer-waving.json'
 
-
+// Medication images
+import paracetamol from './img/meds/paracetamol.webp'
+import ibuprofen from './img/meds/Ibuprofen.jpg'
+import panadol from './img/meds/Panadol.jpg'
+import vitaminC from './img/meds/Vitamin_c.jpg'
 
 export const assets = {
     logo1,
@@ -15,5 +19,9 @@ export const assets = {
     pharmacy_img,
     header_img,
     pharmacyAnimation,
-    customerAnimation
+    customerAnimation,
+    paracetamol,
+    ibuprofen,
+    panadol,
+    vitaminC
 }
