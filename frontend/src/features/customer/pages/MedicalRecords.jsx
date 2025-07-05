@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import { assets } from "../../../assets/assets";
 import MedicalRecordCard from "../components/MedicalRecordCard";
@@ -7,6 +8,7 @@ import CustomerSidebar from "../components/CustomerSidebar";
 
 
 const MedicalRecords = () => {
+  const navigate = useNavigate();
   const [medicalRecords, setMedicalRecords] = useState([
     {
       id: 1,
@@ -58,6 +60,10 @@ const MedicalRecords = () => {
     );
   };
 
+  const handleCardClick = (recordId) => {
+    navigate(`/medical-records/${recordId}`);
+  };
+
   const handleAddRecord = () => {
     // This would typically open a modal or navigate to an add record form
     console.log("Add new medical record");
@@ -70,7 +76,7 @@ const MedicalRecords = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <Navbar />
-        <div className="max-w-4xl mx-auto p-6 pt-8">
+        <div className="max-w-4xl mx-auto p-6 -mt-[72px] md:-mt-[80px] pt-[72px] md:pt-[80px]">
           {/* Header */}
           <div className="mb-8 flex items-center font-poppins space-x-4">
             <img
@@ -92,9 +98,11 @@ const MedicalRecords = () => {
             {medicalRecords.map((record) => (
               <MedicalRecordCard
                 key={record.id}
+                id={record.id}
                 conditionName={record.conditionName}
                 lastUpdated={record.lastUpdated}
                 onDelete={() => handleDeleteRecord(record.id)}
+                onClick={handleCardClick}
               />
             ))}
           </div>

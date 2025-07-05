@@ -19,7 +19,7 @@ const CustomerProfile = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           <div className="max-w-5xl mx-auto w-full">
-            <div className="relative w-full z-10 mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center mt-8">
+            <div className="relative w-full z-10 mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center">
               <h1 className="text-3xl text-white font-bold mb-2">Customer Dashboard</h1>
               <p className="text-gray-600 text-white mb-6">Manage your profile and medical information</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

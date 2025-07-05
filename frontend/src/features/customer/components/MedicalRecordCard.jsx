@@ -2,13 +2,23 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 
 const MedicalRecordCard = ({ 
+  id,
   conditionName, 
   lastUpdated, 
-  onDelete 
+  onDelete,
+  onClick 
 }) => {
+  const handleDeleteClick = (e) => {
+    e.stopPropagation(); // Prevent card click when delete button is clicked
+    onDelete();
+  };
+
   return (
-    <div className="bg-white/50 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow w-[1000px]   duration-200">
-      <div className="flex items-center  justify-center">
+    <div 
+      className="bg-white/50 rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all w-[1000px] duration-200 cursor-pointer hover:bg-white/60 hover:scale-[1.02]"
+      onClick={() => onClick(id)}
+    >
+      <div className="flex items-center justify-center">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-800 mb-1">
             {conditionName}
@@ -19,7 +29,7 @@ const MedicalRecordCard = ({
         </div>
         
         <button
-          onClick={onDelete}
+          onClick={handleDeleteClick}
           className="text-red-400 hover:text-red-600 transition-colors duration-200 p-2 hover:bg-red-50 rounded-full"
           title="Delete record"
         >
