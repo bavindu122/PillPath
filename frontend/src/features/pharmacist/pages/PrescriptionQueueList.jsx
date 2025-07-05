@@ -256,22 +256,34 @@ const PrescriptionQueue = () => {
 
         <main className="flex-1 overflow-y-auto p-6">
           {/* Back button and Page Title */}
-          <div className="dashboard-fade-in-1 mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <button
-                  onClick={() => navigate('/pharmacist/dashboard')}
-                  className="flex items-center space-x-3 text-gray-600 hover:text-blue-600 transition-all duration-300 hover:bg-blue-50 px-4 py-2 rounded-lg group"
-                >
-                  <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform duration-300" />
-                  <span className="font-medium">Back to Dashboard</span>
-                </button>
-                
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold text-gray-800">Prescription Queue</h1>
-                  <p className="text-gray-600 mt-1">Review and process pending prescriptions</p>
+          <div className="flex flex-col items-center justify-center mb-6 animate-fade-in-up">
+            <div className="flex items-center space-x-4 mb-4">
+              <button
+                onClick={() => navigate('/pharmacist/dashboard')}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:bg-white/60 hover:shadow-md px-4 py-2 rounded-lg group"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Back to Dashboard</span>
+              </button>
+            </div>
+            
+            <div className="relative text-center">
+              <div className="flex items-center justify-center space-x-3 mb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-8 bg-gradient-to-b from-purple-500 via-purple-600 to-purple-700 rounded-full shadow-sm"></div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-900 via-purple-800 to-purple-700 bg-clip-text text-transparent">
+                    Prescription Queue
+                  </h1>
+                  <div className="w-2 h-8 bg-gradient-to-b from-purple-500 via-purple-600 to-purple-700 rounded-full shadow-sm"></div>
                 </div>
-                
-                {/* Queue Counter - moved to right side */}
+                <div className="hidden sm:flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-center space-x-4">
                 <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-full shadow-sm">
                   <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
                     <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -280,7 +292,18 @@ const PrescriptionQueue = () => {
                     {filteredPrescriptions.length} prescription{filteredPrescriptions.length !== 1 ? 's' : ''} in queue
                   </p>
                 </div>
+                
+                <div className="hidden md:flex items-center space-x-2 text-xs text-gray-500">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                  <span>Live updates</span>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
               </div>
+              
+              {/* Subtle background decoration */}
+              <div className="absolute -top-2 -left-2 w-16 h-16 bg-gradient-to-br from-purple-100/30 to-transparent rounded-full blur-xl -z-10"></div>
+              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-gradient-to-tl from-indigo-100/40 to-transparent rounded-full blur-lg -z-10"></div>
+            </div>
           </div>
 
           {/* Filters and Search */}
