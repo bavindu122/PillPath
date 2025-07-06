@@ -23,12 +23,12 @@ export default function ProfileModal({ isOpen, onClose }) {
 
   const handleProfileSelect = (profile) => {
     onClose(); // Close the modal
-    navigate("/medical-records"); // Navigate to customer profile page
+    navigate("/customer/medical-records"); // Navigate to medical records page
   };
 
   const handleViewMedicalRecords = (profile) => {
     onClose(); // Close the modal
-    navigate("/medical-records"); // Navigate to medical records page
+    navigate("/customer/medical-records"); // Navigate to medical records page
   };
 
   const handleAddMember = () => {
