@@ -8,8 +8,7 @@ const Customer = () => {
   return (
     <div>
         <Routes>
-            <Route path="/" element={<CustomerProfile />} />
-            <Route path="/profile" element={<CustomerProfile />} />
+            <Route index element={<CustomerProfile />} />
             <Route path="/medical-records" element={<MedicalRecords />} />
             <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
         </Routes>
