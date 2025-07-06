@@ -13,11 +13,13 @@
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",
     "framer-motion": "^12.23.0",
+    "leaflet": "^1.9.4",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.519.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.6.2",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.10"

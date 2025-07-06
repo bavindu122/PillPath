@@ -15,6 +15,8 @@ import Navbar from "./components/Layout/Navbar";
 import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
+import FindPharmacies from "./pages/FindPharmacies/FindPharmacy";
+
 const App = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/pharmacy");
@@ -32,6 +34,7 @@ const App = () => {
         <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
+        <Route path="/FindPharmacies" element={<FindPharmacies />} />
       </Routes>
       {!isAdminPath && <Footer />}
       {/* <Footer /> */}
