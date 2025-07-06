@@ -9,7 +9,6 @@ const Customer = () => {
     <div>
         <Routes>
             <Route index element={<CustomerProfile />} />
-            <Route path="/profile" element={<CustomerProfile />} />
             <Route path="/medical-records" element={<MedicalRecords />} />
             <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
         </Routes>
