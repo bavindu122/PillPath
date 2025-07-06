@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
 
+
 import CustomerProfile from "./features/customer/pages/CustomerProfile";
 import MedicalRecords from "./features/customer/pages/MedicalRecords";
 import MedicalRecordsDetailed from "./features/customer/pages/MedicalRecordsDetailed";
@@ -36,6 +37,8 @@ const App = () => {
         <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
+        <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
         <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
       </Routes>
