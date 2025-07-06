@@ -26,9 +26,22 @@ const CustomerSidebar = () => {
             <p onClick={() => {
               setShowProfileModal(true);
             }}>
-              Family Info
+              Family Profiles
             </p>
           </button>
+          <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
+            Find pharmacies
+          </button>
+          <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
+            OTC Store
+          </button>
+          <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
+            Medicine info
+          </button>
+          <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
+            Settings
+          </button>
+          
         </nav>
       </aside>
       <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
