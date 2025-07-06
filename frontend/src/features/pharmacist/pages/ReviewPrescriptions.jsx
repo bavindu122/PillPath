@@ -33,7 +33,7 @@ const ReviewPrescriptions = () => {
         doctorName: "B.J. Wilks (Chemist)",
         dateUploaded: "17.12.25",
         status: "pending_review",
-        imageUrl: "/src/assets/img/prescription.jpeg",
+        imageUrl: prescriptionImg,
         prescriptionText: `Historical Prescription from 1925`
       });
 
