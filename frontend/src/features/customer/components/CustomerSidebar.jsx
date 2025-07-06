@@ -13,7 +13,7 @@ const CustomerSidebar = () => {
           
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-semibold focus:outline-none">
             <NavLink
-                            to="/customer-profile"
+                            to="/customer"
                             className="cursor-pointer hover:text-pButton">
                         Dashboard
                       </NavLink>

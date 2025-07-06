@@ -61,7 +61,7 @@ const MedicalRecords = () => {
   };
 
   const handleCardClick = (recordId) => {
-    navigate(`/medical-records/${recordId}`);
+    navigate(`/customer/medical-records/${recordId}`);
   };
 
   const handleAddRecord = () => {

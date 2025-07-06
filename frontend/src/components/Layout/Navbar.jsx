@@ -149,7 +149,7 @@ const Navbar = () => {
               >
                 <div className="min-w-48 bg-white rounded-lg shadow-lg flex flex-col gap-4 p-4">
                 <NavLink
-                  to="/customer-profile"
+                  to="/customer"
                   className="cursor-pointer hover:text-pButton">
               Profile
             </NavLink>
