@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
 
+
 import CustomerProfile from "./features/customer/pages/CustomerProfile";
 import MedicalRecordCard from "./features/customer/components/MedicalRecordCard";
 import MedicalRecords from "./features/customer/pages/MedicalRecords";
@@ -21,10 +22,11 @@ import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 
 const App = () => {
   const location = useLocation();
+  const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
     <div className="mx-4 sm:mx-[0%]">
-      {!isAdminPath && <Navbar />}
+      {!isAdminPath && !isPharmacistPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -38,9 +40,10 @@ const App = () => {
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
         <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
+        <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/medical-records/:recordId" element={<MedicalRecordsDetailed />} />
       </Routes>
-      {!isAdminPath && <Footer />}
-      {/* <Footer /> */}
+      {!isAdminPath && !isPharmacistPath && <Footer />}
     </div>
   );
 };

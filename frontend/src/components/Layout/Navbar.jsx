@@ -69,7 +69,7 @@ const Navbar = () => {
                 `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
                   isActive
                     ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-white hover:bg-pButton"
+                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
                 }`
               }
             >
