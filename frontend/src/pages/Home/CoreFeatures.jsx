@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FileUp,
   Map,
@@ -196,8 +197,8 @@ const CoreFeatures = () => {
                   </p>
 
                   {/* Enhanced "Learn more" link */}
-                  <a
-                    href="#"
+                  <Link
+                    to={`/services#feature-${feature.id}`}
                     className={`inline-flex items-center text-sm font-medium ${feature.textColor} hover:opacity-80 transition-all duration-300 relative z-10`}
                   >
                     <span className="border-b border-current pb-0.5">
@@ -207,7 +208,7 @@ const CoreFeatures = () => {
                       size={16}
                       className="ml-1 group-hover:translate-x-2 transition-transform duration-500"
                     />
-                  </a>
+                  </Link>
                 </div>
               </div>
 
