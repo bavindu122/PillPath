@@ -71,12 +71,12 @@ const MedicalRecordsDetailed = () => {
     // In real app, this would show confirmation dialog
     if (window.confirm("Are you sure you want to delete this medical record?")) {
       console.log("Delete record:", recordDetail.conditionName);
-      navigate("/medical-records");
+      navigate("/customer/medical-records");
     }
   };
 
   const handleBack = () => {
-    navigate("/medical-records");
+    navigate("/customer/medical-records");
   };
 
   return (
