@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Download, ZoomIn } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
+import PharmaPageLayout from '../components/PharmaPageLayout';
 import PrescriptionViewer from '../components/PrescriptionViewer';
 import MedicineSearch from '../components/MedicineSearch';
 import OrderPreview from '../components/OrderPreview';
 import ChatWidget from '../components/ChatWidget';
-import Header from '../components/Header';
 
 const ReviewPrescriptions = () => {
   const navigate = useNavigate();
@@ -15,12 +13,10 @@ const ReviewPrescriptions = () => {
   const [orderItems, setOrderItems] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [fadeIn, setFadeIn] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
       loadPrescriptionData();
-      setFadeIn(true);
     }, 300);
   }, [prescriptionId]);
 
@@ -33,7 +29,7 @@ const ReviewPrescriptions = () => {
         doctorName: "B.J. Wilks (Chemist)",
         dateUploaded: "17.12.25",
         status: "pending_review",
-        imageUrl: prescriptionImg,
+        imageUrl: "/api/placeholder/600/800", // Replace with actual prescription image
         prescriptionText: `Historical Prescription from 1925`
       });
 
@@ -130,105 +126,83 @@ const ReviewPrescriptions = () => {
   const handleSendOrder = () => {
     console.log('Sending order:', orderItems);
     // Navigate back to dashboard or show success message
+    navigate('/pharmacist/dashboard');
   };
 
   const handleSaveDraft = () => {
     console.log('Saving draft:', orderItems);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        {/* Sidebar during loading */}
-        <div className="sidebar-slide-in">
-          <Sidebar />
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
-              <div className="flex space-x-1">
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-1"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-2"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
-              </div>
-            </div>
-            <p className="text-gray-600 font-medium animate-pulse">Loading prescription...</p>
-          </div>
-        </div>
+  const headerActions = prescription && (
+    <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-full shadow-sm">
+      <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
       </div>
-    );
-  }
+      <p className="text-sm font-semibold text-green-700">
+        Reviewing: {prescription.patientName}
+      </p>
+    </div>
+  );
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-      {/* Sidebar with active state management */}
-      <div className="sidebar-slide-in">
-        <Sidebar />
-      </div>
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="dashboard-fade-in-1 flex-shrink-0">
-          <Header />
+    <PharmaPageLayout
+      title="Review Prescription"
+      subtitle={prescription ? `Patient: ${prescription.patientName} | Dr. ${prescription.doctorName}` : "Loading prescription details..."}
+      isLoading={isLoading}
+      loadingMessage="Loading prescription..."
+      showBackButton={true}
+      onBack={() => navigate('/pharmacist/queue')}
+      headerActions={headerActions}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Prescription Review */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="dashboard-fade-in-2">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <PrescriptionViewer prescription={prescription} />
+            </div>
+          </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto p-6">
-          {/* Back button */}
-          <div className="flex items-center mb-6 animate-fade-in-up">
-            <button
-              onClick={() => navigate('/pharmacist/dashboard')}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-all duration-300 hover:bg-white/60 hover:shadow-md px-4 py-2 rounded-lg group"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Back to Dashboard</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Prescription Review */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="dashboard-fade-in-2">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                  <PrescriptionViewer prescription={prescription} />
-                </div>
-              </div>
-              
-              <div className="dashboard-fade-in-4">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                  <OrderPreview 
-                    items={orderItems}
-                    onRemoveItem={handleRemoveMedicine}
-                    onUpdateQuantity={handleUpdateQuantity}
-                    onSendOrder={handleSendOrder}
-                    onSaveDraft={handleSaveDraft}
-                    onAddMedicine={handleAddMedicine}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Chat and Medicine Search */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="dashboard-fade-in-4">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                  <ChatWidget 
-                    messages={chatMessages}
-                    onSendMessage={handleSendMessage}
-                    patientName={prescription?.patientName}
-                  />
-                </div>
-              </div>
-              
-              <div className="dashboard-fade-in-3">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                  <MedicineSearch onAddMedicine={handleAddMedicineFromSearch} />
-                </div>
-              </div>
+        {/* Right Column - Chat */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="dashboard-fade-in-4">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <ChatWidget 
+                messages={chatMessages}
+                onSendMessage={handleSendMessage}
+                patientName={prescription?.patientName}
+              />
             </div>
           </div>
-        </main>
+        </div>
+
+        {/* Medicine Search - Single Column */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="dashboard-fade-in-3">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <MedicineSearch onAddMedicine={handleAddMedicineFromSearch} />
+            </div>
+          </div>
+        </div>
+
+        {/* Order Preview - Two Columns */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="dashboard-fade-in-4">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <OrderPreview 
+                items={orderItems}
+                onRemoveItem={handleRemoveMedicine}
+                onUpdateQuantity={handleUpdateQuantity}
+                onSendOrder={handleSendOrder}
+                onSaveDraft={handleSaveDraft}
+                onAddMedicine={handleAddMedicine}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </PharmaPageLayout>
   );
 };
 

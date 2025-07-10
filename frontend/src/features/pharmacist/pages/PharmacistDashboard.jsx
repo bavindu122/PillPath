@@ -9,7 +9,7 @@ import {
   Plus,
   Search
 } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
+import PharmaPageLayout from '../components/PharmaPageLayout';
 import StatsCards from '../components/StatsCards';
 import PrescriptionQueue from '../components/PrescriptionQueue';
 import InventoryAlerts from '../components/InventoryAlerts';
@@ -102,83 +102,60 @@ const PharmacistDashboard = () => {
     { title: "Low Stock Alerts", value: "7", subtitle: "Requires attention", color: "orange" },
     { title: "Patient Messages", value: "15", subtitle: "3 unread", color: "purple" }
   ];
-
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        {/* Sidebar during loading */}
-        <div className="sidebar-slide-in">
-          <Sidebar />
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
-              <div className="flex space-x-1">
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-1"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-2"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
-              </div>
-            </div>
-            <p className="text-gray-600 font-medium animate-pulse">Loading Dashboard...</p>
-          </div>
-        </div>
-      </div>
+      <PharmaPageLayout
+        title="Pharmacist Dashboard"
+        subtitle="Monitor your pharmacy operations"
+        isLoading={true}
+        loadingMessage="Loading Dashboard..."
+      />
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-      {/* Sidebar with active state management */}
-      <div className="sidebar-slide-in">
-        <Sidebar />
+    <PharmaPageLayout
+      title="Pharmacist Dashboard"
+      subtitle="Monitor your pharmacy operations"
+      isLoading={false}
+    >
+      {/* Stats Cards */}
+      <div className="dashboard-fade-in-2 mb-6">
+        <StatsCards stats={statsData} />
       </div>
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="dashboard-fade-in-1 flex-shrink-0">
-          <Header />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Prescription Queue */}
+        <div className="lg:col-span-2 dashboard-fade-in-3">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <PrescriptionQueue 
+              prescriptions={prescriptions}
+              onApprove={(id) => console.log('Approve:', id)}
+              onReject={(id) => console.log('Reject:', id)}
+              onClarify={(id) => console.log('Clarify:', id)}
+            />
+          </div>
         </div>
         
-        <main className="flex-1 overflow-y-auto p-6">
-          {/* Stats Cards */}
-          <div className="dashboard-fade-in-2 mb-6">
-            <StatsCards stats={statsData} />
+        {/* Right sidebar */}
+        <div className="space-y-6 dashboard-fade-in-4">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <InventoryAlerts alerts={inventoryAlerts} />
           </div>
-          
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Prescription Queue */}
-            <div className="lg:col-span-2 dashboard-fade-in-3">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <PrescriptionQueue 
-                  prescriptions={prescriptions}
-                  onApprove={(id) => console.log('Approve:', id)}
-                  onReject={(id) => console.log('Reject:', id)}
-                  onClarify={(id) => console.log('Clarify:', id)}
-                />
-              </div>
-            </div>
-            
-            {/* Right sidebar */}
-            <div className="space-y-6 dashboard-fade-in-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <InventoryAlerts alerts={inventoryAlerts} />
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <PatientMessages messages={messages} />
-              </div>
-            </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <PatientMessages messages={messages} />
           </div>
-        </main>
-
-        {/* Floating Action Button */}
-        <div className="fixed bottom-6 right-6">
-          <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
-            <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6">
+        <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
+          <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
+        </button>
+      </div>
+    </PharmaPageLayout>
   );
 };
 
