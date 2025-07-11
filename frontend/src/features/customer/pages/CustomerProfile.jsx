@@ -32,9 +32,8 @@ const CustomerProfile = ({ removeBg = false }) => {
   return (
     <section
       className={`min-h-screen flex ${
-        !removeBg
-          ? "bg-gradient-to-br from-primary via-primary-hover to-accent"
-          : ""
+        removeBg ? "" : "bg-gradient-to-br from-primary via-primary-hover to-accent"
+
       } relative overflow-hidden`}
     >
       {!removeBg && (
