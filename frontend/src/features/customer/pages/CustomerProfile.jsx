@@ -22,7 +22,7 @@ const CustomerProfile = () => {
         <CustomerSidebar />
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          <div className="max-w-5xl mx-auto pt-10 pb-10 max-w-7xl">
+          <div className="max-w-7xl mx-auto pt-10 pb-10">
             <div className="relative w-full z-10 mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center">
               {/* Welcome Section */}
               <div className="mb-8">
