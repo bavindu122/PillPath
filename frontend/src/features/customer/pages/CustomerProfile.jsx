@@ -30,7 +30,7 @@ const CustomerProfile = () => {
                   <img src={assets.profile_pic} alt="User profile picture"
                     className="w-32 h-32 rounded-full object-cover"/>
                   <div className="flex-1 text-left">
-                    <h1 className="text-3xl text-white font-bold mb-2">Welcome back, John!</h1>
+                    <h1 className="text-3xl text-white font-bold mb-2">Welcome back, {userName}!</h1>
                     <p className="text-white/80 mb-6">Manage your prescriptions and health with ease...</p>
                     <div className="flex flex-wrap gap-4 mb-2">
                       <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
