@@ -120,14 +120,14 @@ const PharmacistDashboard = () => {
       isLoading={false}
     >
       {/* Stats Cards */}
-      <div className="dashboard-fade-in-2 mb-6">
+      <div className="dashboard-fade-in-2 mb-4 sm:mb-6">
         <StatsCards stats={statsData} />
       </div>
       
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Prescription Queue */}
-        <div className="lg:col-span-2 dashboard-fade-in-3">
+        <div className="xl:col-span-2 dashboard-fade-in-3">
           <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
             <PrescriptionQueue 
               prescriptions={prescriptions}
@@ -139,7 +139,7 @@ const PharmacistDashboard = () => {
         </div>
         
         {/* Right sidebar */}
-        <div className="space-y-6 dashboard-fade-in-4">
+        <div className="space-y-4 sm:space-y-6 dashboard-fade-in-4">
           <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
             <InventoryAlerts alerts={inventoryAlerts} />
           </div>
@@ -150,9 +150,9 @@ const PharmacistDashboard = () => {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6">
-        <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
-          <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6">
+        <button className="group bg-blue-600 hover:bg-blue-700 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
+          <Plus className="h-5 w-5 sm:h-6 sm:w-6 group-hover:rotate-90 transition-transform duration-300" />
         </button>
       </div>
     </PharmaPageLayout>

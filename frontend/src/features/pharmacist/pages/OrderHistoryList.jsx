@@ -89,16 +89,6 @@ const OrderHistoryList = () => {
     ];
   };
 
-  const headerActions = (
-    <button
-      onClick={handleExport}
-      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md transition-all duration-200"
-    >
-      <Download className="h-4 w-4" />
-      <span className="text-sm font-medium">Export</span>
-    </button>
-  );
-
   return (
     <PharmaPageLayout
       title="Order History"
@@ -107,16 +97,24 @@ const OrderHistoryList = () => {
       loadingMessage="Loading order history..."
       showBackButton={true}
       onBack={() => navigate('/pharmacist/dashboard')}
-      headerActions={headerActions}
+      headerActions={
+        <button
+          onClick={handleExport}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        >
+          <Download className="h-4 w-4" />
+          <span className="font-medium">Export</span>
+        </button>
+      }
     >
       {/* Stats Cards */}
-      <div className="dashboard-fade-in-2 mb-6">
+      <div className="dashboard-fade-in-2 mb-4 sm:mb-6">
         <OrderStatsCards stats={getStatsData()} />
       </div>
 
       {/* Filters and Search */}
-      <div className="dashboard-fade-in-3 mb-6">
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover p-6">
+      <div className="dashboard-fade-in-3 mb-4 sm:mb-6">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover p-4 sm:p-6">
           <OrderFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -126,19 +124,20 @@ const OrderHistoryList = () => {
             setOrderTypeFilter={(value) => updateFilter('orderType', value)}
             typeFilter={filters.paymentMethod || 'all'}
             setTypeFilter={(value) => updateFilter('paymentMethod', value)}
-            onExport={handleExport}
           />
         </div>
       </div>
 
       {/* Orders Table */}
       <div className="dashboard-fade-in-4">
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-          <OrderTable
-            orders={filteredOrders}
-            onViewOrder={handleViewOrder}
-            onPrintOrder={handlePrintOrder}
-          />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover overflow-hidden">
+          <div className="overflow-x-auto">
+            <OrderTable
+              orders={filteredOrders}
+              onViewOrder={handleViewOrder}
+              onPrintOrder={handlePrintOrder}
+            />
+          </div>
         </div>
       </div>
     </PharmaPageLayout>

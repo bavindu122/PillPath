@@ -147,16 +147,16 @@ const ReviewPrescriptions = () => {
   return (
     <PharmaPageLayout
       title="Review Prescription"
-      subtitle={prescription ? `Patient: ${prescription.patientName} | Dr. ${prescription.doctorName}` : "Loading prescription details..."}
+      subtitle={prescription ? `Patient: ${prescription.patientName}` : "Loading prescription details..."}
       isLoading={isLoading}
       loadingMessage="Loading prescription..."
       showBackButton={true}
       onBack={() => navigate('/pharmacist/queue')}
       headerActions={headerActions}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Prescription Review */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        {/* Prescription Review - Full width on mobile, 2 cols on large screens */}
+        <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-2">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
               <PrescriptionViewer prescription={prescription} />
@@ -164,8 +164,8 @@ const ReviewPrescriptions = () => {
           </div>
         </div>
 
-        {/* Right Column - Chat */}
-        <div className="lg:col-span-1 space-y-6">
+        {/* Chat Widget - Full width on mobile, 1 col on large screens */}
+        <div className="lg:col-span-2 xl:col-span-1 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
               <ChatWidget 
@@ -177,8 +177,8 @@ const ReviewPrescriptions = () => {
           </div>
         </div>
 
-        {/* Medicine Search - Single Column */}
-        <div className="lg:col-span-1 space-y-6">
+        {/* Medicine Search - Full width on mobile */}
+        <div className="lg:col-span-1 xl:col-span-1 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-3">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
               <MedicineSearch onAddMedicine={handleAddMedicineFromSearch} />
@@ -186,8 +186,8 @@ const ReviewPrescriptions = () => {
           </div>
         </div>
 
-        {/* Order Preview - Two Columns */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Order Preview - Full width on mobile, 2 cols on large screens */}
+        <div className="lg:col-span-1 xl:col-span-2 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
               <OrderPreview 
