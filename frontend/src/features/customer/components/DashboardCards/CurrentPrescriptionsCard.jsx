@@ -51,7 +51,7 @@ const CurrentPrescriptionsCard = () => {
             <div className="flex justify-between">
               <div className="flex-1">
                 <div className="flex items-center">
-                  <div className={`w-2 h-2 rounded-full bg-${prescription.color}-400 mr-2`}></div>
+                  <div className={`w-2 h-2 rounded-full ${colorClassMap[prescription.color]} mr-2`}></div>
                   <h4 className="text-white font-medium">{prescription.name}</h4>
                 </div>
                 
