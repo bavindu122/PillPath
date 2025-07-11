@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import Navbar from "../../../components/Layout/Navbar";
 import { assets } from "../../../assets/assets";
 import Button from "../components/Button";
-import { Pencil, Camera } from "lucide-react";
+import { Pencil, Camera, Upload, Search, ShoppingBag } from "lucide-react";
+import CurrentPrescriptionsCard from "../components/DashboardCards/CurrentPrescriptionsCard";
+import RecentOrdersCard from "../components/DashboardCards/RecentOrdersCard";
+import FamilyProfilesCard from "../components/DashboardCards/FamilyProfilesCard";
+import NearbyPharmaciesCard from "../components/DashboardCards/NearbyPharmaciesCard";
 import ProfileModal from "../components/ProfileModal";
 import DetailCard from "../components/DetailCard";
 
@@ -18,11 +22,45 @@ const CustomerProfile = () => {
         <CustomerSidebar />
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          <div className="max-w-5xl mx-auto w-full">
+          <div className="max-w-7xl mx-auto pt-10 pb-10">
             <div className="relative w-full z-10 mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center">
-              <h1 className="text-3xl text-white font-bold mb-2">Customer Dashboard</h1>
-              <p className="text-gray-600 text-white mb-6">Manage your profile and medical information</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Welcome Section */}
+              <div className="mb-8">
+                <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
+                  <img src={assets.profile_pic} alt="User profile picture"
+                    className="w-32 h-32 rounded-full object-cover"/>
+                  <div className="flex-1 text-left">
+                    <h1 className="text-3xl text-white font-bold mb-2">Welcome back, {userName}!</h1>
+                    <p className="text-white/80 mb-6">Manage your prescriptions and health with ease...</p>
+                    <div className="flex flex-wrap gap-4 mb-2">
+                      <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                        <Upload size={18} /> Upload Prescription
+                      </Button>
+                      <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                        <Search size={18} /> Find Pharmacy
+                      </Button>
+                      <Button className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700">
+                        <ShoppingBag size={18} /> Browse OTC
+                      </Button>
+                    </div>
+                  </div>
+                  <Button size="sm" className="absolute top-0 right-0 flex items-center gap-2 text-lg">
+                    <Pencil size={20} /> Edit Profile
+                  </Button>
+                </div>
+                
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                
+                <CurrentPrescriptionsCard />
+                <RecentOrdersCard />
+                <FamilyProfilesCard />
+                <NearbyPharmaciesCard />
+              </div>
+
+              {/* Original Profile Section */}
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-6">
                   {/* ...existing code for DetailCards... */}
                   <DetailCard className="flex flex-col items-center min-h-[260px]">
@@ -50,56 +88,7 @@ const CustomerProfile = () => {
                   </DetailCard>
                 </div>
                 {/* Customer Details */}
-                <div className="md:col-span-2">
-                  <DetailCard className="p-10 min-h-[480px]">
-                    <div className="flex justify-between items-center mb-8">
-                      <h2 className="text-2xl font-bold font-poppins">Customer Details</h2>
-                      <Button size="sm" className="flex items-center gap-2 text-lg px-6 py-2">
-                        <Pencil size={20} /> Edit Details
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-left">
-                      <div>
-                        <p className="text-lg text-gray-500 font-poppins mb-1">Full Name</p>
-                        <p className="font-semibold text-xl">Senuja Udugampola</p>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 mb-1">Age</p>
-                        <p className="font-semibold text-xl">22 years</p>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 mb-1">Gender</p>
-                        <p className="font-semibold text-xl">Male</p>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 mb-1">Date of Birth</p>
-                        <p className="font-semibold text-xl">March 15, 1992</p>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <p className="text-lg text-gray-500 mb-1">Address</p>
-                        <p className="font-semibold text-xl">
-                          1234 Maple Street, 
-                          Apt 5B Springfield, 
-                          IL 62701 United States
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 mb-1">Phone Number</p>
-                        <p className="c-semibold text-xl">+94 703034515</p>
-                      </div>
-                      <div>
-                        <p className="text-lg text-gray-500 mb-1">Email Address</p>
-                        <p className="font-semibold text-xl">senuudugampola@gmail.com</p>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <p className="text-lg text-gray-500 mb-1">Emergency Contact</p>
-                        <p className="font-semibold text-xl">
-                          Sanuthma Munasinghe - +94 703034516
-                        </p>
-                      </div>
-                    </div>
-                  </DetailCard>
-                </div>
+                
               </div>
             </div>
           </div>
