@@ -25,27 +25,29 @@ import GlassCard from "../../../components/UIs/GlassCard";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Link } from "react-router-dom";
 
-const CustomerProfile = () => {
+const CustomerProfile = ({ removeBg = false }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const userName = "John Doe"; // Replace with actual user name logic
 
   return (
-    <section className="min-h-screen flex bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden">
-      {/* Animated background elements - similar to login page */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
-      <div className="absolute top-32 right-20 w-80 h-80 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
-      <div className="absolute -bottom-20 left-32 w-96 h-96 bg-primary/30 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-      <div className="absolute bottom-20 right-10 w-72 h-72 bg-secondary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-6000"></div>
-
-      {/* Medical pattern background */}
-      <div className="medical-pattern absolute inset-0 opacity-5"></div>
-
-      {/* Animated geometric shapes */}
-      <div className="absolute top-20 left-[20%] w-20 h-20 border-4 border-white/10 rounded-lg rotate-12 animate-spin-slow"></div>
-      <div className="absolute bottom-40 right-[15%] w-16 h-16 border-4 border-secondary/20 rounded-full animate-pulse-slow"></div>
-
-      {/* Sidebar */}
-      <CustomerSidebar />
+    <section
+      className={`min-h-screen flex ${
+        !removeBg
+          ? "bg-gradient-to-br from-primary via-primary-hover to-accent"
+          : ""
+      } relative overflow-hidden`}
+    >
+      {!removeBg && (
+        <>
+          <div className="absolute top-10 left-10 w-96 h-96 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
+          <div className="absolute top-32 right-20 w-80 h-80 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
+          <div className="absolute -bottom-20 left-32 w-96 h-96 bg-primary/30 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
+          <div className="absolute bottom-20 right-10 w-72 h-72 bg-secondary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-6000"></div>
+          <div className="medical-pattern absolute inset-0 opacity-5"></div>
+          <div className="absolute top-20 left-[20%] w-20 h-20 border-4 border-white/10 rounded-lg rotate-12 animate-spin-slow"></div>
+          <div className="absolute bottom-40 right-[15%] w-16 h-16 border-4 border-secondary/20 rounded-full animate-pulse-slow"></div>
+        </>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-auto">
