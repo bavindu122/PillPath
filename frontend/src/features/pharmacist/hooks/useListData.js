@@ -85,8 +85,8 @@ export const useListData = (dataLoader, filterConfig = {}) => {
 
   const updateData = (updater) => {
     setData(prev => {
-      const newData = typeof updater === 'function' ? updater(prev) : updater;
-      return newData;
+      return typeof updater === 'function' ? updater(prev) : updater;
+
     });
   };
 
