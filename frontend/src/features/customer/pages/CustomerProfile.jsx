@@ -15,6 +15,7 @@ import CustomerSidebar from "../components/CustomerSidebar";
 
 const CustomerProfile = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const userName = "John Doe"; // Replace with actual user name logic
   return (
     <>
       <section className="min-h-screen flex bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden">
