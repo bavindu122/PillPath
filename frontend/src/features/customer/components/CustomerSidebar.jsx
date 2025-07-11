@@ -30,10 +30,18 @@ const CustomerSidebar = () => {
             </p>
           </button>
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
-            Find pharmacies
+            <NavLink
+              to="/find-pharmacies"
+              className="cursor-pointer hover:text-pButton">
+              Find pharmacies
+            </NavLink>
           </button>
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
-            OTC Store
+            <NavLink
+              to="/otc-store"
+              className="cursor-pointer hover:text-pButton">
+              OTC Store
+            </NavLink>
           </button>
           <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/10 text-gray-700">
             Medicine info
