@@ -86,7 +86,7 @@ export const prescriptionService = {
       defaultSort: 'time',
       searchFields: ['patientName', 'medication', 'prescribedBy'],
       customFilters: {
-        priority: (item, value) => item.priority.toLowerCase().includes(value),
++        priority: (item, value) => item.priority.toLowerCase() === value.toLowerCase(),
         status: (item, value) => item.status === value
       },
       sortFunctions: {
