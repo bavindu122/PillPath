@@ -19,9 +19,10 @@ const App = () => {
   const location = useLocation();
   const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isAdminPath = location.pathname.startsWith("/pharmacy");
+  const isCustomerPath = location.pathname.startsWith("/customer");
   return (
-    <div className="mx-4 sm:mx-[0%]">
-      {!isAdminPath && !isPharmacistPath && <Navbar />}
+    <div >
+      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -34,7 +35,7 @@ const App = () => {
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer/*" element={<Customer />} />
       </Routes>
-      {!isAdminPath && !isPharmacistPath && <Footer />}
+      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
     </div>
   );
 };
