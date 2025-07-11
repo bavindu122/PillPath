@@ -27,7 +27,7 @@ const CustomerProfile = () => {
               {/* Welcome Section */}
               <div className="mb-8">
                 <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
-                  <img src={assets.profile_pic} alt="logo"
+                  <img src={assets.profile_pic} alt="User profile picture"
                     className="w-32 h-32 rounded-full object-cover"/>
                   <div className="flex-1 text-left">
                     <h1 className="text-3xl text-white font-bold mb-2">Welcome back, John!</h1>
