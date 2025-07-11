@@ -21,7 +21,7 @@ const App = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
-    <div className="mx-4 sm:mx-[0%]">
+    <div >
       {!isAdminPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
