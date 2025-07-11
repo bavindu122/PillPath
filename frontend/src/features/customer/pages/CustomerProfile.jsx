@@ -60,7 +60,7 @@ const CustomerProfile = () => {
               </div>
 
               {/* Original Profile Section */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-6">
                   {/* ...existing code for DetailCards... */}
                   <DetailCard className="flex flex-col items-center min-h-[260px]">
