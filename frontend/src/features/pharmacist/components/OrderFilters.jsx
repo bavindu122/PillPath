@@ -16,13 +16,6 @@ const OrderFilters = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Filter Order History</h3>
-        <button
-          onClick={onExport}
-          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-        >
-          <Download className="h-4 w-4" />
-          <span className="text-sm font-medium">Export</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
