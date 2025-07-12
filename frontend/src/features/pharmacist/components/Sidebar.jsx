@@ -32,6 +32,9 @@ const Sidebar = () => {
     if (path.includes('/review')) {
       return 'prescriptions';
     }
+    if (path.includes('/orders')) {
+      return 'orders';
+    }
     return 'dashboard';
   };
 

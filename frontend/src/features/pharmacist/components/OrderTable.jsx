@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye, Printer, User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const OrderTable = ({ orders, onViewOrder, onPrintOrder }) => {
   const getTypeIcon = (type) => {
@@ -149,13 +150,13 @@ const OrderTable = ({ orders, onViewOrder, onPrintOrder }) => {
 
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
-                  <button
-                    onClick={() => onViewOrder(order.id)}
+                  <Link
+                    to={`/pharmacist/orders/${order.id}`}
                     className="flex items-center space-x-1 px-4 py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   >
                     <Eye className="h-3 w-3" />
                     <span>View</span>
-                  </button>
+                  </Link>
                   
                   {order.actions.includes('print') && (
                     <button
