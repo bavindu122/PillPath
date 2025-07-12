@@ -3,7 +3,6 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
-import CustomerProfile from "./features/customer/pages/CustomerProfile";
 
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
@@ -14,15 +13,16 @@ import Navbar from "./components/Layout/Navbar";
 
 import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
-
-import FindPharmacies from "./pages/FindPharmacies/FindPharmacy";
+import Customer from "./features/customer/pages/Customer";
 
 const App = () => {
   const location = useLocation();
+  const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isAdminPath = location.pathname.startsWith("/pharmacy");
+  const isCustomerPath = location.pathname.startsWith("/customer");
   return (
     <div >
-      {!isAdminPath && <Navbar />}
+      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -33,11 +33,9 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
         <Route path="/pharmacist/*" element={<Pharmacist />} />
-        <Route path="/customer-profile" element={<CustomerProfile />} />
-        <Route path="/FindPharmacies" element={<FindPharmacies />} />
+        <Route path="/customer/*" element={<Customer />} />
       </Routes>
-      {!isAdminPath && <Footer />}
-      {/* <Footer /> */}
+      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
     </div>
   );
 };

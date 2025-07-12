@@ -1,9 +1,10 @@
-import React from "react";
+import React, {useState} from "react";
 import { useInventoryData } from "../../hooks/useInventoryData";
 import InventorySummaryCard from "../../components/InventorySettings/InventorySummaryCard";
 import SearchBar from "../../components/InventorySettings/SearchBar";
 import SearchProductCard from "../../components/InventorySettings/SearchProductCard";
 import CurrentStorefrontProductCard from "../../components/InventorySettings/CurrentStorefrontProductCard";
+import AddItem from "../../components/InventorySettings/AddItem";
 
 const InventoryManagementPage = () => {
   const {
@@ -16,6 +17,17 @@ const InventoryManagementPage = () => {
     removeProductFromStore,
     updateProductStock,
   } = useInventoryData();
+
+
+const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddNewProduct = (newProduct) => {
+    // Assuming addProductToStore can handle adding a completely new product
+    // You might need to adjust useInventoryData to properly integrate new items
+    // For now, let's just add it to the currentStorefrontProducts directly for demonstration
+    // In a real app, this would involve API calls and proper state management in useInventoryData
+    addProductToStore(newProduct); // Pass the new product object
+  };
 
   return (
     // No need for outer container div as it's provided by the layout
@@ -30,6 +42,16 @@ const InventoryManagementPage = () => {
       {/* Inventory Summary Cards */}
       
         <InventorySummaryCard inventoryStats={inventorySummary} />
+
+
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-3 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        >
+          Add New Item
+        </button>
+      </div>
       
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -85,6 +107,14 @@ const InventoryManagementPage = () => {
           </div>
         </div>
       </div>
+
+            {/* Add Item Modal */}
+      <AddItem
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleAddNewProduct}
+      />
+
     </>
   );
 };

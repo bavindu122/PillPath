@@ -37,7 +37,7 @@ export default function Sidebar({ activeMenuItem, setActiveMenuItem, isSidebarOp
         </span>
       </div>
 
-      <nav className="flex flex-1 flex-col py-4 px-2">
+      <nav className="flex flex-1 flex-col py-4 px-2 bg-slate-800">
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -51,11 +51,11 @@ export default function Sidebar({ activeMenuItem, setActiveMenuItem, isSidebarOp
                     setIsSidebarOpen(false);
                   }}
                   className={`group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200
-                    ${isActive ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-100'}`}
+                    ${isActive ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-slate-700 hover:text-white'}`}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 ${
-                      isActive ? 'text-primary' : 'text-gray-500 group-hover:text-gray-600'
+                      isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-600'
                     }`}
                   />
                   {item.name}
