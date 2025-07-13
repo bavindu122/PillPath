@@ -75,7 +75,7 @@ export const getFilterCounts = (pharmacies, currentLocation) => {
         pharmacy.lat,
         pharmacy.lng
       );
-      return distance <= 2; // Within 2km
+      return distance <= NEARBY_DISTANCE_KM; // Within 2km
     }).length,
     open24Hours: pharmacies.filter(p => p.has24HourService).length,
     delivery: pharmacies.filter(p => p.hasDelivery).length,
