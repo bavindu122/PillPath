@@ -71,7 +71,7 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
               onChange={(e) => handleInputChange(field, e.target.value)}
               disabled={!isEditing}
               className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 ${
-                !isEditing ? 'cursor-not-allowed opacity-70' : ''
+                isEditing ? '' : 'cursor-not-allowed opacity-70'
               }`}
             >
               {options?.map(option => (
