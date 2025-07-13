@@ -38,7 +38,28 @@ export const formatPhoneNumber = (phoneNumber) => {
 
 // Check if a pharmacy is currently open based on hours string
 export const isPharmacyOpen = (hoursString) => {
-  // For demo purposes - in a real app you would parse the hours string
-  return hoursString.toLowerCase().includes('open') && 
-        !hoursString.toLowerCase().includes('closed');
+  if (!hoursString) return false; // Return false if hoursString is missing or invalid
+  
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  
+  // Example format: "Open 9:00 AM - 5:00 PM"
+  const match = hoursString.match(/open\s(\d{1,2}:\d{2}\s[APM]{2})\s-\s(\d{1,2}:\d{2}\s[APM]{2})/i);
+  if (!match) return false; // Return false if the format is invalid
+  
+  const [_, openTime, closeTime] = match;
+  
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = new Date(`1970-01-01T${new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(new Date(`1970-01-01T${timeStr}`))}`).toTimeString().split(':');
+    return parseInt(hours) * 60 + parseInt(minutes);
+  };
+  
+  const openMinutes = parseTime(openTime);
+  const closeMinutes = parseTime(closeTime);
+  
+  return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
 };
