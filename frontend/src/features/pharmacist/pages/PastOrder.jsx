@@ -18,6 +18,8 @@ const PastOrder = () => {
   };
 
   const handleExportPDF = () => {
+    // TODO: Implement export to PDF functionality
+    alert('Export to PDF is not yet implemented.');
     console.log('Exporting order to PDF:', orderData);
   };
 
