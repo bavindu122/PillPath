@@ -12,7 +12,7 @@ public class BackendApplication {
     public static void main(String[] args) {
 
         Dotenv dotenv = Dotenv.configure()
-        .directory("backend/backend")  // <-- Correct path now!
+        .directory("backend/backend")  // path
         .filename(".env")
         .load();
 
