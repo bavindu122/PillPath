@@ -106,7 +106,7 @@ const PrescriptionViewer = ({ prescription }) => {
 
       {/* Full Size Modal - Using Portal to render at document body level */}
       {showModal && createPortal(
-        <div className="fixed inset-0 backdrop-blur-sm backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] mx-4 overflow-hidden">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
