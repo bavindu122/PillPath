@@ -2,7 +2,7 @@ import React from 'react';
 import { Eye, Printer, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const OrderTable = ({ orders, onViewOrder, onPrintOrder }) => {
+const OrderTable = ({ orders, onPrintOrder }) => {
   const getTypeIcon = (type) => {
     switch (type.toLowerCase()) {
       case 'prescription':
