@@ -115,10 +115,88 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
     );
   };
 
+  // Accessibility: focus trap and escape key
+  const modalRef = useRef(null);
+  const previouslyFocusedElement = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    previouslyFocusedElement.current = document.activeElement;
+
+    // Focus the first focusable element in the modal
+    const focusableSelectors = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ];
+    const modalNode = modalRef.current;
+    const focusableEls = modalNode
+      ? modalNode.querySelectorAll(focusableSelectors.join(','))
+      : [];
+    if (focusableEls.length) {
+      focusableEls[0].focus();
+    }
+
+    // Focus trap handler
+    const handleTab = (e) => {
+      if (e.key !== 'Tab') return;
+      if (!modalNode) return;
+
+      const focusable = Array.from(
+        modalNode.querySelectorAll(focusableSelectors.join(','))
+      ).filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    // Escape key handler
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      } else {
+        handleTab(e);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore focus to previously focused element
+      if (previouslyFocusedElement.current) {
+        previouslyFocusedElement.current.focus();
+      }
+    };
+  }, [isOpen, onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50"
+      role="dialog"
+      aria-modal="true"
+      ref={modalRef}
+    >
       <div className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-gradient-to-br from-primary via-primary-hover to-accent backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
