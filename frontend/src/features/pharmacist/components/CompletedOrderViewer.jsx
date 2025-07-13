@@ -106,7 +106,6 @@ const CompletedOrderViewer = ({ orderData, onPrint, onExportPDF }) => {
                 <div className="relative bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                   <img 
                     src={orderData.prescriptionImageUrl || '/src/assets/img/placeholder.jpeg'} 
-                    alt={orderData.prescriptionImageAlt || 'Prescription Document'}
                     className="object-contain transition-all duration-300 ease-in-out"
                     style={{ 
                       maxHeight: isZoomed ? '600px' : '400px',
