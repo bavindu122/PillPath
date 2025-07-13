@@ -20,6 +20,7 @@ import RecentOrdersCard from "../components/DashboardCards/RecentOrdersCard";
 import FamilyProfilesCard from "../components/DashboardCards/FamilyProfilesCard";
 import NearbyPharmaciesCard from "../components/DashboardCards/NearbyPharmaciesCard";
 import ProfileModal from "../components/ProfileModal";
+import EditProfileModal from "../components/EditProfileModal";
 import DetailCard from "../components/DetailCard";
 import GlassCard from "../../../components/UIs/GlassCard";
 import CustomerSidebar from "../components/CustomerSidebar";
@@ -28,6 +29,7 @@ import { Link } from "react-router-dom";
 
 const CustomerProfile = ({ removeBg = false }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const userName = "John Doe"; // Replace with actual user name logic
 
@@ -88,20 +90,21 @@ const CustomerProfile = ({ removeBg = false }) => {
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
-                    <Link to="/find-pharmacies">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <MapPin size={16} /> Find Pharmacy
                       </Button>
+                    <Link to="/otc-store">
+                      <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <ShoppingBag size={16} /> Browse OTC
+                      </Button>
                     </Link>
-                    <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                      <ShoppingBag size={16} /> Browse OTC
-                    </Button>
                   </div>
                 </div>
 
                 <Button
                   size="sm"
                   className="absolute top-4 right-4 flex items-center gap-2 text-lg bg-white/20 hover:bg-white/30 transition-all duration-300"
+                  onClick={() => setShowEditProfileModal(true)}
                 >
                   <Pencil size={16} /> Edit Profile
                 </Button>
@@ -385,6 +388,18 @@ const CustomerProfile = ({ removeBg = false }) => {
       <ProfileModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
+      />
+      
+      <EditProfileModal
+        isOpen={showEditProfileModal}
+        onClose={() => setShowEditProfileModal(false)}
+        userProfile={{
+          firstName: "John",
+          lastName: "Doe",
+          email: "john.doe@email.com",
+          phone: "+1 (555) 123-4567",
+          // Add more user data here when available
+        }}
       />
       
       <PrescriptionUploadModal
