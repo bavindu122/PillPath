@@ -26,8 +26,8 @@ const RecentOrdersCard = () => {
     <div className="h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="bg-purple-500/20 p-2 rounded-lg">
-            <Package size={18} className="text-purple-400" />
+          <span className="bg-purple-600/20 p-2 rounded-lg">
+            <Package size={18} className="text-purple-200" />
           </span>
           <h3 className="text-white font-semibold">Recent Orders</h3>
         </div>
