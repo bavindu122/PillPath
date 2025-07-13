@@ -142,8 +142,10 @@ const CompletedOrderViewer = ({ orderData, onPrint, onExportPDF }) => {
                 <span className="text-sm">Full Size</span>
               </button>
               <button
-                onClick={onExportPDF}
-                className="flex items-center space-x-1 px-4 py-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                onClick={onExportPDF ? onExportPDF : undefined}
+                className={`flex items-center space-x-1 px-4 py-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200 ${!onExportPDF ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!onExportPDF}
+                title={!onExportPDF ? "Export PDF is not available" : undefined}
               >
                 <Download className="h-4 w-4" />
                 <span className="text-sm">Export PDF</span>
