@@ -81,6 +81,6 @@ export const getFilterCounts = (pharmacies, currentLocation) => {
     delivery: pharmacies.filter(p => p.hasDelivery).length,
     insurance: pharmacies.filter(p => p.acceptsInsurance).length,
     vaccinations: pharmacies.filter(p => p.hasVaccinations).length,
-    highRated: pharmacies.filter(p => p.rating >= 4.5).length,
+    highRated: pharmacies.filter(p => p.rating >= HIGH_RATING_THRESHOLD).length,
   };
 };
