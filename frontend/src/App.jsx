@@ -19,6 +19,7 @@ const App = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   return (
+
     <div className="mx-4 sm:mx-[0%]">
       {!isAdminPath && <Navbar />}
       <Routes>
@@ -38,5 +39,10 @@ const App = () => {
     </div>
   );
 };
+
+// const App = () => {
+//   return <div>Hello World</div>;
+// };
+
 
 export default App;
