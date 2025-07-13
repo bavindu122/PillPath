@@ -23,7 +23,7 @@ export const usePharmacyData = (currentLocation) => {
       setLoading(true);
       try {
         // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
 
         // Sample data - in a real app, this would come from your backend
         const mockPharmacies = [
