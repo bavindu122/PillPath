@@ -16,9 +16,19 @@ public class BackendApplication {
         .filename(".env")
         .load();
 
-        System.setProperty("spring.datasource.username", dotenv.get("DB_USERNAME"));
-        System.setProperty("spring.datasource.password", dotenv.get("DB_PASSWORD"));
-        System.setProperty("jwt.secret", dotenv.get("JWT_SECRET"));
+        String dbUsername = dotenv.get("DB_USERNAME");
+        String dbPassword = dotenv.get("DB_PASSWORD");
+        String jwtSecret = dotenv.get("JWT_SECRET");
+
+        // ✅ Fail fast if any variable is missing
+        if (dbUsername == null || dbPassword == null || jwtSecret == null) {
+            throw new IllegalStateException("Missing environment variables. Please make sure DB_USERNAME, DB_PASSWORD, and JWT_SECRET are set in .env file.");
+        }
+
+        System.setProperty("spring.datasource.username", dbUsername);
+        System.setProperty("spring.datasource.password", dbPassword);
+        System.setProperty("jwt.secret", jwtSecret);
+
 
         SpringApplication.run(BackendApplication.class, args);
     }

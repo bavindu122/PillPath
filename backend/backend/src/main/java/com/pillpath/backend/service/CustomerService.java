@@ -24,50 +24,40 @@ public class CustomerService {
     }
 
     public String registerCustomer(RegisterRequest request) {
-        try {
-            if (customerRepository.existsByEmail(request.getEmail())) {
-                return "Email is already registered";
-            }
-
-            if (!request.getPassword().equals(request.getConfirmPassword())) {
-                return "Password and Confirm Password do not match";
-            }
-
-            Customer customer = Customer.builder()
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
-                    .email(request.getEmail())
-                    .phoneNumber(request.getPhoneNumber())
-                    .dateOfBirth(request.getDateOfBirth())
-                    .password(passwordEncoder.encode(request.getPassword())) // hash password
-                    .build();
-
-            customerRepository.save(customer);
-            return "Customer registered successfully";
-        } catch (Exception e) {
-            // Log exception if needed
-            return "Registration failed: " + e.getMessage();
+        if (customerRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already registered");
         }
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Password and Confirm Password do not match");
+        }
+
+        Customer customer = Customer.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .dateOfBirth(request.getDateOfBirth())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        customerRepository.save(customer);
+        return "Customer registered successfully";
     }
 
     public String loginCustomer(LoginRequest request) {
-        try {
-            Optional<Customer> customerOpt = customerRepository.findByEmail(request.getEmail());
+        Optional<Customer> customerOpt = customerRepository.findByEmail(request.getEmail());
 
-            if (customerOpt.isEmpty()) {
-                return "Invalid email or password";
-            }
-
-            Customer customer = customerOpt.get();
-
-            if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-                return "Invalid email or password";
-            }
-
-            return jwtUtils.generateJwtToken(customer.getEmail());
-        } catch (Exception e) {
-            // Log exception if needed
-            return "Login failed: " + e.getMessage();
+        if (customerOpt.isEmpty()) {
+            throw new RuntimeException("Invalid email or password");
         }
+
+        Customer customer = customerOpt.get();
+
+        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        return jwtUtils.generateJwtToken(customer.getEmail());
     }
 }

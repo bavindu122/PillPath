@@ -7,6 +7,8 @@ import com.pillpath.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +36,8 @@ public class AuthController {
             String jwt = customerService.loginCustomer(loginRequest);
             return ResponseEntity.ok(new JwtResponse(jwt));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            // 401 is more appropriate for failed authentication
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
