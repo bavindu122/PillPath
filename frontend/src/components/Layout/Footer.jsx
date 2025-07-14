@@ -12,9 +12,9 @@ const Footer = () => {
       <div className="absolute  left-[-100px] w-[25rem] h-[25rem] bg-primary/25 rounded-full blur-3xl"></div>
       <div className="absolute top-1/4 right-1/3 w-64 h-64 bg-accent/15 rounded-full blur-2xl animate-float-gentle"></div>
 
-      <div className="container mx-auto px-4 py-10">
+      <div className="">
         {/* Main Footer Content */}
-        <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl overflow-hidden relative">
+        <div className="overflow-hidden relative">
           {/* Glass Edge Highlights */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
           <div className="absolute bottom-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent"></div>
