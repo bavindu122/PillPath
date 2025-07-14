@@ -80,7 +80,7 @@ const MedicalRecordsDetailed = () => {
   };
 
   return (
-    <section className="min-h-screen flex bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden">
+    <section className="min-h-screen flex relative overflow-hidden">
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
