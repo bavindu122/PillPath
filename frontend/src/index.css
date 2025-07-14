@@ -61,7 +61,7 @@ h1, h2, h3, h4, h5, h6 {
 .text-primary-blue { color: var(--color-text-primary); }
 .text-secondary-green { color: var(--color-text-secondary); }
 .text-accent-purple {
-  color: #e040fb; /* Brighter, more vibrant purple */
+  color: #e040fb;
   
   letter-spacing: 0.02em;
 }
