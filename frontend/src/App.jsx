@@ -14,6 +14,7 @@ import Navbar from "./components/Layout/Navbar";
 import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 import Customer from "./features/customer/pages/Customer";
+import FindPharmacy from "./pages/FindPharmacies/FindPharmacy";
 
 const App = () => {
   const location = useLocation();
@@ -34,6 +35,8 @@ const App = () => {
         <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
         <Route path="/pharmacist/*" element={<Pharmacist />} />
         <Route path="/customer/*" element={<Customer />} />
+        <Route path="/find-pharmacy" element={<FindPharmacy />} />
+        <Route path="*" element={<div>Page Not Found</div>} />
       </Routes>
       {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
     </div>

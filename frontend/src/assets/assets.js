@@ -12,6 +12,12 @@ import ibuprofen from './img/meds/Ibuprofen.jpg'
 import panadol from './img/meds/Panadol.jpg'
 import vitaminC from './img/meds/Vitamin_c.jpg'
 
+// Home Page images
+import delivery_img from './img/home/delivery_img.png'
+import find_pharmacy_img from './img/home/find_pharmacy_img.png'
+import upload_rx_img from './img/home/upload_rx_img.png'  
+import cta_img from './img/home/cta_img.png'
+
 export const assets = {
     logo1,
     logo2,
@@ -23,5 +29,10 @@ export const assets = {
     paracetamol,
     ibuprofen,
     panadol,
-    vitaminC
+    vitaminC,
+    delivery_img,
+    find_pharmacy_img,
+    upload_rx_img,
+    cta_img
+
 }
