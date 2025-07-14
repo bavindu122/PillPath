@@ -64,7 +64,7 @@ const CustomerSidebar = () => {
   return (
     <>
       <motion.aside 
-        className={`${isExpanded ? 'w-64' : 'w-20'} min-h-screen bg-gradient-to-b from-primary/80 to-primary-hover/80 backdrop-blur-lg border-r border-white/10 shadow-lg flex flex-col py-6 fixed z-30 transition-all duration-300 ease-in-out`}
+        className={`${isExpanded ? 'w-64' : 'w-20'} min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 backdrop-blur-lg border-r border-white/10 shadow-lg flex flex-col py-6 fixed z-30 transition-all duration-300 ease-in-out`}
         initial={false}
       >
         {/* Logo and Toggle Button */}

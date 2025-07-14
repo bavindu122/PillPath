@@ -1,4 +1,6 @@
 import { calculateDistance } from './mapHelpers';
+const NEARBY_DISTANCE_KM = 2; // 2 km for nearby pharmacies
+const HIGH_RATING_THRESHOLD = 4.0; // Threshold for high-rated 
 
 // Filter pharmacies based on the current filters
 export const filterPharmacies = (pharmacies, filters, currentLocation) => {

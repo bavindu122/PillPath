@@ -104,8 +104,8 @@ const CustomerProfile = ({ removeBg = false }) => {
               <div className="w-full h-px bg-white/10 my-6"></div>
 
               {/* Stats row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up delay-500">
-                {/* Active Prescriptions */}
+              {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up delay-500">
+          
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <div className="bg-blue-500/20 p-2 rounded-lg group-hover:bg-blue-500/30 transition-colors">
@@ -121,7 +121,6 @@ const CustomerProfile = ({ removeBg = false }) => {
                   </div>
                 </div>
 
-                {/* Pending Orders */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <div className="bg-orange-500/20 p-2 rounded-lg group-hover:bg-orange-500/30 transition-colors">
@@ -136,7 +135,6 @@ const CustomerProfile = ({ removeBg = false }) => {
                   </div>
                 </div>
 
-                {/* Loyalty Points */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <div className="bg-yellow-500/20 p-2 rounded-lg group-hover:bg-yellow-500/30 transition-colors">
@@ -154,7 +152,6 @@ const CustomerProfile = ({ removeBg = false }) => {
                   </div>
                 </div>
 
-                {/* Family Members */}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
                     <div className="bg-purple-500/20 p-2 rounded-lg group-hover:bg-purple-500/30 transition-colors">
@@ -184,7 +181,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                     <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full border border-white/30"></div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
