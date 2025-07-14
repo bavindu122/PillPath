@@ -55,7 +55,7 @@ const PatientInfo = ({ patientData }) => {
               <Mail className="h-4 w-4 text-gray-500" />
               <div>
                 <p className="text-xs text-gray-500">Email</p>
-                <p className="text-sm font-medium text-gray-800">{patientData.email}</p>
+                <p className="text-sm font-medium text-gray-800">{patientData.email ? patientData.email : 'N/A'}</p>
               </div>
             </div>
             

@@ -105,8 +105,7 @@ const CompletedOrderViewer = ({ orderData, onPrint, onExportPDF }) => {
                 {/* Prescription Image */}
                 <div className="relative bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                   <img 
-                    src="/src/assets/img/prescription.jpeg" 
-                    alt="Historical Prescription Document from 1925"
+                    src={orderData.prescriptionImageUrl || '/src/assets/img/placeholder.jpeg'} 
                     className="object-contain transition-all duration-300 ease-in-out"
                     style={{ 
                       maxHeight: isZoomed ? '600px' : '400px',
@@ -142,8 +141,10 @@ const CompletedOrderViewer = ({ orderData, onPrint, onExportPDF }) => {
                 <span className="text-sm">Full Size</span>
               </button>
               <button
-                onClick={onExportPDF}
-                className="flex items-center space-x-1 px-4 py-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                onClick={onExportPDF ? onExportPDF : undefined}
+                className={`flex items-center space-x-1 px-4 py-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-200 ${!onExportPDF ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!onExportPDF}
+                title={!onExportPDF ? "Export PDF is not available" : undefined}
               >
                 <Download className="h-4 w-4" />
                 <span className="text-sm">Export PDF</span>
