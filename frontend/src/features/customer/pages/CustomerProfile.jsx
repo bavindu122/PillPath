@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { assets } from "../../../assets/assets";
 import Button from "../components/Button";
 import {
@@ -26,14 +26,20 @@ import GlassCard from "../../../components/UIs/GlassCard";
 import CustomerSidebar from "../components/CustomerSidebar";
 import PrescriptionUploadModal from "../../../components/Prescription/PrescriptionUploadModal";
 import { Link } from "react-router-dom";
+import { useCustomerModals } from "../hooks";
 
 const CustomerProfile = ({ removeBg = false }) => {
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const {
+    showProfileModal,
+    showEditProfileModal,
+    isUploadModalOpen,
+    setShowProfileModal,
+    setShowEditProfileModal,
+    openUploadModal,
+    closeUploadModal
+  } = useCustomerModals();
+  
   const userName = "John Doe"; // Replace with actual user name logic
-
-  const openPrescriptionModal = () => setIsUploadModalOpen(true);
 
   return (
     <section
@@ -86,7 +92,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                   <div className="flex flex-wrap gap-3 animate-fade-in-up delay-400">
                     <Button 
                       className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg"
-                      onClick={openPrescriptionModal}
+                      onClick={openUploadModal}
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
@@ -404,7 +410,7 @@ const CustomerProfile = ({ removeBg = false }) => {
       
       <PrescriptionUploadModal
         isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
+        onClose={closeUploadModal}
       />
     </section>
   );

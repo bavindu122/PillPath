@@ -1,39 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Pencil, Save } from "lucide-react";
 import Button from "./Button";
+import { useProfileForm } from "../hooks";
 
 const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
-  // Initialize form state with current user data
-  const [formData, setFormData] = useState({
-    firstName: userProfile.firstName || "John",
-    lastName: userProfile.lastName || "Doe",
-    email: userProfile.email || "john.doe@email.com",
-    phone: userProfile.phone || "+1 (555) 123-4567",
-    dateOfBirth: userProfile.dateOfBirth || "1990-05-15",
-    gender: userProfile.gender || "Male",
-    bloodType: userProfile.bloodType || "O+",
-    height: userProfile.height || "175",
-    weight: userProfile.weight || "70",
-    address: userProfile.address || "123 Main Street",
-    city: userProfile.city || "New York",
-    state: userProfile.state || "NY",
-    zipCode: userProfile.zipCode || "10001",
-    emergencyContactName: userProfile.emergencyContactName || "Jane Doe",
-    emergencyContactPhone: userProfile.emergencyContactPhone || "+1 (555) 987-6543",
-    allergies: userProfile.allergies || "Penicillin, Shellfish",
-    medicalConditions: userProfile.medicalConditions || "Hypertension, Diabetes",
-    insurance: userProfile.insurance || "Blue Cross Blue Shield",
-    insuranceId: userProfile.insuranceId || "BC123456789"
-  });
+  const { 
+    formData, 
+    errors, 
+    isModified, 
+    handleInputChange, 
+    validateForm, 
+    resetForm, 
+    submitForm 
+  } = useProfileForm(userProfile);
 
   const [editingField, setEditingField] = useState(null);
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   const handleFieldEdit = (field) => {
     setEditingField(field);
@@ -44,8 +25,13 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
   };
 
   const handleSave = () => {
-    // Here you would typically save the data to your backend
-    console.log("Saving profile data:", formData);
+    if (submitForm()) {
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -207,7 +193,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
             Edit Profile
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 group"
           >
             <X size={24} className="text-white/70 group-hover:text-white" />

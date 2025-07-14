@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { assets } from "../../../assets/assets";
 import ProfileModal from "../components/ProfileModal";
 import { NavLink } from "react-router-dom";
@@ -16,32 +16,14 @@ import {
   LogOut,
   FileText
 } from "lucide-react";
+import { useCustomerSidebar } from "../hooks";
 
 const CustomerSidebar = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const { isExpanded, isMobile, toggleSidebar } = useCustomerSidebar();
 
   // Add logo reference
   const logo = assets.logo || "https://via.placeholder.com/40";
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 768) {
-        setIsExpanded(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Check on initial load
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
-  };
 
   // Define active and inactive styles for NavLink
   const linkStyles = {
