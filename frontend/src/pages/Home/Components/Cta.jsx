@@ -1,72 +1,96 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronRight, Sparkles } from "lucide-react";
-// Import your logo (adjust the path if needed)
-import logo from "../../../assets/logo2.png"; // or logo.svg
+import logo from "../../../assets/logo2.png";
+import { assets } from "../../../assets/assets";
+
+
 
 export const Cta = () => {
   return (
-    <div>
-      <section className="py-20 px-4 relative overflow-hidden">
-        {/* Enhanced animated background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-hover to-accent opacity-95"></div>
-        <div className="absolute top-[-10%] right-[-5%] w-[30%] h-[30%] bg-white/10 rounded-full blur-3xl animate-float-gentle"></div>
-        <div
-          className="absolute bottom-[-10%] left-[-5%] w-[30%] h-[30%] bg-white/10 rounded-full blur-3xl animate-float-delay"
-          style={{ animationDelay: "3s" }}
-        ></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-accent/20 rounded-full blur-2xl animate-pulse opacity-40 -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute top-10 right-1/4">
-          <Sparkles className="w-10 h-10 text-white/40 animate-spin-slow" />
-        </div>
+    <section className="py-1 px-4 relative overflow-hidden">
+      {/* Softer background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900"></div>
+      
+      {/* Subtle floating elements */}
+      <div className="absolute top-10 right-20 w-32 h-32 bg-primary/5 rounded-full blur-2xl animate-float-gentle"></div>
+      <div className="absolute bottom-10 left-20 w-24 h-24 bg-secondary/5 rounded-full blur-xl animate-float-delay"></div>
+      <div className="absolute top-5 left-1/4 w-16 h-16 bg-accent/5 rounded-full blur-lg animate-pulse"></div>
 
-        <div className="container mx-auto max-w-4xl relative z-10">
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 border border-white/20 shadow-2xl ring-2 ring-primary/10 hover:ring-accent/20 transition-all duration-500">
-            <div className="text-center">
+      <div className="container mx-auto max-w-6xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left side - 3D Illustration */}
+          <div className="flex justify-center lg:justify-start">
+            <div className="relative">
+              <img
+                src={assets.cta_img}
+                alt="3D Pharmacy Scene"
+                className="w-full max-w-md h-auto object-contain drop-shadow-2xl"
+                loading="lazy"
+                draggable={false}
+              />
+              {/* Floating elements around the 3D scene */}
+              <div className="absolute -top-4 -right-4 w-8 h-8 bg-primary/20 rounded-full animate-bounce"></div>
+              <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-secondary/20 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Right side - CTA Content */}
+          <div className="text-center lg:text-left">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 border border-white/40 shadow-xl">
+              
               {/* Logo */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center lg:justify-start mb-4">
                 <img
                   src={logo}
                   alt="PillPath Logo"
-                  className="w-24 h-24 object-contain drop-shadow-lg"
+                  className="w-16 h-16 object-contain drop-shadow-md"
                   loading="lazy"
                   draggable={false}
                 />
               </div>
             
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white drop-shadow">
-                Ready to Simplify Your Pharmacy Experience?
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-800">
+                Ready to Simplify Your <span className="text-primary">Pharmacy Experience</span>?
               </h2>
-              <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-                Join thousands of users who have transformed how they manage medications with <span className="font-semibold text-accent-purple ">PillPath</span>'s comprehensive services.
+              
+              <p className="text-gray-600 text-base mb-6 leading-relaxed">
+                Join thousands of users who have transformed how they manage medications with PillPath's comprehensive services.
               </p>
-              <div className="flex flex-wrap justify-center gap-6">
+              
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-2 px-10 py-5 bg-white text-primary font-bold rounded-2xl hover:bg-gray-100 transition-all duration-300 shadow-xl hover:scale-105 focus:ring-2 focus:ring-primary/40"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                 >
-                  Create Free Account
-                  <ArrowRight size={20} />
+                  Get Started Free
+                  <ArrowRight size={18} />
                 </Link>
                 <Link
                   to="/services#features"
-                  className="inline-flex items-center gap-2 px-10 py-5 bg-transparent text-white border-2 border-white font-bold rounded-2xl hover:bg-white/10 transition-all duration-300 focus:ring-2 focus:ring-accent/40"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-primary border-2 border-primary/20 font-semibold rounded-xl hover:bg-primary/5 transition-all duration-300"
                 >
                   Learn More
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </Link>
               </div>
-              <div className="mt-8 flex justify-center">
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 text-white/80 rounded-full text-sm shadow backdrop-blur-md">
-                  <Sparkles className="w-4 h-4 text-accent-purple animate-pulse" />
+              
+              {/* Trust badge */}
+              <div className="flex justify-center lg:justify-start">
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm border border-green-200">
+                  <Sparkles className="w-4 h-4 animate-pulse" />
                   No credit card required
                 </span>
               </div>
             </div>
           </div>
         </div>
-      </section>
-    </div>
+
+       
+      </div>
+    </section>
   );
 };
 

@@ -1,76 +1,35 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bell, Edit, Trash2, Calendar } from "lucide-react";
 import Navbar from "../../../components/Layout/Navbar";
 import { assets } from "../../../assets/assets";
 import CustomerSidebar from "../components/CustomerSidebar";
+import { useMedicalRecordDetail } from "../hooks";
 
 const MedicalRecordsDetailed = () => {
   const { recordId } = useParams();
   const navigate = useNavigate();
   
-  // Mock data - in real app, this would come from API based on recordId
-  const [recordDetail, setRecordDetail] = useState(() => {
-    // Simulate different records based on recordId
-    const records = {
-      1: {
-        id: recordId,
-        profileImage: assets.profile_pic,
-        profileName: "Senuja Udugampola",
-        conditionName: "Diabetes",
-        lastUpdated: "March 15, 2024",
-        prescriptionImage: assets.panadol,
-        doctorName: "Dr. Smith Johnson",
-        dateIssued: "March 10, 2024",
-        notes: "Regular monitoring required. Check blood sugar levels twice daily.",
-        medications: ["Metformin 500mg", "Insulin Glargine", "Glucose Test Strips"]
-      },
-      2: {
-        id: recordId,
-        profileImage: assets.profile_pic,
-        profileName: "Senuja Udugampola",
-        conditionName: "Fever",
-        lastUpdated: "March 12, 2024",
-        prescriptionImage: assets.paracetamol,
-        doctorName: "Dr. Sarah Wilson",
-        dateIssued: "March 8, 2024",
-        notes: "Take medication with food. Rest and stay hydrated.",
-        medications: ["Paracetamol 500mg", "Ibuprofen 400mg"]
-      },
-      3: {
-        id: recordId,
-        profileImage: assets.profile_pic,
-        profileName: "Senuja Udugampola",
-        conditionName: "Hypertension",
-        lastUpdated: "March 10, 2024",
-        prescriptionImage: assets.ibuprofen,
-        doctorName: "Dr. Michael Brown",
-        dateIssued: "March 6, 2024",
-        notes: "Monitor blood pressure daily. Reduce salt intake.",
-        medications: ["Lisinopril 10mg", "Amlodipine 5mg"]
-      }
-    };
-    
-    return records[recordId] || records[1]; // Default to first record if ID not found
-  });
-
-  const [showReminderModal, setShowReminderModal] = useState(false);
+  const {
+    recordDetail,
+    showReminderModal,
+    openReminderModal,
+    closeReminderModal,
+    setReminder,
+    editRecord,
+    deleteRecord
+  } = useMedicalRecordDetail(recordId);
 
   const handleSetReminder = () => {
-    setShowReminderModal(true);
-    // In real app, this would open a reminder setting modal
-    console.log("Set reminder for:", recordDetail.conditionName);
+    openReminderModal();
   };
 
   const handleEdit = () => {
-    // In real app, this would navigate to edit page or open edit modal
-    console.log("Edit record:", recordDetail.conditionName);
+    editRecord();
   };
 
   const handleDelete = () => {
-    // In real app, this would show confirmation dialog
-    if (window.confirm("Are you sure you want to delete this medical record?")) {
-      console.log("Delete record:", recordDetail.conditionName);
+    if (deleteRecord()) {
       navigate("/customer/medical-records");
     }
   };
@@ -80,7 +39,7 @@ const MedicalRecordsDetailed = () => {
   };
 
   return (
-    <section className="min-h-screen flex bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden">
+    <section className="min-h-screen flex relative overflow-hidden">
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -216,14 +175,14 @@ const MedicalRecordsDetailed = () => {
             </p>
             <div className="flex gap-4 justify-end">
               <button
-                onClick={() => setShowReminderModal(false)}
+                onClick={closeReminderModal}
                 className="px-4 py-2 bg-gray-500/80 text-white rounded-lg hover:bg-gray-600/90 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => {
-                  setShowReminderModal(false);
+                  closeReminderModal();
                   // Implement reminder logic here
                 }}
                 className="px-4 py-2 bg-blue-500/80 text-white rounded-lg hover:bg-blue-600/90 transition-colors"
