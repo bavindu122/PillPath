@@ -13,6 +13,14 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
       alert('Please fill in all required fields (Name, Price, Stock, Description).');
       return;
     }
+    if (isNaN(price) || parseFloat(price) <= 0) {
+      alert('Price must be a positive number.');
+      return;
+    }
+    if (isNaN(stock) || parseInt(stock, 10) <= 0) {
+      alert('Stock must be a positive integer.');
+      return;
+    }
 
     const newItem = {
       id: Date.now(),
