@@ -54,7 +54,14 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
   const handleDrop = (e) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setImage(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (validImageTypes.includes(file.type)) {
+        setImage(file);
+      } else {
+        // Optionally, you can show an error message here
+        alert('Please upload a valid image file (jpg, png, gif, webp).');
+      }
     }
   };
 
