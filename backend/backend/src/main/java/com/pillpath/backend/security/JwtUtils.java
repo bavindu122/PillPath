@@ -4,13 +4,17 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Key;
 import java.util.Date;
 
 @Component
-
 public class JwtUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -44,14 +48,8 @@ public class JwtUtils {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // Invalid JWT token
-            System.out.println("JWT token is invalid: " + e.getMessage());
+            logger.warn("JWT token validation failed: {}", e.getMessage());
         }
         return false;
     }
-
-
-
-    
 }
-// This class provides utility methods for generating and validating JWT tokens.
