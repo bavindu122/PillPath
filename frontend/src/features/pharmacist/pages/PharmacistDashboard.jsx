@@ -9,14 +9,14 @@ import {
   Plus,
   Search
 } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
+import PharmaPageLayout from '../components/PharmaPageLayout';
 import StatsCards from '../components/StatsCards';
 import PrescriptionQueue from '../components/PrescriptionQueue';
 import InventoryAlerts from '../components/InventoryAlerts';
 import PatientMessages from '../components/PatientMessages';
 import Header from '../components/Header';
 
-const Dashboard = () => {
+const PharmacistDashboard = () => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [inventoryAlerts, setInventoryAlerts] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -38,7 +38,7 @@ const Dashboard = () => {
         patientName: "John Smith",
         medication: "Amoxicillin 500mg - 30 tablets",
         priority: "High Priority",
-        prescribedBy: "Dr. Wilson",
+        date: "2025-07-04",
         time: "10:30 AM",
         avatar: "/api/placeholder/40/40"
       },
@@ -47,7 +47,7 @@ const Dashboard = () => {
         patientName: "Maria Garcia",
         medication: "Metformin 850mg - 60 tablets",
         priority: "Medium Priority",
-        prescribedBy: "Dr. Brown",
+        date: "2025-07-04",
         time: "11:15 AM",
         avatar: "/api/placeholder/40/40"
       },
@@ -56,9 +56,27 @@ const Dashboard = () => {
         patientName: "Robert Davis",
         medication: "Lisinopril 10mg - 30 tablets",
         priority: "Low Priority",
-        prescribedBy: "Dr. Martinez",
+        date: "2025-07-04",
         time: "2:45 PM",
         avatar: "/api/placeholder/40/40"
+      },
+      {
+        id: 4,
+        patientName: "Linda Thompson",
+        medication: "Atorvastatin 20mg - 90 tablets",
+        priority: "Medium Priority",
+        date: "2025-07-04",
+        time: "3:20 PM",
+        avatar: "/api/placeholder/40/40"
+      },
+      {
+        id: 5,
+        patientName: "Sarah Johnson",
+        medication: "Omeprazole 40mg - 14 capsules",
+        priority: "High Priority",
+        time: "4:10 PM",
+        date: "2025-07-04",
+        avatar: "/api/placeholder/40/40",
       }
     ]);
 
@@ -84,80 +102,61 @@ const Dashboard = () => {
     { title: "Low Stock Alerts", value: "7", subtitle: "Requires attention", color: "orange" },
     { title: "Patient Messages", value: "15", subtitle: "3 unread", color: "purple" }
   ];
-
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
-              <div className="flex space-x-1">
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-1"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-2"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
-              </div>
-            </div>
-            <p className="text-gray-600 font-medium animate-pulse">Loading Dashboard...</p>
-          </div>
-        </div>
-      </div>
+      <PharmaPageLayout
+        title="Pharmacist Dashboard"
+        subtitle="Monitor your pharmacy operations"
+        isLoading={true}
+        loadingMessage="Loading Dashboard..."
+      />
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-      {/* Animated Sidebar */}
-      <div className="sidebar-slide-in">
-        <Sidebar />
+    <PharmaPageLayout
+      title="Pharmacist Dashboard"
+      subtitle="Monitor your pharmacy operations"
+      isLoading={false}
+    >
+      {/* Stats Cards */}
+      <div className="dashboard-fade-in-2 mb-4 sm:mb-6">
+        <StatsCards stats={statsData} />
       </div>
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Animated Header */}
-        <div className="dashboard-fade-in-1">
-          <Header />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+        {/* Prescription Queue */}
+        <div className="xl:col-span-2 dashboard-fade-in-3">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <PrescriptionQueue 
+              prescriptions={prescriptions}
+              onApprove={(id) => console.log('Approve:', id)}
+              onReject={(id) => console.log('Reject:', id)}
+              onClarify={(id) => console.log('Clarify:', id)}
+            />
+          </div>
         </div>
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-transparent p-6">
-          {/* Animated Stats Cards */}
-          <div className="dashboard-fade-in-2">
-            <StatsCards stats={statsData} />
+        {/* Right sidebar */}
+        <div className="space-y-4 sm:space-y-6 dashboard-fade-in-4">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <InventoryAlerts alerts={inventoryAlerts} />
           </div>
-          
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            {/* Prescription Queue */}
-            <div className="lg:col-span-2 dashboard-fade-in-3">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <PrescriptionQueue 
-                  prescriptions={prescriptions}
-                  onApprove={(id) => console.log('Approve:', id)}
-                  onReject={(id) => console.log('Reject:', id)}
-                  onClarify={(id) => console.log('Clarify:', id)}
-                />
-              </div>
-            </div>
-            
-            {/* Right sidebar */}
-            <div className="space-y-6 dashboard-fade-in-4">
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <InventoryAlerts alerts={inventoryAlerts} />
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-                <PatientMessages messages={messages} />
-              </div>
-            </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+            <PatientMessages messages={messages} />
           </div>
-
-          {/* Floating Action Button */}
-          <div className="fixed bottom-6 right-6">
-            <button className="group bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
-              <Plus className="h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
-            </button>
-          </div>
-        </main>
+        </div>
       </div>
-    </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6">
+        <button className="group bg-blue-600 hover:bg-blue-700 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200 fab-pulse">
+          <Plus className="h-5 w-5 sm:h-6 sm:w-6 group-hover:rotate-90 transition-transform duration-300" />
+        </button>
+      </div>
+    </PharmaPageLayout>
   );
 };
 
-export default Dashboard;
+export default PharmacistDashboard;
