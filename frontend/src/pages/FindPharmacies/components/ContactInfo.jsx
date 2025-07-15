@@ -25,7 +25,7 @@ const ContactInfo = ({ pharmacy }) => {
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 mb-1">Hours</h3>
-            <p className="text-gray-600">{pharmacy.hours}</p>
+            <p className="text-gray-600">{pharmacy.shours} to {pharmacy.hours}</p>
           </div>
         </div>
 

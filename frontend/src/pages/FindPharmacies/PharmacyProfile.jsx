@@ -8,12 +8,35 @@ import ContactInfo from "./components/ContactInfo";
 import ServicesSection from "./components/ServicesSection";
 import { usePharmacyProfile } from "./hooks/usePharmacyProfile";
 
+// Import images for mini components
+import panadolImg from "../../assets/img/meds/Panadol.jpg";
+import paracetamolImg from "../../assets/img/meds/paracetamol.webp";
+import ibuprofenImg from "../../assets/img/meds/Ibuprofen.jpg";
+import vitaminCImg from "../../assets/img/meds/Vitamin_c.jpg";
+import coughSyrupImg from "../../assets/img/meds/cough_syrup.jpg";
+import antacidImg from "../../assets/img/meds/Antacid.jpg";
+import allergyReliefImg from "../../assets/img/meds/allergy_relief.jpg";
+
 const PharmacyProfile = () => {
   const { pharmacyId } = useParams();
   // Use pharmacyId from URL params, or default to "1" if not provided
   const actualPharmacyId = pharmacyId || "1";
   const { pharmacy, loading, error, reviews, otcProducts } = usePharmacyProfile(actualPharmacyId);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Map product IDs to imported images
+  const getProductImage = (product) => {
+    const imageMap = {
+      1: panadolImg,
+      2: paracetamolImg,
+      3: ibuprofenImg,
+      4: vitaminCImg,
+      5: coughSyrupImg,
+      6: antacidImg,
+      7: allergyReliefImg
+    };
+    return imageMap[product.id] || null;
+  };
 
   if (loading) {
     return (
@@ -41,7 +64,7 @@ const PharmacyProfile = () => {
   const MiniOTCProducts = () => (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Popular Products</h3>
+        <h2 className="text-2xl font-bold text-gray-800">Popular Products</h2>
         <button
           onClick={() => setActiveTab("products")}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -51,50 +74,54 @@ const PharmacyProfile = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {otcProducts?.slice(0, 3).map((product) => (
-          <div key={product.id} className="bg-white/60 rounded-lg p-3 border border-white/30 hover:shadow-md transition-shadow">
-            {/* Product Image */}
-            <div className="w-full h-24 bg-gray-100 rounded-md mb-3 overflow-hidden">
-              {product.image ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
+        {otcProducts?.slice(0, 3).map((product) => {
+          const productImage = getProductImage(product);
+          
+          return (
+            <div key={product.id} className="bg-white/60 rounded-lg p-3 border border-white/30 hover:shadow-md transition-shadow">
+              {/* Product Image */}
+              <div className="w-full h-24 bg-gray-100 rounded-md mb-3 overflow-hidden">
+                {productImage ? (
+                  <img
+                    src={productImage}
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package size={24} className="text-gray-400" />
+                  </div>
+                )}
+                {/* Fallback if image fails to load */}
+                <div className="w-full h-full hidden items-center justify-center">
                   <Package size={24} className="text-gray-400" />
                 </div>
-              )}
-              {/* Fallback if image fails to load */}
-              <div className="w-full h-full hidden items-center justify-center">
-                <Package size={24} className="text-gray-400" />
               </div>
-            </div>
-            
-            {/* Product Info */}
-            <div className="space-y-1">
-              <h4 className="font-medium text-gray-800 text-sm truncate">{product.name}</h4>
-              <p className="text-xs text-gray-600">{product.brand}</p>
-              <div className="flex items-center justify-between">
-                <p className="text-blue-600 font-bold text-sm">Rs. {product.price.toFixed(2)}</p>
-                <div className="flex items-center gap-1">
-                  <Star size={10} className="text-yellow-500 fill-yellow-500" />
-                  <span className="text-xs text-gray-600">{product.rating}</span>
+              
+              {/* Product Info */}
+              <div className="space-y-1">
+                <h4 className="font-medium text-gray-800 text-sm truncate">{product.name}</h4>
+                <p className="text-xs text-gray-600">{product.brand}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-blue-600 font-bold text-sm">Rs. {product.price.toFixed(2)}</p>
+                  <div className="flex items-center gap-1">
+                    <Star size={10} className="text-yellow-500 fill-yellow-500" />
+                    <span className="text-xs text-gray-600">{product.rating}</span>
+                  </div>
                 </div>
+                <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
+                  product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                }`}>
+                  {product.inStock ? "In Stock" : "Out of Stock"}
+                </span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full mt-1 inline-block ${
-                product.inStock ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-              }`}>
-                {product.inStock ? "In Stock" : "Out of Stock"}
-              </span>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -103,7 +130,7 @@ const PharmacyProfile = () => {
   const MiniReviews = () => (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-800">Recent Reviews</h3>
+        <h2 className="text-2xl font-bold text-gray-800">Recent Reviews</h2>
         <button
           onClick={() => setActiveTab("reviews")}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -208,6 +235,12 @@ const PharmacyProfile = () => {
         <div className="space-y-8">
           {activeTab === "overview" && (
             <div className="space-y-8">
+              {/* Mini Products and Reviews Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <MiniOTCProducts />
+                <MiniReviews />
+              </div>
+
               {/* Services and Contact Info Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
@@ -216,12 +249,6 @@ const PharmacyProfile = () => {
                 <div>
                   <ContactInfo pharmacy={pharmacy} />
                 </div>
-              </div>
-              
-              {/* Mini Products and Reviews Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <MiniOTCProducts />
-                <MiniReviews />
               </div>
             </div>
           )}

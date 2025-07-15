@@ -26,7 +26,8 @@ export const usePharmacyProfile = (pharmacyId) => {
           lng: 79.8712,
           rating: 4.8,
           reviewCount: 127,
-          hours: "Open until 10:00 PM",
+          shours: "8:00 AM",
+          hours: "10:00 PM",
           isOpen: true,
           phone: "+94 11 234 5678",
           email: "info@healthfirst.lk",
@@ -93,10 +94,18 @@ export const usePharmacyProfile = (pharmacyId) => {
             date: "2024-06-28",
             comment: "Love their home delivery service! Very convenient and they always call to confirm before delivering. Great selection of OTC products too.",
             helpfulCount: 10
+          },
+          {
+            id: 5,
+            userName: "Amanda Silva",
+            rating: 5,
+            date: "2024-06-28",
+            comment: "Love their home delivery service! Very convenient and they always call to confirm before delivering. Great selection of OTC products too.",
+            helpfulCount: 10
           }
         ];
 
-        // Mock OTC products data with actual medication images
+        // Mock OTC products data with actual medication images from meds folder
         const mockOtcProducts = [
           {
             id: 1,
@@ -104,7 +113,7 @@ export const usePharmacyProfile = (pharmacyId) => {
             category: "pain-relief",
             price: 450.00,
             description: "Extra strength paracetamol with caffeine for fast pain relief",
-            image: "/src/assets/img/meds/panadol.jpg",
+            image: "/src/assets/img/meds/Panadol.jpg",
             inStock: true,
             rating: 4.5,
             reviewCount: 89,
@@ -113,94 +122,81 @@ export const usePharmacyProfile = (pharmacyId) => {
           },
           {
             id: 2,
-            name: "Piriton Tablets",
-            category: "allergy",
+            name: "Paracetamol Tablets",
+            category: "pain-relief",
             price: 320.00,
-            description: "Antihistamine for hay fever, allergies and itchy skin",
-            image: "/src/assets/img/meds/piriton.jpg",
+            description: "Standard paracetamol tablets for pain and fever relief",
+            image: "/src/assets/img/meds/paracetamol.webp",
             inStock: true,
             rating: 4.3,
             reviewCount: 67,
-            brand: "GSK",
-            dosage: "4mg"
+            brand: "Generic",
+            dosage: "500mg"
           },
           {
             id: 3,
-            name: "Strepsils Honey & Lemon",
-            category: "cold-flu",
-            price: 180.00,
-            description: "Antibacterial lozenges for sore throat relief",
-            image: "/src/assets/img/meds/strepsils.jpg",
+            name: "Ibuprofen Tablets",
+            category: "pain-relief",
+            price: 380.00,
+            description: "Anti-inflammatory pain relief for headaches, muscle pain and arthritis",
+            image: "/src/assets/img/meds/Ibuprofen.jpg",
             inStock: true,
             rating: 4.6,
             reviewCount: 134,
-            brand: "Reckitt",
-            dosage: "2.4mg/1.2mg"
-          },
-          {
-            id: 4,
-            name: "Ventolin Inhaler",
-            category: "respiratory",
-            price: 1250.00,
-            description: "Salbutamol inhaler for asthma and breathing difficulties",
-            image: "/src/assets/img/meds/ventolin.jpg",
-            inStock: true,
-            rating: 4.8,
-            reviewCount: 203,
-            brand: "GSK",
-            dosage: "100mcg/dose"
-          },
-          {
-            id: 5,
-            name: "Nurofen Express",
-            category: "pain-relief",
-            price: 680.00,
-            description: "Fast-acting ibuprofen liquid capsules for pain and inflammation",
-            image: "/src/assets/img/meds/nurofen.jpg",
-            inStock: false,
-            rating: 4.4,
-            reviewCount: 156,
-            brand: "Reckitt",
+            brand: "Advil",
             dosage: "200mg"
           },
           {
+            id: 4,
+            name: "Vitamin C Tablets",
+            category: "vitamins",
+            price: 650.00,
+            description: "High strength vitamin C for immune system support",
+            image: "/src/assets/img/meds/Vitamin_c.jpg",
+            inStock: true,
+            rating: 4.8,
+            reviewCount: 203,
+            brand: "Nature's Way",
+            dosage: "1000mg"
+          },
+          {
+            id: 5,
+            name: "Cough Syrup",
+            category: "cold-flu",
+            price: 480.00,
+            description: "Effective cough suppressant syrup for dry and wet coughs",
+            image: "/src/assets/img/meds/cough_syrup.jpg",
+            inStock: false,
+            rating: 4.4,
+            reviewCount: 156,
+            brand: "Benadryl",
+            dosage: "100ml"
+          },
+          {
             id: 6,
-            name: "Gaviscon Advance",
+            name: "Antacid Tablets",
             category: "digestive",
-            price: 890.00,
-            description: "Advanced formula for heartburn and acid indigestion relief",
-            image: "/src/assets/img/meds/gaviscon.jpg",
+            price: 290.00,
+            description: "Fast-acting antacid tablets for heartburn and acid indigestion relief",
+            image: "/src/assets/img/meds/Antacid.jpg",
             inStock: true,
             rating: 4.2,
             reviewCount: 98,
-            brand: "Reckitt",
-            dosage: "500mg/100mg"
+            brand: "Tums",
+            dosage: "750mg"
           },
           {
             id: 7,
-            name: "Sudocrem Antiseptic",
-            category: "skincare",
-            price: 750.00,
-            description: "Healing cream for cuts, grazes, minor burns and skin irritations",
-            image: "/src/assets/img/meds/sudocrem.jpg",
+            name: "Allergy Relief Tablets",
+            category: "allergy",
+            price: 420.00,
+            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
+            image: "/src/assets/img/meds/allergy_relief.jpg",
             inStock: true,
             rating: 4.7,
             reviewCount: 142,
-            brand: "Teva",
-            dosage: "Topical Cream"
-          },
-          {
-            id: 8,
-            name: "Dettol Antiseptic",
-            category: "first-aid",
-            price: 450.00,
-            description: "Antiseptic liquid for wound cleaning and disinfection",
-            image: "/src/assets/img/meds/dettol.jpg",
-            inStock: true,
-            rating: 4.5,
-            reviewCount: 87,
-            brand: "Reckitt",
-            dosage: "250ml"
+            brand: "Claritin",
+            dosage: "10mg"
           }
         ];
 

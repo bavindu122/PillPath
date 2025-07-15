@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, MapPin, Clock, Phone, Share2, Navigation } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Share2, Navigation, Upload, Building2 } from "lucide-react";
 import pharmaImage from "../../../assets/img/meds/pharma.jpg";
 
 const ProfileHeader = ({ pharmacy }) => {
@@ -23,110 +23,130 @@ const ProfileHeader = ({ pharmacy }) => {
     window.open(url, '_blank');
   };
 
+  const handleUploadPrescription = () => {
+    // Handle prescription upload
+    alert("Upload prescription functionality coming soon!");
+  };
+
   return (
-    <div className="relative rounded-2xl shadow-xl mb-8 overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src={pharmaImage}
-          alt="Pharmacy"
-          className="w-full h-full object-cover"
-        />
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
-      </div>
-      
-      {/* Content Container */}
-      <div className="relative z-10 p-8">
-        {/* Pharmacy Info - Left Aligned */}
-        <div className="max-w-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                {pharmacy.name}
-              </h1>
-              <div className="flex items-center mb-3">
-                <div className="flex items-center mr-6">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={20}
-                      className={`${
-                        star <= pharmacy.rating
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-gray-300"
-                      } drop-shadow-sm`}
-                    />
-                  ))}
-                  <span className="ml-2 text-lg font-semibold text-white drop-shadow-lg">
-                    {pharmacy.rating}
-                  </span>
-                  <span className="ml-1 text-gray-200 drop-shadow-sm">
-                    ({pharmacy.reviewCount || 0} reviews)
-                  </span>
+    <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl mb-8 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 min-h-[300px]">
+        
+        {/* Left Side - Pharmacy Details */}
+        <div className="p-8 flex flex-col justify-between bg-gradient-to-br from-white/80 to-white/60">
+          
+          {/* Pharmacy Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-white rounded-full shadow-lg border-4 border-blue-100 flex items-center justify-center overflow-hidden">
+              {pharmacy.logo ? (
+                <img
+                  src={pharmacy.logo}
+                  alt={`${pharmacy.name} logo`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center">
+                  <Building2 size={32} className="text-blue-600" />
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pharmacy Info */}
+          <div className="flex-1 text-center">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-3">
+              {pharmacy.name}
+            </h1>
+            
+            {/* Rating */}
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={18}
+                    className={`${
+                      star <= pharmacy.rating
+                        ? "text-yellow-500 fill-yellow-500"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="ml-2 text-lg font-semibold text-gray-700">
+                {pharmacy.rating}
+              </span>
+              <span className="ml-1 text-gray-600 text-sm">
+                ({pharmacy.reviewCount || 0} reviews)
+              </span>
+            </div>
+
+            {/* Contact Details */}
+            <div className="space-y-3 text-sm text-gray-600">
+              <div className="flex items-center justify-center">
+                <MapPin size={16} className="text-blue-600 mr-2 flex-shrink-0" />
+                <span className="text-center">{pharmacy.address}</span>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <Clock size={16} className="text-green-600 mr-2 flex-shrink-0" />
+                <span className={pharmacy.isOpen ? "text-green-600" : "text-red-600"}>
+                  Open Untill {pharmacy.hours}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-center">
+                <Phone size={16} className="text-purple-600 mr-2 flex-shrink-0" />
+                <a 
+                  href={`tel:${pharmacy.phone}`} 
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  {pharmacy.phone}
+                </a>
               </div>
             </div>
-            
-            <div className="flex gap-3 mt-4 sm:mt-0">
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white rounded-lg transition-colors backdrop-blur-sm text-gray-800"
-              >
-                <Share2 size={18} />
-                Share
-              </button>
-              <button
-                onClick={handleDirections}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Navigation size={18} />
-                Directions
-              </button>
-            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Pharmacy Image */}
+        <div className="lg:col-span-2 relative overflow-hidden">
+          <div className="absolute inset-0">
+            <img
+              src={pharmaImage}
+              alt="Pharmacy"
+              className="w-full h-full object-cover"
+            />
+            {/* Overlay for better text/button visibility */}
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+          
+          {/* Action Buttons - Top Right of Image */}
+          <div className="absolute top-4 right-4 flex gap-3 z-10">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white rounded-lg transition-colors backdrop-blur-sm text-gray-800 shadow-lg"
+            >
+              <Share2 size={18} />
+              Share
+            </button>
+            <button
+              onClick={handleDirections}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+            >
+              <Navigation size={18} />
+              Directions
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
-            <div className="flex items-center">
-              <MapPin size={18} className="text-blue-300 mr-2 flex-shrink-0 drop-shadow-sm" />
-              <span className="drop-shadow-sm">{pharmacy.address}</span>
-            </div>
-            <div className="flex items-center">
-              <Clock size={18} className="text-green-300 mr-2 flex-shrink-0 drop-shadow-sm" />
-              <span className={`drop-shadow-sm ${pharmacy.isOpen ? "text-green-300" : "text-red-300"}`}>
-                {pharmacy.hours}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Phone size={18} className="text-purple-300 mr-2 flex-shrink-0 drop-shadow-sm" />
-              <a href={`tel:${pharmacy.phone}`} className="hover:text-blue-300 transition-colors drop-shadow-sm">
-                {pharmacy.phone}
-              </a>
-            </div>
-          </div>
-
-          {/* Service badges */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            {pharmacy.hasDelivery && (
-              <span className="px-3 py-1 bg-green-500/90 text-white rounded-full text-sm font-medium backdrop-blur-sm">
-                🚚 Delivery Available
-              </span>
-            )}
-            {pharmacy.has24HourService && (
-              <span className="px-3 py-1 bg-blue-500/90 text-white rounded-full text-sm font-medium backdrop-blur-sm">
-                🕐 24/7 Service
-              </span>
-            )}
-            {pharmacy.acceptsInsurance && (
-              <span className="px-3 py-1 bg-purple-500/90 text-white rounded-full text-sm font-medium backdrop-blur-sm">
-                🛡️ Insurance Accepted
-              </span>
-            )}
-            {pharmacy.hasVaccinations && (
-              <span className="px-3 py-1 bg-orange-500/90 text-white rounded-full text-sm font-medium backdrop-blur-sm">
-                💉 Vaccinations
-              </span>
-            )}
+          {/* Upload Prescription Button - Bottom Right of Image */}
+          <div className="absolute bottom-4 right-4 z-10">
+            <button
+              onClick={handleUploadPrescription}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-lg font-medium"
+            >
+              <Upload size={20} />
+              Upload Prescription
+            </button>
           </div>
         </div>
       </div>
