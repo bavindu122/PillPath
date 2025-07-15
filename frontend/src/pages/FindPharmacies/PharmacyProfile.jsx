@@ -194,10 +194,10 @@ const PharmacyProfile = () => {
         <div className="mb-6">
           <Link 
             to="/find-pharmacy" 
-            className="inline-flex items-center text-white/80 hover:text-white transition-colors"
+            className="flex items-center space-x-2 sm:space-x-3 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 sm:px-4 py-2 rounded-lg group w-fit"
           >
-            <ChevronLeft size={16} className="mr-1" />
-            Back to Pharmacy Search
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="font-medium text-sm sm:text-base">Back to Pharmacy Search</span>
           </Link>
         </div>
 

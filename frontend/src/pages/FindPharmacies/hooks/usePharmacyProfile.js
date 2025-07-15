@@ -96,7 +96,7 @@ export const usePharmacyProfile = (pharmacyId) => {
             helpfulCount: 10
           },
           {
-            id: 5,
+            id: 6,
             userName: "Amanda Silva",
             rating: 5,
             date: "2024-06-28",
@@ -187,6 +187,32 @@ export const usePharmacyProfile = (pharmacyId) => {
           },
           {
             id: 7,
+            name: "Allergy Relief Tablets",
+            category: "allergy",
+            price: 420.00,
+            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
+            image: "/src/assets/img/meds/allergy_relief.jpg",
+            inStock: true,
+            rating: 4.7,
+            reviewCount: 142,
+            brand: "Claritin",
+            dosage: "10mg"
+          },
+          {
+            id: 8,
+            name: "Allergy Relief Tablets",
+            category: "allergy",
+            price: 420.00,
+            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
+            image: "/src/assets/img/meds/allergy_relief.jpg",
+            inStock: true,
+            rating: 4.7,
+            reviewCount: 142,
+            brand: "Claritin",
+            dosage: "10mg"
+          },
+          {
+            id: 9,
             name: "Allergy Relief Tablets",
             category: "allergy",
             price: 420.00,

@@ -13,6 +13,8 @@ import allergyReliefImg from "../../../assets/img/meds/allergy_relief.jpg";
 const OTCStorefront = ({ products, pharmacy }) => {
   const [cart, setCart] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8;
 
   const addToCart = (productId) => {
     setCart(prev => ({
@@ -51,11 +53,38 @@ const OTCStorefront = ({ products, pharmacy }) => {
     ? products 
     : products?.filter(product => product.category === selectedCategory) || [];
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+    setCurrentPage(1); // Reset to first page when category changes
+  };
+
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 border border-white/40 shadow-xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">
-          OTC Products & Pharmacy Store
+          OTC Products & Pharmacy Store ({filteredProducts?.length || 0})
         </h2>
         
         {/* Category Filter */}
@@ -63,7 +92,7 @@ const OTCStorefront = ({ products, pharmacy }) => {
           <Filter size={16} className="text-gray-600" />
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={handleCategoryChange}
             className="bg-white/80 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {categories.map(category => (
@@ -76,8 +105,8 @@ const OTCStorefront = ({ products, pharmacy }) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts?.length > 0 ? (
-          filteredProducts.map((product) => {
+        {currentProducts?.length > 0 ? (
+          currentProducts.map((product) => {
             const productImage = getProductImage(product);
             
             return (
@@ -178,6 +207,47 @@ const OTCStorefront = ({ products, pharmacy }) => {
           </div>
         )}
       </div>
+      
+      {/* Pagination */}
+      {filteredProducts.length > 0 && totalPages > 1 && (
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+          <div className="text-sm text-gray-500">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+          </div>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              ←
+            </button>
+            
+            {/* Page Numbers */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 text-sm border rounded-lg transition-colors duration-200 ${
+                  currentPage === page
+                    ? "bg-blue-100 border-blue-200 text-blue-700"
+                    : "border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            
+            <button 
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Cart Summary */}
       {Object.keys(cart).length > 0 && (
