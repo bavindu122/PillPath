@@ -32,8 +32,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // allow register and login without auth
                 .anyRequest().authenticated()
-            );
-            //.httpBasic(Customizer.withDefaults()); // for testing, you can change this later to JWT filter
+            )
+            .httpBasic(Customizer.withDefaults()); // for testing, you can change this later to JWT filter
 
         return http.build();
     }
