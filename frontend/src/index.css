@@ -18,7 +18,7 @@
   --color-text-light: #FFFFFF;     /* Pure white for maximum contrast on dark backgrounds */
   --color-text-primary: #4FA4FF;   /* Brighter, more vibrant blue that pops on glass */
   --color-text-secondary: #3EE686; /* More vibrant green with higher contrast */
-   --color-text-accent: #BF40BF;  /* Brighter purple that stands out on glass */
+  --color-text-accent: #BF40BF;    /* Brighter purple that stands out on glass */
 
   /* Updated semantic colors to match */
   --color-text-success: #2EE07A;   /* Brighter success green */
@@ -29,10 +29,20 @@
   /* Additional useful colors */
   --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
-   /* New vibrant colors */
+  /* New vibrant colors */
   --color-step-yellow: #FFC107; /* Eye-catching yellow for steps */
   --color-step-pink: #E91E63;   /* Bold pink accent */
 
+  /* Dark Theme Background Variables */
+  --color-dark-bg-primary: #1e293b;    /* slate-800 */
+  --color-dark-bg-secondary: #1e3a8a;  /* blue-900 */
+  --color-dark-bg-accent: #3730a3;     /* indigo-900 */
+  
+  /* Dark Theme Floating Elements */
+  --color-dark-float-blue: rgba(59, 130, 246, 0.1);     /* blue-500/10 */
+  --color-dark-float-indigo: rgba(129, 140, 248, 0.15); /* indigo-400/15 */
+  --color-dark-float-slate: rgba(100, 116, 139, 0.2);   /* slate-600/20 */
+  --color-dark-float-blue-light: rgba(96, 165, 250, 0.15); /* blue-400/15 */
 }
 
 /* Base font styles */
@@ -62,7 +72,6 @@ h1, h2, h3, h4, h5, h6 {
 .text-secondary-green { color: var(--color-text-secondary); }
 .text-accent-purple {
   color: #e040fb;
-  
   letter-spacing: 0.02em;
 }
 
@@ -97,6 +106,7 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
   text-fill-color: transparent;
 }
+
 .text-shadow-sm {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -105,3 +115,136 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
 }
 
+/* ===== DARK THEME BACKGROUND UTILITIES ===== */
+
+/* Main Dark Background Pattern */
+.bg-dark-theme {
+  background: linear-gradient(135deg, var(--color-dark-bg-primary), var(--color-dark-bg-secondary), var(--color-dark-bg-accent));
+}
+
+/* Individual background gradients for flexibility */
+.bg-dark-gradient-1 {
+  background: linear-gradient(to bottom right, #1e293b, #1e3a8a, #3730a3);
+}
+
+.bg-dark-gradient-2 {
+  background: linear-gradient(135deg, #0f172a, #1e3a8a, #312e81);
+}
+
+.bg-dark-gradient-3 {
+  background: linear-gradient(to right, #1e293b, #1e40af, #3730a3);
+}
+
+/* Dark Theme Floating Elements */
+.dark-float-element-1 {
+  background-color: var(--color-dark-float-blue);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.4;
+}
+
+.dark-float-element-2 {
+  background-color: var(--color-dark-float-indigo);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.3;
+}
+
+.dark-float-element-3 {
+  background-color: var(--color-dark-float-slate);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.35;
+}
+
+.dark-float-element-4 {
+  background-color: var(--color-dark-float-blue-light);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.3;
+}
+
+/* Dark Theme Section Base Class */
+.dark-section-base {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e293b, #1e3a8a, #3730a3);
+}
+
+/* Dark Theme Floating Pattern Component */
+.dark-floating-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dark-floating-pattern::before {
+  content: '';
+  position: absolute;
+  top: 5rem;
+  left: 10%;
+  width: 24rem;
+  height: 24rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(3rem);
+  opacity: 0.4;
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.dark-floating-pattern::after {
+  content: '';
+  position: absolute;
+  top: 8rem;
+  right: 5rem;
+  width: 20rem;
+  height: 20rem;
+  background-color: rgba(129, 140, 248, 0.15);
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(3rem);
+  opacity: 0.3;
+  animation: float-delay 8s ease-in-out infinite;
+}
+
+/* Enhanced Glass Card for Dark Theme */
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-dark-hover {
+  transition: all 0.3s ease;
+}
+
+.glass-card-dark-hover:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark Theme Text Utilities */
+.text-dark-theme-primary {
+  color: #e2e8f0; /* slate-200 */
+}
+
+.text-dark-theme-secondary {
+  color: #cbd5e1; /* slate-300 */
+}
+
+.text-dark-theme-muted {
+  color: #94a3b8; /* slate-400 */
+}
+
+/* Medical Pattern for Dark Theme */
+.medical-pattern-dark {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.1;
+}
