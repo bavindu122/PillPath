@@ -1,25 +1,47 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
-  Clock, 
   MapPin, 
   User, 
-  Package, 
   Truck, 
-  CheckCircle, 
-  XCircle,
   AlertCircle,
   Calendar,
   Pill
 } from "lucide-react";
 
 const Activities = () => {
+  const navigate = useNavigate();
+
+  const handleViewOrderPreview = (prescriptionId, pharmacyName) => {
+    // Navigate to a new page with prescription and pharmacy details
+    navigate(`/customer/order-preview/${prescriptionId}`, {
+      state: { pharmacyName }
+    });
+  };
+
   const prescriptions = [
     {
       id: "RX-250714-01",
-      uploadedDate: "Jan 15, 2024 • 2:30 PM",
+      uploadedDate: "July 14, 2025 • 2:30 PM",
       prescriptionImage: "/src/assets/img/prescription.jpeg",
       pharmacies: [
+        {
+          name: "Rite Aid",
+          address: "9012 Pine St, Uptown",
+          status: "View Order Preview",
+          statusType: "delivery",
+          iconBg: "bg-blue-100",
+          iconColor: "text-orange-600"
+        },
+        {
+          name: "Walgreens",
+          address: "5678 Oak Ave, Midtown",
+          status: "Pending Order Preview",
+          statusType: "pending",
+          iconBg: "bg-blue-100",
+          iconColor: "text-blue-600"
+        },
         {
           name: "CVS Pharmacy",
           address: "1234 Main St, Downtown",
@@ -27,51 +49,35 @@ const Activities = () => {
           statusType: "pending",
           iconBg: "bg-blue-100",
           iconColor: "text-blue-600"
-        },
-        {
-          name: "Walgreens",
-          address: "5678 Oak Ave, Midtown",
-          status: "Processing",
-          statusType: "processing",
-          iconBg: "bg-purple-100",
-          iconColor: "text-purple-600"
-        },
-        {
-          name: "Rite Aid",
-          address: "9012 Pine St, Uptown",
-          status: "Out for Delivery",
-          statusType: "delivery",
-          iconBg: "bg-orange-100",
-          iconColor: "text-orange-600"
         }
       ]
     },
     {
-      id: "RX-250714-02",
-      uploadedDate: "Jan 14, 2024 • 10:15 AM",
+      id: "RX-250715-02",
+      uploadedDate: "July 15, 2025 • 10:15 AM",
       prescriptionImage: "/src/assets/img/prescription.jpeg",
       pharmacies: [
         {
-          name: "Target Pharmacy",
-          address: "3456 Elm Dr, Westside",
-          status: "Ready for Pickup",
-          statusType: "ready",
-          iconBg: "bg-green-100",
-          iconColor: "text-green-600"
+         name: "Rite Aid",
+          address: "9012 Pine St, Uptown",
+          status: "View Order Preview",
+          statusType: "delivery",
+          iconBg: "bg-blue-100",
+          iconColor: "text-orange-600"
         },
         {
           name: "Local Health Pharmacy",
           address: "7890 Cedar Rd, Eastside",
-          status: "Out of Stock",
-          statusType: "out-of-stock",
-          iconBg: "bg-red-100",
-          iconColor: "text-red-600"
+          status: "View Order Preview",
+          statusType: "delivery",
+          iconBg: "bg-blue-100",
+          iconColor: "text-orange-600"
         },
         {
           name: "MedPlus Pharmacy",
           address: "2468 Maple Ave, Northside",
-          status: "Processing",
-          statusType: "processing",
+          status: "Pending Order Preview",
+          statusType: "pending",
           iconBg: "bg-blue-100",
           iconColor: "text-blue-600"
         }
@@ -101,8 +107,8 @@ const Activities = () => {
       ]
     },
     {
-      id: "RX-250714-04",
-      uploadedDate: "Jan 12, 2024 • 8:20 AM",
+      id: "RX-250715-04",
+      uploadedDate: "July 15, 2024 • 8:20 AM",
       prescriptionImage: "/src/assets/img/prescription.jpeg",
       pharmacies: [
         {
@@ -168,16 +174,8 @@ const Activities = () => {
     switch (statusType) {
       case "pending":
         return <AlertCircle className="h-4 w-4" />;
-      case "processing":
-        return <Clock className="h-4 w-4" />;
       case "delivery":
         return <Truck className="h-4 w-4" />;
-      case "ready":
-        return <CheckCircle className="h-4 w-4" />;
-      case "out-of-stock":
-        return <XCircle className="h-4 w-4" />;
-      default:
-        return <Package className="h-4 w-4" />;
     }
   };
 
@@ -185,24 +183,22 @@ const Activities = () => {
     switch (statusType) {
       case "pending":
         return "bg-yellow-500/20 text-yellow-300 border-yellow-300/30";
-      case "processing":
-        return "bg-blue-500/20 text-blue-300 border-blue-300/30";
       case "delivery":
         return "bg-orange-500/20 text-orange-300 border-orange-300/30";
-      case "ready":
-        return "bg-green-500/20 text-green-300 border-green-300/30";
-      case "out-of-stock":
-        return "bg-red-500/20 text-red-300 border-red-300/30";
-      default:
-        return "bg-gray-500/20 text-gray-300 border-gray-300/30";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
+    <div className="min-h-screen p-6 relative z-10">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Activities</h1>
+        
+
+        {/* Ongoing Activities Section */}
+        <div className="mb-8 bg-black/20 p-4 rounded-lg">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></div>
+            <h2 className="text-2xl font-semibold text-white">Ongoing Activities</h2>
+          </div>
           <p className="text-white/70 text-lg">Track your prescription orders and delivery status</p>
         </div>
 
@@ -278,7 +274,16 @@ const Activities = () => {
                         
                         {/* Status Badge */}
                         <div className="flex items-center space-x-3">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(pharmacy.statusType)}`}>
+                          <span 
+                            onClick={() => {
+                              if (pharmacy.status === "View Order Preview") {
+                                handleViewOrderPreview(prescription.id, pharmacy.name);
+                              }
+                            }}
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(pharmacy.statusType)} ${
+                              pharmacy.status === "View Order Preview" ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+                            }`}
+                          >
                             {getStatusIcon(pharmacy.statusType)}
                             <span className="ml-1">{pharmacy.status}</span>
                           </span>

@@ -3,6 +3,7 @@ import CustomerProfile from "./CustomerProfile";
 import MedicalRecords from "./MedicalRecords";
 import MedicalRecordsDetailed from "./MedicalRecordsDetailed";
 import Activities from "./Activities";
+import OrderPreview from "./OrderPreview";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
@@ -36,6 +37,7 @@ const Customer = () => {
         <Routes>
           <Route index element={<CustomerProfile removeBg={true} />} />
           <Route path="/activities" element={<Activities />} />
+          <Route path="/order-preview/:prescriptionId" element={<OrderPreview />} />
           <Route path="/medical-records" element={<MedicalRecords />} />
           <Route
             path="/medical-records/:recordId"
