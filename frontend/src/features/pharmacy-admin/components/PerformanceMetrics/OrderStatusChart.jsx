@@ -35,8 +35,7 @@ const OrderStatusChart = ({ data }) => {
         position: 'right',
       },
       title: {
-        display: true,
-        text: 'Order Status',
+      
       },
     },
   };
@@ -44,7 +43,7 @@ const OrderStatusChart = ({ data }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow">
       <h2 className="text-xl font-semibold mb-4">Order Status</h2>
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center h-70">
         <Doughnut data={chartData} options={options} />
       </div>
     </div>
