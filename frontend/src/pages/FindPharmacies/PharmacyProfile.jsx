@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, Star, MapPin, Clock, Phone, Globe, Share2, Package, ArrowRight, MessageCircle } from "lucide-react";
+import { ChevronLeft, Star, MapPin, Clock, Phone, Globe, Share2, Package, ArrowRight, MessageCircle, Truck, ShieldCheck, Syringe, Check } from "lucide-react";
 import ProfileHeader from "./components/ProfileHeader";
 import ReviewsSection from "./components/ReviewsSection";
 import OTCStorefront from "./components/OTCStorefront";
 import ContactInfo from "./components/ContactInfo";
 import ServicesSection from "./components/ServicesSection";
+import OpeningHours from "./components/OpeningHours";
 import { usePharmacyProfile } from "./hooks/usePharmacyProfile";
 
 // Import images for mini components
@@ -182,6 +183,80 @@ const PharmacyProfile = () => {
     </div>
   );
 
+  // Mini Services Component for Overview
+  const MiniServices = () => {
+    // Example service data; replace with real data if available
+    const services = [
+      {
+        id: "delivery",
+        label: "Home Delivery",
+        description: "Free delivery within 5km radius",
+        icon: <Truck size={20} className="text-green-500" />,
+        available: pharmacy?.hasDelivery,
+      },
+      {
+        id: "24hr",
+        label: "24/7 Service",
+        description: "Round-the-clock pharmacy services",
+        icon: <Clock size={20} className="text-green-500" />,
+        available: pharmacy?.has24HourService,
+      },
+      {
+        id: "insurance",
+        label: "Insurance Coverage",
+        description: "Accepts major insurance plans",
+        icon: <ShieldCheck size={20} className="text-green-500" />,
+        available: pharmacy?.acceptsInsurance,
+      },
+      {
+        id: "vaccines",
+        label: "Vaccination Services",
+        description: "COVID-19, flu, and other vaccines",
+        icon: <Syringe size={20} className="text-green-500" />,
+        available: pharmacy?.hasVaccinations,
+      },
+    ];
+
+    const availableServices = services.filter(s => s.available);
+
+    return (
+      <div className="bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">Services</h2>
+          <button
+            onClick={() => setActiveTab("services")}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+          >
+            View All <ArrowRight size={16} />
+          </button>
+        </div>
+        {availableServices.length > 0 ? (
+          <div className="space-y-4">
+            {availableServices.map(service => (
+              <div key={service.id} className="bg-green-50 rounded-lg p-4 border border-green-100 flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-green-100 flex items-center justify-center">
+                  {service.icon}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-green-800 text-sm flex items-center gap-1">
+                    {service.label}
+                    <Check size={16} className="text-green-500" />
+                  </h4>
+                  <p className="text-xs text-gray-700">{service.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Clock size={32} className="mx-auto text-gray-400 mb-2" />
+            <p className="text-gray-600 text-sm">No services available.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 pt-20 pb-12">
       {/* Floating background elements */}
@@ -213,7 +288,7 @@ const PharmacyProfile = () => {
                 { id: "reviews", label: "Reviews" },
                 { id: "products", label: "OTC Products" },
                 { id: "services", label: "Services" },
-                { id: "contact", label: "Contact" }
+                { id: "contact", label: "Info" }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -244,10 +319,10 @@ const PharmacyProfile = () => {
               {/* Services and Contact Info Row */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                  <ServicesSection pharmacy={pharmacy} />
-                </div>
-                <div>
                   <ContactInfo pharmacy={pharmacy} />
+                </div>
+                <div className="lg:col-span-1">
+                  <MiniServices />
                 </div>
               </div>
             </div>
@@ -257,13 +332,9 @@ const PharmacyProfile = () => {
           
           {activeTab === "products" && <OTCStorefront products={otcProducts} pharmacy={pharmacy} />}
           
+          {activeTab === "contact" && <ContactInfo pharmacy={pharmacy} />}
+
           {activeTab === "services" && <ServicesSection pharmacy={pharmacy} />}
-          
-          {activeTab === "contact" && (
-            <div className="max-w-2xl mx-auto">
-              <ContactInfo pharmacy={pharmacy} />
-            </div>
-          )}
         </div>
       </div>
     </div>

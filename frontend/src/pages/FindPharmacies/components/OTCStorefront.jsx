@@ -13,6 +13,7 @@ import allergyReliefImg from "../../../assets/img/meds/allergy_relief.jpg";
 const OTCStorefront = ({ products, pharmacy }) => {
   const [cart, setCart] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
 
@@ -49,9 +50,16 @@ const OTCStorefront = ({ products, pharmacy }) => {
     { id: "first-aid", label: "First Aid" }
   ];
 
-  const filteredProducts = selectedCategory === "all" 
-    ? products 
-    : products?.filter(product => product.category === selectedCategory) || [];
+  // Filter products by category and search query
+  const filteredProducts = products?.filter(product => {
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    const matchesSearch = searchQuery === "" || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  }) || [];
 
   // Pagination logic
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -80,6 +88,11 @@ const OTCStorefront = ({ products, pharmacy }) => {
     setCurrentPage(1); // Reset to first page when category changes
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to first page when search changes
+  };
+
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 border border-white/40 shadow-xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -87,20 +100,35 @@ const OTCStorefront = ({ products, pharmacy }) => {
           OTC Products & Pharmacy Store ({filteredProducts?.length || 0})
         </h2>
         
-        {/* Category Filter */}
-        <div className="flex items-center gap-2">
-          <Filter size={16} className="text-gray-600" />
-          <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="bg-white/80 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.label}
-              </option>
-            ))}
-          </select>
+        {/* Search and Filter Controls */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="pl-10 pr-4 py-2 bg-white/80 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+            />
+          </div>
+          
+          {/* Category Filter */}
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-gray-600" />
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="bg-white/80 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -203,7 +231,23 @@ const OTCStorefront = ({ products, pharmacy }) => {
         ) : (
           <div className="col-span-full text-center py-12">
             <Package size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600">No products available in this category.</p>
+            <p className="text-gray-600">
+              {searchQuery || selectedCategory !== "all" 
+                ? "No products found matching your criteria." 
+                : "No products available."}
+            </p>
+            {(searchQuery || selectedCategory !== "all") && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  setCurrentPage(1);
+                }}
+                className="mt-2 text-blue-600 hover:text-blue-700 text-sm"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </div>

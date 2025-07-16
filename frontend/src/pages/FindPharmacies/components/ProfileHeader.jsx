@@ -94,7 +94,7 @@ const ProfileHeader = ({ pharmacy }) => {
                 <div className="flex items-center justify-center">
                   <Clock size={16} className="text-green-600 mr-2 flex-shrink-0" />
                   <span className={pharmacy.isOpen ? "text-green-600" : "text-red-600"}>
-                    Opened Untill {pharmacy.hours}
+                    Open until {pharmacy.hours}
                   </span>
                 </div>
                 
