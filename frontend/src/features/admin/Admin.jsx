@@ -8,7 +8,7 @@ const Admin = () => {
   return (
     <AdminLayout>
       <Routes>
-        <Route path="/" element={<Navigate to="overview" replace />} />
+        <Route path="/" element={<Navigate to="overview" replace />} /> 
         <Route path="overview" element={<Overview />} />
       </Routes>
       
