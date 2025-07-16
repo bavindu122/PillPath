@@ -164,7 +164,7 @@ const PaymentModal = ({
                   : 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
               }`}
             >
-              Confirm order
+              Confirm Order
             </button>
           </div>
         </div>
