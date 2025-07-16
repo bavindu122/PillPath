@@ -24,9 +24,9 @@ import {
 
 const navigation = [
   { name: 'Overview', href: '/admin/overview', icon: LayoutDashboard },
-  { name: 'Customers', href: '/customers', icon: Users },
-  { name: 'Pharmacies', href: '/pharmacies', icon: Building2 },
-  { name: 'Prescriptions', href: '/prescriptions', icon: FileText },
+  { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Pharmacies', href: '/admin/pharmacies', icon: Building2 },
+  { name: 'Prescriptions', href: '/admin/prescriptions', icon: FileText },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'System Logs', href: '/logs', icon: Activity },
   { name: 'Bug Reports', href: '/bugs', icon: Bug },
