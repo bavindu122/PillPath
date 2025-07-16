@@ -2,6 +2,7 @@ import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import PaymentModal from "../../../components/UIs/PaymentModal";
 
 const OrderPreview = () => {
   const { prescriptionId } = useParams();
@@ -10,20 +11,53 @@ const OrderPreview = () => {
   const { pharmacyName } = location.state || {};
 
   const [medications, setMedications] = React.useState([
-    { id: 1, name: "Amoxicillin 500mg", price: 15.99, selected: false, quantity: "30 tablets" },
-    { id: 2, name: "Ibuprofen 200mg", price: 8.50, selected: false, quantity: "60 tablets" },
-    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false, quantity: "90 capsules" },
-    { id: 4, name: "Lisinopril 10mg", price: 9.75, selected: false, quantity: "30 tablets" }
+    { id: 1, name: "Amoxicillin 500mg", price: 15.99, selected: false },
+    { id: 2, name: "Ibuprofen 200mg", price: 8.50, selected: false},
+    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false},
+    { id: 4, name: "Lisinopril 10mg", price: 9.75, selected: false }
   ]);
 
+  const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [isAccepted, setIsAccepted] = React.useState(false);
+
+  // Load saved selections on component mount
+  React.useEffect(() => {
+    const savedSelections = localStorage.getItem(`prescription-${prescriptionId}-selections`);
+    const savedAcceptedState = localStorage.getItem(`prescription-${prescriptionId}-accepted`);
+    
+    if (savedSelections) {
+      const selections = JSON.parse(savedSelections);
+      setMedications(prev => 
+        prev.map(med => ({
+          ...med,
+          selected: selections[med.id] || false
+        }))
+      );
+    }
+    
+    if (savedAcceptedState) {
+      setIsAccepted(JSON.parse(savedAcceptedState));
+    }
+  }, [prescriptionId]);
+
   const totalPrice = medications.reduce((sum, med) => sum + (med.selected ? med.price : 0), 0);
+  const hasSelectedMedications = medications.some(med => med.selected);
 
   const handleMedicationToggle = (id) => {
-    setMedications(prev => 
-      prev.map(med => 
+    setMedications(prev => {
+      const updated = prev.map(med => 
         med.id === id ? { ...med, selected: !med.selected } : med
-      )
-    );
+      );
+      
+      // Save selections to localStorage
+      const selections = {};
+      updated.forEach(med => {
+        selections[med.id] = med.selected;
+      });
+      localStorage.setItem(`prescription-${prescriptionId}-selections`, JSON.stringify(selections));
+      
+      return updated;
+    });
   };
 
   const handleBack = () => {
@@ -31,7 +65,24 @@ const OrderPreview = () => {
   };
 
   const handleProceedToPayment = () => {
-    console.log("Proceeding to payment...");
+    setShowPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+  };
+
+  const handleConfirmPayment = (paymentMethod, finalTotal) => {
+    console.log(`Payment confirmed with ${paymentMethod} for $${finalTotal.toFixed(2)}`);
+    // Add your payment processing logic here
+    setShowPaymentModal(false);
+  };
+  const handleAcceptOrder = () => {
+    if (hasSelectedMedications) {
+      setIsAccepted(true);
+      localStorage.setItem(`prescription-${prescriptionId}-accepted`, JSON.stringify(true));
+      console.log("Order accepted with selected medications:", medications.filter(med => med.selected));
+    }
   };
 
   const handleOrderFromAnotherPharmacy = () => {
@@ -134,7 +185,7 @@ const OrderPreview = () => {
                 </div>
 
                 {/* Payment Button */}
-                <div className="pt-4 flex justify-end">
+                <div className="pt-4 flex justify-end">          
                   <button 
                     onClick={handleProceedToPayment}
                     className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
@@ -148,8 +199,22 @@ const OrderPreview = () => {
               </div>
 
               {/* Right Column - Prescription Image */}
-              <div className="flex-shrink-0 mt-[-113px]"> {/* Adjust this value as needed */}
-                <h3 className="text-lg font-semibold text-white mb-3">Prescription Image</h3>
+              <div className="flex-shrink-0 mt-[-133px]"> {/* Adjust this value as needed */}
+                <div className="mb-4 flex justify-end">
+                  <button 
+                    onClick={handleAcceptOrder}
+                    disabled={!hasSelectedMedications}
+                    className={`py-3 px-5 rounded-lg font-semibold text-base transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 ${
+                      hasSelectedMedications 
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white' 
+                        : 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+                    } ${isAccepted ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800' : ''}`}
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>{isAccepted ? 'Order Accepted' : 'Accept Preview'}</span>
+                  </button>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-3">Uploaded Prescription</h3>
                 <div className="w-100 h-120 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 flex items-center justify-center overflow-hidden">
                   <img src="/src/assets/img/prescription.jpeg" 
                     alt="Prescription" 
@@ -184,6 +249,17 @@ const OrderPreview = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handleClosePaymentModal}
+          prescriptionId={prescriptionId}
+          pharmacyName={pharmacyName || "Rite Aid"}
+          medications={medications}
+          discountPercentage={10}
+          onConfirmPayment={handleConfirmPayment}
+        />
       </div>
     </div>
   );

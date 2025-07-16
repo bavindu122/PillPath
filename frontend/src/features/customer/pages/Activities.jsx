@@ -7,11 +7,16 @@ import {
   Truck, 
   AlertCircle,
   Calendar,
-  Pill
+  Pill,
+  CreditCard
 } from "lucide-react";
+import PaymentModal from "../../../components/UIs/PaymentModal";
 
 const Activities = () => {
   const navigate = useNavigate();
+  const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = React.useState('');
+  const [selectedPharmacyName, setSelectedPharmacyName] = React.useState('');
 
   const handleViewOrderPreview = (prescriptionId, pharmacyName) => {
     // Navigate to a new page with prescription and pharmacy details
@@ -19,6 +24,35 @@ const Activities = () => {
       state: { pharmacyName }
     });
   };
+
+  const handleProceedToPayment = (prescriptionId, pharmacyName) => {
+    setSelectedPrescriptionId(prescriptionId);
+    setSelectedPharmacyName(pharmacyName);
+    setShowPaymentModal(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setShowPaymentModal(false);
+    setSelectedPrescriptionId('');
+    setSelectedPharmacyName('');
+  };
+
+  const handleConfirmPayment = (paymentMethod, finalTotal) => {
+    console.log(`Payment confirmed for ${selectedPrescriptionId} with ${paymentMethod} for $${finalTotal.toFixed(2)}`);
+    // Add your payment processing logic here
+    setShowPaymentModal(false);
+  };
+
+  // Sample medications for the payment modal
+  const sampleMedications = [
+    { id: 1, name: "Amoxicillin 500mg", price: 15.99, selected: true },
+    { id: 2, name: "Ibuprofen 200mg", price: 8.50, selected: true },
+    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false },
+    { id: 4, name: "Lisinopril 10mg", price: 9.75, selected: true }
+  ];
+
+  
+  
 
   const prescriptions = [
     {
@@ -85,22 +119,14 @@ const Activities = () => {
     },
     {
       id: "RX-250714-03",
-      uploadedDate: "Jan 13, 2024 • 3:45 PM",
+      uploadedDate: "July 14, 2025 • 3:45 PM",
       prescriptionImage: "/src/assets/img/prescription.jpeg",
       pharmacies: [
         {
           name: "Kroger Pharmacy",
           address: "1357 Broadway, Central",
-          status: "Out for Delivery",
-          statusType: "delivery",
-          iconBg: "bg-orange-100",
-          iconColor: "text-orange-600"
-        },
-        {
-          name: "Safeway Pharmacy",
-          address: "9753 Park Ave, Southside",
-          status: "Ready for Pickup",
-          statusType: "ready",
+          status: "Proceed to payment",
+          statusType: "payment",
           iconBg: "bg-green-100",
           iconColor: "text-green-600"
         }
@@ -122,47 +148,24 @@ const Activities = () => {
         {
           name: "Giant Pharmacy",
           address: "4321 River St, Riverside",
-          status: "Processing",
-          statusType: "processing",
+          status: "Pending Order Preview",
+          statusType: "pending",
           iconBg: "bg-blue-100",
           iconColor: "text-blue-600"
         },
         {
           name: "Publix Pharmacy",
           address: "5678 Ocean Dr, Seaside",
-          status: "Out of Stock",
-          statusType: "out-of-stock",
-          iconBg: "bg-red-100",
-          iconColor: "text-red-600"
+          status: "Pending Order Preview",
+          statusType: "pending",
+          iconBg: "bg-blue-100",
+          iconColor: "text-blue-600"
         },
         {
           name: "Walmart Pharmacy",
           address: "9876 Mountain Ave, Highland",
-          status: "Ready for Pickup",
-          statusType: "ready",
-          iconBg: "bg-green-100",
-          iconColor: "text-green-600"
-        }
-      ]
-    },
-    {
-      id: "RX-250714-05",
-      uploadedDate: "Jan 11, 2024 • 1:30 PM",
-      prescriptionImage: "/src/assets/img/prescription.jpeg",
-      pharmacies: [
-        {
-          name: "Express Scripts Pharmacy",
-          address: "1122 Tech Blvd, Innovation District",
-          status: "Out for Delivery",
-          statusType: "delivery",
-          iconBg: "bg-orange-100",
-          iconColor: "text-orange-600"
-        },
-        {
-          name: "Community Health Pharmacy",
-          address: "3344 Wellness Way, Medical Center",
-          status: "Processing",
-          statusType: "processing",
+          status: "Pending Order Preview",
+          statusType: "pending",
           iconBg: "bg-blue-100",
           iconColor: "text-blue-600"
         }
@@ -176,6 +179,8 @@ const Activities = () => {
         return <AlertCircle className="h-4 w-4" />;
       case "delivery":
         return <Truck className="h-4 w-4" />;
+      case "payment":
+        return <CreditCard className="h-4 w-4" />;
     }
   };
 
@@ -185,6 +190,8 @@ const Activities = () => {
         return "bg-yellow-500/20 text-yellow-300 border-yellow-300/30";
       case "delivery":
         return "bg-orange-500/20 text-orange-300 border-orange-300/30";
+      case "payment":
+        return "bg-green-500/20 text-green-300 border-green-300/30";
     }
   };
 
@@ -278,10 +285,12 @@ const Activities = () => {
                             onClick={() => {
                               if (pharmacy.status === "View Order Preview") {
                                 handleViewOrderPreview(prescription.id, pharmacy.name);
+                              } else if (pharmacy.status === "Proceed to payment") {
+                                handleProceedToPayment(prescription.id, pharmacy.name);
                               }
                             }}
                             className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(pharmacy.statusType)} ${
-                              pharmacy.status === "View Order Preview" ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
+                              pharmacy.status === "View Order Preview" || pharmacy.status === "Proceed to payment" ? "cursor-pointer hover:opacity-80 transition-opacity" : ""
                             }`}
                           >
                             {getStatusIcon(pharmacy.statusType)}
@@ -306,6 +315,17 @@ const Activities = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={handleClosePaymentModal}
+          prescriptionId={selectedPrescriptionId}
+          pharmacyName={selectedPharmacyName}
+          medications={sampleMedications}
+          discountPercentage={10}
+          onConfirmPayment={handleConfirmPayment}
+        />
       </div>
     </div>
   );
