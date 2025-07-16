@@ -43,10 +43,10 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="h-[72px] md:h-[80px]"></div>
+      <div className="h-[72px] md:h-[60px]"></div>
 
       <div
-        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-4 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-2 z-50 transition-all duration-300 ${
           scrolled
             ? "bg-white/70 backdrop-blur-md shadow-md"
             : "bg-white/90 backdrop-blur-sm"
