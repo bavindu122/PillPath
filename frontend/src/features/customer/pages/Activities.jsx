@@ -134,7 +134,7 @@ const Activities = () => {
     },
     {
       id: "RX-250715-04",
-      uploadedDate: "July 15, 2024 • 8:20 AM",
+      uploadedDate: "July 15, 2025 • 8:20 AM",
       prescriptionImage: "/src/assets/img/prescription.jpeg",
       pharmacies: [
         {
