@@ -12,8 +12,8 @@ const OrderPreview = () => {
 
   const [medications, setMedications] = React.useState([
     { id: 1, name: "Amoxicillin 500mg", price: 15.99, selected: false },
-    { id: 2, name: "Ibuprofen 200mg", price: 8.50, selected: false},
-    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false},
+    { id: 2, name: "Ibuprofen 200mg", price: 8.50, selected: false },
+    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false },
     { id: 4, name: "Lisinopril 10mg", price: 9.75, selected: false }
   ]);
 
