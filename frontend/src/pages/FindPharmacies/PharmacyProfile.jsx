@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, Star, MapPin, Clock, Phone, Globe, Share2, Package, ArrowRight, MessageCircle, Truck, ShieldCheck, Syringe, Check } from "lucide-react";
+import { ChevronLeft, Star, MapPin, Clock, Phone, Globe, Share2, Package, ArrowRight, MessageCircle, Truck, ShieldCheck, Syringe, Check, Mail } from "lucide-react";
 import ProfileHeader from "./components/ProfileHeader";
 import ReviewsSection from "./components/ReviewsSection";
 import OTCStorefront from "./components/OTCStorefront";
@@ -257,6 +257,69 @@ const PharmacyProfile = () => {
     );
   };
 
+  // Mini Contact Info Component for Overview (separated from opening hours)
+  const MiniContactInfo = () => (
+    <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 border border-white/40 shadow-xl">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Contact Info</h2>
+        <button
+          onClick={() => setActiveTab("contact")}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+        >
+          View All <ArrowRight size={16} />
+        </button>
+      </div>
+      
+      <div className="space-y-6">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <MapPin size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-1">Address</h3>
+            <p className="text-gray-600">{pharmacy.address}</p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Phone size={20} className="text-purple-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-1">Phone</h3>
+            <a href={`tel:${pharmacy.phone}`} className="text-gray-600 hover:text-blue-600 transition-colors">
+              {pharmacy.phone}
+            </a>
+          </div>
+        </div>
+
+        {pharmacy.email && (
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Mail size={20} className="text-orange-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-1">Email</h3>
+              <a href={`mailto:${pharmacy.email}`} className="text-gray-600 hover:text-blue-600 transition-colors">
+                {pharmacy.email}
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Mini Opening Hours Component for Overview (separated component)
+  const MiniOpeningHours = () => (
+    <OpeningHours 
+      pharmacy={pharmacy} 
+      showTitle={true} 
+      miniView={true} 
+      className=""
+    />
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 pt-20 pb-12">
       {/* Floating background elements */}
@@ -316,14 +379,11 @@ const PharmacyProfile = () => {
                 <MiniReviews />
               </div>
 
-              {/* Services and Contact Info Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                  <ContactInfo pharmacy={pharmacy} />
-                </div>
-                <div className="lg:col-span-1">
-                  <MiniServices />
-                </div>
+              {/* Services Row */}
+              <div className="grid grid-cols-3 gap-8">
+                <MiniServices />
+                <MiniContactInfo />
+                <MiniOpeningHours />
               </div>
             </div>
           )}
