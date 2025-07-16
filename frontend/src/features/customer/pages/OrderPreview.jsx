@@ -35,6 +35,7 @@ const OrderPreview = () => {
       );
     }
     
+    
     if (savedAcceptedState) {
       setIsAccepted(JSON.parse(savedAcceptedState));
     }

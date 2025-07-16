@@ -21,17 +21,26 @@ const PaymentModal = ({
     setSelectedPaymentMethod(method);
   };
 
+    const [showNoMedWarning, setShowNoMedWarning] = React.useState(false);
+
   const handleConfirmPayment = () => {
+    if (totalPrice === 0) {
+      setShowNoMedWarning(true);
+      return;
+    }
     if (selectedPaymentMethod) {
       onConfirmPayment(selectedPaymentMethod, finalTotal);
       setSelectedPaymentMethod('');
+      setShowNoMedWarning(false);
     }
   };
 
   const handleClose = () => {
     setSelectedPaymentMethod('');
+    setShowNoMedWarning(false);
     onClose();
   };
+  
 
   if (!isOpen) return null;
 
@@ -155,17 +164,19 @@ const PaymentModal = ({
             >
               Cancel
             </button>
-            <button
-              onClick={handleConfirmPayment}
-              disabled={!selectedPaymentMethod}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                selectedPaymentMethod
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
-                  : 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Confirm order
-            </button>
+            {/* (Assume this is where the Confirm button is rendered) */}
+<button
+  onClick={handleConfirmPayment}
+  disabled={!selectedPaymentMethod || totalPrice === 0}
+>
+  Confirm order
+</button>
+{showNoMedWarning && totalPrice === 0 && (
+  <div style={{ color: 'red', marginTop: 8 }}>
+    Please select at least one medication to proceed with payment.
+  </div>
+)}
+
           </div>
         </div>
       </motion.div>
