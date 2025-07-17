@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Star, MapPin, Clock, Phone, Share2, Navigation, Upload, Building2 } from "lucide-react";
 import pharmaImage from "../../../assets/img/meds/pharma.jpg";
+import pharmaLogo from "../../../assets/img/meds/pharmalogo.webp"; // Add this line
 import PrescriptionUploadModal from "../../../components/Prescription/PrescriptionUploadModal";
 
 const ProfileHeader = ({ pharmacy }) => {
@@ -32,7 +33,7 @@ const ProfileHeader = ({ pharmacy }) => {
 
   return (
     <>
-      <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl mb-8 overflow-hidden">
+      <div className="bg-grey/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-xl mb-8 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 min-h-[300px]">
           
           {/* Left Side - Pharmacy Details */}
@@ -41,17 +42,11 @@ const ProfileHeader = ({ pharmacy }) => {
             {/* Pharmacy Logo */}
             <div className="flex justify-center mb-6">
               <div className="w-20 h-20 bg-white rounded-full shadow-lg border-4 border-blue-100 flex items-center justify-center overflow-hidden">
-                {pharmacy.logo ? (
-                  <img
-                    src={pharmacy.logo}
-                    alt={`${pharmacy.name} logo`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center">
-                    <Building2 size={32} className="text-blue-600" />
-                  </div>
-                )}
+                <img
+                  src={pharmaLogo}
+                  alt={`${pharmacy.name} logo`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 
