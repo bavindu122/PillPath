@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Upload, Camera, Check, ChevronRight, MapPin, Clock, PlusCircle } from "lucide-react";
+import {
+  X,
+  Upload,
+  Camera,
+  Check,
+  ChevronRight,
+  MapPin,
+  Clock,
+  PlusCircle,
+  Search,
+  Navigation,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // Add this import
 import Star from "./Star";
 
 const PrescriptionUploadModal = ({ isOpen, onClose }) => {
@@ -15,13 +27,46 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+  const navigate = useNavigate();
+  const handleFindPharmacy = () => {
+    navigate("/find-pharmacy");
+    handleClose();
+  };
+
   // Example pharmacy data - would be fetched from API in real application
   const nearbyPharmacies = [
-    { id: 1, name: "HealthFirst Pharmacy", address: "123 Medical Lane, Colombo", distance: "0.8", rating: 4.8, deliveryTime: "30-45" },
-    { id: 2, name: "MediCare Plus", address: "45 Wellness Road, Colombo", distance: "1.2", rating: 4.7, deliveryTime: "20-30" },
-    { id: 3, name: "Family Care Pharmacy", address: "78 Health Street, Colombo", distance: "1.5", rating: 4.5, deliveryTime: "40-55" },
-    { id: 4, name: "City Health Pharmacy", address: "120 Main Street, Colombo", distance: "2.2", rating: 4.3, deliveryTime: "35-50" },
+    {
+      id: 1,
+      name: "HealthFirst Pharmacy",
+      address: "123 Medical Lane, Colombo",
+      distance: "0.8",
+      rating: 4.8,
+      deliveryTime: "30-45",
+    },
+    {
+      id: 2,
+      name: "MediCare Plus",
+      address: "45 Wellness Road, Colombo",
+      distance: "1.2",
+      rating: 4.7,
+      deliveryTime: "20-30",
+    },
+    {
+      id: 3,
+      name: "Family Care Pharmacy",
+      address: "78 Health Street, Colombo",
+      distance: "1.5",
+      rating: 4.5,
+      deliveryTime: "40-55",
+    },
+    {
+      id: 4,
+      name: "City Health Pharmacy",
+      address: "120 Main Street, Colombo",
+      distance: "2.2",
+      rating: 4.3,
+      deliveryTime: "35-50",
+    },
   ];
 
   // Rest of state management and handlers remain the same...
@@ -50,7 +95,9 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       setCameraActive(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert("Unable to access camera. Please check permissions or use file upload instead.");
+      alert(
+        "Unable to access camera. Please check permissions or use file upload instead."
+      );
       setUploadMethod("device");
     }
   };
@@ -59,13 +106,13 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const captureImage = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    
+
     if (video && canvas) {
       const context = canvas.getContext("2d");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
+
       const imageDataUrl = canvas.toDataURL("image/png");
       setPrescriptionImage(imageDataUrl);
       stopCamera();
@@ -76,7 +123,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   // Stop camera stream
   const stopCamera = () => {
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach((track) => track.stop());
       setMediaStream(null);
     }
     setCameraActive(false);
@@ -96,16 +143,17 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   // Handle submit
   const handleSubmit = async () => {
     if (!prescriptionImage || !selectedPharmacy) {
-      alert("Please complete all required fields");
+      alert("Please upload a prescription and select a pharmacy.");
       return;
     }
-
+    
     setIsLoading(true);
 
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       alert("Prescription sent successfully to " + selectedPharmacy.name);
+      navigate("/customer/activities");
       handleClose();
     }, 1500);
   };
@@ -114,7 +162,10 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const modalContentRef = useRef(null);
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (modalContentRef.current && !modalContentRef.current.contains(event.target)) {
+      if (
+        modalContentRef.current &&
+        !modalContentRef.current.contains(event.target)
+      ) {
         handleClose();
       }
     };
@@ -122,7 +173,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -135,12 +186,12 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-0">
       {/* Enhanced backdrop with blur */}
       <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm"></div>
-      
+
       {/* Decorative elements for glassmorphic effect */}
       <div className="absolute top-[-10%] right-[-5%] w-[30%] h-[30%] bg-secondary/10 rounded-full blur-3xl animate-float-gentle"></div>
       <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-3xl animate-float-delay"></div>
       <div className="absolute top-1/3 left-1/4 w-24 h-24 bg-primary/20 rounded-full blur-xl animate-pulse-slow"></div>
-      
+
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -151,9 +202,11 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
           ref={modalContentRef}
         >
           {/* Header - Kept outside scrollable area */}
-          <div className="bg-gradient-to-r from-primary to-primary-hover p-5 flex justify-between items-center sticky top-0 z-30">
-            <h3 className="text-xl font-bold text-white">Upload Prescription</h3>
-            <button 
+          <div className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 p-5 flex justify-between items-center sticky top-0 z-30">
+            <h3 className="text-xl font-bold text-white">
+              Upload Prescription
+            </h3>
+            <button
               onClick={handleClose}
               className="text-white/80 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
             >
@@ -165,46 +218,77 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
           <div className="px-6 pt-4 pb-2 bg-white/90 sticky top-16 z-20 border-b border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step >= 1
+                      ? "bg-primary text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
                   <Upload size={18} />
                 </div>
-                <div className={`text-sm font-medium ml-2 ${
-                  step >= 1 ? 'text-primary' : 'text-gray-500'
-                } hidden sm:block`}>Upload</div>
+                <div
+                  className={`text-sm font-medium ml-2 ${
+                    step >= 1 ? "text-primary" : "text-gray-500"
+                  } hidden sm:block`}
+                >
+                  Upload
+                </div>
               </div>
-              <div className={`flex-1 h-0.5 mx-2 ${
-                step > 1 ? 'bg-primary' : 'bg-gray-200'
-              }`}></div>
+              <div
+                className={`flex-1 h-0.5 mx-2 ${
+                  step > 1 ? "bg-primary" : "bg-gray-200"
+                }`}
+              ></div>
               <div className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step >= 2
+                      ? "bg-primary text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
                   <Check size={18} />
                 </div>
-                <div className={`text-sm font-medium ml-2 ${
-                  step >= 2 ? 'text-primary' : 'text-gray-500'
-                } hidden sm:block`}>Preview</div>
+                <div
+                  className={`text-sm font-medium ml-2 ${
+                    step >= 2 ? "text-primary" : "text-gray-500"
+                  } hidden sm:block`}
+                >
+                  Preview
+                </div>
               </div>
-              <div className={`flex-1 h-0.5 mx-2 ${
-                step > 2 ? 'bg-primary' : 'bg-gray-200'
-              }`}></div>
+              <div
+                className={`flex-1 h-0.5 mx-2 ${
+                  step > 2 ? "bg-primary" : "bg-gray-200"
+                }`}
+              ></div>
               <div className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= 3 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step >= 3
+                      ? "bg-primary text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
                   <MapPin size={18} />
                 </div>
-                <div className={`text-sm font-medium ml-2 ${
-                  step >= 3 ? 'text-primary' : 'text-gray-500'
-                } hidden sm:block`}>Pharmacy</div>
+                <div
+                  className={`text-sm font-medium ml-2 ${
+                    step >= 3 ? "text-primary" : "text-gray-500"
+                  } hidden sm:block`}
+                >
+                  Pharmacy
+                </div>
               </div>
             </div>
           </div>
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto scrollbar-hide" style={{maxHeight: "calc(90vh - 130px)"}}>
+          <div
+            className="flex-1 overflow-y-auto scrollbar-hide"
+            style={{ maxHeight: "calc(90vh - 130px)" }}
+          >
             <div className="p-4 sm:p-6">
               {/* Step 1: Upload Options */}
               {step === 1 && (
@@ -213,23 +297,25 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     Please select how you'd like to upload your prescription
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`p-6 sm:p-8 border-2 rounded-xl flex flex-col items-center transition-all ${
-                        uploadMethod === 'device' 
-                          ? 'border-primary bg-white/70 shadow-lg' 
-                          : 'border-white/50 bg-white/40 backdrop-blur-sm hover:border-primary/40 hover:bg-white/50'
+                        uploadMethod === "device"
+                          ? "border-primary bg-white/70 shadow-lg"
+                          : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-primary/40 hover:bg-white/50"
                       }`}
                       onClick={() => {
-                        setUploadMethod('device');
+                        setUploadMethod("device");
                         fileInputRef.current.click();
                       }}
                     >
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                         <Upload size={28} className="text-primary" />
                       </div>
-                      <h4 className="font-semibold text-lg mb-2">Upload from Device</h4>
+                      <h4 className="font-semibold text-lg mb-2">
+                        Upload from Device
+                      </h4>
                       <p className="text-sm text-gray-500 text-center">
                         Select a photo or scan from your device
                       </p>
@@ -242,23 +328,25 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                       />
                     </motion.button>
 
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`p-6 sm:p-8 border-2 rounded-xl flex flex-col items-center transition-all ${
-                        uploadMethod === 'camera' 
-                          ? 'border-primary bg-white/70 shadow-lg' 
-                          : 'border-white/50 bg-white/40 backdrop-blur-sm hover:border-primary/40 hover:bg-white/50'
+                        uploadMethod === "camera"
+                          ? "border-primary bg-white/70 shadow-lg"
+                          : "border-white/50 bg-white/40 backdrop-blur-sm hover:border-primary/40 hover:bg-white/50"
                       }`}
                       onClick={() => {
-                        setUploadMethod('camera');
+                        setUploadMethod("camera");
                         initializeCamera();
                       }}
                     >
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                         <Camera size={28} className="text-primary" />
                       </div>
-                      <h4 className="font-semibold text-lg mb-2">Take a Photo</h4>
+                      <h4 className="font-semibold text-lg mb-2">
+                        Take a Photo
+                      </h4>
                       <p className="text-sm text-gray-500 text-center">
                         Use your device's camera to capture your prescription
                       </p>
@@ -267,19 +355,19 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
 
                   {/* Camera View */}
                   {cameraActive && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="mt-4 border-2 border-primary/50 rounded-lg p-2 relative bg-black/10 backdrop-blur-sm"
                     >
-                      <video 
-                        ref={videoRef} 
-                        autoPlay 
-                        className="w-full rounded-lg" 
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        className="w-full rounded-lg"
                         style={{ maxHeight: "400px" }}
                       />
                       <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                        <motion.button 
+                        <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={captureImage}
@@ -300,17 +388,17 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                   <p className="text-center text-gray-700">
                     Please review your prescription
                   </p>
-                  
+
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-white/50 backdrop-blur-sm">
                     {prescriptionImage && (
                       <div className="relative">
-                        <img 
-                          src={prescriptionImage} 
-                          alt="Prescription" 
-                          className="max-h-[400px] mx-auto rounded-lg shadow-md object-contain" 
+                        <img
+                          src={prescriptionImage}
+                          alt="Prescription"
+                          className="max-h-[400px] mx-auto rounded-lg shadow-md object-contain"
                         />
                         <div className="absolute top-2 right-2 flex space-x-2">
-                          <motion.button 
+                          <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => {
@@ -354,100 +442,216 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
               {/* Step 3: Pharmacy Selection */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <p className="text-center text-gray-700">
-                    Select a pharmacy to send your prescription to
-                  </p>
-
-                  <div className="space-y-4">
-                    {nearbyPharmacies.map((pharmacy) => (
-                      <motion.div 
-                        key={pharmacy.id}
-                        whileHover={{ scale: 1.01 }}
-                        className={`border rounded-xl p-4 transition-all cursor-pointer ${
-                          selectedPharmacy?.id === pharmacy.id 
-                            ? 'border-primary/50 bg-white/70 shadow-md' 
-                            : 'border-white/50 bg-white/40 hover:border-primary/30 hover:bg-white/50 backdrop-blur-sm'
-                        }`}
-                        onClick={() => setSelectedPharmacy(pharmacy)}
+                  <div className="text-center">
+                    <p className="text-gray-700 mb-4">
+                      Select a pharmacy to send your prescription to
+                    </p>
+                    <div className="flex items-center justify-center mb-4">
+                      {/* Find Pharmacy Button */}
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleFindPharmacy}
+                        className="w-full sm:w-auto mb-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h4 className="font-semibold text-lg">{pharmacy.name}</h4>
-                            <p className="text-sm text-gray-500">{pharmacy.address}</p>
-                            <div className="flex flex-wrap gap-4 mt-2">
-                              <div className="flex items-center text-sm">
-                                <MapPin size={14} className="text-secondary mr-1" />
-                                <span>{pharmacy.distance} km</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <Clock size={14} className="text-primary mr-1" />
-                                <span>{pharmacy.deliveryTime} mins</span>
-                              </div>
-                              <div className="flex items-center text-sm">
-                                <Star size={14} className="text-yellow-500 mr-1 fill-yellow-500" />
-                                <span>{pharmacy.rating}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex-shrink-0">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                              selectedPharmacy?.id === pharmacy.id
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-gray-300'
-                            }`}>
-                              {selectedPharmacy?.id === pharmacy.id && (
-                                <Check size={14} />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-
-                    <motion.div 
-                      whileHover={{ scale: 1.01 }}
-                      className="border border-dashed border-gray-300 rounded-xl p-4 hover:border-primary/30 hover:bg-white/50 flex items-center justify-center gap-2 cursor-pointer bg-white/30 backdrop-blur-sm"
-                    >
-                      <PlusCircle size={18} className="text-gray-400" />
-                      <span className="text-gray-500">Add Another Pharmacy</span>
-                    </motion.div>
+                        <Navigation size={18} />
+                        <span className="font-medium">
+                          Find Pharmacy Near You
+                        </span>
+                        <Search size={16} />
+                      </motion.button>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                      <div className="h-px bg-gray-300 flex-1"></div>
+                      <span className="text-sm text-gray-500 px-3">
+                        Or choose from recent & nearby
+                      </span>
+                      <div className="h-px bg-gray-300 flex-1"></div>
+                    </div>
                   </div>
 
+                  {/* Recent & Nearby Pharmacies Section */}
+                  <div className="space-y-4">
+                    {/* Section Header */}
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <MapPin size={18} className="text-blue-500" />
+                        Recent & Nearby Pharmacies
+                      </h4>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        {nearbyPharmacies.length} available
+                      </span>
+                    </div>
+
+                    {/* Pharmacy List */}
+                    <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin">
+                      {nearbyPharmacies.map((pharmacy, index) => (
+                        <motion.div
+                          key={pharmacy.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ scale: 1.01 }}
+                          className={`border rounded-xl p-4 transition-all cursor-pointer ${
+                            selectedPharmacy?.id === pharmacy.id
+                              ? "border-primary/50 bg-white/90 shadow-lg ring-2 ring-primary/20"
+                              : "border-white/50 bg-white/40 hover:border-primary/30 hover:bg-white/60 backdrop-blur-sm"
+                          }`}
+                          onClick={() => setSelectedPharmacy(pharmacy)}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-lg text-gray-800">
+                                  {pharmacy.name}
+                                </h4>
+                                {pharmacy.distance <= 1 && (
+                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                    Nearby
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 mb-3">
+                                {pharmacy.address}
+                              </p>
+
+                              {/* Pharmacy Info Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                  <MapPin
+                                    size={14}
+                                    className="text-blue-500 mr-2"
+                                  />
+                                  <span className="text-gray-700">
+                                    {pharmacy.distance} km
+                                  </span>
+                                </div>
+                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                  <Clock
+                                    size={14}
+                                    className="text-orange-500 mr-2"
+                                  />
+                                  <span className="text-gray-700">
+                                    {pharmacy.deliveryTime} mins
+                                  </span>
+                                </div>
+                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                  <Star
+                                    size={14}
+                                    className="text-yellow-500 mr-2 fill-yellow-500"
+                                  />
+                                  <span className="text-gray-700">
+                                    {pharmacy.rating}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Selection Indicator */}
+                            <div className="flex-shrink-0 ml-4">
+                              <div
+                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                  selectedPharmacy?.id === pharmacy.id
+                                    ? "border-primary bg-primary text-white shadow-lg"
+                                    : "border-gray-300 hover:border-primary/50"
+                                }`}
+                              >
+                                {selectedPharmacy?.id === pharmacy.id && (
+                                  <Check size={14} />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* View More Option */}
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      onClick={handleFindPharmacy}
+                      className="w-full border border-dashed border-gray-300 rounded-xl p-4 hover:border-primary/40 hover:bg-white/60 flex items-center justify-center gap-2 cursor-pointer bg-white/30 backdrop-blur-sm transition-all"
+                    >
+                      <Search size={18} className="text-gray-500" />
+                      <span className="text-gray-600 font-medium">
+                        View More Pharmacies
+                      </span>
+                      <ChevronRight size={16} className="text-gray-400" />
+                    </motion.button>
+                  </div>
+
+                  {/* Selected Pharmacy Summary */}
                   {selectedPharmacy && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-4 bg-white/50 backdrop-blur-sm p-4 rounded-xl border border-white/50"
+                      className="bg-gradient-to-r from-primary/10 to-blue-50 border border-primary/20 rounded-xl p-4"
                     >
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <Check size={16} className="text-primary" />
+                        Selected Pharmacy
+                      </h5>
+                      <div className="text-sm text-gray-700">
+                        <div className="font-medium">
+                          {selectedPharmacy.name}
+                        </div>
+                        <div className="text-gray-600">
+                          {selectedPharmacy.address}
+                        </div>
+                        <div className="flex gap-4 mt-1 text-xs">
+                          <span>📍 {selectedPharmacy.distance} km away</span>
+                          <span>
+                            ⏱️ {selectedPharmacy.deliveryTime} min delivery
+                          </span>
+                          <span>⭐ {selectedPharmacy.rating} rating</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Additional Notes */}
+                  {selectedPharmacy && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/50"
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Additional Notes (optional)
                       </label>
                       <textarea
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder="Add any special instructions for the pharmacist..."
-                        className="w-full border border-gray-200 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-primary focus:border-primary bg-white/80"
+                        className="w-full border border-gray-200 rounded-lg p-3 text-gray-700 focus:ring-2 focus:ring-primary focus:border-primary bg-white/90 transition-all"
                         rows={3}
                       />
                     </motion.div>
                   )}
 
-                  <div className="flex justify-between pt-4">
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 sm:justify-between pt-4">
                     <motion.button
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => setStep(2)}
-                      className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-white/70 transition-all bg-white/50 backdrop-blur-sm"
+                      className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-white/70 transition-all bg-white/50 backdrop-blur-sm order-2 sm:order-1"
                     >
-                      Back
+                      Back to Preview
                     </motion.button>
                     <motion.button
-                      whileHover={!isLoading && selectedPharmacy ? { scale: 1.03 } : {}}
-                      whileTap={!isLoading && selectedPharmacy ? { scale: 0.97 } : {}}
+                      whileHover={
+                        !isLoading && selectedPharmacy ? { scale: 1.03 } : {}
+                      }
+                      whileTap={
+                        !isLoading && selectedPharmacy ? { scale: 0.97 } : {}
+                      }
                       onClick={handleSubmit}
                       disabled={!selectedPharmacy || isLoading}
-                      className={`px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg shadow-md hover:shadow-lg flex items-center gap-2 ${
-                        !selectedPharmacy || isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                      className={`px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg shadow-md hover:shadow-lg flex items-center justify-center gap-2 order-1 sm:order-2 ${
+                        !selectedPharmacy || isLoading
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
                       }`}
                     >
                       {isLoading ? (
