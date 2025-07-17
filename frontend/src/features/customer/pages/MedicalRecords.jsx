@@ -1,64 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import { assets } from "../../../assets/assets";
 import MedicalRecordCard from "../components/MedicalRecordCard";
 import CustomerSidebar from "../components/CustomerSidebar";
+import { useMedicalRecords } from "../hooks";
 
 
 const MedicalRecords = () => {
   const navigate = useNavigate();
-  const [medicalRecords, setMedicalRecords] = useState([
-    {
-      id: 1,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Diabetes",
-      lastUpdated: "March 15, 2024"
-    },
-    {
-      id: 2,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Fever",
-      lastUpdated: "March 12, 2024"
-    },
-    {
-      id: 3,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Hypertension",
-      lastUpdated: "March 10, 2024"
-    },
-    {
-      id: 4,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Migraine",
-      lastUpdated: "March 8, 2024"
-    },
-    {
-      id: 5,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Asthma",
-      lastUpdated: "March 5, 2024"
-    },
-    {
-      id: 6,
-      profileImage: assets.profile_pic,
-      profileName: "Senuja Udugampola",
-      conditionName: "Allergies",
-      lastUpdated: "March 3, 2024"
-    }
-  ]);
-
-  const handleDeleteRecord = (recordId) => {
-    setMedicalRecords(prevRecords => 
-      prevRecords.filter(record => record.id !== recordId)
-    );
-  };
+  const { medicalRecords, deleteRecord } = useMedicalRecords();
 
   const handleCardClick = (recordId) => {
     navigate(`/customer/medical-records/${recordId}`);
@@ -100,7 +52,7 @@ const MedicalRecords = () => {
                 id={record.id}
                 conditionName={record.conditionName}
                 lastUpdated={record.lastUpdated}
-                onDelete={() => handleDeleteRecord(record.id)}
+                onDelete={() => deleteRecord(record.id)}
                 onClick={handleCardClick}
               />
             ))}
