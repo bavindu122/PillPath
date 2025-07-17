@@ -36,7 +36,7 @@ const Hero2 = () => {
      
                {/* 3D PATH text with less glow */}
                <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 ">
-                 MARCY
+                 MACY
                </span>
              </h1>
      
