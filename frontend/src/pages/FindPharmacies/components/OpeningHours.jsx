@@ -1,19 +1,21 @@
 import React from "react";
-import { Clock, ArrowRight } from "lucide-react";
+import { Clock } from "lucide-react";
 
 const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = false }) => {
   if (!pharmacy) return null;
 
-  // Operating hours data - would come from pharmacy object in real app
-  const operatingHours = [
-    { day: "Monday", hours: "8:00 AM - 9:00 PM" },
-    { day: "Tuesday", hours: "8:00 AM - 9:00 PM" },
-    { day: "Wednesday", hours: "8:00 AM - 9:00 PM" },
-    { day: "Thursday", hours: "8:00 AM - 9:00 PM" },
-    { day: "Friday", hours: "8:00 AM - 9:00 PM" },
-    { day: "Saturday", hours: "9:00 AM - 7:00 PM" },
-    { day: "Sunday", hours: "10:00 AM - 6:00 PM" }
-  ];
+  // Operating hours data - ensure it's always an array
+  const operatingHours = Array.isArray(pharmacy.operatingHours) 
+    ? pharmacy.operatingHours 
+    : [
+        { day: "Monday", hours: "8:00 AM - 9:00 PM" },
+        { day: "Tuesday", hours: "8:00 AM - 9:00 PM" },
+        { day: "Wednesday", hours: "8:00 AM - 9:00 PM" },
+        { day: "Thursday", hours: "8:00 AM - 9:00 PM" },
+        { day: "Friday", hours: "8:00 AM - 9:00 PM" },
+        { day: "Saturday", hours: "9:00 AM - 7:00 PM" },
+        { day: "Sunday", hours: "10:00 AM - 6:00 PM" }
+      ];
 
   const getCurrentDay = () => {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

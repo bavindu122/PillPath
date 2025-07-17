@@ -7,13 +7,13 @@ const ReviewsSection = ({ reviews, pharmacy }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 5;
 
-  const sortedReviews = reviews?.sort((a, b) => {
+  const sortedReviews = [...(reviews || [])].sort((a, b) => {
     if (sortBy === "newest") return new Date(b.date) - new Date(a.date);
     if (sortBy === "oldest") return new Date(a.date) - new Date(b.date);
     if (sortBy === "highest") return b.rating - a.rating;
     if (sortBy === "lowest") return a.rating - b.rating;
     return 0;
-  }) || [];
+  });
 
   const filteredReviews = filterRating === "all" 
     ? sortedReviews 

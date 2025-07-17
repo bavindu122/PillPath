@@ -15,6 +15,7 @@ const OTCStorefront = ({ products, pharmacy }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [imageError, setImageError] = React.useState(false);
   const productsPerPage = 8;
 
   const addToCart = (productId) => {
@@ -33,7 +34,9 @@ const OTCStorefront = ({ products, pharmacy }) => {
       4: vitaminCImg,
       5: coughSyrupImg,
       6: antacidImg,
-      7: allergyReliefImg
+      7: allergyReliefImg,
+      8: allergyReliefImg,
+      9: allergyReliefImg
     };
     return imageMap[product.id] || null;
   };
@@ -140,20 +143,17 @@ const OTCStorefront = ({ products, pharmacy }) => {
             return (
               <div key={product.id} className="bg-white/60 rounded-xl p-4 border border-white/30 hover:shadow-lg transition-shadow">
                 {/* Product Image */}
-                <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                  {productImage ? (
+                <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
+                  {productImage && !imageError ? (
                     <img
                       src={productImage}
                       alt={product.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                      }}
+                      onError={() => setImageError(true)}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package size={48} className="text-gray-400" />
+                    <div className="flex items-center justify-center w-full h-full text-gray-400">
+                      <span>No image available</span>
                     </div>
                   )}
                   {/* Fallback if image fails to load */}
