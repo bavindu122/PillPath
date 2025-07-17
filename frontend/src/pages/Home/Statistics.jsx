@@ -98,7 +98,7 @@ const CountUp = ({ end, duration = 2000 }) => {
 const Statistics = () => {
   return (
     <section className="py-12 px-4 relative overflow-hidden">
-      {/* Light background matching OtcProducts */}
+      {/* Dark theme background with gradient styling */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900"></div>
       
       {/* Enhanced floating elements for dark theme */}
