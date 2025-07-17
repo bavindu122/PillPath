@@ -32,10 +32,10 @@ const WalletAndIncome = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-10">
-            <StatCard label="Total Revenue" value={1250} icon={<HandCoins size={48} className="text-blue-500" />} />
-            <StatCard label="Total Online Payments" value={85} icon={<CreditCard size={48} className="text-orange-500" />} />
+            <StatCard label="Total Revenue" value={1250} icon={<HandCoins size={48} className="text-green-500" />} />
+            <StatCard label="Total Online Payments" value={85} icon={<CreditCard size={48} className="text-pink-500" />} />
             <StatCard label="Total On-Hand Payments" value={45} icon={<Handshake size={48} className="text-purple-500" />} />
-            <StatCard label="Current Wallet Balance" value={45} icon={<Wallet size={48} className="text-pink-500" />} />
+            <StatCard label="Current Wallet Balance" value={45} icon={<Wallet size={48} className="text-blue-500" />} />
 
 
         </div>
