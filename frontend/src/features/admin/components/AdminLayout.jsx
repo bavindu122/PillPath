@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   Bell,
-  User
+  User,
+  Wallet,
 } from 'lucide-react';
 //import { Button } from '@/components/ui/button';
 //import { cn } from '@/lib/utils';
@@ -28,10 +29,7 @@ const navigation = [
   { name: 'Pharmacies', href: '/admin/pharmacies', icon: Building2 },
   { name: 'Prescriptions', href: '/admin/prescriptions', icon: FileText },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'System Logs', href: '/logs', icon: Activity },
-  { name: 'Bug Reports', href: '/bugs', icon: Bug },
-  { name: 'Security', href: '/security', icon: Shield },
-  { name: 'Maintenance', href: '/maintenance', icon: Wrench },
+  { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
