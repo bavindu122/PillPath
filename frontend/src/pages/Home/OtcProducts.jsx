@@ -134,7 +134,7 @@ const OtcProducts = () => {
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false); // Add this state
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
   const scrollContainerRef = useRef(null);
   const duplicatedProducts = [...otcProducts, ...otcProducts];
 
