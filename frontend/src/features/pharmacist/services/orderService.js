@@ -21,7 +21,7 @@ export const orderService = {
           { name: 'Vitamin D3 1000IU', quantity: 60, price: 12.99 }
         ],
         total: 127.50,
-        date: '2024-12-28',
+        date: '2025-07-10',
         time: '10:30 AM',
         paymentMethod: 'Cash',
         notes: 'Patient allergic to penicillin - verified safe alternative',
@@ -44,7 +44,7 @@ export const orderService = {
           { name: 'Aspirin 81mg', quantity: 90, price: 9.46 }
         ],
         total: 89.25,
-        date: '2024-12-27',
+        date: '2025-06-27',
         time: '02:15 PM',
         paymentMethod: 'Credit Card',
         notes: 'Regular monthly medication refill',
@@ -144,24 +144,35 @@ export const orderService = {
       searchFields: ['patient.name', 'patient.email', 'id'],
       customFilters: {
         dateRange: (item, value) => {
+          if (value === 'all') return true;
+          
           const itemDate = new Date(item.date);
           const today = new Date();
           
           switch (value) {
-            case 'today':
-              return itemDate.toDateString() === today.toDateString();
-            case 'week':
+            case 'last7days':
               const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
               return itemDate >= weekAgo;
-            case 'month':
+            case 'last30days':
               const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
               return itemDate >= monthAgo;
+            case 'last90days':
+              const threeMonthsAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+              return itemDate >= threeMonthsAgo;
             default:
               return true;
           }
         },
-        orderType: (item, value) => item.type === value,
-        paymentMethod: (item, value) => item.paymentMethod === value
+        orderType: (item, value) => {
+          if (value === 'all') return true;
+          return item.type.toLowerCase() === value.toLowerCase();
+        },
+        paymentMethod: (item, value) => {
+          if (value === 'all') return true;
+          if (value === 'cash') return item.paymentMethod.toLowerCase() === 'cash';
+          if (value === 'credit') return item.paymentMethod.toLowerCase().includes('credit');
+          return item.paymentMethod.toLowerCase() === value.toLowerCase();
+        }
       },
       sortFunctions: {
         date: (a, b) => new Date(b.date) - new Date(a.date),

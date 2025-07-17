@@ -59,25 +59,25 @@ const FindPharmacy = () => {
 
   return (
     <>
-  
-      <div className="min-h-screen bg-gradient-to-br from-bg-light via-white to-upload-bg pt-20 pb-12">
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl opacity-60 -z-10"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl opacity-40 -z-10"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 pt-20 pb-12">
+        {/* Floating background elements */}
+        <div className="absolute top-20 right-20 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-10 left-20 w-24 h-24 bg-purple-500/5 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-green-500/5 rounded-full blur-lg animate-pulse"></div>
         
-        <div className="container mx-auto px-4 max-w-7xl">
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
           {/* Header section */}
           <div className="mb-8 text-center md:text-left">
             <div className="inline-flex items-center mb-4">
-              <a href="/" className="text-primary hover:text-primary-hover">
-                <ChevronLeft size={16} className="inline mr-1" />
-                Back to Home
+              <a href="/" className="flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 py-2 rounded-lg group w-fit">
+                <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                <span className="font-medium text-sm sm:text-base">Back to Home</span>
               </a>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gradient-primary">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
               Find Nearby Pharmacies
             </h1>
-            <p className="text-dark/70 max-w-2xl mx-auto md:mx-0">
+            <p className="text-white/70 max-w-2xl mx-auto md:mx-0">
               Discover pharmacies near you, check their ratings, operating hours, and available services.
               Use filters to find exactly what you need.
             </p>
@@ -87,12 +87,12 @@ const FindPharmacy = () => {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-white/50" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-white/30 bg-white/50 backdrop-blur-sm rounded-xl 
-                           text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="block w-full pl-10 pr-3 py-3 border border-white/20 bg-white/10 backdrop-blur-md rounded-xl 
+                           text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
                 placeholder="Search by pharmacy name or location..."
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -102,21 +102,21 @@ const FindPharmacy = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="flex items-center justify-center px-4 py-3 rounded-xl bg-white/50 backdrop-blur-sm 
-                           border border-white/30 text-dark hover:bg-white/70 transition-all"
+                className="flex items-center justify-center px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md 
+                           border border-white/20 text-white hover:bg-white/20 transition-all duration-300"
               >
                 <Sliders size={18} className="mr-2" />
                 Filters
               </button>
               
-              <div className="hidden sm:flex items-center rounded-xl overflow-hidden border border-white/30">
+              <div className="hidden sm:flex items-center rounded-xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-md">
                 <button
                   onClick={() => setViewMode("map")}
                   className={`flex items-center justify-center px-4 py-3 ${
                     viewMode === "map" 
-                      ? "bg-primary text-white" 
-                      : "bg-white/50 backdrop-blur-sm text-dark hover:bg-white/70"
-                  } transition-all`}
+                      ? "bg-white text-blue-600 shadow-md" 
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  } transition-all duration-300`}
                 >
                   <MapIcon size={18} className="mr-2" />
                   Map
@@ -125,9 +125,9 @@ const FindPharmacy = () => {
                   onClick={() => setViewMode("list")}
                   className={`flex items-center justify-center px-4 py-3 ${
                     viewMode === "list" 
-                      ? "bg-primary text-white" 
-                      : "bg-white/50 backdrop-blur-sm text-dark hover:bg-white/70"
-                  } transition-all`}
+                      ? "bg-white text-blue-600 shadow-md" 
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  } transition-all duration-300`}
                 >
                   <List size={18} className="mr-2" />
                   List
@@ -136,9 +136,9 @@ const FindPharmacy = () => {
                   onClick={() => setViewMode("split")}
                   className={`flex items-center justify-center px-4 py-3 ${
                     viewMode === "split" 
-                      ? "bg-primary text-white" 
-                      : "bg-white/50 backdrop-blur-sm text-dark hover:bg-white/70"
-                  } transition-all`}
+                      ? "bg-white text-blue-600 shadow-md" 
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  } transition-all duration-300`}
                 >
                   Split View
                 </button>
@@ -152,9 +152,9 @@ const FindPharmacy = () => {
               onClick={() => setViewMode("map")}
               className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl ${
                 viewMode === "map" 
-                  ? "bg-primary text-white" 
-                  : "bg-white/50 backdrop-blur-sm text-dark border border-white/30"
-              } transition-all`}
+                  ? "bg-white text-blue-600 shadow-md" 
+                  : "bg-white/10 backdrop-blur-md text-white/80 border border-white/20 hover:bg-white/20"
+              } transition-all duration-300`}
             >
               <MapIcon size={18} className="mr-2" />
               Map
@@ -163,9 +163,9 @@ const FindPharmacy = () => {
               onClick={() => setViewMode("list")}
               className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl ${
                 viewMode === "list" 
-                  ? "bg-primary text-white" 
-                  : "bg-white/50 backdrop-blur-sm text-dark border border-white/30"
-              } transition-all`}
+                  ? "bg-white text-blue-600 shadow-md" 
+                  : "bg-white/10 backdrop-blur-md text-white/80 border border-white/20 hover:bg-white/20"
+              } transition-all duration-300`}
             >
               <List size={18} className="mr-2" />
               List
@@ -174,9 +174,9 @@ const FindPharmacy = () => {
               onClick={() => setViewMode("split")}
               className={`flex-1 flex items-center justify-center px-4 py-3 rounded-xl ${
                 viewMode === "split" 
-                  ? "bg-primary text-white" 
-                  : "bg-white/50 backdrop-blur-sm text-dark border border-white/30"
-              } transition-all`}
+                  ? "bg-white text-blue-600 shadow-md" 
+                  : "bg-white/10 backdrop-blur-md text-white/80 border border-white/20 hover:bg-white/20"
+              } transition-all duration-300`}
             >
               Split
             </button>
@@ -186,7 +186,7 @@ const FindPharmacy = () => {
           <div
             className={`${
               isFilterOpen ? "max-h-[500px] opacity-100 mb-6" : "max-h-0 opacity-0 overflow-hidden"
-            } transition-all duration-300 ease-in-out bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg`}
+            } transition-all duration-300 ease-in-out bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl`}
           >
             <PharmacyFilters 
               filters={filters} 
@@ -201,7 +201,7 @@ const FindPharmacy = () => {
           }`}>
             {/* Map container */}
             {(viewMode === "map" || viewMode === "split") && (
-              <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg overflow-hidden">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl overflow-hidden">
                 <PharmacyMap 
                   pharmacies={searchedPharmacies} 
                   selectedPharmacy={selectedPharmacy}
@@ -230,7 +230,6 @@ const FindPharmacy = () => {
           </div>
         </div>
       </div>
-  
     </>
   );
 };

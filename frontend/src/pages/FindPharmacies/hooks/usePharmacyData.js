@@ -41,7 +41,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: false,
             hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Health+First"
+            logo: "/src/assets/img/find/healthfirst.jpeg"
           },
           {
             id: 2,
@@ -56,7 +56,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: true,
             hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=MediCare+"
+            logo: "/src/assets/img/find/medicare.jpeg"
           },
           {
             id: 3,
@@ -71,7 +71,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: false,
             hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Family+Care"
+            logo: "/src/assets/img/find/familycare.jpeg"
           },
           {
             id: 4,
@@ -86,7 +86,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: false,
             has24HourService: false,
             hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=City+Health"
+            logo: "/src/assets/img/find/cityhealth.png"
           },
           {
             id: 5,
@@ -101,7 +101,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: true,
             hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=MediCenter"
+            logo: "/src/assets/img/find/24-7.png"
           },
           {
             id: 6,
@@ -116,7 +116,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: false,
             has24HourService: false,
             hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=QuickMed"
+            logo: "/src/assets/img/find/quickmed.jpg"
           },
           {
             id: 7,
@@ -131,7 +131,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: false,
             hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Union+Pharmacy"
+            logo: "/src/assets/img/find/union.png"
           },
           {
             id: 8,
@@ -146,7 +146,7 @@ export const usePharmacyData = (currentLocation) => {
             acceptsInsurance: true,
             has24HourService: false,
             hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Wellness"
+            logo: "/src/assets/img/find/wellness.jpg"
           }
         ];
         
