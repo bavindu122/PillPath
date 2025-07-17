@@ -71,12 +71,12 @@ const Customers = () => {
         subtitle="Manage registered customers and their account details" 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <StatCard label="Active Customers" value={1250} icon={<Activity size={48} className="text-blue-500" />} />
-        <StatCard label="Loyalty Members" value={85} icon={<Star size={48} className="text-yellow-500" />} />
-        <StatCard label="Suspended Accounts" value={45} icon={<Ban size={48} className="text-red-500" />} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <StatCard label="Active Customers" value={1250} icon={<Activity size={48} className="text-blue-500" />} />
+            <StatCard label="Loyalty Members" value={85} icon={<Star size={48} className="text-yellow-500" />} />
+            <StatCard label="Suspended Accounts" value={45} icon={<Ban size={48} className="text-red-500" />} />
       
-    </div>
+        </div>
       
     </div>
   )
