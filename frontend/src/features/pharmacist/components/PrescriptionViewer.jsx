@@ -122,7 +122,7 @@ const PrescriptionViewer = ({ prescription }) => {
             <div className="p-4 overflow-auto max-h-[calc(90vh-120px)]">
               <div className="flex items-center justify-center">
                 <img 
-                  src={prescription?.imageUrl || '/src/assets/img/prescription.jpeg'} 
+                  src="/src/assets/img/prescription.jpeg"
                   alt="Zoomed Prescription"
                   className="w-full h-auto max-w-none"
                   style={{ 
