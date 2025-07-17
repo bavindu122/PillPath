@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import PaymentModal from "../../../components/UIs/PaymentModal";
+import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
 
 const OrderPreview = () => {
   const { prescriptionId } = useParams();
@@ -18,6 +19,7 @@ const OrderPreview = () => {
   ]);
 
   const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [showOrderFromAnotherPharmacyModal, setShowOrderFromAnotherPharmacyModal] = React.useState(false);
   const [isAccepted, setIsAccepted] = React.useState(false);
 
   // Load saved selections on component mount
@@ -87,7 +89,16 @@ const OrderPreview = () => {
   };
 
   const handleOrderFromAnotherPharmacy = () => {
-    console.log("Ordering from another pharmacy...");
+    setShowOrderFromAnotherPharmacyModal(true);
+  };
+
+  const handleCloseOrderFromAnotherPharmacyModal = () => {
+    setShowOrderFromAnotherPharmacyModal(false);
+  };
+
+  const handleOrderPlaced = (selectedPharmacy, medications) => {
+    console.log("Order placed at:", selectedPharmacy.name, "for medications:", medications);
+    // Add your order placement logic here
   };
 
   const unavailableMedications = [
@@ -267,6 +278,15 @@ const OrderPreview = () => {
           medications={medications}
           discountPercentage={10}
           onConfirmPayment={handleConfirmPayment}
+        />
+
+        {/* Order from Another Pharmacy Modal */}
+        <OrderFromAnotherPharmacyModal
+          isOpen={showOrderFromAnotherPharmacyModal}
+          onClose={handleCloseOrderFromAnotherPharmacyModal}
+          prescriptionId={prescriptionId}
+          unavailableMedications={unavailableMedications}
+          onOrderPlaced={handleOrderPlaced}
         />
       </div>
     </div>
