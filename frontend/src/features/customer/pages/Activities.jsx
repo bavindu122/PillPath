@@ -54,6 +54,13 @@ const Activities = () => {
   
   
 
+  // Function to calculate total price of all available medications
+  const calculateTotalPrice = (medications) => {
+    return medications
+      .filter(med => med.available)
+      .reduce((total, med) => total + med.price, 0);
+  };
+
   const prescriptions = [
     {
       id: "RX-250714-01",
@@ -66,7 +73,13 @@ const Activities = () => {
           status: "View Order Preview",
           statusType: "delivery",
           iconBg: "bg-blue-100",
-          iconColor: "text-orange-600"
+          iconColor: "text-orange-600",
+          medications: [
+            { id: 1, name: "Amoxicillin 500mg", price: 15.99, available: true },
+            { id: 2, name: "Ibuprofen 200mg", price: 8.50, available: true },
+            { id: 3, name: "Vitamin D3 1000IU", price: 12.25, available: false },
+            { id: 4, name: "Lisinopril 10mg", price: 9.75, available: true }
+          ]
         },
         {
           name: "Walgreens",
@@ -74,7 +87,13 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Amoxicillin 500mg", price: 16.99, available: true },
+            { id: 2, name: "Ibuprofen 200mg", price: 9.00, available: true },
+            { id: 3, name: "Vitamin D3 1000IU", price: 13.50, available: true },
+            { id: 4, name: "Lisinopril 10mg", price: 10.25, available: false }
+          ]
         },
         {
           name: "CVS Pharmacy",
@@ -82,7 +101,13 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Amoxicillin 500mg", price: 14.99, available: true },
+            { id: 2, name: "Ibuprofen 200mg", price: 7.99, available: true },
+            { id: 3, name: "Vitamin D3 1000IU", price: 11.75, available: true },
+            { id: 4, name: "Lisinopril 10mg", price: 8.99, available: true }
+          ]
         }
       ]
     },
@@ -97,7 +122,12 @@ const Activities = () => {
           status: "View Order Preview",
           statusType: "delivery",
           iconBg: "bg-blue-100",
-          iconColor: "text-orange-600"
+          iconColor: "text-orange-600",
+          medications: [
+            { id: 1, name: "Metformin 500mg", price: 12.99, available: true },
+            { id: 2, name: "Atorvastatin 20mg", price: 18.50, available: true },
+            { id: 3, name: "Omeprazole 20mg", price: 15.75, available: true }
+          ]
         },
         {
           name: "Local Health Pharmacy",
@@ -105,7 +135,12 @@ const Activities = () => {
           status: "View Order Preview",
           statusType: "delivery",
           iconBg: "bg-blue-100",
-          iconColor: "text-orange-600"
+          iconColor: "text-orange-600",
+          medications: [
+            { id: 1, name: "Metformin 500mg", price: 11.99, available: true },
+            { id: 2, name: "Atorvastatin 20mg", price: 17.25, available: true },
+            { id: 3, name: "Omeprazole 20mg", price: 14.50, available: false }
+          ]
         },
         {
           name: "MedPlus Pharmacy",
@@ -113,7 +148,12 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Metformin 500mg", price: 13.50, available: true },
+            { id: 2, name: "Atorvastatin 20mg", price: 19.00, available: true },
+            { id: 3, name: "Omeprazole 20mg", price: 16.25, available: true }
+          ]
         }
       ]
     },
@@ -128,7 +168,11 @@ const Activities = () => {
           status: "Proceed to payment",
           statusType: "payment",
           iconBg: "bg-green-100",
-          iconColor: "text-green-600"
+          iconColor: "text-green-600",
+          medications: [
+            { id: 1, name: "Levothyroxine 50mcg", price: 22.99, available: true },
+            { id: 2, name: "Amlodipine 5mg", price: 14.25, available: true }
+          ]
         }
       ]
     },
@@ -143,7 +187,12 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-yellow-100",
-          iconColor: "text-yellow-600"
+          iconColor: "text-yellow-600",
+          medications: [
+            { id: 1, name: "Aspirin 81mg", price: 6.99, available: true },
+            { id: 2, name: "Simvastatin 20mg", price: 16.50, available: true },
+            { id: 3, name: "Hydrochlorothiazide 25mg", price: 11.25, available: true }
+          ]
         },
         {
           name: "Giant Pharmacy",
@@ -151,7 +200,12 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Aspirin 81mg", price: 7.50, available: true },
+            { id: 2, name: "Simvastatin 20mg", price: 17.25, available: false },
+            { id: 3, name: "Hydrochlorothiazide 25mg", price: 12.00, available: true }
+          ]
         },
         {
           name: "Publix Pharmacy",
@@ -159,7 +213,12 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Aspirin 81mg", price: 8.99, available: true },
+            { id: 2, name: "Simvastatin 20mg", price: 18.75, available: true },
+            { id: 3, name: "Hydrochlorothiazide 25mg", price: 10.50, available: true }
+          ]
         },
         {
           name: "Walmart Pharmacy",
@@ -167,7 +226,12 @@ const Activities = () => {
           status: "Pending Order Preview",
           statusType: "pending",
           iconBg: "bg-blue-100",
-          iconColor: "text-blue-600"
+          iconColor: "text-blue-600",
+          medications: [
+            { id: 1, name: "Aspirin 81mg", price: 5.99, available: true },
+            { id: 2, name: "Simvastatin 20mg", price: 15.25, available: true },
+            { id: 3, name: "Hydrochlorothiazide 25mg", price: 9.75, available: true }
+          ]
         }
       ]
     }
@@ -259,7 +323,7 @@ const Activities = () => {
                       whileHover={{ scale: 1.01 }}
                       className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-300 p-4"
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between relative">
                         <div className="flex items-center space-x-4">
                           {/* Pharmacy Icon */}
                           <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center border border-white/20">
@@ -278,6 +342,18 @@ const Activities = () => {
                             </div>
                           </div>
                         </div>
+                        
+                        {/* Total Price Display - Absolutely centered */}
+                        {pharmacy.status === "View Order Preview" && pharmacy.medications && (
+                          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div className="text-center">
+                              <div className="text-white/60 text-xs mb-1">Total:</div>
+                              <div className="text-white font-bold text-lg whitespace-nowrap">
+                                ${calculateTotalPrice(pharmacy.medications).toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         
                         {/* Status Badge */}
                         <div className="flex items-center space-x-3">

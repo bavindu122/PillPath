@@ -154,7 +154,14 @@ const OrderPreview = () => {
                 <h3 className="text-xl font-semibold text-white mb-4">Available Items</h3>
                 <div className="space-y-3">
                   {medications.map((medication) => (
-                    <div key={medication.id} className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+                    <div
+                      key={medication.id}
+                      className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border-2 border-green-400 shadow-lg shadow-green-200/20 relative"
+                      style={{
+                        borderImage: 'linear-gradient(90deg, #1dab51ff 0%, #37b766ff 100%) 1',
+                        borderWidth: '2px'
+                      }}
+                    >
                       <div className="flex items-center space-x-4 flex-1">
                         <input
                           type="checkbox"
