@@ -34,7 +34,7 @@ const PharmacyFilters = ({ filters, setFilters, closeFilters }) => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold flex items-center gap-2 text-dark">
+        <h3 className="text-xl font-bold flex items-center gap-2 text-light">
           <Sliders size={20} className="text-primary" />
           Filter Pharmacies
         </h3>
