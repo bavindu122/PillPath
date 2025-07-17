@@ -3,6 +3,8 @@ import StatCard from '../components/StatCard';
 import PageHeader from '../components/PageHeader';
 import SearchFilterBar from '../components/SearchFilterBar';
 import {FileText,CheckLine,ClockAlert,Ban} from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip ,Cell} from 'recharts';
+import ChartCard from '../components/ChartCard';
 import { useState } from 'react';
 
 const prescriptions = [
@@ -12,6 +14,20 @@ const prescriptions = [
   { id: 'PRX004', patient: 'Diana Prince', pharmacy: 'City Pharmacy', status: 'Rejected', submitted: '2023-06-12', amount: '1600' },
   { id: 'PRX005', patient: 'Eve Adams', pharmacy: 'Quick Meds', status: 'Pending', submitted: '2023-06-15',amount: '1300' },
 ];
+
+const monthlyPrescriptionData = [
+{ status: 'Completed', count: 40 },
+{ status: 'Approved', count: 46 },
+{ status: 'Pending', count: 10 },
+{ status: 'Rejected', count: 5 },  
+];
+
+const statusColors = {
+  'Completed': '#10B981', // Green
+  'Approved': '#3B82F6',  // Blue
+  'Pending': '#F59E0B',   // Yellow/Orange
+  'Rejected': '#EF4444'   // Red
+};
 
 const Prescription = () => {
 
@@ -39,11 +55,27 @@ const Prescription = () => {
             subtitle="Monitor and manage all prescription orders." 
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 ">
             <StatCard label="Accepted Prescriptions" value={250} icon={<CheckLine size={48} className="text-blue-500" />} />
             <StatCard label="Pending Prescriptions" value={16} icon={<ClockAlert size={48} className="text-yellow-500" />} />
             <StatCard label="Rejected Prescriptions" value={5} icon={<Ban size={48} className="text-red-500" />} />
         </div>
+
+        <ChartCard title="Prescription Status Overview">
+                  <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={monthlyPrescriptionData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="status" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="count">
+                        {monthlyPrescriptionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={statusColors[entry.status]} />
+                        ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+        </ChartCard>
 
         <SearchFilterBar
             searchTerm={searchTerm}
@@ -52,9 +84,10 @@ const Prescription = () => {
             setFilterValue={setFilterStatus}
             placeholder="Search id, patient name, pharmacy name..."
             filterOptions={['All', 'Completed','Approved', 'Pending', 'Rejected']}
+            
         />
 
-        <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+        <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto ">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

@@ -11,7 +11,7 @@ export default function SearchFilterBar({
   filterLabel = 'Filter',
 }) {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div className="bg-white p-6 rounded-lg shadow-md mb-6 mt-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Search Input */}
         <div className="relative w-full md:w-1/2">
