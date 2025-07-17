@@ -1,19 +1,28 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Eye, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { Mail, Phone, MapPin, Eye, Edit, Trash2, MoreHorizontal,Calendar,UserPlus } from 'lucide-react';
+import { useState } from 'react';
+import SuspendPharmacy from './pharmacyPopup/SuspendPharmacy';
+import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
+import ViewPharmacy from './pharmacyPopup/ViewPharmacy';
 
 
+const PharmacyCard = ({ pharmacy }) => {
 
-const PharmacyCard = ({ pharmacy, onView, onRemove }) => {
+    const [suspendPopup, setSuspendPopup] = useState(null);
+    const [suspendReason, setSuspendReason] = useState('');
+    const [activatePopup, setActivatePopup] = useState(null);
+    const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Active':
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-      case 'Inactive':
-        return <Badge className="bg-red-100 text-red-800">Suspended</Badge>;
+        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>;
+      case 'Suspended':
+        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Suspended</div>;
       case 'Pending':
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</div>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{status}</div>;
     }
   };
 
@@ -28,7 +37,7 @@ const PharmacyCard = ({ pharmacy, onView, onRemove }) => {
   };
 
   return (
-    <div className="hover:shadow-lg transition-shadow">
+    <div className="hover:shadow-lg transition-shadow rounded-2xl border-gray-300 border p-6 bg-white">
       <div className="pb-3">
         <div className="flex items-start justify-between">
           <div>
@@ -53,17 +62,75 @@ const PharmacyCard = ({ pharmacy, onView, onRemove }) => {
             <MapPin className="h-4 w-4 mr-2" />
             {pharmacy.location}
           </div>
+          
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-300">
           <div>
             <p className="text-sm font-medium">{pharmacy.orders} orders</p>
             {getRatingStars(pharmacy.rating)}
+          </div>
+          <div className="flex space-x-2">
+            <button
+                      onClick={() => setSelectedPharmacy(pharmacy)}
+                      className="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-blue-100 transition-colors"
+                      title="View Details"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    {pharmacy.status === 'Suspended' ? (
+                      <button
+                        className="text-green-600 hover:text-green-900 p-2 rounded-full hover:bg-green-100 transition-colors"
+                        title="Activate Pharmacy"
+                        onClick={() => setActivatePopup(pharmacy)}
+                      >
+                        <UserPlus size={18} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setSuspendPopup(pharmacy)}
+                        className="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors"
+                        title="Suspend Pharmacy"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+
           </div>
 
           
         </div>
       </div>
+
+      {selectedPharmacy && (
+        <ViewPharmacy pharmacy={selectedPharmacy} onClose={() => setSelectedPharmacy(null)} />
+        )}
+
+      {suspendPopup && (
+            <SuspendPharmacy
+                pharmacy={suspendPopup}
+                reason={suspendReason}
+                setReason={setSuspendReason}
+                onCancel={() => setSuspendPopup(null)}
+                onConfirm={() => {
+                console.log(`Suspended: ${suspendPopup.name}, Reason: ${suspendReason}`);
+                setSuspendPopup(null);
+                setSuspendReason('');
+                }}
+            />
+            )}
+
+        {activatePopup && (
+            <ActivePharmacy
+                pharmacy={activatePopup}
+                onCancel={() => setActivatePopup(null)}
+                onConfirm={() => {
+                console.log(`Activated: ${activatePopup.name}`);
+                setActivatePopup(null);
+                }}
+            />
+            )}
+
     </div>
   );
 };

@@ -15,6 +15,7 @@ import {
   Activity,
   Clock,
   AlertTriangle,
+  ChartLine,
 } from 'lucide-react';
 
 import {
@@ -107,7 +108,9 @@ const Overview = () => {
         <StatCard label="Prescriptions Uploaded" value={45} icon={<FileText size={48} className="text-yellow-500" />} />
         <StatCard label="Completed Orders" value={980} icon={<Package size={48} className="text-purple-500" />} />
 
-        <StatCard label="Total Revenue" value={`Rs. ${(35000).toLocaleString()}`} icon={<Wallet size={48} className="text-red-500" />} />
+        <StatCard label="Total Revenue" value={`Rs. ${(35000).toLocaleString()}`} icon={<ChartLine size={48} className="text-pink-500" />} />
+        <StatCard label="Wallet Balance" value={`Rs. ${(25600).toLocaleString()}`} icon={<Wallet size={48} className="text-red-500" />} />
+
       </div>
 
       <RecentActivityCard 

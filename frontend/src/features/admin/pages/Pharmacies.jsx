@@ -2,7 +2,8 @@ import React from 'react'
 import StatCard from '../components/StatCard';
 import PageHeader from '../components/PageHeader';
 import SearchFilterBar from '../components/SearchFilterBar';
-import { Store,Activity,Ban,ClockAlert } from 'lucide-react';
+import PharmacyCard from '../components/PharmacyCard';
+import { Store,Activity,Ban,ClockAlert ,Eye,Trash2,UserPlus} from 'lucide-react';
 import { useState } from 'react';
 
 const pharmacies = [
@@ -60,7 +61,7 @@ const pharmacies = [
     email: 'contact@metro-pharm.com',
     phone: '+1 (555) 567-8901',
     location: 'Phoenix, AZ',
-    status: 'Inactive',
+    status: 'Suspended',
     joinDate: '2023-06-30',
     orders: 78,
     rating: 4.2,
@@ -108,7 +109,17 @@ const Pharmacies = () => {
             placeholder="Search by name or email..."
             filterOptions={['All', 'Active', 'Pending', 'Suspended']}
         />
-      
+      <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPharmacies.map(pharmacy => (
+              <PharmacyCard
+                key={pharmacy.id}
+                pharmacy={pharmacy}
+                
+              />
+            ))}
+         </div>
+      </div>
     </div>
   )
 }
