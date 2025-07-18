@@ -18,7 +18,7 @@ const ViewDetailsModal = ({ user, onClose }) => {
           <p><strong>Loyalty Points:</strong> {user.loyaltyPoints}</p>
         )}
         {user.status === 'Suspended' && (
-                <p><strong className='text-red-600'>Suspend Reson:</strong> {user.suspendReason}</p>
+                <p><strong className='text-red-600'>Suspend Reason:</strong> {user.suspendReason}</p>
               )}
       </div>
     </ModalWrapper>
