@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react'
+import { Users,User } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import StatCard from '../components/StatCard'
 import SearchFilterBar from '../components/SearchFilterBar'
@@ -21,7 +21,8 @@ const customers = [
     prescriptions: 12,
     orders: 8,
     loyaltyPoints: 0,
-    suspendReason: null
+    suspendReason: null,
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
   },
   {
     id: 2,
@@ -34,7 +35,8 @@ const customers = [
     prescriptions: 24,
     orders: 18,
     loyaltyPoints: 0,
-    suspendReason: null
+    suspendReason: null,
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
   },
   {
     id: 3,
@@ -47,7 +49,8 @@ const customers = [
     prescriptions: 6,
     orders: 4,
     loyaltyPoints: 120,
-    suspendReason: null
+    suspendReason: null,
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
   },
   {
     id: 4,
@@ -60,7 +63,8 @@ const customers = [
     prescriptions: 15,
     orders: 11,
     loyaltyPoints: 0,
-    suspendReason: null
+    suspendReason: null,
+    profilePicture: null
   },
   {
     id: 5,
@@ -73,7 +77,8 @@ const customers = [
     prescriptions: 3,
     orders: 2,
     loyaltyPoints: 0,
-    suspendReason: 'Violation of terms and conditions - Multiple fake prescription uploads'
+    suspendReason: 'Violation of terms and conditions - Multiple fake prescription uploads',
+    profilePicture: null
   }
 ];
 
@@ -96,6 +101,8 @@ const Customers = () => {
 
     return matchesSearch && matchesStatus;
   });
+
+    
 
   return (
     <div className={`min-h-screen bg-gray-100 p-8 font-sans ${selectedCustomer ? 'backdrop-blur-sm' : ''}`}>
@@ -138,7 +145,20 @@ const Customers = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCustomers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-3">
+                {user.profilePicture ? (
+                    <img
+                    src={user.profilePicture}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full object-cover"
+                    />
+                ) : (
+                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User size={16} className="text-gray-500" />
+                    </div>
+                )}
+                <span>{user.name}</span>
+                </td>                
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
