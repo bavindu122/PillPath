@@ -256,7 +256,7 @@ const WalletAndIncome = () => {
             ))
             ) : (
                 <tr>
-                <td colSpan="8" className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                <td colSpan="7" className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                   No transactions found matching your criteria.
                 </td>
               </tr>
