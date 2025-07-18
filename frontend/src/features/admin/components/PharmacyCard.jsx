@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Eye, Edit, Trash2, MoreHorizontal,Calendar,UserPlus } from 'lucide-react';
+import { Mail, Phone, MapPin, Eye, Trash2, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import SuspendPharmacy from './pharmacyPopup/SuspendPharmacy';
 import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
