@@ -145,7 +145,7 @@ const Overview = () => {
                 dataKey="value"
                 label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
               >
-                {mockDashboardData.orderStatusDistribution.map((entry, index) => (
+                {mockDashboardData.userRolesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

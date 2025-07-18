@@ -55,7 +55,7 @@ const months = [
 
 const years = ['All', '2023', '2024'];
 
-const commisionRate = 0.10;
+const commissionRate = 0.10;
 
 
 
@@ -67,7 +67,7 @@ const WalletAndIncome = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const transactionsWithCalculatedFields = transactions.map(tx => {
-        const commission = tx.amount * commisionRate;
+        const commission = tx.amount * commissionRate;
         // displayCommission is signed: positive for online, negative for on-hand
         const displayCommission = tx.paymentType === 'On-Hand' ? -commission : commission;
         return {

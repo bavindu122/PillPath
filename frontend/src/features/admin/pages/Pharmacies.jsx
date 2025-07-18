@@ -96,9 +96,21 @@ const Pharmacies = () => {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <StatCard label="Active Pharmacies" value={1250} icon={<Activity size={48} className="text-blue-500" />} />
-            <StatCard label="Pending Approval" value={85} icon={<ClockAlert size={48} className="text-yellow-500" />} />
-            <StatCard label="Suspended Pharmacies" value={45} icon={<Ban size={48} className="text-red-500" />} />
+            <StatCard
+                label="Active Pharmacies"
+                value={pharmacies.filter(pharmacy => pharmacy.status === "Active").length}
+                icon={<Activity size={48} className="text-blue-500" />}
+            />
+            <StatCard
+                label="Pending Approval"
+                value={pharmacies.filter(pharmacy => pharmacy.status === "Pending").length}
+                icon={<ClockAlert size={48} className="text-yellow-500" />}
+            />
+            <StatCard
+                label="Suspended Pharmacies"
+                value={pharmacies.filter(pharmacy => pharmacy.status === "Suspended").length}
+                icon={<Ban size={48} className="text-red-500" />}
+            />
         </div>
 
         <SearchFilterBar

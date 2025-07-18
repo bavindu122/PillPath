@@ -1,5 +1,4 @@
 import React from 'react'
-import ModalWrapper from '../popup/ModalWrapper'
 
 const SuspendPharmacy = ({ pharmacy, reason, setReason, onCancel, onConfirm }) => {
   return (
