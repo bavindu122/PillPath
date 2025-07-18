@@ -65,6 +65,7 @@ const WalletAndIncome = () => {
     const [filterMonth, setFilterMonth] = useState('All');
     const [filterYear, setFilterYear] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
+    const [visibleRows, setVisibleRows] = useState(10);
 
     const transactionsWithCalculatedFields = transactions.map(tx => {
         const commission = tx.amount * commissionRate;
@@ -127,6 +128,23 @@ const WalletAndIncome = () => {
     online: parseFloat(paymentsByMonth[key].online.toFixed(2)),
     onHand: parseFloat(paymentsByMonth[key].onHand.toFixed(2))
     })).sort((a, b) => new Date(a.name) - new Date(b.name));
+
+
+    // Get only the visible transactions based on visibleRows
+    const visibleTransactions = filteredTransactions.slice(0, visibleRows);
+    const hasMoreTransactions = filteredTransactions.length > visibleRows;
+
+    // Handle "View More" button click
+    const handleViewMore = () => {
+        setVisibleRows(prev => prev + 10);
+    };
+
+    // Reset visible rows when filters change
+    const handleFilterChange = (setter) => (value) => {
+        setter(value);
+        setVisibleRows(10);
+    };
+
 
 
 
@@ -230,7 +248,7 @@ const WalletAndIncome = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((tx) => (
+              visibleTransactions.map((tx) => (
                 <tr key={tx.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tx.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.date}</td>
@@ -264,6 +282,22 @@ const WalletAndIncome = () => {
                 
           </tbody>
         </table>
+
+        {hasMoreTransactions && (
+            <div className="mt-6 flex justify-center">
+            <button
+                onClick={handleViewMore}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+            >
+                <span>View More ({Math.min(10, filteredTransactions.length - visibleRows)} more)</span>
+            </button>
+            </div>
+        )}
+
+        {/* Show total count */}
+        <div className="mt-4 text-center text-sm text-gray-500">
+            Showing {visibleTransactions.length} of {filteredTransactions.length} transactions
+        </div>
       </div>
     </div>
   )
