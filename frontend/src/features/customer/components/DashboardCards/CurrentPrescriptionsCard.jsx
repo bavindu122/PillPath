@@ -6,7 +6,7 @@ const CurrentPrescriptionsCard = () => {
   const prescriptions = [
     {
       id: 1,
-      name: "Metformin 500mg",
+      name: "RX-250714-01",
       schedule: "Twice daily",
       daysRemaining: 5,
       status: "Ready",
@@ -15,7 +15,7 @@ const CurrentPrescriptionsCard = () => {
     },
     {
       id: 2,
-      name: "Lisinopril 10mg",
+      name: "RX-250714-02",
       schedule: "Once daily",
       daysRemaining: 12,
       status: "Processing",
