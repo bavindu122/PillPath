@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapPin, Navigation } from "lucide-react";
 import { calculateDistance } from "../utils/mapHelpers";
+import logo3 from "../../../assets/img/find/logo3.png";
 
 // Fix for Leaflet default icon in React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -65,7 +66,7 @@ const PharmacyMap = ({
         .current-location-dot {
           width: 20px;
           height: 20px;
-          background-color: #2D5DA0;
+          background-color: #2884f4ff;
           border-radius: 50%;
           border: 3px solid white;
           position: absolute;
@@ -76,7 +77,7 @@ const PharmacyMap = ({
         .current-location-pulse {
           width: 40px;
           height: 40px;
-          background-color: rgba(45, 93, 160, 0.4);
+          background-color: #2884f4ff;
           border-radius: 50%;
           position: absolute;
           top: -10px;
@@ -100,67 +101,88 @@ const PharmacyMap = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(12px);
+          background: white;
+          backdrop-filter: none;
           border-radius: 50%;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          border: 2px solid #4CAF50;
           color: #4CAF50;
           font-size: 18px;
           transition: all 0.3s ease;
+          position: relative;
         }
         .pharmacy-marker:hover {
           transform: scale(1.1);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+          border-color: #45a049;
         }
         .pharmacy-marker-selected {
-          background: linear-gradient(135deg, #4CAF50, #45a049);
+          background: #dadadaff;
           color: white;
-          border: 2px solid rgba(255, 255, 255, 0.3);
+          border: 2px solid #45a049;
           transform: scale(1.2);
-          box-shadow: 0 16px 48px rgba(76, 175, 80, 0.3);
+          box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
           z-index: 1000 !important;
         }
+        .pharmacy-marker-selected:hover {
+          background: #dadadaae;
+        }
+        .pharmacy-marker::before {
+          content: '';
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background: #4CAF50;
+          border-radius: 50%;
+          top: -4px;
+          right: -4px;
+          border: 2px solid white;
+          display: none;
+        }
+        .pharmacy-marker-selected::before {
+          display: block;
+          background: #fff;
+        }
         .leaflet-popup-content-wrapper {
-          background: white;
-          border: 1px solid #e0e0e0;
+          background: #1d398e;
+          border: 1px solid #b7c5e0ff;
+          color: #fff;
           border-radius: 12px;
           padding: 0;
           overflow: hidden;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
         .leaflet-popup-tip {
-          background: white;
-          border: 1px solid #e0e0e0;
+          background: #1d398e;
+          border: 1px solid #b7c5e0ff;          
         }
         .pharmacy-popup {
           width: 250px;
           border-radius: 12px;
           overflow: hidden;
-          background: white;
+          background: #1d398e;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .pharmacy-popup-header {
-          background: white;
-          color: #333;
+          background: #1d398e;
+          color: #fff;
           padding: 16px 20px 12px 20px;
           font-weight: 600;
           font-size: 18px;
-          border-bottom: 1px solid #f0f0f0;
         }
         .pharmacy-popup-content {
           padding: 12px 20px;
-          background: white;
-          color: #666;
+          background: #1d398e;
+          color: #fff;
           font-size: 14px;
           line-height: 1.5;
         }
         .pharmacy-popup-content p {
           margin: 0 0 8px 0;
-          color: #666;
+          color: #fff;
         }
         .pharmacy-popup-content strong {
-          color: #333;
+          color: #fff;
           font-weight: 500;
         }
         .pharmacy-rating {
@@ -170,11 +192,11 @@ const PharmacyMap = ({
           margin: 8px 0;
         }
         .pharmacy-rating-stars {
-          color: #ffc107;
+          color: #e6b215ff;
           font-size: 16px;
         }
         .pharmacy-rating-text {
-          color: #666;
+          color: #fff;
           font-size: 14px;
         }
         .pharmacy-hours {
@@ -192,7 +214,7 @@ const PharmacyMap = ({
           margin: 12px 0;
         }
         .pharmacy-service-tag {
-          background: #f0f8f0;
+          background: #1d398e;
           color: #4CAF50;
           padding: 4px 8px;
           border-radius: 12px;
@@ -204,8 +226,7 @@ const PharmacyMap = ({
           justify-content: space-between;
           gap: 12px;
           padding: 16px 20px;
-          background: white;
-          border-top: 1px solid #f0f0f0;
+          background: #1d398e;
         }
         .pharmacy-popup-footer button {
           flex: 1;
@@ -264,8 +285,8 @@ const PharmacyMap = ({
         const pharmacyIcon = L.divIcon({
           className: 'custom-div-icon',
           html: `<div class="pharmacy-marker ${isSelected ? 'pharmacy-marker-selected' : ''}">
-                   <i data-lucide="pill"></i>
-                 </div>`,
+                  <img src="${logo3}" alt="Pharmacy" style="width: 20px; height: 20px; object-fit: contain;" />
+                </div>`,
           iconSize: [36, 36],
           iconAnchor: [18, 18]
         });

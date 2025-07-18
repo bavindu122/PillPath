@@ -38,9 +38,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 10:00 PM",
             phone: "+94 11 234 5678",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
             logo: "/src/assets/img/find/healthfirst.jpeg"
           },
           {
@@ -53,9 +51,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open 24 hours",
             phone: "+94 11 345 6789",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: true,
-            hasVaccinations: false,
             logo: "/src/assets/img/find/medicare.jpeg"
           },
           {
@@ -68,9 +64,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 9:00 PM",
             phone: "+94 11 456 7890",
             hasDelivery: false,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
             logo: "/src/assets/img/find/familycare.jpeg"
           },
           {
@@ -83,9 +77,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 8:00 PM",
             phone: "+94 11 567 8901",
             hasDelivery: true,
-            acceptsInsurance: false,
             has24HourService: false,
-            hasVaccinations: false,
             logo: "/src/assets/img/find/cityhealth.png"
           },
           {
@@ -98,9 +90,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open 24 hours",
             phone: "+94 11 678 9012",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: true,
-            hasVaccinations: true,
             logo: "/src/assets/img/find/24-7.png"
           },
           {
@@ -113,9 +103,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 11:00 PM",
             phone: "+94 11 789 0123",
             hasDelivery: true,
-            acceptsInsurance: false,
             has24HourService: false,
-            hasVaccinations: false,
             logo: "/src/assets/img/find/quickmed.jpg"
           },
           {
@@ -128,9 +116,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 9:30 PM",
             phone: "+94 11 890 1234",
             hasDelivery: false,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
             logo: "/src/assets/img/find/union.png"
           },
           {
@@ -143,9 +129,7 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 10:30 PM",
             phone: "+94 11 901 2345",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
             logo: "/src/assets/img/find/wellness.jpg"
           }
         ];
