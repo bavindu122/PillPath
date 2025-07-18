@@ -89,7 +89,7 @@ const WalletAndIncome = () => {
     });
 
     // Total commission income (always positive, represents gross earnings)
-    const totalCommissionIncome = filteredTransactions.reduce((sum, tx) => sum + tx.amount * commisionRate, 0);
+    const totalCommissionIncome = filteredTransactions.reduce((sum, tx) => sum + tx.amount * commissionRate, 0);
     // Total amounts for online and on-hand payments
     const totalOnlinePayments = filteredTransactions.filter(tx => tx.paymentType === 'Online').reduce((sum, tx) => sum + tx.commission, 0);
     const totalOnHandPayments = filteredTransactions.filter(tx => tx.paymentType === 'On-Hand').reduce((sum, tx) => sum + tx.commission, 0);
