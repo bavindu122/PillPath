@@ -2,6 +2,19 @@ import React from 'react'
 import PageHeader from '../components/PageHeader';
 import StatCard from '../components/StatCard';
 import { Wallet,HandCoins,Handshake,CreditCard ,Search,Filter} from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+import ChartCard from '../components/ChartCard';
 import { useState } from 'react';
 
 const mockTransactions = [
@@ -83,18 +96,38 @@ const WalletAndIncome = () => {
     // Wallet balance based on net cash flow through the system
     const walletBalance = totalCommissionIncome - totalOnHandPayments;
 
-
     // Prepare data for the income chart (using absolute commission for overall trend)
-    const incomeByMonth = filteredTransactions.reduce((acc, tx) => {
-        const monthYear = new Date(tx.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
-        acc[monthYear] = (acc[monthYear] || 0) + tx.commission; // Use absolute commission for total income trend
-        return acc;
+  const incomeByMonth = filteredTransactions.reduce((acc, tx) => {
+    const monthYear = new Date(tx.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+    acc[monthYear] = (acc[monthYear] || 0) + tx.commission; // Use absolute commission for total income trend
+    return acc;
+  }, {});
+
+  const chartDataIncome = Object.keys(incomeByMonth).map(key => ({
+    name: key,
+    income: parseFloat(incomeByMonth[key].toFixed(2))
+  })).sort((a, b) => new Date(a.name) - new Date(b.name)); // Sort by date
+
+
+    const paymentsByMonth = filteredTransactions.reduce((acc, tx) => {
+    const monthYear = new Date(tx.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+    if (!acc[monthYear]) {
+        acc[monthYear] = { online: 0, onHand: 0 };
+    }
+    if (tx.paymentType === 'Online') {
+        acc[monthYear].online += tx.amount;
+    } else {
+        acc[monthYear].onHand += tx.amount;
+    }
+    return acc;
     }, {});
 
-    const chartDataIncome = Object.keys(incomeByMonth).map(key => ({
-        name: key,
-        income: parseFloat(incomeByMonth[key].toFixed(2))
-    })).sort((a, b) => new Date(a.name) - new Date(b.name)); // Sort by date
+    const chartDataPayments = Object.keys(paymentsByMonth).map(key => ({
+    name: key,
+    online: parseFloat(paymentsByMonth[key].online.toFixed(2)),
+    onHand: parseFloat(paymentsByMonth[key].onHand.toFixed(2))
+    })).sort((a, b) => new Date(a.name) - new Date(b.name));
+
 
 
   return (
@@ -112,6 +145,9 @@ const WalletAndIncome = () => {
             <StatCard label="Total On-Hand Payments Income" value={`Rs. ${totalOnHandPayments.toLocaleString()}`}  icon={<Handshake size={48} className="text-purple-500" />} />
             <StatCard label="Current Wallet Balance" value={`Rs. ${walletBalance.toLocaleString()}`}  icon={<Wallet size={48} className="text-blue-500" />} />
         </div>
+
+        
+        
 
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -149,6 +185,34 @@ const WalletAndIncome = () => {
             </div>
             </div>
         </div >
+
+        {/** Income Chart Card */}
+        <ChartCard title="Monthly Commission Income Trend">
+            <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartDataIncome}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip formatter={(value) => `Rs. ${value.toFixed(2)}`} />
+            <Legend />
+            <Line type="monotone" dataKey="income" stroke="#8884d8" activeDot={{ r: 8 }} name="Commission Income" />
+            </LineChart>
+            </ResponsiveContainer>
+        </ChartCard>
+
+        <ChartCard title="Monthly Online vs. On-Hand Payments" >
+            <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartDataPayments} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => `Rs. ${value.toFixed(2)}`} />
+                        <Bar dataKey="online" fill="#3b82f6" name="Online Payments" radius={[5, 5, 0, 0]} />
+                        <Bar dataKey="onHand" fill="#a855f7" name="On-Hand Payments" radius={[5, 5, 0, 0]} />
+                        <Legend />
+                </BarChart>
+            </ResponsiveContainer>
+        </ChartCard>
 
         <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto ">
         <table className="min-w-full divide-y divide-gray-200">
