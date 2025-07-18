@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { assets } from "../../../assets/assets";
-import ProfileModal from "../components/ProfileModal";
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -20,7 +19,6 @@ import {
 import { useCustomerSidebar } from "../hooks";
 
 const CustomerSidebar = () => {
-  const [showProfileModal, setShowProfileModal] = useState(false);
   const { isExpanded, isMobile, toggleSidebar } = useCustomerSidebar();
 
   // Add logo reference
@@ -38,8 +36,6 @@ const CustomerSidebar = () => {
     { path: "/customer/activities", label: "Ongoing Activities", icon: <Activity size={18} /> },
     { path: "/customer/orders", label: "Past Orders", icon: <Clock size={18} /> },
     { path: "#", label: "Family Profiles", icon: <Users size={18} />, onClick: () => setShowProfileModal(true) },
-    { path: "/find-pharmacies", label: "Find Pharmacies", icon: <MapPin size={18} /> },
-    { path: "/otc-store", label: "OTC Store", icon: <ShoppingBag size={18} /> },
     { path: "/medicine-info", label: "Medicine Info", icon: <Pill size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
@@ -177,8 +173,6 @@ const CustomerSidebar = () => {
         </div>
       </motion.aside>
 
-      {/* Profile Modal */}
-      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
       
       {/* Overlay for mobile */}
       {isExpanded && isMobile && (

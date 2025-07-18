@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const RecentOrdersCard = () => {
   const orders = [
     {
-      id: "PX-2024-001",
+      id: "RX-250718-19",
       pharmacy: "Central Pharmacy",
       status: "Out for Delivery",
       eta: "2 hours",
@@ -13,7 +13,7 @@ const RecentOrdersCard = () => {
       items: 3
     },
     {
-      id: "PX-2024-002",
+      id: "RX-250719-20",
       pharmacy: "HealthCare Pharmacy",
       status: "Ready",
       eta: "Ready for pickup",
@@ -49,7 +49,7 @@ const RecentOrdersCard = () => {
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center">
-                  <h4 className="text-white font-medium">Order #{order.id}</h4>
+                  <h4 className="text-white font-medium">{order.id}</h4>
                   <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
                     order.status === "Out for Delivery" 
                       ? "bg-blue-500/20 text-blue-300" 

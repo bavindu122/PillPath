@@ -19,7 +19,6 @@ import CurrentPrescriptionsCard from "../components/DashboardCards/CurrentPrescr
 import RecentOrdersCard from "../components/DashboardCards/RecentOrdersCard";
 import FamilyProfilesCard from "../components/DashboardCards/FamilyProfilesCard";
 import NearbyPharmaciesCard from "../components/DashboardCards/NearbyPharmaciesCard";
-import ProfileModal from "../components/ProfileModal";
 import EditProfileModal from "../components/EditProfileModal";
 import DetailCard from "../components/DetailCard";
 import GlassCard from "../../../components/UIs/GlassCard";
@@ -386,11 +385,6 @@ const CustomerProfile = ({ removeBg = false }) => {
         </div>
       </div>
 
-      <ProfileModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-      />
-      
       <EditProfileModal
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}

@@ -125,7 +125,7 @@ const OrderCard = ({ order, onView }) => {
             <div className="flex gap-2">
               <button
                 onClick={onView}
-                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <Eye size={14} />
                 View
@@ -148,7 +148,7 @@ const OrderCard = ({ order, onView }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="absolute right-0 top-full mt-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-20 min-w-[160px]"
                 >
-                  <button className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white text-sm flex items-center gap-2 rounded-t-xl">
+                  <button className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white text-sm flex items-center gap-2 rounded-t-xl cursor-pointer">
                     <Eye size={14} />
                     View Details
                   </button>
