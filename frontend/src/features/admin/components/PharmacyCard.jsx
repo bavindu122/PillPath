@@ -6,12 +6,24 @@ import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
 import ViewPharmacy from './pharmacyPopup/ViewPharmacy';
 
 
-const PharmacyCard = ({ pharmacy }) => {
+const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration }) => {
 
     const [suspendPopup, setSuspendPopup] = useState(null);
     const [suspendReason, setSuspendReason] = useState('');
     const [activatePopup, setActivatePopup] = useState(null);
     const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+
+    const handleSuspendConfirm = () => {
+        onSuspend(suspendPopup, suspendReason);
+        setSuspendPopup(null);
+        setSuspendReason('');
+    };
+
+    const handleActivateConfirm = () => {
+        onActivate(activatePopup);
+        setActivatePopup(null);
+    };
+
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -86,7 +98,7 @@ const PharmacyCard = ({ pharmacy }) => {
                       >
                         <UserPlus size={18} />
                       </button>
-                    ) : (
+                    ) : pharmacy.status === 'Active' ? (
                       <button
                         onClick={() => setSuspendPopup(pharmacy)}
                         className="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors"
@@ -94,7 +106,7 @@ const PharmacyCard = ({ pharmacy }) => {
                       >
                         <Trash2 size={18} />
                       </button>
-                    )}
+                    ):null}
 
           </div>
 
@@ -103,8 +115,14 @@ const PharmacyCard = ({ pharmacy }) => {
       </div>
 
       {selectedPharmacy && (
-        <ViewPharmacy pharmacy={selectedPharmacy} onClose={() => setSelectedPharmacy(null)} />
-        )}
+        <ViewPharmacy pharmacy={selectedPharmacy} 
+        onClose={() => setSelectedPharmacy(null)} 
+        onAcceptRegistration={(pharmacy) => {
+            onAcceptRegistration(pharmacy);
+            setSelectedPharmacy(null);  // ← This closes the popup
+        }}
+    />
+)}
 
       {suspendPopup && (
             <SuspendPharmacy
@@ -112,11 +130,7 @@ const PharmacyCard = ({ pharmacy }) => {
                 reason={suspendReason}
                 setReason={setSuspendReason}
                 onCancel={() => setSuspendPopup(null)}
-                onConfirm={() => {
-                console.log(`Suspended: ${suspendPopup.name}, Reason: ${suspendReason}`);
-                setSuspendPopup(null);
-                setSuspendReason('');
-                }}
+                onConfirm={handleSuspendConfirm}
             />
             )}
 
@@ -124,10 +138,7 @@ const PharmacyCard = ({ pharmacy }) => {
             <ActivePharmacy
                 pharmacy={activatePopup}
                 onCancel={() => setActivatePopup(null)}
-                onConfirm={() => {
-                console.log(`Activated: ${activatePopup.name}`);
-                setActivatePopup(null);
-                }}
+                onConfirm={handleActivateConfirm}
             />
             )}
 

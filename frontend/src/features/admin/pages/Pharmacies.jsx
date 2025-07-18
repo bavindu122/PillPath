@@ -73,8 +73,9 @@ const Pharmacies = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
+    const [pharmacyList, setPharmacyList] = useState(pharmacies);
 
-    const filteredPharmacies = pharmacies.filter(pharmacy => {
+    const filteredPharmacies = pharmacyList.filter(pharmacy => {
     const matchesSearch =
       pharmacy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pharmacy.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -85,6 +86,32 @@ const Pharmacies = () => {
     return matchesSearch && matchesStatus;
   });
 
+    const handleSuspend = (pharmacy, suspendReason) => {
+        setPharmacyList(prev =>
+            prev.map(p =>
+                p.id === pharmacy.id ? { ...p, status: 'Suspended', suspendReason } : p
+            )
+        );
+        console.log(`Suspended pharmacy: ${pharmacy.name}, Reason: ${suspendReason}`);
+    };
+
+    const handleActivate = (pharmacy) => {
+        setPharmacyList(prev =>
+            prev.map(p =>
+                p.id === pharmacy.id ? { ...p, status: 'Active', suspendReason: null } : p
+            )
+        );
+        console.log(`Activated pharmacy: ${pharmacy.name}`);
+    };
+
+    const handleAcceptRegistration = (pharmacy) => {
+        setPharmacyList(prev =>
+            prev.map(p =>
+                p.id === pharmacy.id ? { ...p, status: 'Active' } : p
+            )
+        );
+        console.log(`Accepted registration for pharmacy: ${pharmacy.name}`);
+    };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
@@ -98,17 +125,17 @@ const Pharmacies = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <StatCard
                 label="Active Pharmacies"
-                value={pharmacies.filter(pharmacy => pharmacy.status === "Active").length}
+                value={pharmacyList.filter(p => p.status === "Active").length}
                 icon={<Activity size={48} className="text-blue-500" />}
             />
             <StatCard
                 label="Pending Approval"
-                value={pharmacies.filter(pharmacy => pharmacy.status === "Pending").length}
+                value={pharmacyList.filter(p => p.status === "Pending").length}
                 icon={<ClockAlert size={48} className="text-yellow-500" />}
             />
             <StatCard
                 label="Suspended Pharmacies"
-                value={pharmacies.filter(pharmacy => pharmacy.status === "Suspended").length}
+                value={pharmacyList.filter(p => p.status === "Suspended").length}
                 icon={<Ban size={48} className="text-red-500" />}
             />
         </div>
@@ -127,6 +154,9 @@ const Pharmacies = () => {
               <PharmacyCard
                 key={pharmacy.id}
                 pharmacy={pharmacy}
+                onSuspend={handleSuspend}
+                onActivate={handleActivate}
+                onAcceptRegistration={handleAcceptRegistration}
                 
               />
             ))}

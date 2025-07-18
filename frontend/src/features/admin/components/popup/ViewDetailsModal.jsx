@@ -7,7 +7,7 @@ const ViewDetailsModal = ({ user, onClose }) => {
     <ModalWrapper onClose={onClose}>
       <h3 className="text-2xl font-bold text-blue-800 mb-4">Customer Details</h3>
 
-      <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-6"> 
         {/* Left: User Details */}
         <div className="space-y-2 text-gray-700 flex-1">
           <p><strong>Name:</strong> {user.name}</p>
