@@ -20,8 +20,8 @@ const Home = () => {
     <div className="overflow-hidden">
       <Slider openPrescriptionModal={openPrescriptionModal} />
       {/* Remove the prop from HowItWorks */}
-      <HowItWorks />
       <CoreFeatures />
+      <HowItWorks />
       <OtcProducts />
       <Statistics />
       <Testimonial />
