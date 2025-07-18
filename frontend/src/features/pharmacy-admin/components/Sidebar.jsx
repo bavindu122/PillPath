@@ -32,7 +32,7 @@ export default function Sidebar() {
     if (path === '/pharmacy/pharmacyinventory') {
       return 'Inventory';
     }
-    if (path === '/pharmacy/orders') {
+    if (path === '/pharmacy/pharmacyorders') {
       return 'Orders';
     }
     if (path === '/pharmacy/pharmacyanalytics') {
@@ -57,7 +57,7 @@ export default function Sidebar() {
     { name: 'Pharmacy Profile', icon: Settings, path: '/pharmacy/pharmacyprofile' },
     { name: 'Staff Management', icon: Users, path: '/pharmacy/pharmacystaff' },
     { name: 'Inventory', icon: Package, path: '/pharmacy/pharmacyinventory' },
-    { name: 'Orders', icon: ClipboardList, path: '/pharmacy/orders' },
+    { name: 'Orders', icon: ClipboardList, path: '/pharmacy/pharmacyorders' },
     { name: 'Sales Analytics', icon: LineChart, path: '/pharmacy/pharmacyanalytics' },
   ];
 
