@@ -21,12 +21,12 @@ import PharmacyProfile from "./pages/FindPharmacies/PharmacyProfile";
 const App = () => {
   const location = useLocation();
   const isPharmacistPath = location.pathname.startsWith("/pharmacist");
-  const isAdminPath = location.pathname.startsWith("/pharmacy");
+  const isPharmacyAdminPath = location.pathname.startsWith("/pharmacy");
   const isCustomerPath = location.pathname.startsWith("/customer");
-  const isAdminpath = location.pathname.startsWith("/admin");
+  const isAdminPath = location.pathname.startsWith("/admin");
   return (
     <div >
-      {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isAdminpath && <Navbar />}
+      {!isPharmacyAdminPath && !isPharmacistPath && !isCustomerPath && !isAdminPath && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
@@ -45,7 +45,7 @@ const App = () => {
         <Route path="/pharma-profile" element={<PharmacyProfile />} />
         <Route path="*" element={<div>Page Not Found</div>} />
       </Routes>
-      {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isAdminpath && <Footer />} 
+      {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isPharmacyAdminPath && <Footer />} 
     </div>
   );
 };
