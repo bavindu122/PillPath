@@ -1,15 +1,15 @@
-import { Users,User } from 'lucide-react'
-import PageHeader from '../components/PageHeader'
-import StatCard from '../components/StatCard'
-import SearchFilterBar from '../components/SearchFilterBar'
-import { useState } from 'react'
-import React from 'react'
-import { Activity, Star, Ban, Eye, Trash2, UserPlus } from 'lucide-react'
-import ViewDetailsModal from '../components/popup/ViewDetailsModal'
-import SuspendUserModal from '../components/popup/SuspendUserModal'
-import ActivateUserModal from '../components/popup/ActivateUserModal'
+import { Users, User } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import StatCard from '../components/StatCard';
+import SearchFilterBar from '../components/SearchFilterBar';
+import { useState } from 'react';
+import React from 'react';
+import { Activity, Star, Ban, Eye, Trash2, UserPlus } from 'lucide-react';
+import ViewDetailsModal from '../components/popup/ViewDetailsModal';
+import SuspendUserModal from '../components/popup/SuspendUserModal';
+import ActivateUserModal from '../components/popup/ActivateUserModal';
 
-const customers = [
+const initialCustomers = [
   {
     id: 1,
     name: 'John Smith',
@@ -22,7 +22,7 @@ const customers = [
     orders: 8,
     loyaltyPoints: 0,
     suspendReason: null,
-    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?...'
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ const customers = [
     orders: 18,
     loyaltyPoints: 0,
     suspendReason: null,
-    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?...'
   },
   {
     id: 3,
@@ -50,7 +50,7 @@ const customers = [
     orders: 4,
     loyaltyPoints: 120,
     suspendReason: null,
-    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?...'
   },
   {
     id: 4,
@@ -83,13 +83,13 @@ const customers = [
 ];
 
 const Customers = () => {
+  const [customers, setCustomers] = useState(initialCustomers);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [suspendPopup, setSuspendPopup] = useState(null);
   const [suspendReason, setSuspendReason] = useState('');
   const [activatePopup, setActivatePopup] = useState(null);
-
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch =
@@ -102,7 +102,24 @@ const Customers = () => {
     return matchesSearch && matchesStatus;
   });
 
-    
+  const handleSuspend = (user) => {
+    setCustomers(prev =>
+      prev.map(c =>
+        c.id === user.id ? { ...c, status: 'Suspended', suspendReason } : c
+      )
+    );
+    setSuspendPopup(null);
+    setSuspendReason('');
+  };
+
+  const handleActivate = (user) => {
+    setCustomers(prev =>
+      prev.map(c =>
+        c.id === user.id ? { ...c, status: 'Active', suspendReason: null } : c
+      )
+    );
+    setActivatePopup(null);
+  };
 
   return (
     <div className={`min-h-screen bg-gray-100 p-8 font-sans ${selectedCustomer ? 'backdrop-blur-sm' : ''}`}>
@@ -113,9 +130,9 @@ const Customers = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <StatCard label="Active Customers" value={1250} icon={<Activity size={48} className="text-blue-500" />} />
-        <StatCard label="Loyalty Members" value={85} icon={<Star size={48} className="text-yellow-500" />} />
-        <StatCard label="Suspended Accounts" value={45} icon={<Ban size={48} className="text-red-500" />} />
+        <StatCard label="Active Customers" value={customers.filter(c => c.status === 'Active').length} icon={<Activity size={48} className="text-blue-500" />} />
+        <StatCard label="Loyalty Members" value={customers.filter(c => c.status === 'Loyalty').length} icon={<Star size={48} className="text-yellow-500" />} />
+        <StatCard label="Suspended Accounts" value={customers.filter(c => c.status === 'Suspended').length} icon={<Ban size={48} className="text-red-500" />} />
       </div>
 
       <SearchFilterBar
@@ -146,19 +163,15 @@ const Customers = () => {
             {filteredCustomers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-3">
-                {user.profilePicture ? (
-                    <img
-                    src={user.profilePicture}
-                    alt={user.name}
-                    className="h-8 w-8 rounded-full object-cover"
-                    />
-                ) : (
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.name} className="h-8 w-8 rounded-full object-cover" />
+                  ) : (
                     <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <User size={16} className="text-gray-500" />
+                      <User size={16} className="text-gray-500" />
                     </div>
-                )}
-                <span>{user.name}</span>
-                </td>                
+                  )}
+                  <span>{user.name}</span>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -210,36 +223,27 @@ const Customers = () => {
 
       {selectedCustomer && (
         <ViewDetailsModal user={selectedCustomer} onClose={() => setSelectedCustomer(null)} />
-    )}
+      )}
 
-        {suspendPopup && (
-            <SuspendUserModal
-                user={suspendPopup}
-                reason={suspendReason}
-                setReason={setSuspendReason}
-                onCancel={() => setSuspendPopup(null)}
-                onConfirm={() => {
-                console.log(`Suspended: ${suspendPopup.name}, Reason: ${suspendReason}`);
-                setSuspendPopup(null);
-                setSuspendReason('');
-                }}
-            />
-            )}
+      {suspendPopup && (
+        <SuspendUserModal
+          user={suspendPopup}
+          reason={suspendReason}
+          setReason={setSuspendReason}
+          onCancel={() => setSuspendPopup(null)}
+          onConfirm={() => handleSuspend(suspendPopup)}
+        />
+      )}
 
-            {activatePopup && (
-            <ActivateUserModal
-                user={activatePopup}
-                onCancel={() => setActivatePopup(null)}
-                onConfirm={() => {
-                console.log(`Activated: ${activatePopup.name}`);
-                setActivatePopup(null);
-                }}
-            />
-            )}
-
-      
+      {activatePopup && (
+        <ActivateUserModal
+          user={activatePopup}
+          onCancel={() => setActivatePopup(null)}
+          onConfirm={() => handleActivate(activatePopup)}
+        />
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Customers
+export default Customers;
