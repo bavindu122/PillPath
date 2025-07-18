@@ -100,7 +100,7 @@ const PastOrders = () => {
     },
     {
       id: "RX-250117-06",
-      orderNumber: "RX-250117-016",
+      orderNumber: "RX-250117-06",
       total: "$203.40",
       date: "Dec 15, 2024",
       time: "1:10 PM", 
