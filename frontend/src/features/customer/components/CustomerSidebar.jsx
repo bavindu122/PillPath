@@ -37,7 +37,6 @@ const CustomerSidebar = () => {
     { path: "/customer", label: "Dashboard", icon: <Home size={18} /> },
     { path: "/customer/activities", label: "Ongoing Activities", icon: <Activity size={18} /> },
     { path: "/customer/orders", label: "Past Orders", icon: <Clock size={18} /> },
-    { path: "/customer/medical-records", label: "Medical Records", icon: <FileText size={18} /> },
     { path: "#", label: "Family Profiles", icon: <Users size={18} />, onClick: () => setShowProfileModal(true) },
     { path: "/find-pharmacies", label: "Find Pharmacies", icon: <MapPin size={18} /> },
     { path: "/otc-store", label: "OTC Store", icon: <ShoppingBag size={18} /> },

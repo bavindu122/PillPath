@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { BellDot, Menu, LogOutIcon } from "lucide-react";
-import ProfileModal from "../../features/customer/components/ProfileModal";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -10,7 +9,6 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
 
 
   // Track scroll position for styling changes
@@ -224,9 +222,7 @@ const Navbar = () => {
         )}
       </div>
       
-      {/* Profile Modal */}
-      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
-    </>
+      </>
   );
 };
 

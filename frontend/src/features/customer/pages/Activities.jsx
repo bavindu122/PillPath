@@ -268,7 +268,7 @@ const Activities = () => {
         <div className="mb-8 bg-black/20 p-4 rounded-lg">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></div>
-            <h2 className="text-2xl font-semibold text-white">Ongoing Activities</h2>
+            <h2 className="text-4xl font-semibold text-white">Ongoing Activities</h2>
           </div>
           <p className="text-white/70 text-lg">Track your prescription orders and delivery status</p>
         </div>
@@ -348,7 +348,7 @@ const Activities = () => {
                           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
                             <div className="text-center">
                               <div className="text-white/60 text-xs mb-1">Total:</div>
-                              <div className="text-white font-bold text-lg whitespace-nowrap">
+                              <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
                                 ${calculateTotalPrice(pharmacy.medications).toFixed(2)}
                               </div>
                             </div>
