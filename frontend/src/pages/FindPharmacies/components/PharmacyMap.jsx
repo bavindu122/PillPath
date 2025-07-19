@@ -107,7 +107,10 @@ const PharmacyMap = ({
 
         const pharmacyIcon = L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style="${Object.entries(markerStyle).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}">
+          html: `<div style="${Object.entries(markerStyle).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}"
+                      onmouseover="if (!this.classList.contains('selected')) { this.style.background='#f5f5f5'; this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.2)'; }"
+                      onmouseout="if (!this.classList.contains('selected')) { this.style.background='white'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'; }"
+                      class="${isSelected ? 'selected' : ''}">
                   <img src="${logo3}" alt="Pharmacy" style="width: 20px; height: 20px; object-fit: contain;" />
                 </div>`,
           iconSize: [36, 36],
@@ -123,8 +126,9 @@ const PharmacyMap = ({
         // Create custom popup with inline styles
         const popupContent = `
           <div style="width: 280px; border-radius: 12px; overflow: hidden; background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <div style="background: white; color: #333; padding: 16px 20px 12px 20px; font-weight: 600; font-size: 18px; border-bottom: 1px solid #f0f0f0;">
-              ${pharmacy.name}
+            <div style="background: white; color: #333; padding: 16px 20px 12px 20px; font-weight: 600; font-size: 18px; display: flex; align-items: center; gap: 12px;">
+              <img src="${pharmacy.logo || logo3}" alt="${pharmacy.name}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px; border: 1px solid #e0e0e0;" />
+              <span>${pharmacy.name}</span>
             </div>
             <div style="padding: 12px 20px; background: white; color: #666; font-size: 14px; line-height: 1.5;">
               <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
@@ -137,14 +141,20 @@ const PharmacyMap = ({
               </div>
               <div style="display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0;">
                 ${pharmacy.hasDelivery ? '<span style="background: #f0f8f0; color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Delivery</span>' : ''}
-                ${pharmacy.has24HourService ? '<span style="background: #f0f8f0; color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Mobile App</span>' : ''}
+                ${pharmacy.has24HourService ? '<span style="background: #ffedd4; color: #ba6240ff; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">24 Hours</span>' : ''}
               </div>
             </div>
-            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 16px 20px; background: white; border-top: 1px solid #f0f0f0;">
-              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #4CAF50; color: white;" onclick="console.log('View details for ${pharmacy.name}')">
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 16px 20px; background: white;">
+              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #4CAF50; color: white;" 
+                      onmouseover="this.style.background='#45a049'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)'"
+                      onmouseout="this.style.background='#4CAF50'; this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                      onclick="window.location.href='/pharma-profile/${pharmacy.id}'">
                 View Details
               </button>
-              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f5f5f5; color: #666;" onclick="console.log('Get directions to ${pharmacy.name}')">
+              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f5f5f5; color: #666;" 
+                      onmouseover="this.style.background='#e0e0e0'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)'"
+                      onmouseout="this.style.background='#f5f5f5'; this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                      onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${pharmacy.lat},${pharmacy.lng}', '_blank')">
                 Directions
               </button>
             </div>
@@ -214,7 +224,7 @@ const PharmacyMap = ({
       <style jsx>{`
         .leaflet-popup-content-wrapper {
           background: white !important;
-          border: 1px solid #e0e0e0 !important;
+          border: 1px solid #43b611ff !important;
           border-radius: 12px !important;
           padding: 0 !important;
           overflow: hidden !important;
@@ -222,7 +232,7 @@ const PharmacyMap = ({
         }
         .leaflet-popup-tip {
           background: white !important;
-          border: 1px solid #e0e0e0 !important;
+          border: 1px solid #43b611ff !important;
         }
       `}</style>
     </div>
