@@ -1,17 +1,30 @@
-
 import React, { useState } from 'react';
-import { UserPlus, Trash2, Edit3, Search } from 'lucide-react'; // Added icons
+import { UserPlus, Trash2, Edit3, Search, Camera, Sparkles, Users, Shield } from 'lucide-react';
+import profilepic1 from '../../../../assets/profile_pic.png'
+import profilepic2 from '../../../../assets/profile_pic.png'
+import profilepic3 from '../../../../assets/pharmacist.png'
 
 export default function StaffManagement() {
   const [staffMembers, setStaffMembers] = useState([
-    { id: 1, name: 'Alice Wonderland', role: 'Pharmacist', email: 'alice@pharmacare.com', phone: '111-222-3333' },
-    { id: 2, name: 'Bob The Builder', role: 'Pharmacy Technician', email: 'bob@pharmacare.com', phone: '444-555-6666' },
-    { id: 3, name: 'Charlie Chaplin', role: 'Administrator', email: 'charlie@pharmacare.com', phone: '777-888-9999' },
+    { id: 1, name: 'Alice Wonderland', profilePicture: profilepic1, email: 'alice@pharmacare.com', phone: '111-222-3333' },
+    { id: 2, name: 'Bob The Builder', profilePicture: profilepic2, email: 'bob@pharmacare.com', phone: '444-555-6666' },
+    { id: 3, name: 'Charlie Chaplin', profilePicture: profilepic3, email: 'charlie@pharmacare.com', phone: '777-888-9999' },
   ]);
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
-  const [newStaff, setNewStaff] = useState({ name: '', role: '', email: '', phone: '' });
+  const [newStaff, setNewStaff] = useState({ name: '', profilePicture: '', email: '', phone: '' });
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingStaffId, setEditingStaffId] = useState(null); // State to track which staff member is being edited
+  const [editingStaffId, setEditingStaffId] = useState(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewStaff({ ...newStaff, profilePicture: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddStaff = (e) => {
     e.preventDefault();
@@ -19,9 +32,9 @@ export default function StaffManagement() {
       setStaffMembers(staffMembers.map(staff => staff.id === editingStaffId ? { ...staff, ...newStaff } : staff));
       setEditingStaffId(null);
     } else {
-      setStaffMembers([...staffMembers, { id: staffMembers.length + 1, ...newStaff }]);
+      setStaffMembers([...staffMembers, { id: Date.now(), ...newStaff }]);
     }
-    setNewStaff({ name: '', role: '', email: '', phone: '' });
+    setNewStaff({ name: '', profilePicture: '', email: '', phone: '' });
     setShowAddStaffModal(false);
   };
 
@@ -31,156 +44,235 @@ export default function StaffManagement() {
 
   const handleEditStaff = (staff) => {
     setEditingStaffId(staff.id);
-    setNewStaff({ name: staff.name, role: staff.role, email: staff.email, phone: staff.phone });
+    setNewStaff({ name: staff.name, profilePicture: staff.profilePicture, email: staff.email, phone: staff.phone });
     setShowAddStaffModal(true);
   };
 
   const filteredStaff = staffMembers.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.role.toLowerCase().includes(searchTerm.toLowerCase())
+    staff.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Staff Management</h2>
-
-      <div className="bg-white p-6 rounded-lg shadow-xl mb-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative flex-1 mr-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search staff members..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10">
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4 shadow-md">
+            <Users className="h-8 w-8 text-white" />
           </div>
-          <button
-            onClick={() => {
-              setEditingStaffId(null);
-              setNewStaff({ name: '', role: '', email: '', phone: '' });
-              setShowAddStaffModal(true);
-            }}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 shadow-md"
-          >
-            <UserPlus className="h-5 w-5 mr-2" />
-            Add Staff
-          </button>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Staff Management
+          </h1>
+          <p className="text-gray-600">Manage your pharmacy team and staff members</p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredStaff.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">No staff members found.</td>
-                </tr>
-              ) : (
-                filteredStaff.map((staff) => (
-                  <tr key={staff.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{staff.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{staff.role}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{staff.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{staff.phone}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEditStaff(staff)}
-                        className="text-blue-600 hover:text-blue-900 mr-3 p-1 rounded-md hover:bg-blue-100 transition-colors"
-                        title="Edit Staff"
-                      >
-                        <Edit3 className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStaff(staff.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition-colors"
-                        title="Delete Staff"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        {/* Main Card */}
+        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8">
+          {/* Header Actions */}
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+            <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-6 w-6 text-blue-600" />
+                <span className="text-sm font-medium text-gray-600">Team Members: {staffMembers.length}</span>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                setEditingStaffId(null);
+                setNewStaff({ name: '', profilePicture: '', email: '', phone: '' });
+                setShowAddStaffModal(true);
+              }}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200"
+            >
+              <div className="flex items-center">
+                <UserPlus className="h-5 w-5 mr-2" />
+                <span className="font-medium">Add Staff Member</span>
+              </div>
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-6 relative">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                placeholder="Search staff members by name or email..."
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Staff Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredStaff.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-10 w-10 text-gray-500" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-700 mb-2">No Staff Members Found</h3>
+                <p className="text-gray-500">Try adjusting your search criteria or add a new staff member.</p>
+              </div>
+            ) : (
+              filteredStaff.map((staff) => (
+                <div key={staff.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  {/* Profile Picture */}
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      {staff.profilePicture ? (
+                        <img 
+                          src={staff.profilePicture} 
+                          alt={`${staff.name}'s profile`} 
+                          className="w-20 h-20 rounded-full object-cover border-4 border-white shadow"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow">
+                          {staff.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Staff Info */}
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{staff.name}</h3>
+                    <p className="text-sm text-gray-500 mb-1">{staff.email}</p>
+                    <p className="text-sm text-gray-500">{staff.phone}</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-center space-x-3">
+                    <button
+                      onClick={() => handleEditStaff(staff)}
+                      className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors duration-200"
+                    >
+                      <div className="flex items-center">
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Edit</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStaff(staff.id)}
+                      className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors duration-200"
+                    >
+                      <div className="flex items-center">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Delete</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 
       {/* Add/Edit Staff Modal */}
       {showAddStaffModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">{editingStaffId ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
-            <form onSubmit={handleAddStaff}>
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  id="name"
-                  value={newStaff.name}
-                  onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-full mb-4">
+                  <UserPlus className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800">
+                  {editingStaffId ? 'Edit Staff Member' : 'Add New Staff Member'}
+                </h3>
               </div>
-              <div className="mb-4">
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <input
-                  type="text"
-                  id="role"
-                  value={newStaff.role}
-                  onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
+
+              <div className="space-y-4">
+                {/* Name Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={newStaff.name}
+                    onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                  />
+                </div>
+
+                {/* Profile Picture */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                  <div className="flex items-center space-x-4">
+                    {newStaff.profilePicture ? (
+                      <img src={newStaff.profilePicture} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
+                        {newStaff.name.charAt(0) || '?'}
+                      </div>
+                    )}
+                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                      <div className="flex items-center">
+                        <Camera className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Upload Image</span>
+                      </div>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    value={newStaff.email}
+                    onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                  />
+                </div>
+
+                {/* Phone Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    value={newStaff.phone}
+                    onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddStaffModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddStaff}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    <div className="flex items-center">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      <span className="font-medium">
+                        {editingStaffId ? 'Update Staff' : 'Add Staff'}
+                      </span>
+                    </div>
+                  </button>
+                </div>
               </div>
-              <div className="mb-4">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={newStaff.email}
-                  onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="mb-6">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input
-                  type="text"
-                  id="phone"
-                  value={newStaff.phone}
-                  onChange={(e) => setNewStaff({ ...newStaff, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAddStaffModal(false)}
-                  className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
-                >
-                  {editingStaffId ? 'Update Staff' : 'Add Staff'}
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
