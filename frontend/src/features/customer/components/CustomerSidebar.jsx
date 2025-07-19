@@ -35,7 +35,7 @@ const CustomerSidebar = () => {
     { path: "/customer", label: "Dashboard", icon: <Home size={18} /> },
     { path: "/customer/activities", label: "Ongoing Activities", icon: <Activity size={18} /> },
     { path: "/customer/orders", label: "Past Orders", icon: <Clock size={18} /> },
-    { path: "#", label: "Family Profiles", icon: <Users size={18} />, onClick: () => setShowProfileModal(true) },
+    { path: "/customer/family-profiles", label: "Family Profiles", icon: <Users size={18} /> },
     { path: "/medicine-info", label: "Medicine Info", icon: <Pill size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
@@ -84,49 +84,28 @@ const CustomerSidebar = () => {
               whileTap={{ scale: 0.98 }}
               className="overflow-hidden"
             >
-              {item.onClick ? (
-                <button 
-                  onClick={item.onClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl ${linkStyles.inactive} w-full transition-all duration-200`}
-                >
-                  <div className="text-white/80">{item.icon}</div>
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: "auto" }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </button>
-              ) : (
-                <NavLink 
-                  to={item.path}
-                  end={item.path === "/customer"}
-                  className={({ isActive }) => 
-                    `flex items-center gap-3 px-4 py-3 rounded-xl ${isActive ? linkStyles.active : linkStyles.inactive} transition-all duration-200`
-                  }
-                >
-                  <div className="text-white/80">{item.icon}</div>
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.span
-                        initial={{ opacity: 0, width: 0 }}
-                        animate={{ opacity: 1, width: "auto" }}
-                        exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="whitespace-nowrap"
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </NavLink>
-              )}
+              <NavLink 
+                to={item.path}
+                end={item.path === "/customer"}
+                className={({ isActive }) => 
+                  `flex items-center gap-3 px-4 py-3 rounded-xl ${isActive ? linkStyles.active : linkStyles.inactive} transition-all duration-200`
+                }
+              >
+                <div className="text-white/80">{item.icon}</div>
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="whitespace-nowrap"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </NavLink>
             </motion.div>
           ))}
         </nav>

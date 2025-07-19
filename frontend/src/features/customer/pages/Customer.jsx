@@ -5,6 +5,7 @@ import MedicalRecordsDetailed from "./MedicalRecordsDetailed";
 import Activities from "./Activities";
 import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
+import FamilyProfiles from "./FamilyProfiles";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
@@ -39,6 +40,7 @@ const Customer = () => {
           <Route index element={<CustomerProfile removeBg={true} />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/orders" element={<PastOrders />} />
+          <Route path="/family-profiles" element={<FamilyProfiles />} />
           <Route path="/order-preview/:prescriptionId" element={<OrderPreview />} />
           <Route path="/medical-records" element={<MedicalRecords />} />
           <Route
