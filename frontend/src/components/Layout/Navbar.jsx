@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
-import { NavLink, useNavigate } from "react-router-dom";
-import { BellDot, Menu, LogOutIcon } from "lucide-react";
-import ProfileModal from "../../features/customer/components/ProfileModal";
+import { useNavigate } from "react-router-dom";
+import { BellDot, Menu, LogOut } from "lucide-react";
+
 import DesktopNav from "./components/DesktopNav";
 import ProfileDropdown from "./components/ProfileDropdown";
 import MobileFloatingNav from "./components/MobileFloatingNav";
@@ -152,11 +152,7 @@ const Navbar = () => {
       {/* Floating Mobile Navigation */}
       <MobileFloatingNav />
 
-      {/* Profile Modal */}
-      <ProfileModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-      />
+        
     </>
   );
 };
