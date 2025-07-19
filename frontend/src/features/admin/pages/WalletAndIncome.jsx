@@ -153,7 +153,7 @@ const WalletAndIncome = () => {
 
         <PageHeader 
             icon={Wallet} 
-            title="Wallet & Income Overview" 
+            title="Wallet & Income Overview"  
             subtitle="Detailed financial insights into PillPath transactions and earnings" 
         />
 
