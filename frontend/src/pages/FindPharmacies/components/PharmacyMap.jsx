@@ -39,9 +39,9 @@ const PharmacyMap = ({
       // Add current location marker
       const currentLocationIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: `<div class="current-location-marker">
-                 <div class="current-location-dot"></div>
-                 <div class="current-location-pulse"></div>
+        html: `<div style="position: relative; width: 20px; height: 20px;">
+                 <div style="width: 20px; height: 20px; background-color: #2884f4; border-radius: 50%; border: 3px solid white; position: absolute; top: 0; left: 0; z-index: 2;"></div>
+                 <div style="width: 40px; height: 40px; background-color: rgba(40, 132, 244, 0.4); border-radius: 50%; position: absolute; top: -10px; left: -10px; z-index: 1; animation: pulse 2s infinite;"></div>
                </div>`,
         iconSize: [30, 30],
         iconAnchor: [15, 15]
@@ -53,209 +53,14 @@ const PharmacyMap = ({
         .openPopup();
     }
 
-    // Apply custom CSS for current location marker
-    if (!document.getElementById('map-custom-css')) {
+    // Add CSS animations for pulse effect
+    if (!document.getElementById('map-animations')) {
       const style = document.createElement('style');
-      style.id = 'map-custom-css';
+      style.id = 'map-animations';
       style.innerHTML = `
-        .current-location-marker {
-          position: relative;
-          width: 20px;
-          height: 20px;
-        }
-        .current-location-dot {
-          width: 20px;
-          height: 20px;
-          background-color: #2884f4ff;
-          border-radius: 50%;
-          border: 3px solid white;
-          position: absolute;
-          top: 0;
-          left: 0;
-          z-index: 2;
-        }
-        .current-location-pulse {
-          width: 40px;
-          height: 40px;
-          background-color: #2884f4ff;
-          border-radius: 50%;
-          position: absolute;
-          top: -10px;
-          left: -10px;
-          z-index: 1;
-          animation: pulse 2s infinite;
-        }
         @keyframes pulse {
-          0% {
-            transform: scale(0.5);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1.5);
-            opacity: 0;
-          }
-        }
-        .pharmacy-marker {
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: white;
-          backdrop-filter: none;
-          border-radius: 50%;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          border: 2px solid #4CAF50;
-          color: #4CAF50;
-          font-size: 18px;
-          transition: all 0.3s ease;
-          position: relative;
-        }
-        .pharmacy-marker:hover {
-          transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
-          border-color: #45a049;
-        }
-        .pharmacy-marker-selected {
-          background: #dadadaff;
-          color: white;
-          border: 2px solid #45a049;
-          transform: scale(1.2);
-          box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4);
-          z-index: 1000 !important;
-        }
-        .pharmacy-marker-selected:hover {
-          background: #dadadaae;
-        }
-        .pharmacy-marker::before {
-          content: '';
-          position: absolute;
-          width: 8px;
-          height: 8px;
-          background: #4CAF50;
-          border-radius: 50%;
-          top: -4px;
-          right: -4px;
-          border: 2px solid white;
-          display: none;
-        }
-        .pharmacy-marker-selected::before {
-          display: block;
-          background: #fff;
-        }
-        .leaflet-popup-content-wrapper {
-          background: #1d398e;
-          border: 1px solid #b7c5e0ff;
-          color: #fff;
-          border-radius: 12px;
-          padding: 0;
-          overflow: hidden;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-        .leaflet-popup-tip {
-          background: #1d398e;
-          border: 1px solid #b7c5e0ff;          
-        }
-        .pharmacy-popup {
-          width: 250px;
-          border-radius: 12px;
-          overflow: hidden;
-          background: #1d398e;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        .pharmacy-popup-header {
-          background: #1d398e;
-          color: #fff;
-          padding: 16px 20px 12px 20px;
-          font-weight: 600;
-          font-size: 18px;
-        }
-        .pharmacy-popup-content {
-          padding: 12px 20px;
-          background: #1d398e;
-          color: #fff;
-          font-size: 14px;
-          line-height: 1.5;
-        }
-        .pharmacy-popup-content p {
-          margin: 0 0 8px 0;
-          color: #fff;
-        }
-        .pharmacy-popup-content strong {
-          color: #fff;
-          font-weight: 500;
-        }
-        .pharmacy-rating {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin: 8px 0;
-        }
-        .pharmacy-rating-stars {
-          color: #e6b215ff;
-          font-size: 16px;
-        }
-        .pharmacy-rating-text {
-          color: #fff;
-          font-size: 14px;
-        }
-        .pharmacy-hours {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin: 8px 0;
-          color: #4CAF50;
-          font-weight: 500;
-        }
-        .pharmacy-services {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          margin: 12px 0;
-        }
-        .pharmacy-service-tag {
-          background: #1d398e;
-          color: #4CAF50;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-        .pharmacy-popup-footer {
-          display: flex;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 16px 20px;
-          background: #1d398e;
-        }
-        .pharmacy-popup-footer button {
-          flex: 1;
-          padding: 10px 16px;
-          border: none;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          text-align: center;
-        }
-        .pharmacy-popup-footer button:first-child {
-          background: #4CAF50;
-          color: white;
-        }
-        .pharmacy-popup-footer button:first-child:hover {
-          background: #45a049;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-        }
-        .pharmacy-popup-footer button:last-child {
-          background: #f5f5f5;
-          color: #666;
-        }
-        .pharmacy-popup-footer button:last-child:hover {
-          background: #e0e0e0;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          0% { transform: scale(0.5); opacity: 1; }
+          100% { transform: scale(1.5); opacity: 0; }
         }
       `;
       document.head.appendChild(style);
@@ -282,9 +87,27 @@ const PharmacyMap = ({
       pharmacies.forEach(pharmacy => {
         const isSelected = selectedPharmacy && selectedPharmacy.id === pharmacy.id;
         
+        const markerStyle = {
+          width: '36px',
+          height: '36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'white',
+          borderRadius: '50%',
+          boxShadow: isSelected ? '0 8px 24px rgba(76, 175, 80, 0.4)' : '0 4px 12px rgba(0, 0, 0, 0.15)',
+          border: isSelected ? '2px solid #45a049' : '2px solid #4CAF50',
+          color: isSelected ? 'white' : '#4CAF50',
+          fontSize: '18px',
+          transition: 'all 0.3s ease',
+          position: 'relative',
+          transform: isSelected ? 'scale(1.2)' : 'scale(1)',
+          zIndex: isSelected ? '1000' : 'auto'
+        };
+
         const pharmacyIcon = L.divIcon({
           className: 'custom-div-icon',
-          html: `<div class="pharmacy-marker ${isSelected ? 'pharmacy-marker-selected' : ''}">
+          html: `<div style="${Object.entries(markerStyle).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}">
                   <img src="${logo3}" alt="Pharmacy" style="width: 20px; height: 20px; object-fit: contain;" />
                 </div>`,
           iconSize: [36, 36],
@@ -297,34 +120,42 @@ const PharmacyMap = ({
             setSelectedPharmacy(pharmacy);
           });
 
-        // Create custom popup
+        // Create custom popup with inline styles
         const popupContent = `
-          <div class="pharmacy-popup">
-            <div class="pharmacy-popup-header">
+          <div style="width: 280px; border-radius: 12px; overflow: hidden; background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="background: white; color: #333; padding: 16px 20px 12px 20px; font-weight: 600; font-size: 18px; border-bottom: 1px solid #f0f0f0;">
               ${pharmacy.name}
             </div>
-            <div class="pharmacy-popup-content">
-              <div class="pharmacy-rating">
-                <span class="pharmacy-rating-stars">★★★★★</span>
-                <span class="pharmacy-rating-text">${pharmacy.rating} (142 reviews)</span>
+            <div style="padding: 12px 20px; background: white; color: #666; font-size: 14px; line-height: 1.5;">
+              <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
+                <span style="color: #ffc107; font-size: 16px;">★★★★★</span>
+                <span style="color: #666; font-size: 14px;">${pharmacy.rating} (142 reviews)</span>
               </div>
-              <p>${pharmacy.address}</p>
-              <div class="pharmacy-hours">
+              <p style="margin: 0 0 8px 0; color: #666;">${pharmacy.address}</p>
+              <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0; color: #4CAF50; font-weight: 500;">
                 <span>${pharmacy.hours}</span>
               </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0;">
+                ${pharmacy.hasDelivery ? '<span style="background: #f0f8f0; color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Delivery</span>' : ''}
+                ${pharmacy.has24HourService ? '<span style="background: #f0f8f0; color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Mobile App</span>' : ''}
+              </div>
             </div>
-            <div class="pharmacy-popup-footer">
-              <button onclick="console.log('View details for ${pharmacy.name}')">
-                View
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 16px 20px; background: white; border-top: 1px solid #f0f0f0;">
+              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #4CAF50; color: white;" onclick="console.log('View details for ${pharmacy.name}')">
+                View Details
               </button>
-              <button onclick="console.log('Get directions to ${pharmacy.name}')">
+              <button style="flex: 1; padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; text-align: center; background: #f5f5f5; color: #666;" onclick="console.log('Get directions to ${pharmacy.name}')">
                 Directions
               </button>
             </div>
           </div>
         `;
         
-        marker.bindPopup(popupContent);
+        marker.bindPopup(popupContent, {
+          className: 'custom-popup',
+          closeButton: true,
+          autoPan: true
+        });
         markersRef.current[pharmacy.id] = marker;
       });
 
@@ -358,9 +189,9 @@ const PharmacyMap = ({
       )}
       
       {!currentLocation && (
-        <div className="flex items-center justify-center h-[500px] bg-gray-100">
+        <div className="flex items-center justify-center h-[500px] bg-gray-100/60 backdrop-blur-md rounded-2xl border border-white/30">
           <div className="text-center p-8">
-            <MapPin size={40} className="mx-auto text-gray-400 mb-4" />
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading map...</p>
           </div>
         </div>
@@ -369,7 +200,7 @@ const PharmacyMap = ({
       {/* Map controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2">
         <button 
-          className="p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+          className="p-3 bg-white/60 backdrop-blur-md rounded-full shadow-lg hover:bg-white/90 transition-all duration-300 border border-white/30"
           onClick={() => {
             if (mapInstanceRef.current && currentLocation) {
               mapInstanceRef.current.setView([currentLocation.lat, currentLocation.lng], 14);
@@ -379,6 +210,21 @@ const PharmacyMap = ({
           <Navigation size={20} className="text-primary" />
         </button>
       </div>
+
+      <style jsx>{`
+        .leaflet-popup-content-wrapper {
+          background: white !important;
+          border: 1px solid #e0e0e0 !important;
+          border-radius: 12px !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+        .leaflet-popup-tip {
+          background: white !important;
+          border: 1px solid #e0e0e0 !important;
+        }
+      `}</style>
     </div>
   );
 };

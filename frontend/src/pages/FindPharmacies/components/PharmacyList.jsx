@@ -82,7 +82,7 @@ const PharmacyList = ({
                   <h3 className="font-bold text-lg text-dark">{pharmacy.name}</h3>
                   <div className="flex items-center text-yellow-500">
                     <Star size={16} className="fill-yellow-500" />
-                    <span className="ml-1 text-sm font-medium">{pharmacy.rating}</span>
+                    <span className="ml-1 text-sm text-dark font-medium">{pharmacy.rating}</span>
                   </div>
                 </div>
                 
