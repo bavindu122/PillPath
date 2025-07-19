@@ -1,5 +1,7 @@
 import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { AuthProvider } from "./hooks/useAuth";
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
@@ -22,27 +24,33 @@ const App = () => {
   const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isAdminPath = location.pathname.startsWith("/pharmacy");
   const isCustomerPath = location.pathname.startsWith("/customer");
+
   return (
-    <div >
-      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/otc" element={<Otc />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
-        <Route path="/pharmacist/*" element={<Pharmacist />} />
-        <Route path="/customer/*" element={<Customer />} />
-        <Route path="/find-pharmacy" element={<FindPharmacy />} />
-        <Route path="/pharma-profile/:pharmacyId" element={<PharmacyProfile />} />
-        <Route path="/pharma-profile" element={<PharmacyProfile />} />
-        <Route path="*" element={<div>Page Not Found</div>} />
-      </Routes>
-      {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
-    </div>
+    <AuthProvider>
+      <div>
+        {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Navbar />}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/otc" element={<Otc />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
+          <Route path="/pharmacist/*" element={<Pharmacist />} />
+          <Route path="/customer/*" element={<Customer />} />
+          <Route path="/find-pharmacy" element={<FindPharmacy />} />
+          <Route
+            path="/pharma-profile/:pharmacyId"
+            element={<PharmacyProfile />}
+          />
+          <Route path="/pharma-profile" element={<PharmacyProfile />} />
+          <Route path="*" element={<div>Page Not Found</div>} />
+        </Routes>
+        {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
+      </div>
+    </AuthProvider>
   );
 };
 
