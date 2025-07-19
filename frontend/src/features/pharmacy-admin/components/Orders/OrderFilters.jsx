@@ -45,7 +45,6 @@ const OrderFilters = ({
             <option value="all">All Types</option>
             <option value="prescription">Prescriptions</option>
             <option value="otc">OTC Items</option>
-            <option value="mixed">Mixed Orders</option>
           </select>
         </div>
 
@@ -81,3 +80,5 @@ const OrderFilters = ({
 };
 
 export default OrderFilters;
+
+

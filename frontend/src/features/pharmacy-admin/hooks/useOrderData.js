@@ -56,38 +56,13 @@ const useOrdersData = () => {
         const orderDate = new Date();
         orderDate.setDate(orderDate.getDate() - Math.floor(Math.random() * 90)); // Random date within last 90 days
         
-        // Decide if this order includes prescription, OTC, or both
-        const hasPrescription = Math.random() > 0.3;
-        const hasOTC = Math.random() > 0.3;
-        
         let items = [];
-        let orderType = 'mixed';
+        let orderType;
         
-        if (hasPrescription && hasOTC) {
-          // Add 1-2 prescription items
-          const prescriptionCount = Math.floor(Math.random() * 2) + 1;
-          for (let i = 0; i < prescriptionCount; i++) {
-            const med = prescriptionMeds[Math.floor(Math.random() * prescriptionMeds.length)];
-            const quantity = Math.floor(Math.random() * 2) + 1;
-            items.push({
-              ...med,
-              quantity,
-              total: +(med.price * quantity).toFixed(2)
-            });
-          }
-          
-          // Add 1-3 OTC items
-          const otcCount = Math.floor(Math.random() * 3) + 1;
-          for (let i = 0; i < otcCount; i++) {
-            const med = otcMeds[Math.floor(Math.random() * otcMeds.length)];
-            const quantity = Math.floor(Math.random() * 3) + 1;
-            items.push({
-              ...med,
-              quantity,
-              total: +(med.price * quantity).toFixed(2)
-            });
-          }
-        } else if (hasPrescription) {
+        // Randomly choose order type: prescription OR otc (no mixed)
+        const isPrescriptionOrder = Math.random() > 0.5;
+        
+        if (isPrescriptionOrder) {
           // Prescription only
           orderType = 'prescription';
           const prescriptionCount = Math.floor(Math.random() * 3) + 1;
@@ -239,3 +214,4 @@ const useOrdersData = () => {
 };
 
 export default useOrdersData;
+
