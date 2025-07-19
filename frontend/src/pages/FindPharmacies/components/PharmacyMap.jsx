@@ -237,7 +237,7 @@ const PharmacyMap = ({
       <style jsx>{`
         .leaflet-popup-content-wrapper {
           background: white !important;
-          border: 1px solid #43b611ff !important;
+          border: 1px solid var(--color-primary, #4CAF50) !important;
           border-radius: 12px !important;
           padding: 0 !important;
           overflow: hidden !important;
