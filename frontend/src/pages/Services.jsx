@@ -4,6 +4,7 @@ import Navbar from "../components/Layout/Navbar";
 import Footer from "../components/Layout/Footer";
 import TrustSafety from "./Home/TrustSafety";
 import Benefits from "./Home/Benefits";
+import { assets } from "../assets/assets";
 
 import {
   FileUp,
@@ -378,62 +379,107 @@ const Services = () => {
   return (
     <>
       <Navbar />
-
       {/* Hero Section with Enhanced Glassmorphism */}
-      <section className="relative overflow-hidden pt-20 pb-16">
-        {/* Enhanced background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-bg-light via-upload-bg to-bg-light -z-10"></div>
+      {/* Hero Section with Enhanced Glassmorphism and 3D Model */}
+      <section className="relative overflow-hidden pt-10 pb-10">
+        {/* Updated background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] -z-10"></div>
         <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-3xl animate-pulse-slow"></div>
         <div
           className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: "2s" }}
         ></div>
 
+        {/* Animated grid pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up text-gradient-primary">
-              Comprehensive Pharmacy Services
-            </h1>
-            <p className="text-dark text-lg md:text-xl max-w-3xl mx-auto mb-10 animate-fade-in-up delay-200">
-              Discover how PillPath simplifies your pharmacy experience with
-              powerful digital tools designed around your needs.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 animate-fade-in-up delay-300">
-              <a
-                href="#features"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-hover text-white font-medium rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                Explore Services
-                <ChevronRight size={18} />
-              </a>
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-xl text-primary border border-white/30 font-medium rounded-2xl shadow-xl hover:bg-white/30 transition-all duration-300"
-              >
-                Get Started
-                <ArrowRight size={18} />
-              </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Text Content */}
+            <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up text-white">
+                Comprehensive{" "}
+                <span className="text-gradient-primary">Pharmacy Services</span>
+              </h1>
+              <p className="text-white/70 text-lg md:text-xl max-w-3xl mx-auto lg:mx-0 mb-10 animate-fade-in-up delay-200">
+                Discover how PillPath simplifies your pharmacy experience with
+                powerful digital tools designed around your needs.
+              </p>
+              <div className="flex flex-wrap lg:justify-start justify-center gap-4 animate-fade-in-up delay-300">
+                <a
+                  href="#features"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-hover text-white font-medium rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                >
+                  Explore Services
+                  <ChevronRight size={18} />
+                </a>
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-xl text-white border border-white/30 font-medium rounded-2xl shadow-xl hover:bg-white/30 transition-all duration-300"
+                >
+                  Get Started
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
+            </div>
+
+            {/* 3D Model Image */}
+            <div className="hidden lg:flex justify-center lg:justify-end animate-fade-in-scale delay-500">
+              <div className="relative">
+                {/* Floating elements around image */}
+                <div className="absolute -top-10 -left-10 w-20 h-20 bg-primary/30 rounded-full blur-xl animate-float-delay"></div>
+                <div className="absolute -bottom-8 -right-8 w-16 h-16 bg-accent/30 rounded-full blur-xl animate-float-gentle"></div>
+
+                {/* Main 3D image */}
+                <img
+                  src={assets.granpa}
+                  alt="Digital Pharmacy Services"
+                  className="max-w-full h-auto object-contain filter drop-shadow-2xl float-animation"
+                  style={{ maxHeight: "450px" }}
+                />
+
+                {/* Optional: Add a glow effect behind image */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 via-secondary/20 to-accent/20 rounded-full blur-3xl -z-10"></div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
+        {/* Decorative wave bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+            className="w-full"
+          >
+            <path
+              fill="rgba(255,255,255,0.05)"
+              fillOpacity="1"
+              d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,186.7C672,213,768,235,864,224C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+          </svg>
+        </div>
+      </section>
       {/* Enhanced Services Overview with Glassmorphism Cards */}
+      {/* Enhanced Services Overview with Dark Glassmorphism Cards */}
       <section
         id="features"
-        className="py-20 px-4 bg-gradient-to-br from-bg-light via-white to-upload-bg relative overflow-hidden"
+        className="py-20 px-4 bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] relative overflow-hidden"
       >
         {/* Background decorative elements */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-secondary/5 rounded-full blur-3xl opacity-60"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-40"></div>
+        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-60"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-40"></div>
+
+        {/* Animated grid pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
 
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in-up">
-              <span className="text-gradient-primary">Our Services</span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-in-up text-white">
+              Our <span className="text-gradient-primary">Services</span>
             </h2>
             <div className="w-24 h-1.5 bg-gradient-to-r from-primary via-secondary to-accent rounded-full mx-auto mb-6"></div>
-            <p className="text-dark max-w-2xl mx-auto text-lg">
+            <p className="text-white/70 max-w-2xl mx-auto text-lg">
               PillPath offers a comprehensive suite of services designed to make
               managing your medications simpler, safer, and more convenient.
             </p>
@@ -443,9 +489,9 @@ const Services = () => {
             {serviceFeatures.map((feature) => (
               <div
                 key={feature.id}
-                className={`group p-6 rounded-2xl border transition-all duration-500 cursor-pointer bg-white/15 backdrop-blur-xl border-white/20 shadow-xl hover:shadow-2xl hover:translate-y-[-8px] relative overflow-hidden ${
+                className={`group p-6 rounded-2xl border transition-all duration-500 cursor-pointer bg-white/5 backdrop-blur-xl border-white/10 shadow-xl hover:shadow-2xl hover:translate-y-[-8px] relative overflow-hidden ${
                   activeFeature === feature.id
-                    ? "border-white/40 bg-white/25 shadow-[0_0_30px_rgba(255,255,255,0.15)] translate-y-[-8px]"
+                    ? "border-white/20 bg-white/10 shadow-[0_0_30px_rgba(255,255,255,0.1)] translate-y-[-8px]"
                     : ""
                 }`}
                 onClick={() => setActiveFeature(feature.id)}
@@ -471,19 +517,19 @@ const Services = () => {
                       className={`text-xl font-bold mb-3 transition-all duration-300 ${
                         activeFeature === feature.id
                           ? feature.textColor
-                          : "text-dark"
+                          : "text-white"
                       }`}
                     >
                       {feature.title}
                     </h3>
-                    <p className="text-dark/70 text-sm leading-relaxed mb-4">
+                    <p className="text-white/70 text-sm leading-relaxed mb-4">
                       {feature.description}
                     </p>
 
                     {/* Active indicator */}
                     {activeFeature === feature.id && (
-                      <div className="inline-flex items-center gap-2 text-sm font-medium text-primary-blue">
-                        <div className="w-2 h-2 bg-primary-blue rounded-full animate-pulse"></div>
+                      <div className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                         look for more details below
                       </div>
                     )}
@@ -494,25 +540,24 @@ const Services = () => {
           </div>
         </div>
       </section>
-
-      {/* Enhanced Detailed Feature Section */}
+      {/* Enhanced Detailed Feature Section with Dark Theme */}
       {activeService && (
         <section
           id="feature-details"
-          className="py-20 px-4 relative overflow-hidden"
+          className="py-20 px-4 relative overflow-hidden bg-gradient-to-br from-[#0A0E1A] via-[#1E1B4B] to-[#030B17]"
         >
           {/* Enhanced background effects */}
-          <div
-            className={`absolute inset-0 ${activeService.bgColor} -z-10`}
-          ></div>
-          <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-gradient-to-br from-white/40 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-gradient-to-tl from-white/40 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-gradient-to-tl from-accent/20 to-transparent rounded-full blur-3xl"></div>
+
+          {/* Animated grid pattern */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
           <div className="container mx-auto max-w-7xl">
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
               {/* Feature Overview - Enhanced */}
               <div className="xl:col-span-2">
-                <div className="bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/20 relative overflow-hidden">
+                <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/10 relative overflow-hidden">
                   {/* Card background effects */}
                   <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-primary/10 rounded-full blur-2xl"></div>
                   <div className="absolute bottom-[-30px] left-[-30px] w-48 h-48 bg-secondary/10 rounded-full blur-2xl"></div>
@@ -524,24 +569,19 @@ const Services = () => {
                       >
                         {activeService.icon}
                       </div>
-                      <h2 className="text-3xl md:text-4xl font-bold">
-                        <span className={activeService.textColor}>
-                          {activeService.title}
-                        </span>
+                      <h2 className="text-3xl md:text-4xl font-bold text-white">
+                        {activeService.title}
                       </h2>
                     </div>
 
-                    <p className="text-dark text-lg mb-8 leading-relaxed">
+                    <p className="text-white/80 text-lg mb-8 leading-relaxed">
                       {activeService.description}
                     </p>
 
                     {/* Enhanced How It Works */}
                     <div className="mb-8">
-                      <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <Lightbulb
-                          className={activeService.textColor}
-                          size={24}
-                        />
+                      <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+                        <Lightbulb className="text-primary" size={24} />
                         How It Works
                       </h3>
 
@@ -549,7 +589,7 @@ const Services = () => {
                         {activeService.steps.map((step, index) => (
                           <div
                             key={index}
-                            className="group flex gap-4 p-4 rounded-2xl transition-all duration-300 bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 hover:border-white/50 hover:shadow-lg"
+                            className="group flex gap-4 p-4 rounded-2xl transition-all duration-300 bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-lg"
                           >
                             {/* Step Number */}
                             <div
@@ -560,21 +600,17 @@ const Services = () => {
 
                             {/* Step Icon */}
                             <div className="flex-shrink-0 mt-1">
-                              <div
-                                className={`p-2 rounded-lg ${activeService.bgColor} group-hover:scale-105 transition-transform duration-300`}
-                              >
+                              <div className="p-2 rounded-lg bg-white/10 group-hover:scale-105 transition-transform duration-300">
                                 {step.icon}
                               </div>
                             </div>
 
                             {/* Step Content */}
                             <div className="flex-1">
-                              <h4
-                                className={`font-bold mb-2 ${activeService.textColor} text-lg`}
-                              >
+                              <h4 className="font-bold mb-2 text-white text-lg">
                                 {step.title}
                               </h4>
-                              <p className="text-dark/70 leading-relaxed">
+                              <p className="text-white/70 leading-relaxed">
                                 {step.description}
                               </p>
                             </div>
@@ -585,22 +621,22 @@ const Services = () => {
 
                     {/* Enhanced Benefits */}
                     <div className="mb-8">
-                      <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <Star className={activeService.textColor} size={20} />
+                      <h4 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                        <Star className="text-primary" size={20} />
                         Key Benefits
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {activeService.benefits.map((benefit, index) => (
                           <div
                             key={index}
-                            className="flex items-start gap-3 p-3 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30"
+                            className="flex items-start gap-3 p-3 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10"
                           >
                             <div
                               className={`p-1 rounded-full bg-gradient-to-br ${activeService.color} text-white mt-1 flex-shrink-0`}
                             >
                               <Check size={14} />
                             </div>
-                            <span className="text-dark font-medium">
+                            <span className="text-white/90 font-medium">
                               {benefit}
                             </span>
                           </div>
@@ -619,7 +655,7 @@ const Services = () => {
                       </Link>
                       <a
                         href="#demo-video"
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-white/20 backdrop-blur-xl text-dark border border-white/30 font-semibold rounded-2xl hover:bg-white/30 transition-all duration-300"
+                        className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-xl text-white border border-white/20 font-semibold rounded-2xl hover:bg-white/20 transition-all duration-300"
                       >
                         Watch Demo
                         <ExternalLink size={18} />
@@ -631,9 +667,9 @@ const Services = () => {
 
               {/* Enhanced Guide Book Sidebar */}
               <div className="xl:col-span-1">
-                <div className="bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl p-6 border border-white/20 sticky top-8">
-                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <BookOpen className={activeService.textColor} size={24} />
+                <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-xl p-6 border border-white/10 sticky top-8">
+                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+                    <BookOpen className="text-primary" size={24} />
                     Quick Guide
                   </h3>
 
@@ -641,7 +677,7 @@ const Services = () => {
                     {activeService.guideBook.map((tip, index) => (
                       <div
                         key={index}
-                        className="group p-4 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 cursor-pointer"
+                        className="group p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
                         onClick={() => handleSetExpandedGuide(index)}
                       >
                         <div className="flex items-start gap-3">
@@ -651,13 +687,13 @@ const Services = () => {
                             {index + 1}
                           </div>
                           <div className="flex-1">
-                            <p className="text-dark font-medium leading-relaxed">
+                            <p className="text-white/90 font-medium leading-relaxed">
                               {tip}
                             </p>
                           </div>
                           <ChevronDown
                             size={16}
-                            className={`text-dark/60 transition-transform duration-300 ${
+                            className={`text-white/60 transition-transform duration-300 ${
                               getExpandedGuide() === index ? "rotate-180" : ""
                             }`}
                           />
@@ -665,7 +701,7 @@ const Services = () => {
 
                         {getExpandedGuide() === index && (
                           <div className="mt-3 pt-3 border-t border-white/20 animate-fade-in">
-                            <p className="text-dark/70 text-sm">
+                            <p className="text-white/70 text-sm">
                               Pro tip: This feature helps ensure the best
                               experience with our platform.
                             </p>
@@ -676,21 +712,18 @@ const Services = () => {
                   </div>
 
                   {/* Help Section */}
-                  <div className="p-4 rounded-xl bg-white/30 backdrop-blur-sm border border-white/40">
+                  <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
                     <div className="flex items-center gap-2 mb-2">
-                      <HelpCircle
-                        className={activeService.textColor}
-                        size={20}
-                      />
-                      <h4 className="font-bold text-dark">Need Help?</h4>
+                      <HelpCircle className="text-primary" size={20} />
+                      <h4 className="font-bold text-white">Need Help?</h4>
                     </div>
-                    <p className="text-dark/70 text-sm mb-3">
+                    <p className="text-white/70 text-sm mb-3">
                       Our support team is here to help you get the most out of{" "}
                       {activeService.title}.
                     </p>
                     <a
                       href="#contact"
-                      className={`inline-flex items-center gap-1 text-sm font-medium ${activeService.textColor} hover:underline`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                     >
                       <MessageSquare size={16} />
                       Contact Support
@@ -702,19 +735,22 @@ const Services = () => {
           </div>
         </section>
       )}
+      {/* Enhanced FAQ Section with Dark Theme */}
+      <section className="py-16 px-4 bg-gradient-to-br from-[#1E1B4B] via-[#0F172A] to-[#030B17] relative overflow-hidden">
+        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-60"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-40"></div>
 
-      {/* Enhanced FAQ Section */}
-      <section className="py-16 px-4 bg-white relative overflow-hidden">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl opacity-60"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl opacity-40"></div>
+        {/* Animated grid pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
         <div className="container mx-auto max-w-4xl relative z-10">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-gradient-primary">
-              Frequently Asked Questions
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              Frequently Asked{" "}
+              <span className="text-gradient-primary">Questions</span>
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent rounded-full mx-auto mb-4"></div>
-            <p className="text-dark">
+            <p className="text-white/70">
               Find answers to common questions about our services
             </p>
           </div>
@@ -750,16 +786,16 @@ const Services = () => {
             ].map((faq, index) => (
               <div
                 key={index}
-                className="bg-white/15 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-lg hover:shadow-xl hover:bg-white/10 transition-all duration-300"
               >
-                <h3 className="text-xl font-bold mb-3 text-dark flex items-start gap-2">
+                <h3 className="text-xl font-bold mb-3 text-white flex items-start gap-2">
                   <HelpCircle
-                    className="text-primary-blue mt-1 flex-shrink-0"
+                    className="text-primary mt-1 flex-shrink-0"
                     size={20}
                   />
                   {faq.question}
                 </h3>
-                <p className="text-dark/80 leading-relaxed pl-7">
+                <p className="text-white/80 leading-relaxed pl-7">
                   {faq.answer}
                 </p>
               </div>
@@ -767,7 +803,7 @@ const Services = () => {
           </div>
 
           <div className="mt-12 text-center">
-            <p className="text-dark mb-4">Still have questions?</p>
+            <p className="text-white/70 mb-4">Still have questions?</p>
             <Link
               to="/contact"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary-hover text-white font-semibold rounded-2xl hover:shadow-xl transition-all duration-300 hover:scale-105"
@@ -777,7 +813,7 @@ const Services = () => {
             </Link>
           </div>
         </div>
-      </section>
+      </section>{" "}
       <Benefits />
       <TrustSafety />
       {/* Enhanced CTA Section */}
