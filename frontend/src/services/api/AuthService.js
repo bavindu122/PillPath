@@ -67,13 +67,13 @@ class ApiService {
   //   });
   // }
 
-  // // Login
-  // async login(credentials) {
-  //   return this.request('auth/login', {
-  //     method: 'POST',
-  //     body: credentials,
-  //   });
-  // }
+  // Login
+  async login(credentials) {
+    return this.request('customers/login', {
+      method: 'POST',
+      body: credentials,
+    });
+  }
 
   // // Get user profile
   // async getUserProfile() {
