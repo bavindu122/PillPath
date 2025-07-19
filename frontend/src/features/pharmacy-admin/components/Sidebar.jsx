@@ -10,6 +10,7 @@ import {
   LineChart,
   Menu,
   X,
+  Wallet,
   ChevronRight
 } from 'lucide-react';
 
@@ -38,6 +39,9 @@ export default function Sidebar() {
     if (path === '/pharmacy/pharmacyanalytics') {
       return 'Sales Analytics';
     }
+    if (path === '/pharmacy/paymentgateway') {
+      return 'Payment Gateway';
+    }
     return 'Dashboard';
   };
 
@@ -59,6 +63,7 @@ export default function Sidebar() {
     { name: 'Inventory', icon: Package, path: '/pharmacy/pharmacyinventory' },
     { name: 'Orders', icon: ClipboardList, path: '/pharmacy/pharmacyorders' },
     { name: 'Sales Analytics', icon: LineChart, path: '/pharmacy/pharmacyanalytics' },
+    { name: 'Payment Gateway', icon: Wallet, path: '/pharmacy/paymentgateway' },
   ];
 
   return (
