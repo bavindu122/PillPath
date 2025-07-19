@@ -38,7 +38,7 @@ const MobileFloatingNav = () => {
                   <Icon size={20} />
                   
                   {/* Notification dot example */}
-                  {item.label === "Profile" && (
+                  {item.hasNotification && (
                     <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </div>
