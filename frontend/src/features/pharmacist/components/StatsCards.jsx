@@ -54,19 +54,6 @@ const StatsCards = ({ stats }) => {
               }}></div>
             </div>
           </div>
-          
-          {/* Animated progress bar */}
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div 
-              className={`h-1 rounded-full transition-all duration-1000 ease-out group-hover:w-full`}
-              style={{
-                backgroundColor: index === 0 ? '#3B82F6' : 
-                               index === 1 ? '#10B981' : 
-                               index === 2 ? '#F59E0B' : '#8B5CF6',
-                width: '0%'
-              }}
-            ></div>
-          </div>
         </div>
       ))}
     </div>
