@@ -3,10 +3,10 @@ import StatCard from '../components/StatCard';
 import PageHeader from '../components/PageHeader';
 import SearchFilterBar from '../components/SearchFilterBar';
 import PharmacyCard from '../components/PharmacyCard';
-import { Store,Activity,Ban,ClockAlert ,Eye,Trash2,UserPlus} from 'lucide-react';
+import { Store,Activity,Ban,ClockAlert ,Eye,Trash2,UserPlus,TriangleAlert} from 'lucide-react';
 import { useState } from 'react';
 
-const pharmacies = [
+const initialPharmacies = [
   {
     id: 1,
     name: 'MedPlus Pharmacy',
@@ -16,12 +16,14 @@ const pharmacies = [
     phone: '+1 (555) 123-4567',
     websiteLink: 'https://www.medplus.com',
     location: 'New York, NY',
-    status: 'Active',
+    status: 'Rejected',
     joinDate: '2023-03-15',
     orders: 245,
     rating: 4.8,
     businessRegistration: '123456789',
+    rejectReason: 'Incomplete registration',
     license: 'NY-PHARM-001234',
+    issueDate: '2020-01-01',
     licenseExpiry: '2025-03-15',
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
@@ -43,6 +45,7 @@ const pharmacies = [
     rating: 4.6,
     businessRegistration: '987654321',
     license: 'CA-PHARM-005678',
+    issueDate: '2020-02-15',
     licenseExpiry: '2024-01-22',
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
@@ -63,6 +66,7 @@ const pharmacies = [
     orders: 0,
     rating: 0,
     license: 'IL-PHARM-009012',
+    issueDate: '2020-03-01',
     licenseExpiry: '2025-01-10',
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
@@ -81,6 +85,7 @@ const pharmacies = [
     orders: 156,
     rating: 4.9,
     license: 'TX-PHARM-003456',
+    issueDate: '2020-05-20',
     licenseExpiry: '2025-08-07',
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
@@ -100,6 +105,7 @@ const pharmacies = [
     orders: 78,
     rating: 4.2,
     license: 'AZ-PHARM-007890',
+    issueDate: '2020-04-10',
     licenseExpiry: '2025-06-30',
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
@@ -110,9 +116,11 @@ const pharmacies = [
 
 const Pharmacies = () => {
 
+    const [pharmacies, setPharmacies] = useState(initialPharmacies);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [pharmacyList, setPharmacyList] = useState(pharmacies);
+    const [visibleRows, setVisibleRows] = useState(12);
 
     const filteredPharmacies = pharmacyList.filter(pharmacy => {
     const matchesSearch =
@@ -152,6 +160,33 @@ const Pharmacies = () => {
         console.log(`Accepted registration for pharmacy: ${pharmacy.name}`);
     };
 
+    const handleRejectRegistration = (pharmacy, reason) => {
+      setPharmacyList(prev =>
+            prev.map(p =>
+                p.id === pharmacy.id ? { ...p, status: 'Rejected', suspendReason: reason } : p
+            )
+        );
+        console.log(`Rejected registration for pharmacy: ${pharmacy.name}`);
+    }
+
+
+    // Get only the visible pharmacies based on visibleRows
+    const visiblePharmacies = filteredPharmacies.slice(0, visibleRows);
+    const hasMorePharmacies = filteredPharmacies.length > visibleRows;
+
+    // Handle "View More" button click
+    const handleViewMore = () => {
+        setVisibleRows(prev => prev + 6);
+    };
+
+    // Reset visible rows when filters change
+    const handleFilterChange = (setter) => (value) => {
+        setter(value);
+        setVisibleRows(12);
+    };
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
 
@@ -161,11 +196,16 @@ const Pharmacies = () => {
             subtitle="Manage all registered pharmacies on the PillPath platform." 
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <StatCard
                 label="Active Pharmacies"
                 value={pharmacyList.filter(p => p.status === "Active").length}
                 icon={<Activity size={48} className="text-blue-500" />}
+            />
+            <StatCard
+                label="Rejected Pharmacies"
+                value={pharmacyList.filter(p => p.status === "Rejected").length}
+                icon={<TriangleAlert size={48} className="text-gray-500" />}
             />
             <StatCard
                 label="Pending Approval"
@@ -185,21 +225,38 @@ const Pharmacies = () => {
             filterValue={filterStatus}
             setFilterValue={setFilterStatus}
             placeholder="Search by name or email..."
-            filterOptions={['All', 'Active', 'Pending', 'Suspended']}
+            filterOptions={['All', 'Active', 'Pending', 'Suspended','Rejected']}
         />
       <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPharmacies.map(pharmacy => (
+            {visiblePharmacies.map(pharmacy => (
               <PharmacyCard
                 key={pharmacy.id}
                 pharmacy={pharmacy}
                 onSuspend={handleSuspend}
                 onActivate={handleActivate}
                 onAcceptRegistration={handleAcceptRegistration}
+                onRejectRegistration={handleRejectRegistration}
                 
               />
             ))}
          </div>
+
+         {hasMorePharmacies && (
+            <div className="mt-6 flex justify-center">
+            <button
+                onClick={handleViewMore}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+            >
+                <span>View More ({Math.min(10, filteredPharmacies.length - visibleRows)} more)</span>
+            </button>
+            </div>
+        )}
+
+        {/* Show total count */}
+        <div className="mt-4 text-center text-sm text-gray-500">
+            Showing {visiblePharmacies.length} of {filteredPharmacies.length} pharmacies
+        </div>
       </div>
     </div>
   )

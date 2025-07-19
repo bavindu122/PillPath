@@ -6,7 +6,7 @@ import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
 import ViewPharmacy from './pharmacyPopup/ViewPharmacy';
 
 
-const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration }) => {
+const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration, onRejectRegistration }) => {
 
     const [suspendPopup, setSuspendPopup] = useState(null);
     const [suspendReason, setSuspendReason] = useState('');
@@ -119,6 +119,10 @@ const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration }) 
         onClose={() => setSelectedPharmacy(null)} 
         onAcceptRegistration={(pharmacy) => {
             onAcceptRegistration(pharmacy);
+            setSelectedPharmacy(null);  // ← This closes the popup
+        }}
+        onRejectRegistration={(pharmacy, reason) => {
+            onRejectRegistration(pharmacy, reason);
             setSelectedPharmacy(null);  // ← This closes the popup
         }}
     />
