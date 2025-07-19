@@ -71,7 +71,7 @@ const HowItWorks = () => {
   }, []);
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-5 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900"></div>
       {/* Enhanced floating elements for dark theme */}
       <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float-slow"></div>
