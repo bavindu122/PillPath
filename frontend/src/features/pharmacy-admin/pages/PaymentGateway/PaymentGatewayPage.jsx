@@ -55,7 +55,7 @@ const PaymentGatewayPage = () => {
     <div className="p-6">
       <div className="mb-6 flex items-center">
         <button
-          onClick={() => navigate('/pharmacy-admin/dashboard')}
+          onClick={() => navigate('/pharmacy')}
           className="mr-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
