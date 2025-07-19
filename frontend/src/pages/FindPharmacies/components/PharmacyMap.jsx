@@ -26,6 +26,13 @@ const generateStarRating = (rating) => {
   return stars;
 };
 
+// Helper to convert camelCase style object to CSS string
+function convertStyleObjectToString(styleObj) {
+  return Object.entries(styleObj)
+    .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+    .join('; ');
+}
+
 const PharmacyMap = ({ 
   pharmacies, 
   selectedPharmacy, 
@@ -120,7 +127,7 @@ const PharmacyMap = ({
 
         const pharmacyIcon = L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style="${Object.entries(markerStyle).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`).join('; ')}"
+          html: `<div style="${convertStyleObjectToString(markerStyle)}"
                       onmouseover="if (!this.classList.contains('selected')) { this.style.background='#f5f5f5'; this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.2)'; }"
                       onmouseout="if (!this.classList.contains('selected')) { this.style.background='white'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'; }"
                       class="${isSelected ? 'selected' : ''}">
