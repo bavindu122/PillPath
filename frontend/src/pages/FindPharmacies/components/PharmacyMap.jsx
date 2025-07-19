@@ -13,6 +13,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Helper function to generate star rating display
+const generateStarRating = (rating) => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  let stars = '';
+  for (let i = 0; i < fullStars; i++) stars += '★';
+  if (hasHalfStar) stars += '☆';
+  for (let i = 0; i < emptyStars; i++) stars += '☆';
+  return stars;
+};
+
 const PharmacyMap = ({ 
   pharmacies, 
   selectedPharmacy, 
@@ -132,7 +145,7 @@ const PharmacyMap = ({
             </div>
             <div style="padding: 12px 20px; background: white; color: #666; font-size: 14px; line-height: 1.5;">
               <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
-                <span style="color: #ffc107; font-size: 16px;">★★★★★</span>
+                <span style="color: #ffc107; font-size: 16px;">${generateStarRating(pharmacy.rating)}</span>
                 <span style="color: #666; font-size: 14px;">${pharmacy.rating} (142 reviews)</span>
               </div>
               <p style="margin: 0 0 8px 0; color: #666;">${pharmacy.address}</p>

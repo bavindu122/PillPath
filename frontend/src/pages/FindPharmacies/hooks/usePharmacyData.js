@@ -34,7 +34,7 @@ export const usePharmacyData = (currentLocation) => {
             address: "123 Medical Lane, Colombo 05",
             lat: currentLocation ? currentLocation.lat + 0.01 : 6.9371,
             lng: currentLocation ? currentLocation.lng + 0.01 : 79.8712,
-            rating: 4.8,
+            rating: 3,
             hours: "Open until 10:00 PM",
             phone: "+94 11 234 5678",
             hasDelivery: true,
