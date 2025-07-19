@@ -28,10 +28,10 @@ const navigation = [
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Pharmacies', href: '/admin/pharmacies', icon: Building2 },
   { name: 'Prescriptions', href: '/admin/prescriptions', icon: FileText },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   {name:'Sales', href:'/admin/sales', icon: Activity},
   { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children }) {
