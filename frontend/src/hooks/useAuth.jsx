@@ -1,19 +1,19 @@
-import { useState, useContext, createContext, useEffect } from 'react';
-import ApiService from '../services/api/AuthService';
+import { useState, useContext, createContext, useEffect } from "react";
+import ApiService from "../services/api/AuthService";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('auth_token')); // Consistent naming
+  const [token, setToken] = useState(localStorage.getItem("auth_token")); // Consistent naming
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,11 +27,17 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       setLoading(true);
-      const userData = await ApiService.getUserProfile(token);
+      const userData = await ApiService.getUserProfile();
       setUser(userData);
     } catch (error) {
-      console.error('Auth check failed:', error);
-      logout();
+      console.error("Auth check failed:", error);
+      // Only logout if the error is authentication related
+      if (
+        error.message.includes("Invalid credentials") ||
+        error.message.includes("401")
+      ) {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -43,17 +49,17 @@ export const AuthProvider = ({ children }) => {
       setError(null);
 
       let response;
-      if (userType === 'customer') {
+      if (userType === "customer") {
         response = await ApiService.registerCustomer(userData);
       } else {
         response = await ApiService.registerPharmacy(userData);
       }
 
       // For customer registration, auto-login if token is returned
-      if (userType === 'customer' && response.token) {
+      if (userType === "customer" && response.token) {
         setToken(response.token);
         setUser(response.user);
-        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem("auth_token", response.token);
       }
 
       return response;
@@ -71,11 +77,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
 
       const response = await ApiService.login(credentials);
-      
+
       if (response.token) {
         setToken(response.token);
         setUser(response.user);
-        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem("auth_token", response.token);
       }
 
       return response;
@@ -90,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
     setError(null);
   };
 
@@ -106,9 +112,5 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

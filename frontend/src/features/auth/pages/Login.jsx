@@ -18,12 +18,12 @@ import { useAuth } from "../../../hooks/useAuth";
 const Login = () => {
   const navigate = useNavigate();
   const { login, loading, error, isAuthenticated } = useAuth();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
@@ -36,50 +36,49 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/customer/dashboard');
+      navigate("/customer"); // Navigate to the customer route
     }
   }, [isAuthenticated, navigate]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear errors when user types
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
     if (submitError) setSubmitError("");
   };
 
   const validate = () => {
     const newErrors = {};
-    
+
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) return;
 
     try {
       setSubmitError("");
       const response = await login(formData);
-      
+
       // Navigation will be handled by the useEffect above
       console.log("Login successful:", response);
     } catch (error) {
@@ -162,7 +161,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300 ${
-                  errors.email ? 'border-red-400' : 'border-white/30'
+                  errors.email ? "border-red-400" : "border-white/30"
                 }`}
                 disabled={loading}
               />
@@ -171,7 +170,9 @@ const Login = () => {
               </div>
             </div>
             {errors.email && (
-              <p className="text-red-300 text-xs mt-1 animate-fade-in">{errors.email}</p>
+              <p className="text-red-300 text-xs mt-1 animate-fade-in">
+                {errors.email}
+              </p>
             )}
           </div>
 
@@ -188,7 +189,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border placeholder-white/60 text-white pl-12 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300 ${
-                  errors.password ? 'border-red-400' : 'border-white/30'
+                  errors.password ? "border-red-400" : "border-white/30"
                 }`}
                 disabled={loading}
               />
@@ -205,13 +206,15 @@ const Login = () => {
               </button>
             </div>
             {errors.password && (
-              <p className="text-red-300 text-xs mt-1 animate-fade-in">{errors.password}</p>
+              <p className="text-red-300 text-xs mt-1 animate-fade-in">
+                {errors.password}
+              </p>
             )}
           </div>
 
           {/* Forgot password */}
           <div className="w-full text-right relative z-10 animate-fade-in-up delay-500">
-            <button 
+            <button
               type="button"
               className="text-info text-sm hover:text-primary-blue hover:underline transition-all duration-200"
             >
@@ -229,9 +232,7 @@ const Login = () => {
               hoverGradient="hover:from-secondary hover:to-accent/70"
               type="submit"
               disabled={loading}
-              className={`${
-                loading ? "opacity-80 pointer-events-none" : ""
-              }`}
+              className={`${loading ? "opacity-80 pointer-events-none" : ""}`}
             />
           </div>
         </form>
@@ -248,7 +249,7 @@ const Login = () => {
         {/* Enhanced Social login buttons */}
         <div className="flex gap-4 relative z-10 animate-fade-in-up delay-800">
           {/* Google */}
-          <button 
+          <button
             type="button"
             className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
             disabled={loading}
@@ -280,7 +281,7 @@ const Login = () => {
           </button>
 
           {/* Apple */}
-          <button 
+          <button
             type="button"
             className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
             disabled={loading}
@@ -298,7 +299,7 @@ const Login = () => {
           </button>
 
           {/* Facebook */}
-          <button 
+          <button
             type="button"
             className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
             disabled={loading}

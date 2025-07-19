@@ -74,6 +74,11 @@ class ApiService {
       body: credentials,
     });
   }
+   async getUserProfile() {
+    return this.request('customers/profile', {
+      method: 'GET',
+    });
+  }
 
   // // Get user profile
   // async getUserProfile() {
