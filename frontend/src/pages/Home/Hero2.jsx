@@ -33,7 +33,7 @@ const Hero2 = () => {
 
           <div className="bottom-[-35px] relative mx-0 sm:mx-2 my-2 sm:my-0 transform-gpu">
             {/* Subtle background for 3D depth */}
-            <div className="absolute -inset-1 bg-white/10 rounded-full blur-md"></div>
+            <div className="absolute -inset-1  rounded-full blur-md"></div>
 
             {/* Logo with 3D shadow effect */}
             <div className="relative transform-gpu animate-logo-entrance opacity-0 scale-70">
@@ -81,7 +81,7 @@ const Hero2 = () => {
         <div className="flex-1 flex justify-center max-w-full lg:max-w-[40%] my-4 lg:my-0 animate-fade-in-scale delay-400">
           {assets.pharmacy_img ? (
             <img
-              src={assets.pharmacy_img}
+              src={assets.findPharmacy}
               alt="Pharmacy service"
               className="object-contain w-full h-auto max-h-[300px] md:max-h-[400px] lg:max-h-[400px] mx-3 float-animation drop-shadow-2xl"
               onError={(e) => {
