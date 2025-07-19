@@ -52,13 +52,33 @@ const PaymentModal = ({
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={handleClose}
     >
+      <style>
+        {`
+          .payment-modal-scroll::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+          }
+          .payment-modal-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 8px;
+          }
+          .payment-modal-scroll::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .payment-modal-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #22c55e #0000;
+          }
+        `}
+      </style>
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 max-w-md w-full max-h-[90vh] overflow-y-auto payment-modal-scroll"
         onClick={(e) => e.stopPropagation()}
-      >
+      >{/* Inject custom scrollbar styles scoped to PaymentModal */}
+      
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <h2 className="text-2xl font-bold text-white">Payment Details</h2>

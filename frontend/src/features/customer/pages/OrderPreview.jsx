@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import PaymentModal from "../../../components/UIs/PaymentModal";
+import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
 
 const OrderPreview = () => {
   const { prescriptionId } = useParams();
@@ -18,6 +19,7 @@ const OrderPreview = () => {
   ]);
 
   const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [showOrderFromAnotherPharmacyModal, setShowOrderFromAnotherPharmacyModal] = React.useState(false);
   const [isAccepted, setIsAccepted] = React.useState(false);
 
   // Load saved selections on component mount
@@ -87,7 +89,16 @@ const OrderPreview = () => {
   };
 
   const handleOrderFromAnotherPharmacy = () => {
-    console.log("Ordering from another pharmacy...");
+    setShowOrderFromAnotherPharmacyModal(true);
+  };
+
+  const handleCloseOrderFromAnotherPharmacyModal = () => {
+    setShowOrderFromAnotherPharmacyModal(false);
+  };
+
+  const handleOrderPlaced = (selectedPharmacy, medications) => {
+    console.log("Order placed at:", selectedPharmacy.name, "for medications:", medications);
+    // Add your order placement logic here
   };
 
   const unavailableMedications = [
@@ -116,8 +127,8 @@ const OrderPreview = () => {
             <span>Back to Ongoing Activities</span>
           </button>
           
-          <h1 className="text-4xl font-bold text-white mb-2">Order Preview</h1>
-          <p className="text-white/70 text-lg">Review your prescription order details</p>
+          <h1 className="text-4xl font-bold text-white mb-2 text-center">Order Preview</h1>
+          <p className="text-white/70 text-lg text-center">Review your prescription order details</p>
         </div>
 
         {/* Main Content */}
@@ -152,16 +163,23 @@ const OrderPreview = () => {
               {/* Left Column */}
               <div className="flex-1 flex flex-col">
                 <h3 className="text-xl font-semibold text-white mb-4">Available Items</h3>
-                <div className="space-y-3">
+                <div className="space-y-3 ">
                   {medications.map((medication) => (
-                    <div key={medication.id} className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                      <div className="flex items-center space-x-4 flex-1">
+                    <div
+                      key={medication.id}
+                      className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-xl border-2 shadow-lg shadow-green-200/20 relative"
+                      style={{
+                        borderColor: '#22c55e',
+                        borderImage: 'none'
+                      }}
+                    >
+                      <div className="flex items-center  space-x-4 flex-1">
                         <input
                           type="checkbox"
                           id={`medication-${medication.id}`}
                           checked={medication.selected}
                           onChange={() => handleMedicationToggle(medication.id)}
-                          className="w-5 h-5 text-green-600 bg-white/10 border-white/30 rounded focus:ring-green-500 focus:ring-2"
+                          className="w-5 h-5 text-green-600 rounded-lg border bg-white/10 border-white/30 rounded focus:ring-green-500 focus:ring-2"
                         />
                         <div className="flex-1">
                           <h4 className="text-white font-medium">{medication.name}</h4>
@@ -260,6 +278,15 @@ const OrderPreview = () => {
           medications={medications}
           discountPercentage={10}
           onConfirmPayment={handleConfirmPayment}
+        />
+
+        {/* Order from Another Pharmacy Modal */}
+        <OrderFromAnotherPharmacyModal
+          isOpen={showOrderFromAnotherPharmacyModal}
+          onClose={handleCloseOrderFromAnotherPharmacyModal}
+          prescriptionId={prescriptionId}
+          unavailableMedications={unavailableMedications}
+          onOrderPlaced={handleOrderPlaced}
         />
       </div>
     </div>
