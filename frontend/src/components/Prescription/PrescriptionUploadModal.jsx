@@ -95,9 +95,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       setCameraActive(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert(
-        "Unable to access camera. Please check permissions or use file upload instead."
-      );
+      alert("Unable to access camera. Please check permissions or use file upload instead.");
       setUploadMethod("device");
     }
   };
