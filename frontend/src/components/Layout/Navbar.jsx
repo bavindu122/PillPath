@@ -16,16 +16,14 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  
-  // ✅ FIX: Add 'user' to the destructuring
+
   const { logout, isAuthenticated, user } = useAuth();
-  
+
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  // Track scroll position for styling changes
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -35,23 +33,12 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
-
-  const handleMouseEnter = () => {
-    setShowDropdown(true);
-  };
-
-  const handleMouseLeave = () => {
-    setShowDropdown(false);
-  };
+  const toggleDropdown = () => setShowDropdown(!showDropdown);
+  const handleMouseEnter = () => setShowDropdown(true);
+  const handleMouseLeave = () => setShowDropdown(false);
 
   return (
     <>
@@ -64,9 +51,7 @@ const Navbar = () => {
       {/* Top Navigation Bar */}
       <div
         className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-2 z-40 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/70 backdrop-blur-md shadow-md"
-            : "bg-white/90 backdrop-blur-sm"
+          scrolled ? "navbar-bg-scrolled" : "navbar-bg-default"
         }`}
       >
         {/* Logo */}
@@ -79,63 +64,106 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <DesktopNav />
-
-        {/* Desktop Account Section */}
+        
         <div className="hidden md:flex items-center gap-4 mr-6">
-          {/* ✅ Use isAuthenticated instead of token for consistency */}
           {isAuthenticated ? (
-            <div
-              className="flex items-center gap-4"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <BellDot className="w-6 h-6 cursor-pointer" />
-              <ProfileImage
-                src={user?.profilePictureUrl}
-                alt="profile"
-                className="w-10 h-10 rounded-full cursor-pointer"
-                onClick={toggleDropdown}
-              />
-              <ProfileDropdown show={showDropdown} setToken={setToken} />
+            <div className="flex items-center gap-5">
+              {/* User greeting */}
+              <div className="hidden lg:block text-right">
+                <p className="text-sm navbar-text-welcome font-medium">
+                  Welcome back,
+                </p>
+                <p className="text-sm navbar-text-username font-semibold truncate max-w-[140px]">
+                  {user?.fullName || user?.firstName || "User"}
+                </p>
+              </div>
+
+              {/* Notification bell */}
+              <div className="relative group">
+                <div className="p-2 rounded-full navbar-hover-bg navbar-hover-bg-blue cursor-pointer">
+                  <BellDot className="w-5 h-5 navbar-text-secondary group-hover:navbar-blue-text transition-colors duration-200" />
+                </div>
+                <span className="absolute -top-1 -right-1 navbar-notification-badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg">
+                  3
+                </span>
+              </div>
+
+              {/* Profile section */}
+              <div
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div className="flex items-center gap-2 cursor-pointer group p-1 rounded-full navbar-hover-bg transition-all duration-200">
+                  <ProfileImage
+                    src={user?.profilePictureUrl}
+                    alt="profile"
+                    className="navbar-avatar rounded-full shadow-sm"
+                    onClick={toggleDropdown}
+                  />
+                  <svg
+                    className="w-4 h-4 navbar-text-muted group-hover:navbar-blue-text transition-colors duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <ProfileDropdown show={showDropdown} setToken={setToken} />
+              </div>
             </div>
           ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-pButton text-white px-6 py-2 lg:px-8 lg:py-3 rounded-full font-light hover:bg-pButtonH whitespace-nowrap"
-            >
-              Create account
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Sign in button */}
+              <button
+                onClick={() => navigate("/login")}
+                className="group relative px-6 py-2.5 lg:px-8 lg:py-3 navbar-btn-outline rounded-full font-medium whitespace-nowrap overflow-hidden"
+              >
+                <span className="relative z-10 font-semibold">Sign in</span>
+                <div className="absolute inset-0 navbar-gradient-blue transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              </button>
+
+              {/* Create account button */}
+              <button
+                onClick={() => navigate("/register")}
+                className="group relative px-6 py-2.5 lg:px-8 lg:py-3 navbar-btn-filled rounded-full font-semibold whitespace-nowrap overflow-hidden"
+              >
+                <span className="relative z-10">Create account</span>
+                <div className="absolute inset-0 navbar-gradient-blue-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 navbar-gradient-shine -skew-x-12 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Mobile Header Actions - Simplified for floating nav */}
+        {/* Mobile Header Actions */}
         <div className="md:hidden flex items-center gap-4 mr-4">
-          {/* ✅ Use isAuthenticated instead of token for consistency */}
           {isAuthenticated ? (
             <ProfileImage
               src={user?.profilePictureUrl}
               alt="profile"
-              className="w-8 h-8 rounded-full cursor-pointer"
+              className="navbar-avatar-mobile rounded-full cursor-pointer"
               onClick={toggleDropdown}
             />
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="bg-pButton text-white px-4 py-2 rounded-full font-light hover:bg-pButtonH whitespace-nowrap text-sm"
+              className="navbar-btn-outline px-4 py-2 rounded-full font-light whitespace-nowrap text-sm"
             >
-              Create account
+              Sign in
             </button>
           )}
           <Menu
-            className="w-6 h-6 cursor-pointer"
+            className="w-6 h-6 cursor-pointer navbar-text-primary"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
           />
         </div>
 
-        {/* Mobile Menu Dropdown - Simplified as we'll use floating nav */}
+        {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 backdrop-blur-md shadow-lg rounded-b-2xl z-50 p-4 border-t border-gray-100">
-            <div className="flex flex-col gap-3 font-medium text-gray-700">
+          <div className="md:hidden absolute top-full left-0 right-0 navbar-bg-mobile-menu rounded-b-2xl z-50 p-4 border-t border-gray-100">
+            <div className="flex flex-col gap-3 font-medium navbar-text-primary">
               <button
                 onClick={handleLogout}
                 className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left flex items-center gap-3"
@@ -157,7 +185,6 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Floating Mobile Navigation */}
       <MobileFloatingNav />
     </>
   );

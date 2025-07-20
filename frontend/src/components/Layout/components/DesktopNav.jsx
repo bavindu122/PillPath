@@ -3,15 +3,15 @@ import { NavLink } from "react-router-dom";
 
 const DesktopNav = () => {
   return (
-    <div className="hidden md:flex border border-gray-400 rounded-full px-4 py-1 lg:px-6 lg:py-2">
-      <ul className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-medium text-gray-700 text-sm whitespace-nowrap">
+    <div className="hidden md:flex border navbar-blue-border rounded-full px-4 py-1 lg:px-6 lg:py-2">
+      <ul className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-medium navbar-text-primary text-sm whitespace-nowrap">
         <NavLink
           to="/"
           className={({ isActive }) =>
             `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
               isActive
-                ? "text-white border bg-pButton"
-                : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
+                ? "navbar-text-white navbar-blue-bg"
+                : "navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
             }`
           }
         >
@@ -22,8 +22,8 @@ const DesktopNav = () => {
           className={({ isActive }) =>
             `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
               isActive
-                ? "text-white border bg-pButton"
-                : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
+                ? "navbar-text-white navbar-blue-bg"
+                : "navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
             }`
           }
         >
@@ -34,8 +34,8 @@ const DesktopNav = () => {
           className={({ isActive }) =>
             `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
               isActive
-                ? "text-white border bg-pButton"
-                : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
+                ? "navbar-text-white navbar-blue-bg"
+                : "navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
             }`
           }
         >
@@ -46,8 +46,8 @@ const DesktopNav = () => {
           className={({ isActive }) =>
             `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
               isActive
-                ? "text-white border bg-pButton"
-                : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
+                ? "navbar-text-white navbar-blue-bg"
+                : "navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
             }`
           }
         >
@@ -58,8 +58,8 @@ const DesktopNav = () => {
           className={({ isActive }) =>
             `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
               isActive
-                ? "text-white border bg-pButton"
-                : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
+                ? "navbar-text-white navbar-blue-bg"
+                : "navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
             }`
           }
         >
