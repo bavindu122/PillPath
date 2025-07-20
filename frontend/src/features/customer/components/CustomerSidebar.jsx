@@ -179,9 +179,11 @@ const CustomerSidebar = () => {
                   transition={{ duration: 0.2 }}
                 >
                   <p className="text-white font-medium text-sm">
-                    {user?.firstName && user?.lastName
-                      ? `${user.firstName} ${user.lastName}`
-                      : user?.firstName || "Customer"}
+                    {user?.fullName ||
+                      (user?.firstName && user?.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : user?.firstName) ||
+                      "Customer"}
                   </p>
                   <p className="text-white/60 text-xs">
                     {user?.email || "customer@example.com"}

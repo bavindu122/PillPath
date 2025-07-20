@@ -36,7 +36,7 @@ const CustomerProfile = ({ removeBg = false }) => {
     setShowProfileModal,
     setShowEditProfileModal,
     openUploadModal,
-    closeUploadModal
+    closeUploadModal,
   } = useCustomerModals();
 
   const { user } = useAuth();
@@ -44,8 +44,9 @@ const CustomerProfile = ({ removeBg = false }) => {
   return (
     <section
       className={`min-h-screen flex ${
-        removeBg ? "" : "bg-gradient-to-br from-primary via-primary-hover to-accent"
-
+        removeBg
+          ? ""
+          : "bg-gradient-to-br from-primary via-primary-hover to-accent"
       } relative overflow-hidden`}
     >
       {!removeBg && (
@@ -73,30 +74,30 @@ const CustomerProfile = ({ removeBg = false }) => {
                     alt="User profile picture"
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/30 shadow-lg animate-fade-in-scale"
                   />
-                  
                 </div>
 
                 <div className="flex-1 text-left">
                   <h1 className="text-2xl md:text-3xl text-white font-bold mb-2 animate-fade-in-up delay-200">
                     Welcome back,{" "}
-                    <span className="text-gradient-secondary">{user?.firstName || "Customer"}!</span>
+                    <span className="text-gradient-secondary">
+                      {user?.fullName || user?.firstName || "Customer"}!
+                    </span>
                   </h1>
                   <p className="text-white/80 mb-6 animate-fade-in-up delay-300">
                     Manage your prescriptions and health with ease from your
                     personalized dashboard
                   </p>
-
                   {/* Quick action buttons */}
                   <div className="flex flex-wrap gap-3 animate-fade-in-up delay-400">
-                    <Button 
+                    <Button
                       className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg"
                       onClick={openUploadModal}
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
-                      <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                        <MapPin size={16} /> Find Pharmacy
-                      </Button>
+                    <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                      <MapPin size={16} /> Find Pharmacy
+                    </Button>
                     <Link to="/otc-store">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <ShoppingBag size={16} /> Browse OTC
@@ -397,7 +398,7 @@ const CustomerProfile = ({ removeBg = false }) => {
           // Add more user data here when available
         }}
       />
-      
+
       <PrescriptionUploadModal
         isOpen={isUploadModalOpen}
         onClose={closeUploadModal}
