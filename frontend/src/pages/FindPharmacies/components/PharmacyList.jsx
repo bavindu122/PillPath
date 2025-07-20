@@ -82,7 +82,7 @@ const PharmacyList = ({
                   <h3 className="font-bold text-lg text-dark">{pharmacy.name}</h3>
                   <div className="flex items-center text-yellow-500">
                     <Star size={16} className="fill-yellow-500" />
-                    <span className="ml-1 text-sm font-medium">{pharmacy.rating}</span>
+                    <span className="ml-1 text-sm text-dark font-medium">{pharmacy.rating}</span>
                   </div>
                 </div>
                 
@@ -116,21 +116,9 @@ const PharmacyList = ({
                     </span>
                   )}
                   {pharmacy.has24HourService && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 flex items-center">
+                    <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800 flex items-center">
                       <Clock size={12} className="mr-1" />
                       24 Hours
-                    </span>
-                  )}
-                  {pharmacy.acceptsInsurance && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-800 flex items-center">
-                      <Shield size={12} className="mr-1" />
-                      Insurance
-                    </span>
-                  )}
-                  {pharmacy.hasVaccinations && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800 flex items-center">
-                      <Pill size={12} className="mr-1" />
-                      Vaccinations
                     </span>
                   )}
                 </div>

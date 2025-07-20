@@ -6,6 +6,7 @@ import OrderSummary from '../components/OrderSummary';
 import PatientInfo from '../components/PatientInfo';
 import DeliveryTracking from '../components/DeliveryTracking';
 import useOrderData from '../hooks/useOrderData';
+import './index-pharmacist.css';
 
 const PastOrder = () => {
   const navigate = useNavigate();
