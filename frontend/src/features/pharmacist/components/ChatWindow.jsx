@@ -91,7 +91,7 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
   const { patientName, patientAvatar, status, priority, prescriptionId, messages } = conversation;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm flex flex-col" style={{ height: '600px' }}>
+    <div className="bg-white rounded-lg shadow-sm flex flex-col" style={{ height: '700px' }}>
       {/* Chat Header */}
       <div className="p-4 border-b" style={{ borderColor: 'var(--pharma-border)' }}>
         <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto chat-scroll-area" style={{ maxHeight: '500px', minHeight: '400px' }}>
+    <div className="flex-1 overflow-y-auto chat-scroll-area">
         <div className="p-4 space-y-4">
           {messages.map((msg, index) => {
             const isPharmacist = msg.sender === 'pharmacist';
