@@ -195,13 +195,13 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
       {/* Message Input */}
       <div className="chat-input-area p-4">
         <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center">
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
               rows={1}
-              className="w-full px-4 py-3 border rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              className="w-full px-4 py-3 border rounded-xl resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
               style={{ 
                 borderColor: 'var(--pharma-border)',
                 backgroundColor: 'white',

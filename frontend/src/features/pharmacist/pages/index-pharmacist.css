@@ -343,7 +343,7 @@
 
 /* Chat Stats styling */
 .chat-stats-blue {
-  background: linear-gradient(135deg, var(--pharma-blue-50) 0%, var(--pharma-blue-100) 100%);
+  background: var(--pharma-blue-100);
   border-color: var(--pharma-blue-200);
 }
 

@@ -19,7 +19,7 @@ const ChatFilters = ({
           placeholder="Search conversations..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
           style={{ 
             borderColor: 'var(--pharma-border)',
             backgroundColor: 'var(--pharma-bg-light)'
@@ -36,7 +36,7 @@ const ChatFilters = ({
         <select
           value={filterStatus}
           onChange={(e) => onFilterStatusChange(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
           style={{ 
             borderColor: 'var(--pharma-border)',
             backgroundColor: 'var(--pharma-bg-light)'
@@ -58,7 +58,7 @@ const ChatFilters = ({
         <select
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
           style={{ 
             borderColor: 'var(--pharma-border)',
             backgroundColor: 'var(--pharma-bg-light)'
