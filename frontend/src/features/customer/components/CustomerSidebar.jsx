@@ -36,7 +36,7 @@ const CustomerSidebar = () => {
     { path: "/customer/activities", label: "Ongoing Activities", icon: <Activity size={18} /> },
     { path: "/customer/orders", label: "Past Orders", icon: <Clock size={18} /> },
     { path: "/customer/family-profiles", label: "Family Profiles", icon: <Users size={18} /> },
-    { path: "/medicine-info", label: "Medicine Info", icon: <Pill size={18} /> },
+    { path: "/customer/medicine-info", label: "Medicine Info", icon: <Pill size={18} /> },
     { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
 

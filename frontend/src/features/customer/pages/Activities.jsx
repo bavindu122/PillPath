@@ -261,17 +261,17 @@ const Activities = () => {
 
   return (
     <div className="min-h-screen p-6 relative z-10">
-      <div className="max-w-6xl mx-auto">
-        
-
-        {/* Ongoing Activities Section */}
-        <div className="mb-8 bg-black/20 p-4 rounded-lg">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full"></div>
-            <h2 className="text-4xl font-semibold text-white">Ongoing Activities</h2>
-          </div>
-          <p className="text-white/70 text-lg">Track your prescription orders and delivery status</p>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+        <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Ongoing Activities</h1>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">Track your prescription orders and delivery status</p>
         </div>
+        </motion.div>
 
         <div className="space-y-8">
           {prescriptions.map((prescription, index) => (
@@ -377,6 +377,13 @@ const Activities = () => {
                           <motion.div
                             whileHover={{ x: 5 }}
                             className="text-white/60 hover:text-white transition-colors cursor-pointer"
+                            onClick={() => {
+                              if (pharmacy.status === "View Order Preview") {
+                                handleViewOrderPreview(prescription.id, pharmacy.name);
+                              } else if (pharmacy.status === "Proceed to payment") {
+                                handleProceedToPayment(prescription.id, pharmacy.name);
+                              }
+                            }}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -402,7 +409,7 @@ const Activities = () => {
           discountPercentage={10}
           onConfirmPayment={handleConfirmPayment}
         />
-      </div>
+      
     </div>
   );
 };

@@ -234,7 +234,7 @@ const FamilyProfiles = () => {
             className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Family <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Profiles</span>
+              Family Profiles 
             </h1>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Manage medication profiles and health information for your entire family in one secure place

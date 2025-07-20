@@ -137,17 +137,16 @@ const PastOrders = () => {
   return (
     <div className="min-h-screen p-6 relative">
       {/* Header */}
+      
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="text-center mb-8"
       >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Past Orders</h1>
-            <p className="text-white/60">View and manage your order history</p>
-          </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Past Orders</h1>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">View and manage your order history</p>
           
           <div className="flex items-center gap-3">
             <span className="text-white/60 text-sm">
