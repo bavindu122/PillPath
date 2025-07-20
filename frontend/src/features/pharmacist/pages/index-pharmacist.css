@@ -13,6 +13,8 @@
   --pharma-text-dark: #1A2530;
   --pharma-text-light: #fff;
   --pharma-text-muted: #94a3b8;
+  --pharma-text-primary: #1f2937;
+  --pharma-text-secondary: #6b7280;
   --pharma-border: #e0e7ef;
   --pharma-border-dark: #374151;
   --pharma-yellow: #FFC107;
@@ -337,6 +339,133 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Chat Stats styling */
+.chat-stats-blue {
+  background: linear-gradient(135deg, var(--pharma-blue-50) 0%, var(--pharma-blue-100) 100%);
+  border-color: var(--pharma-blue-200);
+}
+
+.chat-stats-red {
+  background: linear-gradient(135deg, var(--pharma-red-50) 0%, var(--pharma-red-100) 100%);
+  border-color: var(--pharma-red-200);
+}
+
+.chat-stats-yellow {
+  background: linear-gradient(135deg, var(--pharma-orange-50) 0%, var(--pharma-orange-100) 100%);
+  border-color: var(--pharma-orange-200);
+}
+
+.chat-stats-green {
+  background: linear-gradient(135deg, var(--pharma-green-50) 0%, var(--pharma-green-100) 100%);
+  border-color: var(--pharma-green-200);
+}
+
+.chat-icon-blue {
+  color: var(--pharma-blue-600);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-red {
+  color: var(--pharma-red-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-yellow {
+  color: var(--pharma-orange-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-green {
+  color: var(--pharma-green-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Chat specific styles */
+.chat-message-bubble {
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+.chat-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pharma-gray-300) transparent;
+}
+
+.chat-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--pharma-gray-300);
+  border-radius: 3px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: var(--pharma-gray-400);
+}
+
+.chat-message-time {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.chat-conversation-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-conversation-card:hover {
+  background-color: var(--pharma-gray-50);
+  transform: translateY(-1px);
+}
+
+.chat-conversation-card.selected {
+  background-color: var(--pharma-blue-50);
+  border-left: 4px solid var(--pharma-blue-600);
+}
+
+.chat-input-area {
+  border-top: 1px solid var(--pharma-border);
+  background-color: var(--pharma-bg-light);
+}
+
+.chat-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chat-status-active {
+  background-color: var(--pharma-green-500);
+}
+
+.chat-status-waiting {
+  background-color: var(--pharma-orange-500);
+}
+
+.chat-status-resolved {
+  background-color: var(--pharma-gray-400);
 }
 
 /* Dark mode */
