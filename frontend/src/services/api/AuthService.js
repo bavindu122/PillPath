@@ -1,4 +1,4 @@
-import PharmacyService from './PharmacyService'; // ✅ ADD: Import PharmacyService
+import PharmacyService from './PharmacyService';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -24,15 +24,9 @@ class ApiService {
     }
 
     try {
+      console.log('Making API request:', url, config);
       const response = await fetch(url, config);
       
-      // Handle 401 Unauthorized
-      if (response.status === 401) {
-        localStorage.removeItem('auth_token');
-        window.location.href = '/login';
-        return;
-      }
-
       let data;
       const contentType = response.headers.get('content-type');
       
@@ -42,8 +36,24 @@ class ApiService {
         data = await response.text();
       }
 
+      console.log('API response:', response.status, data);
+
       if (!response.ok) {
-        throw new Error(data.message || data.error || `HTTP error! status: ${response.status}`);
+        // Handle different error formats from backend
+        if (data && typeof data === 'object') {
+          if (data.message) {
+            throw new Error(data.message);
+          } else if (data.error) {
+            throw new Error(data.error);
+          } else if (!data.success && data.errors) {
+            // Handle validation errors
+            const errorMessages = Array.isArray(data.errors) 
+              ? data.errors.join(', ') 
+              : Object.values(data.errors).join(', ');
+            throw new Error(errorMessages);
+          }
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return data;
@@ -53,45 +63,65 @@ class ApiService {
     }
   }
 
-  // Customer registration
+  // ✅ Customer registration - Updated to match exact DTO structure
   async registerCustomer(userData) {
-    return this.request('auth/register/customer', {
+    // ✅ Include ALL fields that match CustomerRegistrationRequest DTO
+    const registrationRequest = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      phone: userData.phone,
+      password: userData.password,
+      dateOfBirth: userData.dateOfBirth,
+      termsAccepted: userData.termsAccepted // ✅ Now included since it's in the DTO
+    };
+
+    console.log('Sending customer registration request:', registrationRequest);
+    
+    return this.request('customers/register', {
       method: 'POST',
-      body: userData,
+      body: registrationRequest,
     });
   }
 
-  // ✅ ADD: Pharmacy registration
+  // ✅ Pharmacy registration
   async registerPharmacy(pharmacyData) {
     return PharmacyService.registerPharmacy(pharmacyData);
   }
 
-  // Login
+  // ✅ Customer login - Updated endpoint
   async login(credentials) {
-    return this.request('auth/login', {
+    const loginRequest = {
+      email: credentials.email,
+      password: credentials.password
+    };
+
+    console.log('Sending login request:', loginRequest);
+    
+    return this.request('customers/login', {
       method: 'POST',
-      body: credentials,
+      body: loginRequest,
     });
   }
 
-  // Get user profile
+  // ✅ Get customer profile
   async getUserProfile() {
-    return this.request('auth/profile', {
+    return this.request('customers/profile', {
       method: 'GET',
     });
   }
 
-  // Update user profile
+  // ✅ Update customer profile
   async updateUserProfile(profileData) {
-    return this.request('auth/profile', {
+    return this.request('customers/profile', {
       method: 'PUT',
       body: profileData,
     });
   }
 
-  // Logout
+  // ✅ Customer logout
   async logout() {
-    return this.request('auth/logout', {
+    return this.request('customers/logout', {
       method: 'POST',
     });
   }

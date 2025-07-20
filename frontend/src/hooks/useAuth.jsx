@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }) => {
       console.error("Auth check failed:", error);
       if (
         error.message.includes("Invalid credentials") ||
-        error.message.includes("401")
+        error.message.includes("401") ||
+        error.message.includes("Unauthorized")
       ) {
         logout();
       }
@@ -51,11 +52,17 @@ export const AuthProvider = ({ children }) => {
       if (userType === "customer") {
         response = await ApiService.registerCustomer(userData);
 
-        // ✅ For customers, set token and user immediately
-        if (response.token) {
-          setToken(response.token);
-          setUser(response.user);
-          localStorage.setItem("auth_token", response.token);
+        // ✅ Handle backend response format
+        if (response && response.success) {
+          // If backend returns token immediately upon registration
+          if (response.token) {
+            setToken(response.token);
+            setUser(response.user || response.customer);
+            localStorage.setItem("auth_token", response.token);
+          }
+        } else if (response && !response.success) {
+          // Handle registration failure
+          throw new Error(response.message || "Registration failed");
         }
       } else if (userType === "pharmacy") {
         // ✅ For pharmacies, just register (no immediate login)
@@ -79,10 +86,15 @@ export const AuthProvider = ({ children }) => {
 
       const response = await ApiService.login(credentials);
 
-      if (response.token) {
-        setToken(response.token);
-        setUser(response.user);
-        localStorage.setItem("auth_token", response.token);
+      // ✅ Handle backend login response format
+      if (response && response.success) {
+        if (response.token) {
+          setToken(response.token);
+          setUser(response.user || response.customer);
+          localStorage.setItem("auth_token", response.token);
+        }
+      } else if (response && !response.success) {
+        throw new Error(response.message || "Login failed");
       }
 
       return response;
@@ -101,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
-  // ✅ ADD: Update user method
+  // ✅ Update user method
   const updateUser = (updatedUserData) => {
     setUser((prevUser) => ({
       ...prevUser,
@@ -117,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
-    updateUser, // ✅ ADD: Include updateUser in context
+    updateUser,
     checkAuthStatus,
     isAuthenticated: !!token,
   };
