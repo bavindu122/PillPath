@@ -125,17 +125,17 @@
 
 /* Existing component styles using CSS variables */
 .priority-high {
-  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+  background: var(--pharma-red-100);
   color: var(--pharma-red-800);
   border-color: var(--pharma-red-200);
 }
 .priority-medium {
-  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+  background: var(--pharma-yellow-100);
   color: var(--pharma-yellow-800);
   border-color: var(--pharma-yellow-200);
 }
 .priority-low {
-  background: linear-gradient(to right, var(--pharma-blue-50), var(--pharma-blue-100));
+  background: var(--pharma-blue-100);
   color: var(--pharma-blue-800);
   border-color: var(--pharma-blue-200);
 }
@@ -148,31 +148,31 @@
 /* Alert styles */
 .alert-critical {
   border-left: 4px solid var(--pharma-red-500);
-  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+  background: var(--pharma-red-100);
 }
 .alert-critical:hover {
-  background: linear-gradient(to right, var(--pharma-red-100), var(--pharma-red-200));
+  background: var(--pharma-red-200);
 }
 .alert-low {
   border-left: 4px solid var(--pharma-orange-500);
-  background: linear-gradient(to right, var(--pharma-orange-50), var(--pharma-orange-100));
+  background: var(--pharma-orange-100);
 }
 .alert-low:hover {
-  background: linear-gradient(to right, var(--pharma-orange-100), var(--pharma-orange-200));
+  background: var(--pharma-orange-200);
 }
 .alert-medium {
   border-left: 4px solid var(--pharma-yellow);
-  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+  background: var(--pharma-yellow-100);
 }
 .alert-medium:hover {
-  background: linear-gradient(to right, var(--pharma-yellow-100), var(--pharma-yellow-200));
+  background: var(--pharma-yellow-200);
 }
 .alert-default {
   border-left: 4px solid var(--pharma-gray-500);
-  background: linear-gradient(to right, var(--pharma-gray-50), var(--pharma-gray-100));
+  background: var(--pharma-gray-100);
 }
 .alert-default:hover {
-  background: linear-gradient(to right, var(--pharma-gray-100), var(--pharma-gray-200));
+  background: var(--pharma-gray-200);
 }
 
 /* Text colors for alerts */
@@ -184,19 +184,19 @@
 /* Stats card styles */
 .stats-card-blue {
   border-color: var(--pharma-blue-200);
-  background: linear-gradient(to bottom right, var(--pharma-blue-50), var(--pharma-blue-100));
+  background: var(--pharma-blue-100);
 }
 .stats-card-green {
   border-color: var(--pharma-green-200);
-  background: linear-gradient(to bottom right, var(--pharma-green-50), var(--pharma-green-100));
+  background: var(--pharma-green-100);
 }
 .stats-card-orange {
   border-color: var(--pharma-orange-200);
-  background: linear-gradient(to bottom right, var(--pharma-orange-50), var(--pharma-orange-100));
+  background: var(--pharma-orange-100);
 }
 .stats-card-purple {
   border-color: var(--pharma-purple-200);
-  background: linear-gradient(to bottom right, var(--pharma-purple-50), var(--pharma-purple-50));
+  background: var(--pharma-purple-100);
 }
 
 .stats-icon-blue { color: var(--pharma-blue-600); }
@@ -207,19 +207,19 @@
 /* Inventory Stats card styles */
 .inventory-stats-blue {
   border-color: var(--pharma-blue-200);
-  background: linear-gradient(to bottom right, var(--pharma-blue-50), var(--pharma-blue-100));
+  background: var(--pharma-blue-100);
 }
 .inventory-stats-green {
   border-color: var(--pharma-green-200);
-  background: linear-gradient(to bottom right, var(--pharma-green-50), var(--pharma-green-100));
+  background: var(--pharma-green-100);
 }
 .inventory-stats-orange {
   border-color: var(--pharma-orange-200);
-  background: linear-gradient(to bottom right, var(--pharma-orange-50), var(--pharma-orange-100));
+  background: var(--pharma-orange-100);
 }
 .inventory-stats-purple {
   border-color: var(--pharma-purple-200);
-  background: linear-gradient(to bottom right, var(--pharma-purple-50), var(--pharma-purple-100));
+  background: var(--pharma-purple-100);
 }
 
 .inventory-icon-blue { color: var(--pharma-blue-600); }
@@ -239,7 +239,7 @@
 }
 
 .inventory-table-header {
-  background: linear-gradient(to right, var(--pharma-gray-50), var(--pharma-gray-100));
+  background: var(--pharma-gray-100);
   border-bottom: 1px solid var(--pharma-border);
 }
 
