@@ -1,19 +1,20 @@
 import React from 'react';
 import { Eye, Printer, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import '../pages/index-pharmacist.css';
 
 const OrderTable = ({ orders, onPrintOrder }) => {
   const getTypeIcon = (type) => {
     switch (type.toLowerCase()) {
       case 'prescription':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgba(45, 93, 160, 0.1)', color: 'var(--pharma-blue)' }}>
             📋 Prescription
           </span>
         );
       case 'otc':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border pharma-text-danger" style={{ backgroundColor: 'rgba(255, 82, 82, 0.1)', borderColor: 'rgba(255, 82, 82, 0.3)' }}>
             💊 OTC
           </span>
         );
@@ -26,19 +27,19 @@ const OrderTable = ({ orders, onPrintOrder }) => {
     switch (paymentMethod.toLowerCase()) {
       case 'cash':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium pharma-text-success" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
             💵 Cash
           </span>
         );
       case 'credit card':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium pharma-text-info" style={{ backgroundColor: 'rgba(142, 68, 173, 0.1)' }}>
             💳 Card
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium pharma-bg-gray-100 pharma-text-gray-800">
             {paymentMethod}
           </span>
         );
@@ -70,8 +71,8 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold text-gray-800">Processed Prescriptions</h3>
-        <div className="text-sm text-gray-500">
+        <h3 className="text-xl font-semibold pharma-text-dark">Processed Prescriptions</h3>
+        <div className="text-sm pharma-text-muted">
           Showing 1 to {Math.min(10, orders.length)} of {orders.length} results
         </div>
       </div>
@@ -81,7 +82,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
           {orders.map((order, index) => (
             <div
               key={order.id}
-              className="border border-gray-200 rounded-xl p-6 hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-1 group animate-fade-in-left bg-white/50 backdrop-blur-sm"
+              className="border pharma-border rounded-xl p-6 pharma-bg-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group animate-fade-in-left backdrop-blur-sm"
               style={{
                 animationDelay: `${index * 100}ms`
               }}
@@ -90,10 +91,10 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                 <div className="flex items-center space-x-4 flex-1">
                   {/* Patient Avatar */}
                   <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
-                      <User className="h-6 w-6 text-blue-600" />
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-md transition-shadow duration-200" style={{ background: 'linear-gradient(to bottom right, var(--pharma-gray-100), var(--pharma-gray-200))' }}>
+                      <User className="h-6 w-6 pharma-text-primary" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 pharma-bg-success rounded-full border-2 border-white"></div>
                   </div>
 
                   {/* Order Details */}
@@ -101,11 +102,11 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-4">
                         <div>
-                          <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-200">
+                          <h4 className="font-semibold pharma-text-dark group-hover:pharma-text-primary transition-colors duration-200">
                             {order.id}
                           </h4>
-                          <p className="text-sm text-gray-600">{order.patient.name}</p>
-                          <p className="text-xs text-gray-400">{order.patient.email}</p>
+                          <p className="text-sm pharma-text-gray-600">{order.patient.name}</p>
+                          <p className="text-xs pharma-text-muted">{order.patient.email}</p>
                         </div>
                         
                         <div className="flex items-center space-x-3">
@@ -115,7 +116,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4 text-xs text-gray-500 mt-3">
+                    <div className="grid grid-cols-4 gap-4 text-xs pharma-text-muted mt-3">
                       <span className="flex flex-col">
                         <span className="text-gray-400">Items</span>
                         <span className="text-gray-700 font-medium">{order.items} items</span>

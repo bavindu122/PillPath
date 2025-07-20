@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Download } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const OrderFilters = ({
   searchTerm,

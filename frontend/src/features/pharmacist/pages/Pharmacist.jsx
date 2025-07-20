@@ -5,6 +5,7 @@ import PrescriptionQueueList from "./PrescriptionQueueList"
 import OrderHistoryList from "./OrderHistoryList"
 import PastOrder from "./PastOrder"
 import { Route, Routes } from 'react-router-dom'
+import './index-pharmacist.css'
 
 const Pharmacist = () => {
   return (
