@@ -267,14 +267,14 @@ const PrescriptionQueue = () => {
                       <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
                         <Link
                           to={`/pharmacist/review/${prescription.id}`}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:from-blue-200 hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <Eye className="h-3 w-3" />
                           <span>Review</span>
                         </Link>
                         <button
                           onClick={() => handleApprove(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-green-100 to-green-200 text-green-800 text-xs font-medium rounded-lg hover:from-green-200 hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-green-200 text-green-800 text-xs font-medium rounded-lg hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <CheckCircle className="h-3 w-3" />
                           <span className="hidden sm:inline">Approve</span>
@@ -282,7 +282,7 @@ const PrescriptionQueue = () => {
                         </button>
                         <button
                           onClick={() => handleClarify(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-medium rounded-lg hover:from-yellow-200 hover:to-yellow-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-yellow-200 text-yellow-800 text-xs font-medium rounded-lg hover:to-yellow-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <MessageCircle className="h-3 w-3" />
                           <span className="hidden sm:inline">Clarify</span>
@@ -290,7 +290,7 @@ const PrescriptionQueue = () => {
                         </button>
                         <button
                           onClick={() => handleReject(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-gradient-to-r from-red-100 to-red-200 text-red-800 text-xs font-medium rounded-lg hover:from-red-200 hover:to-red-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-red-200 text-red-800 text-xs font-medium rounded-lg hover:to-red-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <XCircle className="h-3 w-3" />
                           <span className="hidden sm:inline">Reject</span>

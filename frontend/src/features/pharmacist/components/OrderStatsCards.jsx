@@ -1,69 +1,74 @@
 import React from 'react';
+import { ShoppingCart, Clock, CheckCircle, DollarSign, Package, TrendingUp, AlertCircle, FileText } from 'lucide-react';
 import '../pages/index-pharmacist.css';
 
 const OrderStatsCards = ({ stats }) => {
-  const getIconColor = (color) => {
-    switch (color) {
-      case 'blue':
-        return 'from-blue-500 to-blue-600';
-      case 'green':
-        return 'from-green-500 to-green-600';
-      case 'orange':
-        return 'from-orange-500 to-orange-600';
-      case 'purple':
-        return 'from-purple-500 to-purple-600';
-      default:
-        return 'from-gray-500 to-gray-600';
-    }
+  // Icon mapping based on common order stats
+  const getIcon = (title) => {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('total') || titleLower.includes('order')) return ShoppingCart;
+    if (titleLower.includes('pending') || titleLower.includes('waiting')) return Clock;
+    if (titleLower.includes('completed') || titleLower.includes('delivered')) return CheckCircle;
+    if (titleLower.includes('revenue') || titleLower.includes('value') || titleLower.includes('$')) return DollarSign;
+    if (titleLower.includes('product') || titleLower.includes('item')) return Package;
+    if (titleLower.includes('growth') || titleLower.includes('trend')) return TrendingUp;
+    if (titleLower.includes('urgent') || titleLower.includes('priority')) return AlertCircle;
+    return FileText; // default icon
   };
 
-  const getBgColor = (color) => {
-    switch (color) {
-      case 'blue':
-        return 'from-blue-50 to-blue-100';
-      case 'green':
-        return 'from-green-50 to-green-100';
-      case 'orange':
-        return 'from-orange-50 to-orange-100';
-      case 'purple':
-        return 'from-purple-50 to-purple-100';
-      default:
-        return 'from-gray-50 to-gray-100';
-    }
+  const getCardClass = (color) => {
+    const classes = {
+      blue: 'inventory-stats-blue',
+      green: 'inventory-stats-green',
+      orange: 'inventory-stats-orange',
+      purple: 'inventory-stats-purple'
+    };
+    return classes[color] || classes.blue;
+  };
+
+  const getIconClass = (color) => {
+    const classes = {
+      blue: 'inventory-icon-blue',
+      green: 'inventory-icon-green',
+      orange: 'inventory-icon-orange',
+      purple: 'inventory-icon-purple'
+    };
+    return classes[color] || classes.blue;
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (
-        <div
-          key={index}
-          className={`group bg-gradient-to-br ${getBgColor(stat.color)} rounded-xl border border-white/20 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden`}
-          style={{
-            animationDelay: `${index * 100}ms`
-          }}
-        >
-          <div className="flex items-center justify-between relative z-10">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800 group-hover:scale-105 transition-transform duration-300">
-                {stat.value}
-              </h3>
-              <h4 className="text-lg font-semibold text-gray-700 group-hover:text-gray-800 transition-colors duration-200 mb-1">
-                {stat.title}
-              </h4>
-              <p className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors duration-200">
-                {stat.subtitle}
-              </p>
-            </div>
-            
-            <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${getIconColor(stat.color)} opacity-80 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center`}>
-              <div className="w-6 h-6 bg-white rounded-full opacity-80"></div>
+      {stats.map((stat, index) => {
+        const Icon = getIcon(stat.title);
+        return (
+          <div
+            key={index}
+            className={`${getCardClass(stat.color)} border rounded-xl p-6 hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer group`}
+            style={{
+              animationDelay: `${index * 100}ms`,
+              animation: 'slideInUp 0.6s ease-out forwards'
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium mb-2 group-hover:transition-colors duration-200" style={{ color: 'var(--pharma-gray-600)' }}>
+                  {stat.title}
+                </p>
+                <p className="text-3xl font-bold mb-1 group-hover:scale-105 transition-transform duration-200" style={{ color: 'var(--pharma-gray-900)' }}>
+                  {stat.value}
+                </p>
+                <p className="text-xs group-hover:transition-colors duration-200" style={{ color: 'var(--pharma-gray-500)' }}>
+                  {stat.subtitle}
+                </p>
+              </div>
+              
+              <div className={`${getIconClass(stat.color)} opacity-80 group-hover:opacity-100 transition-opacity duration-200`}>
+                <Icon className="h-8 w-8" />
+              </div>
             </div>
           </div>
-          
-          {/* Subtle shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

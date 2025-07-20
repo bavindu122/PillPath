@@ -348,17 +348,17 @@
 }
 
 .chat-stats-red {
-  background: linear-gradient(135deg, var(--pharma-red-50) 0%, var(--pharma-red-100) 100%);
+  background: var(--pharma-red-100);
   border-color: var(--pharma-red-200);
 }
 
 .chat-stats-yellow {
-  background: linear-gradient(135deg, var(--pharma-orange-50) 0%, var(--pharma-orange-100) 100%);
+  background: var(--pharma-orange-100);
   border-color: var(--pharma-orange-200);
 }
 
 .chat-stats-green {
-  background: linear-gradient(135deg, var(--pharma-green-50) 0%, var(--pharma-green-100) 100%);
+  background: var(--pharma-green-100);
   border-color: var(--pharma-green-200);
 }
 
