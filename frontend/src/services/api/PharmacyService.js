@@ -1,8 +1,6 @@
-import PharmacyService from './PharmacyService'; // ✅ ADD: Import PharmacyService
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
-class ApiService {
+class PharmacyService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
@@ -48,53 +46,34 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('Pharmacy API request failed:', error);
       throw error;
     }
   }
 
-  // Customer registration
-  async registerCustomer(userData) {
-    return this.request('auth/register/customer', {
-      method: 'POST',
-      body: userData,
-    });
-  }
-
-  // ✅ ADD: Pharmacy registration
+  // ✅ Pharmacy registration
   async registerPharmacy(pharmacyData) {
-    return PharmacyService.registerPharmacy(pharmacyData);
-  }
-
-  // Login
-  async login(credentials) {
-    return this.request('auth/login', {
+    console.log('Registering pharmacy with data:', pharmacyData);
+    return this.request('pharmacies/register', {
       method: 'POST',
-      body: credentials,
+      body: pharmacyData,
     });
   }
 
-  // Get user profile
-  async getUserProfile() {
-    return this.request('auth/profile', {
+  // Get pharmacy profile
+  async getPharmacyProfile() {
+    return this.request('pharmacies/profile', {
       method: 'GET',
     });
   }
 
-  // Update user profile
-  async updateUserProfile(profileData) {
-    return this.request('auth/profile', {
+  // Update pharmacy profile
+  async updatePharmacyProfile(profileData) {
+    return this.request('pharmacies/profile', {
       method: 'PUT',
       body: profileData,
     });
   }
-
-  // Logout
-  async logout() {
-    return this.request('auth/logout', {
-      method: 'POST',
-    });
-  }
 }
 
-export default new ApiService();
+export default new PharmacyService();

@@ -4,10 +4,9 @@ import PharmacyForm from "./PharmacyForm";
 
 const RegisterForm = ({ role, onBack, onSubmit }) => {
   const handleSubmit = (formData) => {
-    // Here you would typically handle the form submission
-    // like sending data to an API
+    // ✅ Pass the role and formData to parent
     console.log(`${role} registration submitted:`, formData);
-    onSubmit(formData);
+    onSubmit(formData, role); // Pass role to distinguish registration type
   };
 
   return (

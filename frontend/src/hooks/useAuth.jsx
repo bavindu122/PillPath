@@ -50,14 +50,17 @@ export const AuthProvider = ({ children }) => {
       let response;
       if (userType === "customer") {
         response = await ApiService.registerCustomer(userData);
-      } else {
-        response = await ApiService.registerPharmacy(userData);
-      }
 
-      if (userType === "customer" && response.token) {
-        setToken(response.token);
-        setUser(response.user);
-        localStorage.setItem("auth_token", response.token);
+        // ✅ For customers, set token and user immediately
+        if (response.token) {
+          setToken(response.token);
+          setUser(response.user);
+          localStorage.setItem("auth_token", response.token);
+        }
+      } else if (userType === "pharmacy") {
+        // ✅ For pharmacies, just register (no immediate login)
+        response = await ApiService.registerPharmacy(userData);
+        // Don't set token/user for pharmacy - they need admin approval
       }
 
       return response;
@@ -100,9 +103,9 @@ export const AuthProvider = ({ children }) => {
 
   // ✅ ADD: Update user method
   const updateUser = (updatedUserData) => {
-    setUser(prevUser => ({
+    setUser((prevUser) => ({
       ...prevUser,
-      ...updatedUserData
+      ...updatedUserData,
     }));
   };
 

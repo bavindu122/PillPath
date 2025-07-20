@@ -8,36 +8,40 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   
+  // ✅ Updated formData to match backend DTO
   const [formData, setFormData] = useState({
-    // Basic Information
-    pharmacyName: "",
-    tradingName: "",
-    ownerName: "",
-    phone: "",
-    email: "",
-    website: "",
-    password: "",
-    confirmPassword: "",
-    
-    // Legal Documentation
-    licenseNumber: "",
-    licenseIssueDate: "",
-    licenseExpiryDate: "",
-    businessRegNumber: "",
-    localAuthorityReg: "",
-    
-    // Pharmacist Details
-    pharmacistName: "",
-    slmcRegNumber: "",
-    pharmacistContact: "",
-    secondaryPharmacist: "",
-    
-    // Location & Services
+    // Pharmacy Details (matching PharmacyRegistrationRequest)
+    name: "",
     address: "",
-    district: "",
-    operatingHours: "",
-    services: "",
-    insurancePlans: "",
+    phoneNumber: "",
+    email: "",
+    licenseNumber: "",
+    licenseExpiryDate: "",
+    operatingHours: {
+      monday: "",
+      tuesday: "",
+      wednesday: "",
+      thursday: "",
+      friday: "",
+      saturday: "",
+      sunday: ""
+    },
+    services: [],
+    deliveryAvailable: false,
+    deliveryRadius: "",
+    
+    // Admin Details (matching PharmacyRegistrationRequest)
+    adminFirstName: "",
+    adminLastName: "",
+    adminEmail: "",
+    adminPassword: "",
+    adminPhoneNumber: "",
+    adminPosition: "",
+    adminLicenseNumber: "",
+    
+    // UI-only fields (not sent to backend)
+    confirmPassword: "",
+    website: "",
     termsAccepted: false
   });
   
@@ -45,10 +49,29 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+    
+    if (name.startsWith('operatingHours.')) {
+      const day = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        operatingHours: {
+          ...prev.operatingHours,
+          [day]: value
+        }
+      }));
+    } else if (name === 'services') {
+      // Handle services as comma-separated values
+      const servicesArray = value.split(',').map(s => s.trim()).filter(s => s);
+      setFormData(prev => ({
+        ...prev,
+        services: servicesArray
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
+    }
     
     // Clear error when field is edited
     if (errors[name]) {
@@ -60,45 +83,45 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
     const newErrors = {};
     
     if (step === 1) {
-      if (!formData.pharmacyName) newErrors.pharmacyName = "Pharmacy name is required";
-      if (!formData.ownerName) newErrors.ownerName = "Owner name is required";
-      if (!formData.phone) newErrors.phone = "Phone number is required";
+      // Basic Information - Pharmacy Details
+      if (!formData.name) newErrors.name = "Pharmacy name is required";
+      if (!formData.phoneNumber) newErrors.phoneNumber = "Phone number is required";
       
       if (!formData.email) {
         newErrors.email = "Email is required";
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
         newErrors.email = "Email is invalid";
       }
+    }
+    
+    if (step === 2) {
+      // Legal Documentation
+      if (!formData.licenseNumber) newErrors.licenseNumber = "License number is required";
+      if (!formData.licenseExpiryDate) newErrors.licenseExpiryDate = "License expiry date is required";
+    }
+    
+    if (step === 3) {
+      // Admin Details
+      if (!formData.adminFirstName) newErrors.adminFirstName = "Admin first name is required";
+      if (!formData.adminLastName) newErrors.adminLastName = "Admin last name is required";
+      if (!formData.adminEmail) newErrors.adminEmail = "Admin email is required";
+      if (!formData.adminPhoneNumber) newErrors.adminPhoneNumber = "Admin phone is required";
+      if (!formData.adminPosition) newErrors.adminPosition = "Admin position is required";
       
-      if (!formData.password) {
-        newErrors.password = "Password is required";
-      } else if (formData.password.length < 8) {
-        newErrors.password = "Password must be at least 8 characters";
+      if (!formData.adminPassword) {
+        newErrors.adminPassword = "Password is required";
+      } else if (formData.adminPassword.length < 8) {
+        newErrors.adminPassword = "Password must be at least 8 characters";
       }
       
-      if (formData.password !== formData.confirmPassword) {
+      if (formData.adminPassword !== formData.confirmPassword) {
         newErrors.confirmPassword = "Passwords do not match";
       }
     }
     
-    if (step === 2) {
-      if (!formData.licenseNumber) newErrors.licenseNumber = "License number is required";
-      if (!formData.licenseIssueDate) newErrors.licenseIssueDate = "License issue date is required";
-      if (!formData.licenseExpiryDate) newErrors.licenseExpiryDate = "License expiry date is required";
-      if (!formData.businessRegNumber) newErrors.businessRegNumber = "Business registration number is required";
-      if (!formData.localAuthorityReg) newErrors.localAuthorityReg = "Local authority registration is required";
-    }
-    
-    if (step === 3) {
-      if (!formData.pharmacistName) newErrors.pharmacistName = "Pharmacist name is required";
-      if (!formData.slmcRegNumber) newErrors.slmcRegNumber = "SLMC registration number is required";
-      if (!formData.pharmacistContact) newErrors.pharmacistContact = "Pharmacist contact is required";
-    }
-    
     if (step === 4) {
+      // Location & Services
       if (!formData.address) newErrors.address = "Address is required";
-      if (!formData.district) newErrors.district = "District is required";
-      if (!formData.operatingHours) newErrors.operatingHours = "Operating hours are required";
       if (!formData.termsAccepted) newErrors.termsAccepted = "You must accept the terms";
     }
     
@@ -120,7 +143,32 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
     e.preventDefault();
     
     if (validateStep(currentStep)) {
-      onSubmit(formData);
+      // ✅ Prepare data for backend (remove UI-only fields)
+      const backendData = {
+        // Pharmacy details
+        name: formData.name,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        licenseNumber: formData.licenseNumber,
+        licenseExpiryDate: formData.licenseExpiryDate,
+        operatingHours: formData.operatingHours,
+        services: formData.services,
+        deliveryAvailable: formData.deliveryAvailable,
+        deliveryRadius: formData.deliveryRadius ? parseInt(formData.deliveryRadius) : null,
+        
+        // Admin details
+        adminFirstName: formData.adminFirstName,
+        adminLastName: formData.adminLastName,
+        adminEmail: formData.adminEmail,
+        adminPassword: formData.adminPassword,
+        adminPhoneNumber: formData.adminPhoneNumber,
+        adminPosition: formData.adminPosition,
+        adminLicenseNumber: formData.adminLicenseNumber
+      };
+      
+      console.log('Submitting pharmacy registration:', backendData);
+      onSubmit(backendData);
     }
   };
 
@@ -133,7 +181,7 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
       <p className="text-white/70 text-center mb-6">Step {currentStep} of {totalSteps}: {
         currentStep === 1 ? "Basic Information" :
         currentStep === 2 ? "Legal Documentation" :
-        currentStep === 3 ? "Pharmacist Details" :
+        currentStep === 3 ? "Admin Account" :
         "Location & Services"
       }</p>
       
@@ -166,7 +214,7 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
             <span className="text-xs hidden md:block">{
               step === 1 ? "Basic Info" :
               step === 2 ? "Legal Docs" :
-              step === 3 ? "Pharmacist" :
+              step === 3 ? "Admin" :
               "Location"
             }</span>
           </div>
@@ -174,72 +222,29 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Step 1: Basic Information */}
+        {/* Step 1: Basic Information - Pharmacy Details */}
         {currentStep === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div className="relative group">
               <label className="block text-white/90 text-sm font-medium mb-2">
-                Pharmacy Name (Official) <span className="text-accent">*</span>
+                Pharmacy Name <span className="text-accent">*</span>
               </label>
               <div className="relative">
                 <input
                   type="text"
-                  name="pharmacyName"
-                  value={formData.pharmacyName}
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.pharmacyName ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter official pharmacy name"
+                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.name ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                  placeholder="Enter pharmacy name"
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                   <Building2 size={20} />
                 </div>
               </div>
-              {errors.pharmacyName && (
+              {errors.name && (
                 <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.pharmacyName}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Trading Name (if different)
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="tradingName"
-                  value={formData.tradingName}
-                  onChange={handleChange}
-                  className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
-                  placeholder="Enter trading name if different"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <Building2 size={20} />
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Owner/Manager Name <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="ownerName"
-                  value={formData.ownerName}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.ownerName ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter owner/manager name"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <User size={20} />
-                </div>
-              </div>
-              {errors.ownerName && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.ownerName}
+                  <Info size={12} /> {errors.name}
                 </p>
               )}
             </div>
@@ -247,24 +252,24 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="relative group">
                 <label className="block text-white/90 text-sm font-medium mb-2">
-                  Contact Phone Number <span className="text-accent">*</span>
+                  Phone Number <span className="text-accent">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="tel"
-                    name="phone"
-                    value={formData.phone}
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
                     onChange={handleChange}
-                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.phone ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                    placeholder="Enter contact phone"
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.phoneNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    placeholder="Enter phone number"
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                     <Phone size={20} />
                   </div>
                 </div>
-                {errors.phone && (
+                {errors.phoneNumber && (
                   <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                    <Info size={12} /> {errors.phone}
+                    <Info size={12} /> {errors.phoneNumber}
                   </p>
                 )}
               </div>
@@ -296,7 +301,7 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
             
             <div className="relative group">
               <label className="block text-white/90 text-sm font-medium mb-2">
-                Website (if available)
+                Website (optional)
               </label>
               <div className="relative">
                 <input
@@ -312,6 +317,212 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* Step 2: Legal Documentation */}
+        {currentStep === 2 && (
+          <div className="space-y-5 animate-fade-in">
+            <div className="relative group">
+              <label className="block text-white/90 text-sm font-medium mb-2">
+                Pharmacy License Number <span className="text-accent">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="licenseNumber"
+                  value={formData.licenseNumber}
+                  onChange={handleChange}
+                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.licenseNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                  placeholder="Enter pharmacy license number"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                  <FileText size={20} />
+                </div>
+              </div>
+              {errors.licenseNumber && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                  <Info size={12} /> {errors.licenseNumber}
+                </p>
+              )}
+            </div>
+            
+            <div className="relative group">
+              <label className="block text-white/90 text-sm font-medium mb-2">
+                License Expiry Date <span className="text-accent">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  name="licenseExpiryDate"
+                  value={formData.licenseExpiryDate}
+                  onChange={handleChange}
+                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.licenseExpiryDate ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                  <Calendar size={20} />
+                </div>
+              </div>
+              {errors.licenseExpiryDate && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                  <Info size={12} /> {errors.licenseExpiryDate}
+                </p>
+              )}
+            </div>
+            
+            <div className="p-4 bg-accent/10 rounded-xl border border-accent/20">
+              <p className="text-white/80 text-sm">
+                All legal documentation will be verified before your pharmacy account is approved. Please ensure all information is accurate and up-to-date.
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Step 3: Admin Account Details */}
+        {currentStep === 3 && (
+          <div className="space-y-5 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="relative group">
+                <label className="block text-white/90 text-sm font-medium mb-2">
+                  Admin First Name <span className="text-accent">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="adminFirstName"
+                    value={formData.adminFirstName}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminFirstName ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    placeholder="Enter first name"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                    <User size={20} />
+                  </div>
+                </div>
+                {errors.adminFirstName && (
+                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <Info size={12} /> {errors.adminFirstName}
+                  </p>
+                )}
+              </div>
+              
+              <div className="relative group">
+                <label className="block text-white/90 text-sm font-medium mb-2">
+                  Admin Last Name <span className="text-accent">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="adminLastName"
+                    value={formData.adminLastName}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminLastName ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    placeholder="Enter last name"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                    <User size={20} />
+                  </div>
+                </div>
+                {errors.adminLastName && (
+                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <Info size={12} /> {errors.adminLastName}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="relative group">
+              <label className="block text-white/90 text-sm font-medium mb-2">
+                Admin Email <span className="text-accent">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  name="adminEmail"
+                  value={formData.adminEmail}
+                  onChange={handleChange}
+                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminEmail ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                  placeholder="Enter admin email"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                  <Mail size={20} />
+                </div>
+              </div>
+              {errors.adminEmail && (
+                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                  <Info size={12} /> {errors.adminEmail}
+                </p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="relative group">
+                <label className="block text-white/90 text-sm font-medium mb-2">
+                  Admin Phone <span className="text-accent">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    name="adminPhoneNumber"
+                    value={formData.adminPhoneNumber}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminPhoneNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    placeholder="Enter admin phone"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                    <Phone size={20} />
+                  </div>
+                </div>
+                {errors.adminPhoneNumber && (
+                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <Info size={12} /> {errors.adminPhoneNumber}
+                  </p>
+                )}
+              </div>
+              
+              <div className="relative group">
+                <label className="block text-white/90 text-sm font-medium mb-2">
+                  Position/Title <span className="text-accent">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="adminPosition"
+                    value={formData.adminPosition}
+                    onChange={handleChange}
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminPosition ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    placeholder="e.g. Pharmacist, Manager"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                    <ClipboardCheck size={20} />
+                  </div>
+                </div>
+                {errors.adminPosition && (
+                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                    <Info size={12} /> {errors.adminPosition}
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            <div className="relative group">
+              <label className="block text-white/90 text-sm font-medium mb-2">
+                Admin License Number (if applicable)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="adminLicenseNumber"
+                  value={formData.adminLicenseNumber}
+                  onChange={handleChange}
+                  className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
+                  placeholder="Enter license number (optional)"
+                />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                  <FileText size={20} />
+                </div>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="relative group">
@@ -321,19 +532,19 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
                 <div className="relative">
                   <input
                     type="password"
-                    name="password"
-                    value={formData.password}
+                    name="adminPassword"
+                    value={formData.adminPassword}
                     onChange={handleChange}
-                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.password ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
+                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.adminPassword ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
                     placeholder="Create a password"
                   />
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                     <Lock size={20} />
                   </div>
                 </div>
-                {errors.password && (
+                {errors.adminPassword && (
                   <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                    <Info size={12} /> {errors.password}
+                    <Info size={12} /> {errors.adminPassword}
                   </p>
                 )}
               </div>
@@ -365,239 +576,6 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
           </div>
         )}
         
-        {/* Step 2: Legal Documentation */}
-        {currentStep === 2 && (
-          <div className="space-y-5 animate-fade-in">
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                NMRA License Number <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="licenseNumber"
-                  value={formData.licenseNumber}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.licenseNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter NMRA license number"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <FileText size={20} />
-                </div>
-              </div>
-              {errors.licenseNumber && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.licenseNumber}
-                </p>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="relative group">
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  License Issue Date <span className="text-accent">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    name="licenseIssueDate"
-                    value={formData.licenseIssueDate}
-                    onChange={handleChange}
-                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.licenseIssueDate ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                    <Calendar size={20} />
-                  </div>
-                </div>
-                {errors.licenseIssueDate && (
-                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                    <Info size={12} /> {errors.licenseIssueDate}
-                  </p>
-                )}
-              </div>
-              
-              <div className="relative group">
-                <label className="block text-white/90 text-sm font-medium mb-2">
-                  License Expiry Date <span className="text-accent">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    name="licenseExpiryDate"
-                    value={formData.licenseExpiryDate}
-                    onChange={handleChange}
-                    className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.licenseExpiryDate ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  />
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                    <Calendar size={20} />
-                  </div>
-                </div>
-                {errors.licenseExpiryDate && (
-                  <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                    <Info size={12} /> {errors.licenseExpiryDate}
-                  </p>
-                )}
-              </div>
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Business Registration Number <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="businessRegNumber"
-                  value={formData.businessRegNumber}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.businessRegNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter business registration number"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <ClipboardCheck size={20} />
-                </div>
-              </div>
-              {errors.businessRegNumber && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.businessRegNumber}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Local Authority Registration <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="localAuthorityReg"
-                  value={formData.localAuthorityReg}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.localAuthorityReg ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter local authority registration"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <FileText size={20} />
-                </div>
-              </div>
-              {errors.localAuthorityReg && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.localAuthorityReg}
-                </p>
-              )}
-            </div>
-            
-            <div className="p-4 bg-accent/10 rounded-xl border border-accent/20">
-              <p className="text-white/80 text-sm">
-                All legal documentation will be verified before your pharmacy account is approved. Please ensure all information is accurate and up-to-date.
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {/* Step 3: Pharmacist Details */}
-        {currentStep === 3 && (
-          <div className="space-y-5 animate-fade-in">
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Registered Pharmacist Name <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="pharmacistName"
-                  value={formData.pharmacistName}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.pharmacistName ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter registered pharmacist name"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <User size={20} />
-                </div>
-              </div>
-              {errors.pharmacistName && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.pharmacistName}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                SLMC Registration Number <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="slmcRegNumber"
-                  value={formData.slmcRegNumber}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.slmcRegNumber ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter SLMC registration number"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <ClipboardCheck size={20} />
-                </div>
-              </div>
-              {errors.slmcRegNumber && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.slmcRegNumber}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Pharmacist Contact Details <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="tel"
-                  name="pharmacistContact"
-                  value={formData.pharmacistContact}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.pharmacistContact ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter pharmacist contact details"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <Phone size={20} />
-                </div>
-              </div>
-              {errors.pharmacistContact && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.pharmacistContact}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Secondary Pharmacist (if applicable)
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="secondaryPharmacist"
-                  value={formData.secondaryPharmacist}
-                  onChange={handleChange}
-                  className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
-                  placeholder="Enter secondary pharmacist name (optional)"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <User size={20} />
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 bg-accent/10 rounded-xl border border-accent/20">
-              <p className="text-white/80 text-sm">
-                The registered pharmacist will be responsible for all prescription-related activities on the platform.
-              </p>
-            </div>
-          </div>
-        )}
-        
         {/* Step 4: Location & Services */}
         {currentStep === 4 && (
           <div className="space-y-5 animate-fade-in">
@@ -625,65 +603,41 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
               )}
             </div>
             
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                District/Province <span className="text-accent">*</span>
+            {/* Operating Hours */}
+            <div className="space-y-3">
+              <label className="block text-white/90 text-sm font-medium">
+                Operating Hours
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="district"
-                  value={formData.district}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.district ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="Enter district or province"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <MapPin size={20} />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {Object.keys(formData.operatingHours).map(day => (
+                  <div key={day} className="relative group">
+                    <label className="block text-white/70 text-xs font-medium mb-1 capitalize">
+                      {day}
+                    </label>
+                    <input
+                      type="text"
+                      name={`operatingHours.${day}`}
+                      value={formData.operatingHours[day]}
+                      onChange={handleChange}
+                      className="w-full rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
+                      placeholder="e.g. 9:00-17:00 or Closed"
+                    />
+                  </div>
+                ))}
               </div>
-              {errors.district && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.district}
-                </p>
-              )}
             </div>
             
             <div className="relative group">
               <label className="block text-white/90 text-sm font-medium mb-2">
-                Operating Hours <span className="text-accent">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="operatingHours"
-                  value={formData.operatingHours}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${errors.operatingHours ? "border-red-400" : "border-white/30"} placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300`}
-                  placeholder="e.g. Mon-Fri: 9am-7pm, Sat: 10am-4pm"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <Clock size={20} />
-                </div>
-              </div>
-              {errors.operatingHours && (
-                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-                  <Info size={12} /> {errors.operatingHours}
-                </p>
-              )}
-            </div>
-            
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Services Offered (delivery, consultation, etc.)
+                Services Offered
               </label>
               <div className="relative">
                 <textarea
                   name="services"
-                  value={formData.services}
+                  value={formData.services.join(', ')}
                   onChange={handleChange}
                   className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
-                  placeholder="List services your pharmacy offers"
+                  placeholder="Enter services separated by commas (e.g. Prescription Filling, Consultation, Delivery)"
                   rows={2}
                 ></textarea>
                 <div className="absolute left-3 top-6 text-white/60">
@@ -692,23 +646,38 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
               </div>
             </div>
             
-            <div className="relative group">
-              <label className="block text-white/90 text-sm font-medium mb-2">
-                Accepted Insurance Plans
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  name="insurancePlans"
-                  value={formData.insurancePlans}
-                  onChange={handleChange}
-                  className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
-                  placeholder="List accepted insurance plans (optional)"
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                  <FileText size={20} />
-                </div>
+            {/* Delivery Options */}
+            <div className="space-y-3">
+              <div className="relative group">
+                <label className="flex items-center gap-3 cursor-pointer text-white/90">
+                  <input
+                    type="checkbox"
+                    name="deliveryAvailable"
+                    checked={formData.deliveryAvailable}
+                    onChange={handleChange}
+                    className="w-5 h-5 border border-white/30 rounded checked:bg-accent checked:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all duration-300"
+                  />
+                  <span className="text-sm">Delivery Service Available</span>
+                </label>
               </div>
+              
+              {formData.deliveryAvailable && (
+                <div className="relative group">
+                  <label className="block text-white/90 text-sm font-medium mb-2">
+                    Delivery Radius (km)
+                  </label>
+                  <input
+                    type="number"
+                    name="deliveryRadius"
+                    value={formData.deliveryRadius}
+                    onChange={handleChange}
+                    className="w-full rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 placeholder-white/60 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:bg-white/25 transition-all duration-300"
+                    placeholder="Enter delivery radius in kilometers"
+                    min="1"
+                    max="100"
+                  />
+                </div>
+              )}
             </div>
             
             {/* Terms and Conditions */}
