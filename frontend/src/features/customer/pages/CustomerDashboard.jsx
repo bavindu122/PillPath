@@ -26,6 +26,7 @@ import CustomerSidebar from "../components/CustomerSidebar";
 import PrescriptionUploadModal from "../../../components/Prescription/PrescriptionUploadModal";
 import { Link } from "react-router-dom";
 import { useCustomerModals } from "../hooks";
+import { useAuth } from "../../../hooks/useAuth";
 
 const CustomerProfile = ({ removeBg = false }) => {
   const {
@@ -37,8 +38,8 @@ const CustomerProfile = ({ removeBg = false }) => {
     openUploadModal,
     closeUploadModal
   } = useCustomerModals();
-  
-  const userName = "John Doe"; // Replace with actual user name logic
+
+  const { user } = useAuth();
 
   return (
     <section
@@ -78,7 +79,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                 <div className="flex-1 text-left">
                   <h1 className="text-2xl md:text-3xl text-white font-bold mb-2 animate-fade-in-up delay-200">
                     Welcome back,{" "}
-                    <span className="text-gradient-secondary">{userName}!</span>
+                    <span className="text-gradient-secondary">{user?.firstName || "Customer"}!</span>
                   </h1>
                   <p className="text-white/80 mb-6 animate-fade-in-up delay-300">
                     Manage your prescriptions and health with ease from your

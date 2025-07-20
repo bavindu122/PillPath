@@ -6,6 +6,7 @@ import { BellDot, Menu, LogOut } from "lucide-react";
 import DesktopNav from "./components/DesktopNav";
 import ProfileDropdown from "./components/ProfileDropdown";
 import MobileFloatingNav from "./components/MobileFloatingNav";
+import { useAuth } from "../../hooks/useAuth";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -14,7 +15,11 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-
+  const { logout, isAuthenticated } = useAuth(); // Use real auth state
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   // Track scroll position for styling changes
   useEffect(() => {
     const handleScroll = () => {
@@ -125,16 +130,12 @@ const Navbar = () => {
           <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 backdrop-blur-md shadow-lg rounded-b-2xl z-50 p-4 border-t border-gray-100">
             <div className="flex flex-col gap-3 font-medium text-gray-700">
               <button
-                onClick={() => {
-                  setToken(!token);
-                  setShowMobileMenu(false);
-                }}
+                onClick={handleLogout} // Use the real logout function
                 className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left flex items-center gap-3"
               >
                 <LogOut size={18} />
-                {token ? "Logout" : "Login"}
+                Logout
               </button>
-
               <button
                 onClick={() => {
                   setShowProfileModal(true);
@@ -151,8 +152,6 @@ const Navbar = () => {
 
       {/* Floating Mobile Navigation */}
       <MobileFloatingNav />
-
-        
     </>
   );
 };

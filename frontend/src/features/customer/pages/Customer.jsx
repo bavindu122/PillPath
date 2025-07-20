@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CustomerDashboard from "./CustomerDashboard";
 import MedicalRecords from "./MedicalRecords";
 import MedicalRecordsDetailed from "./MedicalRecordsDetailed";
@@ -7,25 +7,35 @@ import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
 import FamilyProfiles from "./FamilyProfiles";
 import CustomerSidebar from "../components/CustomerSidebar";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
 import { useAuth } from "../../../hooks/useAuth";
 
 const Customer = () => {
   const sidebarWidth = useSidebarWidth();
   const location = useLocation();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+
+  // Log authentication status for debugging
+  useEffect(() => {
+    console.log('Customer page - Auth status:', { isAuthenticated, loading, user });
+  }, [isAuthenticated, loading, user]);
+
   // Show loading while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white text-lg">Checking authentication...</p>
+        </div>
       </div>
     );
   }
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
