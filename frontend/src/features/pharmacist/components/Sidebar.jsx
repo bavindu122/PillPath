@@ -31,6 +31,9 @@ const Sidebar = () => {
     if (path === '/pharmacist/orders') {
       return 'orders';
     }
+    if (path === '/pharmacist/inventory') {
+      return 'inventory';
+    }
     if (path.includes('/review')) {
       return 'prescriptions';
     }
@@ -65,7 +68,7 @@ const Sidebar = () => {
       id: 'inventory', 
       icon: Package, 
       label: 'Inventory',
-      path: '#'
+      path: '/pharmacist/inventory'
     },
     { 
       id: 'chat', 
