@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import '../pages/index-pharmacist.css';
+import { assets } from '../../../assets/assets';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -121,7 +122,10 @@ const Sidebar = () => {
       `}>
         <div className="mb-8 mt-12 xl:mt-0">
           <Link to="/pharmacist" className="block" onClick={closeMobileMenu}>
-            <h2 className="text-xl font-bold text-gradient-primary">PillPath</h2>
+            <h2 className="text-xl font-bold text-gradient-primary flex items-center gap-2">
+              <img src={assets.logo3} alt="PillPath Logo" className="ml-2 h-8 w-auto" />
+              PillPath
+            </h2>
             <p className="text-xs text-gray-400 mt-1">Pharmacist Dashboard</p>
           </Link>
         </div>
