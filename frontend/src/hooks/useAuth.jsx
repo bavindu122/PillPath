@@ -13,7 +13,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("auth_token")); // Consistent naming
+  const [token, setToken] = useState(localStorage.getItem("auth_token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
     } catch (error) {
       console.error("Auth check failed:", error);
-      // Only logout if the error is authentication related
       if (
         error.message.includes("Invalid credentials") ||
         error.message.includes("401")
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }) => {
         response = await ApiService.registerPharmacy(userData);
       }
 
-      // For customer registration, auto-login if token is returned
       if (userType === "customer" && response.token) {
         setToken(response.token);
         setUser(response.user);
@@ -100,6 +98,14 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
+  // ✅ ADD: Update user method
+  const updateUser = (updatedUserData) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      ...updatedUserData
+    }));
+  };
+
   const value = {
     user,
     token,
@@ -108,6 +114,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    updateUser, // ✅ ADD: Include updateUser in context
     checkAuthStatus,
     isAuthenticated: !!token,
   };

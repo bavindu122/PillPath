@@ -70,9 +70,13 @@ const CustomerProfile = ({ removeBg = false }) => {
               <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
                 <div className="relative">
                   <img
-                    src={assets.profile_pic}
+                    src={user?.profilePictureUrl || assets.profile_pic}
                     alt="User profile picture"
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/30 shadow-lg animate-fade-in-scale"
+                    onError={(e) => {
+                      // Fallback to default image if user's profile picture fails to load
+                      e.target.src = assets.profile_pic;
+                    }}
                   />
                 </div>
 
@@ -390,13 +394,7 @@ const CustomerProfile = ({ removeBg = false }) => {
       <EditProfileModal
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}
-        userProfile={{
-          firstName: "John",
-          lastName: "Doe",
-          email: "john.doe@email.com",
-          phone: "+1 (555) 123-4567",
-          // Add more user data here when available
-        }}
+        // Remove userProfile prop since we're getting it from useAuth now
       />
 
       <PrescriptionUploadModal

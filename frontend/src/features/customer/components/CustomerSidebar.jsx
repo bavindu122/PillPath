@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { assets } from "../../../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import ProfileImage from "../../../components/common/ProfileImage";
+
 import {
   Home,
   ShoppingBag,
@@ -164,10 +166,10 @@ const CustomerSidebar = () => {
           }`}
         >
           <div className="flex items-center">
-            <img
-              src={assets.profile_pic || "https://via.placeholder.com/40"}
+            <ProfileImage
+              src={user?.profilePictureUrl}
               alt="User avatar"
-              className="h-10 w-10 rounded-full object-cover border-2 border-white/30"
+              className="h-10 w-10 rounded-full border-2 border-white/30"
             />
             <AnimatePresence>
               {isExpanded && (

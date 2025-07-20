@@ -7,6 +7,7 @@ import DesktopNav from "./components/DesktopNav";
 import ProfileDropdown from "./components/ProfileDropdown";
 import MobileFloatingNav from "./components/MobileFloatingNav";
 import { useAuth } from "../../hooks/useAuth";
+import ProfileImage from "../common/ProfileImage";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -15,11 +16,15 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const { logout, isAuthenticated } = useAuth(); // Use real auth state
+  
+  // ✅ FIX: Add 'user' to the destructuring
+  const { logout, isAuthenticated, user } = useAuth();
+  
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
   // Track scroll position for styling changes
   useEffect(() => {
     const handleScroll = () => {
@@ -77,15 +82,16 @@ const Navbar = () => {
 
         {/* Desktop Account Section */}
         <div className="hidden md:flex items-center gap-4 mr-6">
-          {token ? (
+          {/* ✅ Use isAuthenticated instead of token for consistency */}
+          {isAuthenticated ? (
             <div
               className="flex items-center gap-4"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
               <BellDot className="w-6 h-6 cursor-pointer" />
-              <img
-                src={assets.profile_pic}
+              <ProfileImage
+                src={user?.profilePictureUrl}
                 alt="profile"
                 className="w-10 h-10 rounded-full cursor-pointer"
                 onClick={toggleDropdown}
@@ -104,12 +110,13 @@ const Navbar = () => {
 
         {/* Mobile Header Actions - Simplified for floating nav */}
         <div className="md:hidden flex items-center gap-4 mr-4">
-          {token ? (
-            <img
-              src={assets.profile_pic}
+          {/* ✅ Use isAuthenticated instead of token for consistency */}
+          {isAuthenticated ? (
+            <ProfileImage
+              src={user?.profilePictureUrl}
               alt="profile"
-              className="w-8 h-8 rounded-full"
-              onClick={() => navigate("/customer")}
+              className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={toggleDropdown}
             />
           ) : (
             <button
@@ -130,7 +137,7 @@ const Navbar = () => {
           <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 backdrop-blur-md shadow-lg rounded-b-2xl z-50 p-4 border-t border-gray-100">
             <div className="flex flex-col gap-3 font-medium text-gray-700">
               <button
-                onClick={handleLogout} // Use the real logout function
+                onClick={handleLogout}
                 className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left flex items-center gap-3"
               >
                 <LogOut size={18} />
