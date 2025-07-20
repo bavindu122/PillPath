@@ -96,7 +96,7 @@ const InventoryTable = ({ products, sortBy, sortOrder, onSort, onEditProduct }) 
               return (
                 <tr 
                   key={product.id} 
-                  className="inventory-table-row hover:opacity-90 transition-opacity"
+                  className="inventory-table-row opacity-80 transition-opacity duration-200"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <td className="px-6 py-4">
@@ -153,12 +153,11 @@ const InventoryTable = ({ products, sortBy, sortOrder, onSort, onEditProduct }) 
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
-                      onClick={() => onEditProduct(product)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:opacity-80"
-                      style={{ backgroundColor: 'var(--pharma-blue)', color: 'var(--pharma-text-light)' }}
+                    onClick={() => onEditProduct(product)}
+                    className="inventory-edit-btn flex items-center space-x-1 px-4 py-2 text-xs font-medium rounded-lg transform hover:scale-105 transition-all duration-200"
                     >
-                      <Edit3 className="h-3 w-3" />
-                      Edit
+                    <Edit3 className="h-3 w-3" />
+                    Edit
                     </button>
                   </td>
                 </tr>

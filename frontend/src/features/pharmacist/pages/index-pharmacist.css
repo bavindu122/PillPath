@@ -278,6 +278,16 @@
   color: var(--pharma-green-800);
 }
 
+.inventory-edit-btn {
+  background: var(--pharma-purple-50);
+  color: var(--pharma-purple-600);
+  transition: background 0.2s, color 0.2s;
+}
+.inventory-edit-btn:hover {
+  background: var(--pharma-purple-100);
+  color: var(--pharma-purple-800);
+}
+
 /* Product Edit Modal */
 .product-edit-modal {
   background-color: var(--pharma-card-bg);
