@@ -194,7 +194,7 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
       setTimeout(() => {
         // Simulate redirect by clearing content and showing final message
         setLogoutMessage('You have been logged out. Redirecting to home page...');
-        
+        window.location.href = '/';
       }, 1500); // Simulate redirect delay
     }, 1000); // Simulate logout process delay
   };
