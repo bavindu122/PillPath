@@ -48,7 +48,7 @@ const PaymentGatewayHeader = ({ balance, onAddFunds }) => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Money In</p>
-            <p className="text-lg font-semibold text-green-600">+RS.3,240.50</p>
+            <p className="text-lg font-semibold text-green-600">+Rs.3,240.50</p>
           </div>
         </div>
         
