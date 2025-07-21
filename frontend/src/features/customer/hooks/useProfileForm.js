@@ -107,10 +107,16 @@ export const useProfileForm = (initialProfile = {}) => {
     setIsModified(false);
   };
 
-  const submitForm = () => {
+  const submitForm = (additionalData = {}) => {
     if (validateForm()) {
+      // Combine form data with any additional data (like profile picture)
+      const completeFormData = {
+        ...formData,
+        ...additionalData
+      };
+      
       // Here you would typically make an API call to save the data
-      console.log("Profile updated:", formData);
+      console.log("Profile updated:", completeFormData);
       setIsModified(false);
       return true;
     }

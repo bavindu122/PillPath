@@ -210,7 +210,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                   <span className="bg-blue-600/20 p-2 rounded-lg mr-2">
                     <Calendar size={20} className="text-blue-200" />
                   </span>
-                  Health Management
+                  Order Management
                   <Button className="ml-auto flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white">
                     <ChevronRight size={16} />
                   </Button>

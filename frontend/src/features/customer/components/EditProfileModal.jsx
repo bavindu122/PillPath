@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Pencil, Save } from "lucide-react";
+import { X, Pencil, Save, Camera, Upload } from "lucide-react";
 import Button from "./Button";
 import { useProfileForm } from "../hooks";
 
@@ -15,6 +15,10 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
   } = useProfileForm(userProfile);
 
   const [editingField, setEditingField] = useState(null);
+  // Initialize with existing profile picture immediately
+  const [profilePicture, setProfilePicture] = useState(userProfile?.profilePicture || null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(userProfile?.profilePicture || null);
+  const fileInputRef = useRef(null);
 
   const handleFieldEdit = (field) => {
     setEditingField(field);
@@ -25,19 +29,73 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
   };
 
   const handleSave = () => {
-    if (submitForm()) {
+    // Include profile picture in the form data
+    const formDataWithPicture = {
+      ...formData,
+      profilePicture: profilePicture
+    };
+    
+    if (submitForm(formDataWithPicture)) {
       onClose();
     }
   };
 
   const handleClose = () => {
     resetForm();
+    setProfilePicture(userProfile?.profilePicture || null);
+    setProfilePicturePreview(userProfile?.profilePicture || null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     onClose();
   };
 
   const handleCancel = () => {
     // Reset form data to original values if needed
+    setProfilePicture(userProfile?.profilePicture || null);
+    setProfilePicturePreview(userProfile?.profilePicture || null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     onClose();
+  };
+
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleProfilePictureChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB.');
+        return;
+      }
+
+      setProfilePicture(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicturePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeProfilePicture = () => {
+    setProfilePicture(null);
+    setProfilePicturePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const FormField = ({ label, field, type = "text", options = null, placeholder = "" }) => {
@@ -174,6 +232,38 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
     };
   }, [isOpen, onClose]);
 
+  // Initialize profile picture when userProfile changes
+  useEffect(() => {
+    console.log('userProfile changed:', userProfile?.profilePicture);
+    if (userProfile?.profilePicture) {
+      console.log('Setting profile picture:', userProfile.profilePicture);
+      setProfilePicture(userProfile.profilePicture);
+      setProfilePicturePreview(userProfile.profilePicture);
+    }
+  }, [userProfile?.profilePicture]);
+
+  // Initialize profile picture when modal opens
+  useEffect(() => {
+    console.log('Modal opened, isOpen:', isOpen, 'userProfile pic:', userProfile?.profilePicture, 'current preview:', profilePicturePreview);
+    if (isOpen && userProfile?.profilePicture && !profilePicturePreview) {
+      console.log('Initializing profile picture on modal open');
+      setProfilePicture(userProfile.profilePicture);
+      setProfilePicturePreview(userProfile.profilePicture);
+    }
+  }, [isOpen, userProfile?.profilePicture, profilePicturePreview]);
+
+  // Cleanup blob URLs when component unmounts to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Only revoke blob URLs created by FileReader, not existing server URLs
+      if (profilePicturePreview && 
+          profilePicturePreview.startsWith('blob:') && 
+          profilePicturePreview !== userProfile?.profilePicture) {
+        URL.revokeObjectURL(profilePicturePreview);
+      }
+    };
+  }, [profilePicturePreview, userProfile?.profilePicture]);
+
   if (!isOpen) return null;
 
   return (
@@ -202,6 +292,67 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
 
         {/* Form Content - Scrollable */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+          
+          {/* Profile Picture Section */}
+          <div className="flex justify-center mb-8">
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm">
+                {profilePicturePreview ? (
+                  <img
+                    src={profilePicturePreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // If image fails to load, show camera icon
+                      console.log('Failed to load profile image:', profilePicturePreview);
+                      setProfilePicturePreview(null);
+                    }}
+                    onLoad={() => {
+                      console.log('Profile image loaded successfully:', profilePicturePreview);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Camera size={40} className="text-white/50" />
+                    {console.log('Showing camera icon, profilePicturePreview:', profilePicturePreview)}
+                  </div>
+                )}
+              </div>
+              
+              {/* Upload/Edit Button */}
+              <button
+                onClick={handleProfilePictureClick}
+                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
+              >
+                <div className="text-white text-center">
+                  <Upload size={24} className="mx-auto mb-1" />
+                  <span className="text-xs font-medium">
+                    {profilePicturePreview ? 'Change' : 'Upload'}
+                  </span>
+                </div>
+              </button>
+              
+              {/* Remove Button */}
+              {profilePicturePreview && (
+                <button
+                  onClick={removeProfilePicture}
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors duration-200"
+                >
+                  <X size={16} className="text-white" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleProfilePictureChange}
+            className="hidden"
+          />
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Personal Information */}
