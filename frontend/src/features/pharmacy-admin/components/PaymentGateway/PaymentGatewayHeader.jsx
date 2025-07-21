@@ -17,8 +17,8 @@ const PaymentGatewayHeader = ({ balance, onAddFunds }) => {
         
         <div className="flex items-center">
           <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-4 py-3 mr-4">
-            <p className="text-sm text-indigo-600 font-medium">Current Balance</p>
-            <p className="text-2xl font-bold text-indigo-700">${balance.toFixed(2)}</p>
+            <p className="text-sm text-indigo-600 font-medium">Outstanding Bill</p>
+            <p className="text-2xl font-bold text-indigo-700">Rs.{balance.toFixed(2)}</p>
           </div>
           
           {/* <button
@@ -48,7 +48,7 @@ const PaymentGatewayHeader = ({ balance, onAddFunds }) => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Money In</p>
-            <p className="text-lg font-semibold text-green-600">+$3,240.50</p>
+            <p className="text-lg font-semibold text-green-600">+RS.3,240.50</p>
           </div>
         </div>
         
@@ -58,7 +58,7 @@ const PaymentGatewayHeader = ({ balance, onAddFunds }) => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Money Out</p>
-            <p className="text-lg font-semibold text-red-600">-$2,157.75</p>
+            <p className="text-lg font-semibold text-red-600">-Rs.2,157.75</p>
           </div>
         </div>
       </div>

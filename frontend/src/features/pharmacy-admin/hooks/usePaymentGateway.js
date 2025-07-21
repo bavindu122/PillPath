@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const usePaymentGateway = () => {
-  const [balance, setBalance] = useState(5000.00);
+  const [balance, setBalance] = useState(100.00);
   const [transactions, setTransactions] = useState([]);
   const [savedCards, setSavedCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
