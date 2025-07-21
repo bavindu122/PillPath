@@ -127,8 +127,8 @@ const CustomerSidebar = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <p className="text-white font-medium text-sm">John Doe</p>
-                  <p className="text-white/60 text-xs">john.doe@example.com</p>
+                  <p className="text-white font-medium text-sm">Senuja Udugampola</p>
+                  <p className="text-white/60 text-xs">senuja@example.com</p>
                 </motion.div>
               )}
             </AnimatePresence>

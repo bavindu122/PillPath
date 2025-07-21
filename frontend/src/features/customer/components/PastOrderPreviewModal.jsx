@@ -9,11 +9,11 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
 
   // Sample family members - you can replace this with actual data
   const familyMembers = [
-    "John Doe",
-    "Jane Doe", 
-    "Michael Doe",
-    "Sarah Doe",
-    "Robert Doe"
+    "Senuja Udugampola",
+    "Sanuthma Munasinghe", 
+    "Tanuri Mandini",
+    "Nirmi Kawmada",
+    "Bavindu Shamen"
   ];
 
   // Close dropdown when clicking outside

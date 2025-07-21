@@ -1,5 +1,5 @@
 import React from "react";
-import { Pill, Clock, CalendarClock, RefreshCw, ChevronRight } from "lucide-react";
+import { Pill, Clock, CalendarClock, DollarSign, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const CurrentPrescriptionsCard = () => {
@@ -7,19 +7,19 @@ const CurrentPrescriptionsCard = () => {
     {
       id: 1,
       name: "RX-250714-01",
-      schedule: "Twice daily",
-      daysRemaining: 5,
-      status: "Ready",
-      refills: 2,
+      pharmacy: "HealthPlus ",
+      distance: 5,
+      status: "Ready to pickup",
+      price: 250,
       color: "blue"
     },
     {
       id: 2,
       name: "RX-250714-02",
-      schedule: "Once daily",
-      daysRemaining: 12,
-      status: "Processing",
-      refills: 1,
+      pharmacy: "Central Pharmacy",
+      distance: 12,
+      status: "Packing",
+      price: 1000,
       color: "purple"
     }
   ];
@@ -58,15 +58,15 @@ const CurrentPrescriptionsCard = () => {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <div className="flex items-center text-white/60 text-xs">
                     <Clock size={12} className="mr-1" />
-                    {prescription.schedule}
+                    {prescription.pharmacy}
                   </div>
                   <div className="flex items-center text-white/60 text-xs">
                     <CalendarClock size={12} className="mr-1" />
-                    {prescription.daysRemaining} days left
+                    {prescription.distance} km
                   </div>
                   <div className="flex items-center text-white/60 text-xs">
-                    <RefreshCw size={12} className="mr-1" />
-                    {prescription.refills} refills
+                    <DollarSign size={12} className="mr-1" />
+                    Rs. {prescription.price} 
                   </div>
                 </div>
               </div>

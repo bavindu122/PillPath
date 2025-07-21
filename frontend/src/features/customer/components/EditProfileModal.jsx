@@ -265,19 +265,6 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
               <FormField label="State" field="state" />
               <FormField label="ZIP Code" field="zipCode" />
             </div>
-
-            {/* Emergency & Insurance */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <div className="w-2 h-6 bg-red-500 rounded-full"></div>
-                Emergency & Insurance
-              </h3>
-              
-              <FormField label="Emergency Contact Name" field="emergencyContactName" />
-              <FormField label="Emergency Contact Phone" field="emergencyContactPhone" type="tel" />
-              <FormField label="Insurance Provider" field="insurance" />
-              <FormField label="Insurance ID" field="insuranceId" />
-            </div>
           </div>
         </div>
 

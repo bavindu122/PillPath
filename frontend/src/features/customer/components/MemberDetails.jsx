@@ -59,7 +59,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 rounded-fullbackdrop-blur-sm z-50 flex items-center justify-center p-4"
         onClick={handleMainModalClick}
       >
         <motion.div
@@ -71,7 +71,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header with Profile Hero Section */}
-          <div className="relative bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-8 border-b border-white/10 flex-shrink-0">
+          <div className="relative bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-8 border-b border-white/10 flex-shrink-0 rounded-t-3xl">
             <div className="absolute top-4 right-4 flex gap-2">
              
               <motion.button
@@ -430,7 +430,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
           </div>
 
           {/* Modal Footer */}
-          <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0">
+          <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0 rounded-b-3xl">
             <div className="flex gap-3">
               <motion.button
                 whileHover={{ scale: 1.02 }}

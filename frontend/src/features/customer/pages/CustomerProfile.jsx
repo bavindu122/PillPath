@@ -38,7 +38,7 @@ const CustomerProfile = ({ removeBg = false }) => {
     closeUploadModal
   } = useCustomerModals();
   
-  const userName = "John Doe"; // Replace with actual user name logic
+  const userName = "Senuja Udugampola"; // Replace with actual user name logic
 
   return (
     <section
@@ -93,9 +93,11 @@ const CustomerProfile = ({ removeBg = false }) => {
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
+                    <Link to="/find-pharmacy?from=dashboard">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <MapPin size={16} /> Find Pharmacy
                       </Button>
+                    </Link>
                     <Link to="/otc-store">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <ShoppingBag size={16} /> Browse OTC
@@ -319,7 +321,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                     </span>
                     Nearby Pharmacies
                   </h2>
-                  <Link to="/find-pharmacies">
+                  <Link to="/find-pharmacy?from=dashboard">
                     <Button
                       size="sm"
                       className="bg-white/20 hover:bg-white/30 text-white text-xs"
@@ -389,10 +391,10 @@ const CustomerProfile = ({ removeBg = false }) => {
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}
         userProfile={{
-          firstName: "John",
-          lastName: "Doe",
-          email: "john.doe@email.com",
-          phone: "+1 (555) 123-4567",
+          firstName: "Senuja",
+          lastName: "Udugampola",
+          email: "senuja@email.com",
+          phone: "+94 703034515",
           // Add more user data here when available
         }}
       />
