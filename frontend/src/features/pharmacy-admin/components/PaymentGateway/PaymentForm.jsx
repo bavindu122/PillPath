@@ -285,7 +285,7 @@ const PaymentForm = ({ processPayment, isProcessing, balance, savedCards, onSave
                 {validationErrors.amount}
               </p>
             )}
-            <p className="mt-1 text-sm text-gray-500">Available balance: Rs.{balance?.toFixed(2) || '0.00'}</p>
+            <p className="mt-1 text-sm text-gray-500">Outstanding Bill: Rs.{balance?.toFixed(2) || '0.00'}</p>
           </div>
         </div>
 
