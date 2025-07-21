@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Eye, Trash2, UserPlus } from 'lucide-react';
+import { Mail, Phone, MapPin, Eye, Trash2, UserPlus, Building,Store } from 'lucide-react';
 import { useState } from 'react';
 import SuspendPharmacy from './pharmacyPopup/SuspendPharmacy';
 import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
@@ -50,6 +50,26 @@ const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration, on
 
   return (
     <div className="hover:shadow-lg transition-shadow rounded-2xl border-gray-300 border p-6 bg-white">
+      {/* Pharmacy Image Section */}
+      <div className="mb-4 flex justify-center">
+        {pharmacy.image ? (
+          <img 
+            src={pharmacy.image} 
+            alt={pharmacy.name}
+            className="w-20 h-20 rounded-full object-cover shadow-md"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className={`w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center shadow-md ${pharmacy.image ? 'hidden' : 'flex'}`}
+        >
+          <Store size={32} className="text-gray-500" />
+        </div>
+      </div>
+
       <div className="pb-3">
         <div className="flex items-start justify-between">
           <div>

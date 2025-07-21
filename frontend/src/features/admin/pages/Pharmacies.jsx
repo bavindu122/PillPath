@@ -29,6 +29,7 @@ const initialPharmacies = [
     pharmacistContact: '+1 (555) 987-6543',
     pharmacistLicense: 'CA-PHARM-005678',
     secondaryPharmacist:'Jony Doe',
+    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=300&fit=crop&crop=center',
   },
   {
     id: 2,
@@ -51,6 +52,7 @@ const initialPharmacies = [
     pharmacistContact: '+1 (555) 987-6543',
     pharmacistLicense: 'CA-PHARM-005678',
     secondaryPharmacist:'Jony Doe',
+    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&crop=center',
   },
   {
     id: 3,
@@ -72,6 +74,7 @@ const initialPharmacies = [
     pharmacistContact: '+1 (555) 987-6543',
     pharmacistLicense: 'CA-PHARM-005678',
     secondaryPharmacist:'Jony Doe',
+    // No image provided - will show building icon
   },
   {
     id: 4,
@@ -90,6 +93,7 @@ const initialPharmacies = [
     pharmacist:'Jony Doe',
     pharmacistContact: '+1 (555) 987-6543',
     pharmacistLicense: 'CA-PHARM-005678',
+    image: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&h=300&fit=crop&crop=center',
   },
   {
     id: 5,
@@ -111,6 +115,7 @@ const initialPharmacies = [
     pharmacistContact: '+1 (555) 987-6543',
     pharmacistLicense: 'CA-PHARM-005678',
     secondaryPharmacist:'Jony Doe',
+    // No image provided - will show building icon
   }
 ];
 

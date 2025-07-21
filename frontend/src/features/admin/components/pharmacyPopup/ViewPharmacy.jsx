@@ -38,7 +38,22 @@ const ViewPharmacy = ({ pharmacy, onClose ,onAcceptRegistration ,onRejectRegistr
     <div className="space-y-2 text-gray-700 text-sm">
       <div className="flex items-center mb-4">
         <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-          <Store className="w-8 h-8 text-gray-500" />
+          {pharmacy.image ? (
+                    <img 
+                      src={pharmacy.image} 
+                      alt={pharmacy.name}
+                      className="w-16 h-16 rounded-full object-cover shadow-md"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className={`w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center shadow-md ${pharmacy.image ? 'hidden' : 'flex'}`}
+                  >
+                    <Store className="text-gray-500" />
+                  </div>
         </div>
         <div>
           <h3 className="font-semibold text-lg">{pharmacy.name }</h3>
