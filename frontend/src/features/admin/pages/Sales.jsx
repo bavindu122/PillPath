@@ -72,21 +72,11 @@ const months = [
 const years = ['All', '2023', '2024'];
 
 const Sales = () => {
-
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [filterMonth, setFilterMonth] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 10;
-
-  // Calculate KPIs for sales
-  const totalReceivedPayments = dummySalesData.transactions
-    .filter(t => t.type === 'Order Payment' || t.type === 'Commission Payment')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalPayoutsToPharmacies = dummySalesData.transactions
-    .filter(t => t.type === 'Payout')
-    .reduce((sum, t) => sum + t.amount, 0);
 
   // Filter and Search Logic
   const filteredAndSearchedTransactions = dummySalesData.transactions.filter(transaction => {
@@ -104,6 +94,17 @@ const Sales = () => {
     return matchesSearch && matchesType && matchesMonth;
   });
 
+  // KPIs based on filtered data
+  const totalReceivedPayments = filteredAndSearchedTransactions
+    .filter(t => t.type === 'Order Payment' || t.type === 'Commission Payment')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalPayoutsToPharmacies = filteredAndSearchedTransactions
+    .filter(t => t.type === 'Payout')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalTransactions = filteredAndSearchedTransactions.length;
+
   // Pagination Logic
   const indexOfLastTransaction = currentPage * transactionsPerPage;
   const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
@@ -112,43 +113,38 @@ const Sales = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Data for chart (e.g., transactions by type)
-  const transactionTypeData = Object.entries(dummySalesData.transactions.reduce((acc, transaction) => {
+  // Chart Data
+  const transactionTypeData = Object.entries(filteredAndSearchedTransactions.reduce((acc, transaction) => {
     acc[transaction.type] = (acc[transaction.type] || 0) + transaction.amount;
     return acc;
   }, {})).map(([name, amount]) => ({ name, amount }));
 
-  // Get unique months for filter dropdown
-  const uniqueMonths = [...new Set(dummySalesData.transactions.map(t => new Date(t.date).toLocaleString('default', { month: 'long' })))];
-
-        
-    
-        
+  const uniqueMonths = [...new Set(dummySalesData.transactions.map(t => new Date(t.date).toLocaleString('default', { month: 'long' })))]
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
       <PageHeader 
-            icon={Activity} 
-            title="Sales & Financial Overview"  
-            subtitle="Comprehensive view of all financial transactions within the system." 
-        />
+        icon={Activity} 
+        title="Sales & Financial Overview"  
+        subtitle="Comprehensive view of all financial transactions within the system." 
+      />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <StatCard label="Total Payments Recieved" value={`Rs. ${totalReceivedPayments.toFixed(2)}`} icon={<TrendingUp size={48} className="text-blue-500" />} />
-            <StatCard label="Total Payouts to Pharmacies" value={`Rs. ${totalPayoutsToPharmacies.toFixed(2)}`}  icon={<TrendingDown size={48} className="text-red-500" />} />
-            <StatCard label="Total Transactions" value={dummySalesData.transactions.length} icon={<Repeat size={48} className="text-purple-500" />} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <StatCard label="Total Payments Received" value={`Rs. ${totalReceivedPayments.toFixed(2)}`} icon={<TrendingUp size={48} className="text-blue-500" />} />
+        <StatCard label="Total Payouts to Pharmacies" value={`Rs. ${totalPayoutsToPharmacies.toFixed(2)}`} icon={<TrendingDown size={48} className="text-red-500" />} />
+        <StatCard label="Total Transactions" value={totalTransactions} icon={<Repeat size={48} className="text-purple-500" />} />
+      </div>
 
-        <section className="mb-12">
+      <section className="mb-12">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">Transaction Summary</h2>
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <h3 className="text-xl font-medium text-gray-800 mb-4">Transactions by Type</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={transactionTypeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={transactionTypeData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+              <Tooltip contentStyle={{ borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
               <Legend />
               <Bar dataKey="amount" fill="#8884d8" barSize={40} radius={[10, 10, 0, 0]} />
             </BarChart>
@@ -163,12 +159,12 @@ const Sales = () => {
             <input
               type="text"
               placeholder="Search by ID, Sender, or Receiver"
-              className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-grow p-3 border border-gray-300 rounded-lg"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <select
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-lg"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
@@ -178,7 +174,7 @@ const Sales = () => {
               <option value="Payout">Payout</option>
             </select>
             <select
-              className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-3 border border-gray-300 rounded-lg"
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
             >
@@ -193,13 +189,12 @@ const Sales = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Transaction ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Sender</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Reciever</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Amount</th>
-                      
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Transaction ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Sender</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Receiver</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase">Amount</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -209,7 +204,7 @@ const Sales = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.sender}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.receiver}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         transaction.type === 'Commission Payment' ? 'bg-green-100 text-green-800' :
                         transaction.type === 'Payout' ? 'bg-purple-100 text-purple-800' :
@@ -225,14 +220,13 @@ const Sales = () => {
             </table>
           </div>
 
-          {/* Pagination Controls */}
           <div className="flex justify-center mt-6 space-x-2">
             {[...Array(totalPages).keys()].map(number => (
               <button
                 key={number + 1}
                 onClick={() => paginate(number + 1)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-200 ${
-                  currentPage === number + 1 ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                className={`px-4 py-2 rounded-lg font-semibold ${
+                  currentPage === number + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
                 {number + 1}
@@ -241,22 +235,8 @@ const Sales = () => {
           </div>
         </div>
       </section>
-        
-
-        
-
-                
-      
-
-        
-        
-        
-
-        
     </div>
-  )
-}
+  );
+};
 
-export default Sales
-
- 
+export default Sales;
