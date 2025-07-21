@@ -68,7 +68,7 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
     setNewModeratorUsername('');
     setNewModeratorPassword('');
     // In a real application, replace alert with a custom modal/toast
-    alert(`Moderator '${newModeratorUsername}' added successfully! Password: '${newModeratorPassword}' (Please note this down securely, as it will not be displayed again).`);
+    alert(`Moderator '${newModeratorUsername}' added successfully! Please ensure the password is stored securely.' (Please note this down securely, as it will not be displayed again).`);
   };
 
   const handleDeleteModerator = (id, username) => {
@@ -482,7 +482,7 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
               id="newPassword"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
               value={passwordChangeNew}
-              onChange={(e) => setNewPasswordChangeNew(e.target.value)}
+              onChange={(e) => setPasswordChangeNew(e.target.value)}
               required
             />
           </div>
