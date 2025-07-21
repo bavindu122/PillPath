@@ -75,7 +75,7 @@ const OrderCard = ({ order }) => {
           
           <div>
             <p className="text-sm text-gray-500 mb-1">Total</p>
-            <p className="text-sm font-medium text-gray-900">${order.total.toFixed(2)}</p>
+            <p className="text-sm font-medium text-gray-900">Rs.{order.total.toFixed(2)}</p>
           </div>
           
           <div>
