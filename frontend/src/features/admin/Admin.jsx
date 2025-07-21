@@ -10,6 +10,7 @@ import WalletAndIncome from './pages/WalletAndIncome';
 import Sales from './pages/Sales';
 import Analytics from './pages/Analytics';
 import Setting from './pages/Setting';
+import Announcements from './pages/Announcements';
 const Admin = () => {
   return (
     <AdminLayout>
@@ -23,6 +24,7 @@ const Admin = () => {
         <Route path="sales" element={<Sales />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Setting />} />
+        <Route path="announcements" element={<Announcements />} />
       </Routes>
       
     </AdminLayout>
