@@ -282,9 +282,9 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Username</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Last Login</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -364,7 +364,7 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
         </h2>
         <form onSubmit={handleAddOrUpdateCommissionTier} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 items-end">
           <div>
-            <label htmlFor="minAmount" className="block text-sm font-medium text-gray-700 mb-1">Min Amount ($)</label>
+            <label htmlFor="minAmount" className="block text-sm font-medium text-gray-700 mb-1">Min Amount (Rs)</label>
             <input
               type="number"
               id="minAmount"
@@ -377,7 +377,7 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
             />
           </div>
           <div>
-            <label htmlFor="maxAmount" className="block text-sm font-medium text-gray-700 mb-1">Max Amount ($) (Leave blank for no max)</label>
+            <label htmlFor="maxAmount" className="block text-sm font-medium text-gray-700 mb-1">Max Amount (Rs) (Leave blank for no max)</label>
             <input
               type="number"
               id="maxAmount"
@@ -418,10 +418,10 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min Amount</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Amount</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Min Amount</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Max Amount</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Rate</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -524,9 +524,9 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Timestamp</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Action</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Admin</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">

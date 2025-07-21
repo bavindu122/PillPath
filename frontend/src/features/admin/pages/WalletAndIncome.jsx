@@ -285,6 +285,8 @@ const WalletAndIncome = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const transactionsPerPage = 10;
+  const [currentPharmacyPage, setCurrentPharmacyPage] = useState(1);
+  const pharmaciesPerPage = 6;
   const [isPharmacyDetailsModalOpen, setIsPharmacyDetailsModalOpen] =
     useState(false);
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
@@ -328,6 +330,19 @@ const WalletAndIncome = () => {
   );
 
   const paginateCustomerPayments = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Pagination Logic for Pharmacy Wallet Overview
+  const indexOfLastPharmacy = currentPharmacyPage * pharmaciesPerPage;
+  const indexOfFirstPharmacy = indexOfLastPharmacy - pharmaciesPerPage;
+  const currentPharmacies = uniquePharmacies.slice(
+    indexOfFirstPharmacy,
+    indexOfLastPharmacy
+  );
+  const totalPharmacyPages = Math.ceil(
+    uniquePharmacies.length / pharmaciesPerPage
+  );
+
+  const paginatePharmacies = (pageNumber) => setCurrentPharmacyPage(pageNumber);
 
   // Calculate Stat Cards
   const totalRevenue = filteredTransactions
@@ -620,12 +635,19 @@ const WalletAndIncome = () => {
 
       {/* Pharmacy Wallet Overview */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <Store className="mr-2 text-gray-600" size={24} /> Pharmacy Wallet
-          Overview
+        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Store className="mr-2 text-gray-600" size={24} /> Pharmacy Wallet
+            Overview
+          </div>
+          <div className="text-sm text-gray-500">
+            Showing {indexOfFirstPharmacy + 1}-
+            {Math.min(indexOfLastPharmacy, uniquePharmacies.length)} of{" "}
+            {uniquePharmacies.length} pharmacies
+          </div>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {uniquePharmacies.map((pharmacyName) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {currentPharmacies.map((pharmacyName) => {
             const summary = getPharmacyWalletSummary(pharmacyName);
             return (
               <div
@@ -638,13 +660,13 @@ const WalletAndIncome = () => {
                 <p className="text-sm text-gray-600">
                   Commissions Paid:{" "}
                   <span className="font-medium text-green-700">
-                    ${summary.totalPaidCommissions}
+                    Rs.{summary.totalPaidCommissions}
                   </span>
                 </p>
                 <p className="text-sm text-gray-600">
                   Payouts Received:{" "}
                   <span className="font-medium text-blue-700">
-                    ${summary.totalPayoutsReceived}
+                    Rs.{summary.totalPayoutsReceived}
                   </span>
                 </p>
                 <button
@@ -657,6 +679,25 @@ const WalletAndIncome = () => {
             );
           })}
         </div>
+
+        {/* Pagination Controls for Pharmacy Wallet Overview */}
+        {totalPharmacyPages > 1 && (
+          <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalPharmacyPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => paginatePharmacies(i + 1)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  currentPharmacyPage === i + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Filters and Search */}
@@ -725,7 +766,7 @@ const WalletAndIncome = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => `Rs.${value.toFixed(2)}`} />
             <Legend />
             <Bar
               dataKey="online"
@@ -762,7 +803,7 @@ const WalletAndIncome = () => {
               interval={0}
             />
             <YAxis />
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => `Rs.${value.toFixed(2)}`} />
             <Legend />
             <Bar
               dataKey="commission"
