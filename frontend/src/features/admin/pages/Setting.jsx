@@ -2,7 +2,7 @@ import PageHeader from '../components/PageHeader';
 
 import React, { useState } from 'react';
 import {
-  UserPlus, Settings, Lock, List, Trash2, CheckCircle, XCircle, DollarSign, Home
+  UserPlus, Settings, Lock, List, Trash2, CheckCircle, XCircle, DollarSign, Home,LogOut
 } from 'lucide-react';
 
 // Dummy Data for Admin Settings
@@ -46,6 +46,9 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
   const [newCommissionMax, setNewCommissionMax] = useState('');
   const [newCommissionRate, setNewCommissionRate] = useState('');
   const [editCommissionId, setEditCommissionId] = useState(null);
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutMessage, setLogoutMessage] = useState('');
 
   const handleAddModerator = (e) => {
     e.preventDefault();
@@ -180,15 +183,55 @@ const [moderators, setModerators] = useState(dummySettingsData.moderators);
     }
   };
 
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    setLogoutMessage('Logging out...');
+    setTimeout(() => {
+      setLogoutMessage('Redirecting to home page...');
+      // In a real application, you would perform actual logout (e.g., clear tokens)
+      // and then redirect using window.location.href or a router.
+      // For this isolated component, we'll just show the message.
+      setTimeout(() => {
+        // Simulate redirect by clearing content and showing final message
+        setLogoutMessage('You have been logged out. Redirecting to home page...');
+        
+      }, 1500); // Simulate redirect delay
+    }, 1000); // Simulate logout process delay
+  };
+
+  if (isLoggingOut) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center font-inter">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 animate-pulse">
+            {logoutMessage}
+          </h2>
+          <p className="text-gray-600">Please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
-        <PageHeader 
-        icon={Settings} 
-        title="Admin Settings" 
-        subtitle="Manage system configurations and user roles." 
-      />
+        <div className="flex items-center justify-between mb-8">
+            <PageHeader 
+                icon={Settings} 
+                title="Admin Settings" 
+                subtitle="Manage system configurations and user roles." 
+            />
 
+            <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
+                >
+                <LogOut className="w-5 h-5 mr-2" /> Logout
+            </button>
+        </div>
+
+     
       {/* Add Moderator Section */}
       <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
