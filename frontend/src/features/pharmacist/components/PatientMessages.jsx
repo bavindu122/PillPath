@@ -1,15 +1,16 @@
 import React from 'react';
 import { MessageSquare, Plus, User, Send } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const PatientMessages = ({ messages }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center animate-fade-in-left">
-          <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-3"></div>
+        <h2 className="text-lg font-semibold pharma-text-dark flex items-center animate-fade-in-left">
+          <div className="w-1 h-5 rounded-full mr-3" style={{ background: 'linear-gradient(to bottom, var(--pharma-purple), var(--pharma-blue))' }}></div>
           Patient Messages
         </h2>
-        <button className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:from-blue-200 hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200">
+        <button className="flex items-center space-x-2 px-3 py-2 text-xs font-medium rounded-lg hover:shadow-md transform hover:scale-105 transition-all duration-200 pharma-text-primary" style={{ background: 'linear-gradient(to right, rgba(45, 93, 160, 0.1), rgba(45, 93, 160, 0.2))' }}>
           <Plus className="h-3 w-3" />
           <span>New Message</span>
         </button>

@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import '../pages/index-pharmacist.css';
 
 const PharmaPageLayout = ({ 
   children, 
@@ -14,20 +15,20 @@ const PharmaPageLayout = ({
   headerActions
 }) => {
   const loadingScreen = (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+    <div className="flex h-screen pharma-bg-light overflow-hidden">
       <div className="sidebar-slide-in hidden lg:block">
         <Sidebar />
       </div>
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
+          <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full" style={{ backgroundColor: 'rgba(45, 93, 160, 0.1)' }}>
             <div className="flex space-x-1">
-              <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-1"></div>
-              <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-2"></div>
-              <div className="w-3 h-3 bg-blue-500 rounded-full loading-dot-3"></div>
+              <div className="w-3 h-3 pharma-bg-primary rounded-full loading-dot-1"></div>
+              <div className="w-3 h-3 pharma-bg-primary rounded-full loading-dot-2"></div>
+              <div className="w-3 h-3 pharma-bg-primary rounded-full loading-dot-3"></div>
             </div>
           </div>
-          <p className="text-gray-600 font-medium animate-pulse text-sm sm:text-base">{loadingMessage}</p>
+          <p className="pharma-text-gray-600 font-medium animate-pulse text-sm sm:text-base">{loadingMessage}</p>
         </div>
       </div>
     </div>
@@ -38,7 +39,7 @@ const PharmaPageLayout = ({
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+    <div className="flex h-screen pharma-bg-light overflow-hidden">
       {/* Sidebar - Hidden on mobile, shown on desktop */}
       <div className="hidden xl:block sidebar-slide-in">
         <Sidebar />

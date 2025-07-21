@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Download, ZoomIn, ZoomOut, RotateCw, AlertTriangle, X } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const PrescriptionViewer = ({ prescription }) => {
   const [isZoomed, setIsZoomed] = useState(false);
@@ -29,20 +30,20 @@ const PrescriptionViewer = ({ prescription }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <div className="pharma-bg-card rounded-xl shadow-lg border pharma-border overflow-hidden">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+              <h2 className="text-xl font-semibold pharma-text-dark flex items-center">
                 Prescription Review
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm pharma-text-gray-600 mt-1">
                 Patient: {prescription?.patientName || 'Loading...'} | Order #PX-{prescription?.id || '000'}
               </p>
             </div>
             
             <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-2 px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+              <div className="flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium pharma-text-warning" style={{ backgroundColor: 'rgba(255, 167, 38, 0.1)' }}>
                 <AlertTriangle className="h-4 w-4" />
                 <span>Pending Review</span>
               </div>

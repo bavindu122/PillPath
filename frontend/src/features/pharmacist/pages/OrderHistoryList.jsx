@@ -8,6 +8,7 @@ import {
   Printer
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import './index-pharmacist.css';
 import PharmaPageLayout from '../components/PharmaPageLayout';
 import useListData from '../hooks/useListData';
 import { orderService } from '../services/orderService';
