@@ -7,16 +7,16 @@ import Customers from './pages/Customers';
 import Pharmacies from './pages/Pharmacies';
 import Prescription from './pages/Prescription';
 import WalletAndIncome from './pages/WalletAndIncome';
-import AdminLogin from './pages/AdminLogin'; // ✅ Import the component directly
+import AdminLogin from './pages/AdminLogin';
 import AdminRoute from '../../components/ProtectedRoute/AdminRoute';
 
 const Admin = () => {
   return (
     <Routes>
-      {/* ✅ Admin login route - no provider needed here since it's at App level */}
+      {/* ✅ Admin login route */}
       <Route path="/login" element={<AdminLogin />} />
       
-      {/* ✅ Protected admin routes */}
+      {/* ✅ Protected admin routes - redirect / to overview */}
       <Route path="/*" element={
         <AdminRoute>
           <AdminLayout>

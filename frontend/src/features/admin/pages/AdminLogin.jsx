@@ -11,18 +11,9 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import GradientButton from "../../../components/UIs/GradientButton";
-import { AdminAuthProvider, useAdminAuth } from "../../../hooks/useAdminAuth";
+import { useAdminAuth } from "../../../hooks/useAdminAuth"; // ✅ Remove AdminAuthProvider import
 
-// ✅ Create a wrapper component that provides the AdminAuthProvider
-const AdminLoginWrapper = () => {
-  return (
-    <AdminAuthProvider>
-      <AdminLogin />
-    </AdminAuthProvider>
-  );
-};
-
-// ✅ The actual AdminLogin component
+// ✅ Remove the wrapper - provider is already at App level
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { login, loading, error, isAuthenticated } = useAdminAuth();
@@ -41,10 +32,10 @@ const AdminLogin = () => {
     return () => setMounted(false);
   }, []);
 
-  // Redirect if already authenticated
+  // ✅ Redirect if already authenticated - redirect to /admin (dashboard)
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/admin/overview"); // ✅ Navigate to admin overview instead of dashboard
+      navigate("/admin"); // ✅ Navigate to /admin which will redirect to /admin/overview
     }
   }, [isAuthenticated, navigate]);
 
@@ -84,19 +75,23 @@ const AdminLogin = () => {
 
     try {
       setSubmitError("");
+      console.log("Starting admin login...");
+
       const response = await login(formData);
 
       console.log("Admin login successful:", response);
-      // Navigation will be handled by the useEffect above
+
+      // ✅ Don't rely on response.success here since login() handles that
+      // If login() doesn't throw an error, it was successful
+      console.log("Redirecting to admin dashboard...");
+      navigate("/admin");
     } catch (error) {
+      console.error("Login failed:", error);
       setSubmitError(error.message || "Admin login failed. Please try again.");
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 relative overflow-hidden px-4 py-8">
-      {/* ... rest of your existing JSX stays the same ... */}
-      
       {/* Animated background elements */}
       <div className="absolute top-10 left-10 w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
       <div className="absolute top-32 right-20 w-80 h-80 bg-indigo-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
@@ -146,7 +141,7 @@ const AdminLogin = () => {
               ></div>
             </div>
           </div>
-          
+
           <h1 className="text-2xl font-bold text-white mt-4 text-center">
             Admin Portal
           </h1>
@@ -266,5 +261,5 @@ const AdminLogin = () => {
   );
 };
 
-// ✅ Export the wrapper instead of the component directly
-export default AdminLoginWrapper;
+// ✅ Export the component directly (no wrapper)
+export default AdminLogin;
