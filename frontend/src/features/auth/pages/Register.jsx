@@ -1,17 +1,32 @@
 import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Clock, ClipboardCheck, HelpCircle, MessageSquare } from "lucide-react";
 import RoleSelector from "../components/RoleSelector";
 import RegisterForm from "../components/RegisterForm";
 import Navbar from "../../../components/Layout/Navbar";
+import { useAuth } from "../../../hooks/useAuth";
 
 export const Register = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedRole, setSelectedRole] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user && registrationComplete) {
+      // Auto redirect customers to dashboard after successful registration
+      if (selectedRole === "customer") {
+        setTimeout(() => {
+          navigate("/customer/dashboard");
+        }, 3000);
+      }
+    }
+  }, [user, registrationComplete, selectedRole, navigate]);
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -25,13 +40,9 @@ export const Register = () => {
     setShowForm(false);
   };
 
-  const handleRegistrationSubmit = (formData) => {
-    // Here you would typically handle the API call to register the user
-    console.log("Registration submitted:", formData);
-    // Save the form data to state
-    setSubmittedData(formData);
-
-    // Set registration complete
+  const handleRegistrationSubmit = (responseData) => {
+    console.log("Registration successful:", responseData);
+    setSubmittedData(responseData);
     setRegistrationComplete(true);
   };
 
@@ -63,10 +74,12 @@ export const Register = () => {
                     : "bg-yellow-500/20"
                 }`}
               >
-                {selectedRole === "customer" ? (
-                  <Check size={40} className="text-green-500" />
-                ) : (
-                  <ClipboardCheck size={40} className="text-yellow-500" />
+                {selectedRole === "customer" && user && (
+                  <div className="mt-4 p-3 bg-green-500/20 border border-green-500/40 rounded-lg">
+                    <p className="text-green-200 text-sm">
+                      Redirecting to your dashboard in 3 seconds...
+                    </p>
+                  </div>
                 )}
               </div>
 

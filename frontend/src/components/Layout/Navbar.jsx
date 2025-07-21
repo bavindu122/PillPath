@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
-import { NavLink, useNavigate } from "react-router-dom";
-import { BellDot, Menu, LogOutIcon } from "lucide-react";
-import ProfileModal from "../../features/customer/components/ProfileModal";
+import { useNavigate } from "react-router-dom";
+import { BellDot, Menu, LogOut } from "lucide-react";
+
+import DesktopNav from "./components/DesktopNav";
+import ProfileDropdown from "./components/ProfileDropdown";
+import MobileFloatingNav from "./components/MobileFloatingNav";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -11,7 +14,6 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-
 
   // Track scroll position for styling changes
   useEffect(() => {
@@ -43,10 +45,15 @@ const Navbar = () => {
 
   return (
     <>
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      />
       <div className="h-[72px] md:h-[60px]"></div>
 
+      {/* Top Navigation Bar */}
       <div
-        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-2 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-2 z-40 transition-all duration-300 ${
           scrolled
             ? "bg-white/70 backdrop-blur-md shadow-md"
             : "bg-white/90 backdrop-blur-sm"
@@ -60,72 +67,8 @@ const Navbar = () => {
           onClick={() => navigate("/")}
         />
 
-        {/* Desktop Navigation (hidden on mobile) */}
-        <div className="hidden md:flex border border-gray-400 rounded-full px-4 py-1 lg:px-6 lg:py-2">
-          <ul className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-medium text-gray-700 text-sm whitespace-nowrap">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Home</li>
-            </NavLink>
-            {/* Other navigation links remain unchanged */}
-            <NavLink
-              to="/services"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Services</li>
-            </NavLink>
-            <NavLink
-              to="/otc"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">OTC Store</li>
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">About Us</li>
-            </NavLink>
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Contact</li>
-            </NavLink>
-          </ul>
-        </div>
+        {/* Desktop Navigation */}
+        <DesktopNav />
 
         {/* Desktop Account Section */}
         <div className="hidden md:flex items-center gap-4 mr-6">
@@ -142,30 +85,7 @@ const Navbar = () => {
                 className="w-10 h-10 rounded-full cursor-pointer"
                 onClick={toggleDropdown}
               />
-              <div
-                className={`absolute top-0 right-0 mt-16 mr-6 text-base font-medium text-gray-600 z-50 transition-all duration-200 ${
-                  showDropdown ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
-              >
-                <div className="min-w-48 bg-white rounded-lg shadow-lg flex flex-col gap-4 p-4">
-                <NavLink
-                  to="/customer"
-                  className="cursor-pointer hover:text-pButton">
-              Profile
-            </NavLink>
-                  
-                  <p className="cursor-pointer hover:text-pButton">Settings</p>
-                  <div className="border-t border-gray-200 pt-2">
-                    <p
-                      onClick={() => setToken(false)}
-                      className="cursor-pointer hover:text-pButton flex items-center gap-2"
-                    >
-                      <LogOutIcon size={16} />
-                      <span>Logout</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <ProfileDropdown show={showDropdown} setToken={setToken} />
             </div>
           ) : (
             <button
@@ -177,13 +97,14 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Section  */}
+        {/* Mobile Header Actions - Simplified for floating nav */}
         <div className="md:hidden flex items-center gap-4 mr-4">
           {token ? (
             <img
               src={assets.profile_pic}
               alt="profile"
               className="w-8 h-8 rounded-full"
+              onClick={() => navigate("/customer")}
             />
           ) : (
             <button
@@ -199,33 +120,39 @@ const Navbar = () => {
           />
         </div>
 
-        {/* shown when menu button is clicked */}
+        {/* Mobile Menu Dropdown - Simplified as we'll use floating nav */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg rounded-b-lg z-50 p-4">
-            <ul className="flex flex-col gap-3 font-medium text-gray-700">
-              {/* Mobile menu links remain unchanged */}
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? "text-white border bg-pButton"
-                      : "text-gray-700 hover:text-white hover:bg-pButton"
-                  }`
-                }
-                onClick={() => setShowMobileMenu(false)}
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 backdrop-blur-md shadow-lg rounded-b-2xl z-50 p-4 border-t border-gray-100">
+            <div className="flex flex-col gap-3 font-medium text-gray-700">
+              <button
+                onClick={() => {
+                  setToken(!token);
+                  setShowMobileMenu(false);
+                }}
+                className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left flex items-center gap-3"
               >
-                <li>Home</li>
-              </NavLink>
-              {/* Other mobile navigation links */}
-              {/* ... */}
-            </ul>
+                <LogOut size={18} />
+                {token ? "Logout" : "Login"}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowProfileModal(true);
+                  setShowMobileMenu(false);
+                }}
+                className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left"
+              >
+                Settings
+              </button>
+            </div>
           </div>
         )}
       </div>
-      
-      {/* Profile Modal */}
-      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
+
+      {/* Floating Mobile Navigation */}
+      <MobileFloatingNav />
+
+        
     </>
   );
 };
