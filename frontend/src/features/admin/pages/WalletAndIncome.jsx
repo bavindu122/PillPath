@@ -417,15 +417,15 @@ const WalletAndIncome = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Type</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount ($)</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission ($)</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received Status</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Order ID</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Date</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Customer</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Pharmacy</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Payment Type</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Amount (Rs)</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Commission (Rs)</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Received Status</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -509,12 +509,12 @@ const WalletAndIncome = () => {
                 <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Payment Type</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount ($)</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Commission ($)</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Order ID</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Date</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Customer</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Payment Type</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Amount (Rs)</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Commission (Rs)</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -554,13 +554,13 @@ const WalletAndIncome = () => {
                 <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Payout ID</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Month Due</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount ($)</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Receipt</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Payout ID</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Date</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Month Due</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Amount (Rs)</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Status</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Receipt</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -617,13 +617,13 @@ const WalletAndIncome = () => {
                 <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Commission ID</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order Date</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Month Due</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount ($)</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Commission ID</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Order ID</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Order Date</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Month Due</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Amount (Rs)</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Status</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -730,59 +730,7 @@ const WalletAndIncome = () => {
 
         
 
-       {/*} <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto ">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Transaction id</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Patient</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Pharmacy</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Payment Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Amount (Rs.)</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">Commission (Rs.)</th>
-              
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredTransactions.length > 0 ? (
-              visibleTransactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tx.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.patient}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.pharmacy}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    tx.paymentType === 'Online' ? 'bg-blue-100 text-blue-800' :
-                    'bg-purple-100 text-purple-800'
-                    
-                  }`}>
-                    {tx.paymentType}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount.toFixed(2)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`${tx.displayCommission < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {tx.displayCommission.toFixed(2)}
-                    </span></td>
-                
-                
-              </tr>
-            ))
-            ) : (
-                <tr>
-                <td colSpan="7" className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                  No transactions found matching your criteria.
-                </td>
-              </tr>
-            )}
-                
-          </tbody>
-        </table>
-
-        
-      </div>*/}
+       
     </div>
   )
 }

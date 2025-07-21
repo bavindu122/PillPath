@@ -9,6 +9,7 @@ import Prescription from './pages/Prescription';
 import WalletAndIncome from './pages/WalletAndIncome';
 import Sales from './pages/Sales';
 import Analytics from './pages/Analytics';
+import Setting from './pages/Setting';
 const Admin = () => {
   return (
     <AdminLayout>
@@ -21,7 +22,7 @@ const Admin = () => {
         <Route path="wallet" element={<WalletAndIncome />} />
         <Route path="sales" element={<Sales />} />
         <Route path="analytics" element={<Analytics />} />
-
+        <Route path="settings" element={<Setting />} />
       </Routes>
       
     </AdminLayout>
