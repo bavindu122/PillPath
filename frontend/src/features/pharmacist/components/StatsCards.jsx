@@ -1,23 +1,24 @@
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const StatsCards = ({ stats }) => {
   const getCardColor = (color) => {
     const colors = {
-      blue: 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100',
-      green: 'border-green-200 bg-gradient-to-br from-green-50 to-green-100',
-      orange: 'border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100',
-      purple: 'border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100'
+      blue: 'stats-card-blue',
+      green: 'stats-card-green',
+      orange: 'stats-card-orange',
+      purple: 'stats-card-purple'
     };
     return colors[color] || colors.blue;
   };
 
   const getIconColor = (color) => {
     const colors = {
-      blue: 'text-blue-600',
-      green: 'text-green-600',
-      orange: 'text-orange-600',
-      purple: 'text-purple-600'
+      blue: 'stats-icon-blue',
+      green: 'stats-icon-green',
+      orange: 'stats-icon-orange',
+      purple: 'stats-icon-purple'
     };
     return colors[color] || colors.blue;
   };
@@ -35,37 +36,24 @@ const StatsCards = ({ stats }) => {
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600 mb-2 group-hover:text-gray-700 transition-colors duration-200">
+              <p className="text-sm font-medium mb-2 group-hover:transition-colors duration-200" style={{ color: 'var(--pharma-gray-600)' }}>
                 {stat.title}
               </p>
-              <p className="text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform duration-200">
+              <p className="text-3xl font-bold mb-1 group-hover:scale-105 transition-transform duration-200" style={{ color: 'var(--pharma-gray-900)' }}>
                 {stat.value}
               </p>
-              <p className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors duration-200">
+              <p className="text-xs group-hover:transition-colors duration-200" style={{ color: 'var(--pharma-gray-500)' }}>
                 {stat.subtitle}
               </p>
             </div>
             
             <div className={`${getIconColor(stat.color)} opacity-80 group-hover:opacity-100 transition-opacity duration-200`}>
               <div className={`w-4 h-4 rounded-full group-hover:animate-pulse`} style={{
-                backgroundColor: index === 0 ? '#3B82F6' : 
-                               index === 1 ? '#10B981' : 
-                               index === 2 ? '#F59E0B' : '#8B5CF6'
+                backgroundColor: stat.color === 'blue' ? 'var(--pharma-blue-600)' : 
+                               stat.color === 'green' ? 'var(--pharma-green-600)' : 
+                               stat.color === 'orange' ? 'var(--pharma-orange-600)' : 'var(--pharma-purple-600)'
               }}></div>
             </div>
-          </div>
-          
-          {/* Animated progress bar */}
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div 
-              className={`h-1 rounded-full transition-all duration-1000 ease-out group-hover:w-full`}
-              style={{
-                backgroundColor: index === 0 ? '#3B82F6' : 
-                               index === 1 ? '#10B981' : 
-                               index === 2 ? '#F59E0B' : '#8B5CF6',
-                width: '0%'
-              }}
-            ></div>
           </div>
         </div>
       ))}

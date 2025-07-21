@@ -15,6 +15,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PharmaPageLayout from '../components/PharmaPageLayout';
 import useListData from '../hooks/useListData';
 import { prescriptionService } from '../services/prescriptionService';
+import './index-pharmacist.css';
 
 const PrescriptionQueue = () => {
   const navigate = useNavigate();

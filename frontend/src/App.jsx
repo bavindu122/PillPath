@@ -30,7 +30,7 @@ const App = () => {
   return (
     <AuthProvider>
       <div>
-        {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Navbar />}
+        {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isPharmacyAdminPath && <Navbar />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -59,10 +59,12 @@ const App = () => {
           <Route path="/pharma-profile" element={<PharmacyProfile />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
-        {!isAdminPath && !isPharmacistPath && !isCustomerPath && <Footer />}
+        {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isPharmacyAdminPath && <Footer />}
       </div>
     </AuthProvider>
   );
 };
+
+
 
 export default App;

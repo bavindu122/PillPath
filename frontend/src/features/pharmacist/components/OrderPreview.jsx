@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, Send, Save, X, Plus, Minus } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSaveDraft, onAddMedicine }) => {
   const [notes, setNotes] = useState('');
