@@ -36,19 +36,23 @@ export const useProfileForm = (initialProfile = null) => {
       profilePictureUrl: profile.profilePictureUrl || "",
       insuranceProvider: profile.insuranceProvider || "",
       insuranceId: profile.insuranceId || "",
-      allergies: Array.isArray(profile.allergies) 
-        ? profile.allergies.join(', ') 
+      allergies: Array.isArray(profile.allergies)
+        ? profile.allergies.join(", ")
         : profile.allergies || "",
       medicalConditions: Array.isArray(profile.medicalConditions)
-        ? profile.medicalConditions.join(', ')
+        ? profile.medicalConditions.join(", ")
         : profile.medicalConditions || "",
       emergencyContactName: profile.emergencyContactName || "",
       emergencyContactPhone: profile.emergencyContactPhone || "",
     };
   };
 
-  const [formData, setFormData] = useState(() => getInitialFormData(initialProfile));
-  const [originalData, setOriginalData] = useState(() => getInitialFormData(initialProfile));
+  const [formData, setFormData] = useState(() =>
+    getInitialFormData(initialProfile)
+  );
+  const [originalData, setOriginalData] = useState(() =>
+    getInitialFormData(initialProfile)
+  );
   const [errors, setErrors] = useState({});
   const [isModified, setIsModified] = useState(false);
 
@@ -56,27 +60,38 @@ export const useProfileForm = (initialProfile = null) => {
   useEffect(() => {
     if (initialProfile && Object.keys(initialProfile).length > 0) {
       const newFormData = getInitialFormData(initialProfile);
-      
-      setFormData(newFormData);
-      setOriginalData(newFormData);
-      setIsModified(false); // Reset modification state when new data loads
+
+      // ✅ Only update if the data actually changed to prevent unnecessary re-renders
+      setFormData((prevData) => {
+        const dataChanged =
+          JSON.stringify(prevData) !== JSON.stringify(newFormData);
+        return dataChanged ? newFormData : prevData;
+      });
+
+      setOriginalData((prevOriginal) => {
+        const originalChanged =
+          JSON.stringify(prevOriginal) !== JSON.stringify(newFormData);
+        return originalChanged ? newFormData : prevOriginal;
+      });
+
+      setIsModified(false);
     }
   }, [initialProfile]);
-
+  
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value, // Always store as string during editing
     }));
-    
+
     // Check if data has been modified
     setIsModified(true); // Simplified - just mark as modified when any change occurs
-    
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: undefined
+        [field]: undefined,
       }));
     }
   };
@@ -119,20 +134,26 @@ export const useProfileForm = (initialProfile = null) => {
       // Prepare data for backend - convert comma-separated strings back to arrays
       const submitData = {
         ...formData,
-        allergies: formData.allergies 
-          ? formData.allergies.split(',').map(item => item.trim()).filter(item => item)
+        allergies: formData.allergies
+          ? formData.allergies
+              .split(",")
+              .map((item) => item.trim())
+              .filter((item) => item)
           : [],
         medicalConditions: formData.medicalConditions
-          ? formData.medicalConditions.split(',').map(item => item.trim()).filter(item => item)
-          : []
+          ? formData.medicalConditions
+              .split(",")
+              .map((item) => item.trim())
+              .filter((item) => item)
+          : [],
       };
 
       // TODO: Make API call to update profile
       console.log("Profile data to submit:", submitData);
-      
+
       // Here you would make the API call:
       // const response = await ApiService.updateCustomerProfile(submitData);
-      
+
       setIsModified(false);
       setOriginalData(formData);
       return true;
@@ -152,6 +173,6 @@ export const useProfileForm = (initialProfile = null) => {
     validateForm,
     resetForm,
     submitForm,
-    setFormData
+    setFormData,
   };
 };

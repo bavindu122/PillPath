@@ -7,15 +7,15 @@ import { customerService } from "../../../services/api/CustomerService";
 
 const EditProfileModal = ({ isOpen, onClose }) => {
   const { user, loading, updateUser } = useAuth();
-  
-  const { 
-    formData, 
-    errors, 
-    isModified, 
-    handleInputChange, 
-    validateForm, 
-    resetForm, 
-    submitForm 
+
+  const {
+    formData,
+    errors,
+    isModified,
+    handleInputChange,
+    validateForm,
+    resetForm,
+    submitForm,
   } = useProfileForm(user);
 
   const [editingField, setEditingField] = useState(null);
@@ -46,21 +46,21 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     setUploadingImage(true);
     try {
       const result = await customerService.uploadProfilePicture(file);
-      
+
       if (result.success) {
         // Update local state
         setProfileImagePreview(result.imageUrl);
-        handleInputChange('profilePictureUrl', result.imageUrl);
-        
+        handleInputChange("profilePictureUrl", result.imageUrl);
+
         // Update user context
         updateUser({ ...user, profilePictureUrl: result.imageUrl });
-        
+
         return result.imageUrl;
       } else {
         throw new Error(result.message);
       }
     } catch (error) {
-      console.error('Failed to upload profile picture:', error);
+      console.error("Failed to upload profile picture:", error);
       alert(`Failed to upload image: ${error.message}`);
       throw error;
     } finally {
@@ -82,16 +82,22 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         // Prepare data for backend
         const profileData = {
           ...formData,
-          allergies: formData.allergies 
-            ? formData.allergies.split(',').map(item => item.trim()).filter(item => item)
+          allergies: formData.allergies
+            ? formData.allergies
+                .split(",")
+                .map((item) => item.trim())
+                .filter((item) => item)
             : [],
           medicalConditions: formData.medicalConditions
-            ? formData.medicalConditions.split(',').map(item => item.trim()).filter(item => item)
-            : []
+            ? formData.medicalConditions
+                .split(",")
+                .map((item) => item.trim())
+                .filter((item) => item)
+            : [],
         };
 
         const result = await customerService.updateProfile(profileData);
-        
+
         if (result.success) {
           // Update user context with new data
           updateUser(result.customer);
@@ -103,7 +109,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
       onClose();
     } catch (error) {
-      console.error('Failed to save profile:', error);
+      console.error("Failed to save profile:", error);
       alert(`Failed to save profile: ${error.message}`);
     } finally {
       setSavingProfile(false);
@@ -123,23 +129,37 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     setSelectedFile(null);
     onClose();
   };
+  const handleFieldBlur = (field) => {
+    if (editingField === field) {
+      setEditingField(null);
+    }
+  };
+  const handleFieldKeyDown = (e, field) => {
+    if (e.key === "Enter" && editingField === field) {
+      setEditingField(null);
+    }
+    if (e.key === "Escape" && editingField === field) {
+      setEditingField(null);
+    }
+  };
 
   // Handle profile picture selection
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert('File size must be less than 5MB');
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        alert("File size must be less than 5MB");
         return;
       }
-      
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
         return;
       }
 
       setSelectedFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -152,9 +172,9 @@ const EditProfileModal = ({ isOpen, onClose }) => {
   const handleRemoveImage = () => {
     setSelectedFile(null);
     setProfileImagePreview(null);
-    handleInputChange('profilePictureUrl', '');
+    handleInputChange("profilePictureUrl", "");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -165,7 +185,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         await uploadProfilePicture(selectedFile);
         setSelectedFile(null);
         if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          fileInputRef.current.value = "";
         }
       } catch (error) {
         // Error already handled in uploadProfilePicture
@@ -173,61 +193,78 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const FormField = ({ label, field, type = "text", options = null, placeholder = "" }) => {
+  // Inside EditProfileModal.jsx
+  const FormField = ({
+    label,
+    field,
+    type = "text",
+    options = null,
+    placeholder = "",
+  }) => {
     const isEditing = editingField === field;
-    
+
+    // ✅ Ensure consistent string value
+    const fieldValue = React.useMemo(() => {
+      const value = formData[field];
+      if (value === null || value === undefined) return "";
+      if (Array.isArray(value)) return value.join(", ");
+      return String(value);
+    }, [formData[field]]);
+
     return (
       <div className="mb-4">
         <label className="block text-white/90 text-sm font-medium mb-2">
           {label}
         </label>
         <div className="relative flex items-center">
-          {type === "select" ? (
-            <select
-              value={formData[field] || ''}
-              onChange={(e) => handleInputChange(field, e.target.value)}
-              disabled={!isEditing}
-              className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 ${
-                isEditing ? '' : 'cursor-not-allowed opacity-70'
-              }`}
-            >
-              <option value="" className="bg-gray-800 text-white">Select {label}</option>
-              {options?.map(option => (
-                <option key={option} value={option} className="bg-gray-800 text-white">
-                  {option}
-                </option>
-              ))}
-            </select>
-          ) : type === "textarea" ? (
+          {type === "textarea" ? (
             <textarea
-              value={formData[field] || ''}
+              value={fieldValue}
               onChange={(e) => handleInputChange(field, e.target.value)}
+              onBlur={() => handleFieldBlur?.(field)}
+              onKeyDown={(e) => handleFieldKeyDown?.(e, field)}
               disabled={!isEditing}
               placeholder={placeholder}
               rows="3"
               className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 resize-none ${
-                isEditing ? '' : 'cursor-not-allowed opacity-70'
+                isEditing ? "" : "cursor-not-allowed opacity-70"
               }`}
+              autoFocus={isEditing}
             />
           ) : (
             <input
               type={type}
-              value={formData[field] || ''}
+              value={fieldValue}
               onChange={(e) => handleInputChange(field, e.target.value)}
+              onBlur={() => handleFieldBlur?.(field)}
+              onKeyDown={(e) => handleFieldKeyDown?.(e, field)}
               disabled={!isEditing}
               placeholder={placeholder}
               className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 ${
-                  isEditing ? '' : 'cursor-not-allowed opacity-70'
-                }`}
+                isEditing ? "" : "cursor-not-allowed opacity-70"
+              }`}
+              autoFocus={isEditing}
             />
           )}
-          
+
           <button
-            onClick={() => isEditing ? handleFieldSave() : handleFieldEdit(field)}
+            onClick={() =>
+              isEditing ? handleFieldSave() : handleFieldEdit(field)
+            }
             className="absolute right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 group"
             type="button"
           >
-            <Pencil size={16} className="text-white/70 group-hover:text-white" />
+            {isEditing ? (
+              <Save
+                size={16}
+                className="text-green-400 group-hover:text-green-300"
+              />
+            ) : (
+              <Pencil
+                size={16}
+                className="text-white/70 group-hover:text-white"
+              />
+            )}
           </button>
         </div>
         {errors[field] && (
@@ -235,22 +272,20 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         )}
       </div>
     );
-  };
-
-  // Accessibility: focus trap and escape key
+  }; // Accessibility: focus trap and escape key
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         handleClose();
       }
     };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    
+
+    document.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
 
@@ -267,7 +302,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         }
       }}
     >
-      <div 
+      <div
         ref={modalRef}
         className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -305,14 +340,17 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                   <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
                   Profile Picture
                 </h3>
-                
+
                 <div className="flex flex-col items-center space-y-4">
                   {/* Profile Picture Preview */}
                   <div className="relative group">
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/20 bg-white/10 backdrop-blur-sm shadow-lg">
                       {uploadingImage ? (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Loader2 size={32} className="text-blue-400 animate-spin" />
+                          <Loader2
+                            size={32}
+                            className="text-blue-400 animate-spin"
+                          />
                         </div>
                       ) : profileImagePreview ? (
                         <img
@@ -326,7 +364,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Overlay on hover */}
                     {!uploadingImage && (
                       <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -348,9 +386,9 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                       ) : (
                         <Upload size={16} />
                       )}
-                      {uploadingImage ? 'Uploading...' : 'Upload Photo'}
+                      {uploadingImage ? "Uploading..." : "Upload Photo"}
                     </button>
-                    
+
                     {selectedFile && !uploadingImage && (
                       <button
                         onClick={handleImmediateUpload}
@@ -361,17 +399,18 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                         Save Photo
                       </button>
                     )}
-                    
-                    {(profileImagePreview || selectedFile) && !uploadingImage && (
-                      <button
-                        onClick={handleRemoveImage}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 rounded-xl transition-all duration-300"
-                        type="button"
-                      >
-                        <X size={16} />
-                        Remove
-                      </button>
-                    )}
+
+                    {(profileImagePreview || selectedFile) &&
+                      !uploadingImage && (
+                        <button
+                          onClick={handleRemoveImage}
+                          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 rounded-xl transition-all duration-300"
+                          type="button"
+                        >
+                          <X size={16} />
+                          Remove
+                        </button>
+                      )}
                   </div>
 
                   <input
@@ -381,7 +420,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     onChange={handleFileSelect}
                     className="hidden"
                   />
-                  
+
                   <p className="text-gray-400 text-xs">
                     Maximum file size: 5MB. Supported formats: JPG, PNG, GIF
                   </p>
@@ -390,19 +429,26 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
               {/* Form Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
                 {/* Personal Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
                     Personal Information
                   </h3>
-                  
+
                   <FormField label="Username" field="username" />
                   <FormField label="Full Name" field="fullName" />
                   <FormField label="Email" field="email" type="email" />
-                  <FormField label="Phone Number" field="phoneNumber" type="tel" />
-                  <FormField label="Date of Birth" field="dateOfBirth" type="date" />
+                  <FormField
+                    label="Phone Number"
+                    field="phoneNumber"
+                    type="tel"
+                  />
+                  <FormField
+                    label="Date of Birth"
+                    field="dateOfBirth"
+                    type="date"
+                  />
                 </div>
 
                 {/* Contact & Address Information */}
@@ -411,17 +457,31 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     <div className="w-2 h-6 bg-green-500 rounded-full"></div>
                     Contact Information
                   </h3>
-                  
+
                   <FormField label="Address" field="address" />
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
-                      <div className={`text-sm ${user?.emailVerified ? 'text-green-400' : 'text-red-400'}`}>
-                        Email {user?.emailVerified ? 'Verified' : 'Not Verified'}
+                      <div
+                        className={`text-sm ${
+                          user?.emailVerified
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        Email{" "}
+                        {user?.emailVerified ? "Verified" : "Not Verified"}
                       </div>
                     </div>
                     <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
-                      <div className={`text-sm ${user?.phoneVerified ? 'text-green-400' : 'text-red-400'}`}>
-                        Phone {user?.phoneVerified ? 'Verified' : 'Not Verified'}
+                      <div
+                        className={`text-sm ${
+                          user?.phoneVerified
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        Phone{" "}
+                        {user?.phoneVerified ? "Verified" : "Not Verified"}
                       </div>
                     </div>
                   </div>
@@ -430,19 +490,21 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                 {/* Medical Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <div className="w-2 h-6 bg-red-500 rounded-full"></div>
-                    Medical Information
+                    <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
+                    Emergency & Insurance
                   </h3>
-                  
-                  <FormField 
-                    label="Allergies" 
-                    field="allergies" 
+
+                  <FormField
+                    key="allergies" // ✅ Add stable key
+                    label="Allergies"
+                    field="allergies"
                     type="textarea"
                     placeholder="List any known allergies (separate with commas)..."
                   />
-                  <FormField 
-                    label="Medical Conditions" 
-                    field="medicalConditions" 
+                  <FormField
+                    key="medicalConditions" // ✅ Add stable key
+                    label="Medical Conditions"
+                    field="medicalConditions"
                     type="textarea"
                     placeholder="List any chronic conditions (separate with commas)..."
                   />
@@ -454,10 +516,20 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
                     Emergency & Insurance
                   </h3>
-                  
-                  <FormField label="Emergency Contact Name" field="emergencyContactName" />
-                  <FormField label="Emergency Contact Phone" field="emergencyContactPhone" type="tel" />
-                  <FormField label="Insurance Provider" field="insuranceProvider" />
+
+                  <FormField
+                    label="Emergency Contact Name"
+                    field="emergencyContactName"
+                  />
+                  <FormField
+                    label="Emergency Contact Phone"
+                    field="emergencyContactPhone"
+                    type="tel"
+                  />
+                  <FormField
+                    label="Insurance Provider"
+                    field="insuranceProvider"
+                  />
                   <FormField label="Insurance ID" field="insuranceId" />
                 </div>
               </div>
@@ -472,14 +544,20 @@ const EditProfileModal = ({ isOpen, onClose }) => {
               >
                 Cancel
               </Button>
-              
+
               <Button
                 onClick={handleSave}
-                disabled={(!isModified && !selectedFile) || savingProfile || uploadingImage}
+                disabled={
+                  (!isModified && !selectedFile) ||
+                  savingProfile ||
+                  uploadingImage
+                }
                 className={`px-6 py-3 text-white flex items-center gap-2 transform transition-all duration-300 shadow-lg ${
-                  (isModified || selectedFile) && !savingProfile && !uploadingImage
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:scale-105'
-                    : 'bg-gray-500/50 cursor-not-allowed'
+                  (isModified || selectedFile) &&
+                  !savingProfile &&
+                  !uploadingImage
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:scale-105"
+                    : "bg-gray-500/50 cursor-not-allowed"
                 }`}
               >
                 {savingProfile ? (
@@ -487,7 +565,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                 ) : (
                   <Save size={18} />
                 )}
-                {savingProfile ? 'Saving...' : 'Save Changes'}
+                {savingProfile ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </>
