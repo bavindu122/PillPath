@@ -6,9 +6,9 @@ import profilepic3 from '../../../../assets/pharmacist.png'
 
 export default function StaffManagement() {
   const [staffMembers, setStaffMembers] = useState([
-    { id: 1, name: 'Alice Wonderland', profilePicture: profilepic1, email: 'alice@pharmacare.com', phone: '111-222-3333' },
-    { id: 2, name: 'Bob The Builder', profilePicture: profilepic2, email: 'bob@pharmacare.com', phone: '444-555-6666' },
-    { id: 3, name: 'Charlie Chaplin', profilePicture: profilepic3, email: 'charlie@pharmacare.com', phone: '777-888-9999' },
+    { id: 1, name: 'Sanu Munasinghe', profilePicture: profilepic1, email: 'sanu@pillpath.com', phone: '111-222-3333' },
+    { id: 2, name: 'Senuja Udugampola', profilePicture: profilepic2, email: 'senuja@pillpath.com', phone: '444-555-6666' },
+    { id: 3, name: 'Tanuri Mandini', profilePicture: profilepic3, email: 'tanu@pillpath.com', phone: '777-888-9999' },
   ]);
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
   const [newStaff, setNewStaff] = useState({ name: '', profilePicture: '', email: '', phone: '' });

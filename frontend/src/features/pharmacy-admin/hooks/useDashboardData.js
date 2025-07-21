@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 const useDashboardData = () => {
   const [overviewData, setOverviewData] = useState({
     totalOrders: { value: '1,247', change: '+12%' },
-    revenue: { value: '$24,580', change: '+8%' },
+    revenue: { value: 'Rs.24,580', change: '+8%' },
     activeStaff: { value: 12, new: 2 },
     inventoryItems: { value: 856, lowStock: 23 },
     digitalWallet : { value: 100, description: 'Current Balance' }
@@ -21,10 +21,10 @@ const useDashboardData = () => {
   });
 
   const [recentOrders, setRecentOrders] = useState([
-    { id: 'Order #1234', customerName: 'John Smith', amount: '$45.50', status: 'Completed' },
-    { id: 'Order #1235', customerName: 'Sarah Johnson', amount: '$32.00', status: 'Pending' },
-    { id: 'Order #1236', customerName: 'Michael Brown', amount: '$60.20', status: 'Completed' },
-    { id: 'Order #1237', customerName: 'Emily Davis', amount: '$15.75', status: 'Pending' },
+    { id: 'Order #1234', customerName: 'John Smith', amount: 'Rs.45.50', status: 'Completed' },
+    { id: 'Order #1235', customerName: 'Sarah Johnson', amount: 'Rs.32.00', status: 'Pending' },
+    { id: 'Order #1236', customerName: 'Michael Brown', amount: 'Rs.60.20', status: 'Completed' },
+    { id: 'Order #1237', customerName: 'Emily Davis', amount: 'Rs.15.75', status: 'Pending' },
   ]);
 
   const [lowStockAlerts, setLowStockAlerts] = useState([
