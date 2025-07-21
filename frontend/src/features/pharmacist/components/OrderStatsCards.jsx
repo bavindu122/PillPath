@@ -1,4 +1,5 @@
 import React from 'react';
+import '../pages/index-pharmacist.css';
 
 const OrderStatsCards = ({ stats }) => {
   const getIconColor = (color) => {

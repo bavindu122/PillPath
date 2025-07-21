@@ -19,7 +19,6 @@ import CurrentPrescriptionsCard from "../components/DashboardCards/CurrentPrescr
 import RecentOrdersCard from "../components/DashboardCards/RecentOrdersCard";
 import FamilyProfilesCard from "../components/DashboardCards/FamilyProfilesCard";
 import NearbyPharmaciesCard from "../components/DashboardCards/NearbyPharmaciesCard";
-import ProfileModal from "../components/ProfileModal";
 import EditProfileModal from "../components/EditProfileModal";
 import DetailCard from "../components/DetailCard";
 import GlassCard from "../../../components/UIs/GlassCard";
@@ -73,9 +72,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                     alt="User profile picture"
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/30 shadow-lg animate-fade-in-scale"
                   />
-                  <div className="absolute -bottom-2 -right-2 bg-secondary rounded-full p-2 shadow-md cursor-pointer hover:bg-secondary-hover transition-colors duration-200">
-                    <Camera size={18} className="text-white" />
-                  </div>
+                  
                 </div>
 
                 <div className="flex-1 text-left">
@@ -388,11 +385,6 @@ const CustomerProfile = ({ removeBg = false }) => {
         </div>
       </div>
 
-      <ProfileModal
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-      />
-      
       <EditProfileModal
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}

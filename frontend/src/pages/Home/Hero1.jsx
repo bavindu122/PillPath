@@ -33,7 +33,7 @@ const Hero1 = ({ openPrescriptionModal }) => {
 
           <div className="bottom-[-35px] relative mx-0 sm:mx-2 my-2 sm:my-0 transform-gpu">
             {/* Enhanced background for 3D depth */}
-            <div className="absolute -inset-1 bg-white/10 rounded-full blur-md"></div>
+            <div className="absolute -inset-1 rounded-full blur-md"></div>
 
             {/* Logo with enhanced 3D shadow effect */}
             <div className="relative transform-gpu animate-logo-entrance opacity-0 scale-70">
