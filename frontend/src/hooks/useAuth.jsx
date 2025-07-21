@@ -57,7 +57,10 @@ export const AuthProvider = ({ children }) => {
           // If backend returns token immediately upon registration
           if (response.token) {
             setToken(response.token);
-            setUser(response.user || response.customer);
+            setUser({
+              ...response.user || response.customer,
+              userType: 'customer'
+            });
             localStorage.setItem("auth_token", response.token);
           }
         } else if (response && !response.success) {
@@ -90,7 +93,10 @@ export const AuthProvider = ({ children }) => {
       if (response && response.success) {
         if (response.token) {
           setToken(response.token);
-          setUser(response.user || response.customer);
+          setUser({
+            ...response.user || response.customer,
+            userType: 'customer'
+          });
           localStorage.setItem("auth_token", response.token);
         }
       } else if (response && !response.success) {
@@ -132,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     checkAuthStatus,
     isAuthenticated: !!token,
+    userType: user?.userType || null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

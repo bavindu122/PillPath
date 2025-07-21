@@ -7,20 +7,31 @@ import Customers from './pages/Customers';
 import Pharmacies from './pages/Pharmacies';
 import Prescription from './pages/Prescription';
 import WalletAndIncome from './pages/WalletAndIncome';
+import AdminLogin from './pages/AdminLogin'; // ✅ Import the component directly
+import AdminRoute from '../../components/ProtectedRoute/AdminRoute';
+
 const Admin = () => {
   return (
-    <AdminLayout>
-      <Routes>
-        <Route path="/" element={<Navigate to="overview" replace />} /> 
-        <Route path="overview" element={<Overview />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="pharmacies" element={<Pharmacies />} />
-        <Route path="prescriptions" element={<Prescription />} />
-        <Route path="wallet" element={<WalletAndIncome />} />
-
-      </Routes>
+    <Routes>
+      {/* ✅ Admin login route - no provider needed here since it's at App level */}
+      <Route path="/login" element={<AdminLogin />} />
       
-    </AdminLayout>
+      {/* ✅ Protected admin routes */}
+      <Route path="/*" element={
+        <AdminRoute>
+          <AdminLayout>
+            <Routes>
+              <Route path="/" element={<Navigate to="overview" replace />} /> 
+              <Route path="overview" element={<Overview />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="pharmacies" element={<Pharmacies />} />
+              <Route path="prescriptions" element={<Prescription />} />
+              <Route path="wallet" element={<WalletAndIncome />} />
+            </Routes>
+          </AdminLayout>
+        </AdminRoute>
+      } />
+    </Routes>
   )
 }
 
