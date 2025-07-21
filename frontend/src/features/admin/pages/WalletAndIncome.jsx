@@ -807,7 +807,7 @@ const WalletAndIncome = () => {
             <Legend />
             <Bar
               dataKey="commission"
-              fill="#82ca9d"
+              fill="#EC4899"
               name="Commission Paid"
               radius={[10, 10, 0, 0]}
             />
