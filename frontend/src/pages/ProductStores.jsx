@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -209,7 +209,7 @@ const ProductStores = () => {
   const [filteredStores, setFilteredStores] = useState(mockStores);
   const [sortBy, setSortBy] = useState("distance");
   const [filterBy, setFilterBy] = useState("all");
-  const [selectedStore, setSelectedStore] = useState(null);
+  const [selectedStoreState, setSelectedStoreState] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -220,6 +220,29 @@ const ProductStores = () => {
     cvv: "",
     cardholderName: "",
   });
+
+  // Memoize particle styles to avoid layout jank from randomization on every render
+  const particleStyles = useMemo(
+    () =>
+      Array.from({ length: 15 }, () => ({
+        width: `${Math.random() * 6 + 3}px`,
+        height: `${Math.random() * 6 + 3}px`,
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        animationDuration: `${Math.random() * 20 + 10}s`,
+        animationDelay: `${Math.random() * 5}s`,
+      })),
+    []
+  );
+
+  // Helper to reset quantity when store changes
+  const setSelectedStore = (store) => {
+    setSelectedStoreState(store);
+    setQuantity(1);
+  };
+
+  // Use selectedStoreState as selectedStore for compatibility
+  const selectedStore = selectedStoreState;
 
   useEffect(() => {
     // Get product data
@@ -255,7 +278,18 @@ const ProductStores = () => {
         case "distance":
           return parseFloat(a.distance) - parseFloat(b.distance);
         case "deliveryTime":
-          return parseInt(a.deliveryTime) - parseInt(b.deliveryTime);
+          // Helper function to normalize delivery time to minutes for sorting
+          const getDeliveryMinutes = (deliveryTime) => {
+            if (deliveryTime.toLowerCase().includes("next day")) {
+              return 1440; // 24 hours in minutes
+            }
+            const parsed = parseInt(deliveryTime);
+            return isNaN(parsed) ? 9999 : parsed; // Put unknown times at the end
+          };
+          return (
+            getDeliveryMinutes(a.deliveryTime) -
+            getDeliveryMinutes(b.deliveryTime)
+          );
         default:
           return 0;
       }
@@ -266,6 +300,7 @@ const ProductStores = () => {
 
   const handleOrderClick = (store) => {
     setSelectedStore(store);
+    setPaymentMethod("cash"); // Reset payment method to default when opening modal
     setShowOrderModal(true);
   };
 
@@ -362,18 +397,11 @@ const ProductStores = () => {
 
       {/* Floating particles */}
       <div className="absolute inset-0">
-        {[...Array(15)].map((_, i) => (
+        {particleStyles.map((style, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white/10 animate-float-random"
-            style={{
-              width: `${Math.random() * 6 + 3}px`,
-              height: `${Math.random() * 6 + 3}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDuration: `${Math.random() * 20 + 10}s`,
-              animationDelay: `${Math.random() * 5}s`,
-            }}
+            style={style}
           ></div>
         ))}
       </div>
@@ -688,11 +716,28 @@ const ProductStores = () => {
                     min="1"
                     max={selectedStore.stockCount}
                     value={quantity}
-                    onChange={(e) =>
-                      setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                    onChange={(e) => {
+                      const inputValue = parseInt(e.target.value) || 1;
+                      const validQuantity = Math.min(
+                        Math.max(1, inputValue),
+                        selectedStore.stockCount
+                      );
+                      setQuantity(validQuantity);
+                    }}
+                    className={`w-full bg-white/10 border rounded-lg px-3 py-2 text-white focus:outline-none ${
+                      quantity > selectedStore.stockCount
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-white/20 focus:border-blue-500"
+                    }`}
                   />
+                  {quantity > selectedStore.stockCount && (
+                    <p className="text-red-400 text-xs mt-1">
+                      Only {selectedStore.stockCount} items available in stock
+                    </p>
+                  )}
+                  <p className="text-gray-400 text-xs mt-1">
+                    Available: {selectedStore.stockCount} items
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-400 block mb-2">
@@ -757,7 +802,7 @@ const ProductStores = () => {
         {/* Card Payment Modal */}
         {showPaymentModal && selectedStore && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-md w-full">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-md w-full mt-16">
               <h3 className="text-xl font-bold text-white mb-4">
                 Payment Details
               </h3>
@@ -841,12 +886,31 @@ const ProductStores = () => {
                       type="text"
                       value={cardDetails.expiryDate}
                       onChange={(e) => {
-                        // Format as MM/YY
-                        const value = e.target.value.replace(/\D/g, "");
-                        const formattedValue = value.replace(
-                          /(\d{2})(\d{2})/,
-                          "$1/$2"
-                        );
+                        // Format as MM/YY and restrict month to 01-12
+                        let value = e.target.value.replace(/\D/g, "");
+                        if (value.length === 0) {
+                          handleCardInputChange("expiryDate", "");
+                          return;
+                        }
+                        // Only allow up to 4 digits (MMYY)
+                        value = value.slice(0, 4);
+                        let formattedValue = value;
+                        if (value.length >= 2) {
+                          let month = value.slice(0, 2);
+                          // Restrict month to 01-12
+                          if (parseInt(month, 10) < 1) {
+                            month = "01";
+                          } else if (parseInt(month, 10) > 12) {
+                            month = "12";
+                          } else if (month.length === 1) {
+                            // If user types a single digit, don't format yet
+                            formattedValue = month;
+                          }
+                          formattedValue = month;
+                          if (value.length > 2) {
+                            formattedValue += "/" + value.slice(2, 4);
+                          }
+                        }
                         handleCardInputChange("expiryDate", formattedValue);
                       }}
                       placeholder="MM/YY"
