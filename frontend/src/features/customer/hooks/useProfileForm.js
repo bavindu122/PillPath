@@ -118,7 +118,6 @@ export const useProfileForm = (initialProfile = null) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const resetForm = () => {
     setFormData(originalData);
     setErrors({});

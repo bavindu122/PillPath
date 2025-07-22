@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
-import PaymentModal from "../../../components/UIs/PaymentModal";
+import PaymentModal from "../components/PaymentModal";
 import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
 
 const OrderPreview = () => {
@@ -173,14 +173,34 @@ const OrderPreview = () => {
                         borderImage: 'none'
                       }}
                     >
-                      <div className="flex items-center  space-x-4 flex-1">
-                        <input
-                          type="checkbox"
-                          id={`medication-${medication.id}`}
-                          checked={medication.selected}
-                          onChange={() => handleMedicationToggle(medication.id)}
-                          className="w-5 h-5 text-green-600 rounded-lg border bg-white/10 border-white/30 rounded focus:ring-green-500 focus:ring-2"
-                        />
+                      <div className="flex items-center space-x-4 flex-1">
+                        <label className="relative flex items-center cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            id={`medication-${medication.id}`}
+                            checked={medication.selected}
+                            onChange={() => handleMedicationToggle(medication.id)}
+                            className="peer appearance-none w-6 h-6 rounded-lg border-2 border-white/30 bg-white/10 transition-all duration-200 focus:ring-2 focus:ring-green-400 focus:outline-none"
+                          />
+                          <span className="absolute left-0 top-0 w-6 h-6 flex items-center justify-center pointer-events-none">
+                            <svg
+                              className={`transition-opacity duration-200 ${medication.selected ? 'opacity-100' : 'opacity-0'}`}
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M6 13L11 18L18 8"
+                                stroke="#1cdf50ff"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </span>
+                        </label>
                         <div className="flex-1">
                           <h4 className="text-white font-medium">{medication.name}</h4>
                           <p className="text-white/60 text-sm">{medication.quantity}</p>
@@ -188,7 +208,7 @@ const OrderPreview = () => {
                       </div>
                       <div className="text-right">
                         <span className={`font-semibold text-lg ${medication.selected ? 'text-white' : 'text-white/50'}`}>
-                          ${medication.price.toFixed(2)}
+                          Rs. {medication.price.toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -199,7 +219,7 @@ const OrderPreview = () => {
                 <div className="border-t border-white/10 pt-4 mt-6">
                   <div className="flex items-center justify-between p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                     <span className="text-xl font-bold text-white">Total Price</span>
-                    <span className="text-2xl font-bold text-white">${totalPrice.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-white">Rs. {totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -230,7 +250,7 @@ const OrderPreview = () => {
                     } ${isAccepted ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800' : ''}`}
                   >
                     <FileText className="h-4 w-4" />
-                    <span>{isAccepted ? 'Order Accepted' : 'Accept Preview'}</span>
+                    <span>{isAccepted ? 'Order preview Accepted' : 'Accept Preview'}</span>
                   </button>
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">Uploaded Prescription</h3>

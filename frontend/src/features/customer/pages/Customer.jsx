@@ -6,6 +6,7 @@ import Activities from "./Activities";
 import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
 import FamilyProfiles from "./FamilyProfiles";
+import MedicineInfo from "./MedicineInfo";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
@@ -66,6 +67,8 @@ const Customer = () => {
           <Route path="/activities" element={<Activities />} />
           <Route path="/orders" element={<PastOrders />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
+          <Route path="/medicine-info" element={<MedicineInfo />} />
+          <Route path="/order-preview/:prescriptionId" element={<OrderPreview />} />
           <Route
             path="/order-preview/:prescriptionId"
             element={<OrderPreview />}

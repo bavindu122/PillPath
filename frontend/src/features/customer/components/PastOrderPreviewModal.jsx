@@ -9,11 +9,11 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
 
   // Sample family members - you can replace this with actual data
   const familyMembers = [
-    "John Doe",
-    "Jane Doe", 
-    "Michael Doe",
-    "Sarah Doe",
-    "Robert Doe"
+    "Senuja Udugampola",
+    "Sanuthma Munasinghe", 
+    "Tanuri Mandini",
+    "Nirmi Kawmada",
+    "Bavindu Shamen"
   ];
 
   // Close dropdown when clicking outside
@@ -159,7 +159,7 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
                   {medications.map((med, idx) => (
                     <li key={idx} className="flex justify-between text-white/80 text-base py-1">
                       <span>{med.name}</span>
-                      <span>${parseFloat(med.price).toFixed(2)}</span>
+                      <span>Rs. {parseFloat(med.price).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>
@@ -170,24 +170,24 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between text-white/80 text-base">
                   <span>Subtotal:</span>
-                  <span>{order.subtotal ? `$${order.subtotal}` : `$${medications.reduce((sum, med) => sum + (parseFloat(med.price) || 0), 0).toFixed(2)}`}</span>
+                  <span>{order.subtotal ? `Rs. ${order.subtotal}` : `Rs. ${medications.reduce((sum, med) => sum + (parseFloat(med.price) || 0), 0).toFixed(2)}`}</span>
                 </div>
                 {order.insuranceCoverage && (
                   <div className="flex justify-between text-green-300 text-base">
                     <span>Insurance Coverage:</span>
-                    <span>- ${order.insuranceCoverage}</span>
+                    <span>- Rs. {order.insuranceCoverage}</span>
                   </div>
                 )}
                 {order.pharmacyDiscount && (
                   <div className="flex justify-between text-green-300 text-base">
                     <span>Pharmacy Discount:</span>
-                    <span>- ${order.pharmacyDiscount}</span>
+                    <span>- Rs. {order.pharmacyDiscount}</span>
                   </div>
                 )}
                 <div className="border-t border-white/10 pt-2">
                   <div className="flex justify-between text-white text-lg font-bold">
                     <span>Total Amount:</span>
-                    <span>{order.total ? `${order.total}` : `$${medications.reduce((sum, med) => sum + (parseFloat(med.price) || 0), 0).toFixed(2)}`}</span>
+                    <span>{order.total ? `Rs. ${order.total.replace('$', '')}` : `Rs. ${medications.reduce((sum, med) => sum + (parseFloat(med.price) || 0), 0).toFixed(2)}`}</span>
                   </div>
                 </div>
               </div>

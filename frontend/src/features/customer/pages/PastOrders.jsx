@@ -26,7 +26,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-01",
       orderNumber: "RX-250117-01",
-      total: "$127.50",
+      total: "Rs. 127.50",
       date: "Dec 28, 2024",
       time: "10:30 AM",
       status: "Completed",
@@ -41,7 +41,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-02", 
       orderNumber: "RX-250117-02",
-      total: "$89.25",
+      total: "Rs.89.25",
       date: "Dec 25, 2024",
       time: "2:15 PM",
       status: "Completed",
@@ -56,7 +56,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-03",
       orderNumber: "RX-250117-03", 
-      total: "$45.00",
+      total: "Rs. 45.00",
       date: "Dec 22, 2024",
       time: "11:45 AM",
       status: "Completed",
@@ -71,7 +71,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-04",
       orderNumber: "RX-250117-04",
-      total: "$156.75",
+      total: "Rs. 156.75",
       date: "Dec 20, 2024",
       time: "9:20 AM",
       status: "Completed",
@@ -86,7 +86,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-05",
       orderNumber: "RX-250117-05",
-      total: "$32.80",
+      total: "Rs. 32.80",
       date: "Dec 18, 2024", 
       time: "4:30 PM",
       status: "Completed",
@@ -101,7 +101,7 @@ const PastOrders = () => {
     {
       id: "RX-250117-06",
       orderNumber: "RX-250117-06",
-      total: "$203.40",
+      total: "Rs. 203.40",
       date: "Dec 15, 2024",
       time: "1:10 PM", 
       status: "Completed",
@@ -137,17 +137,16 @@ const PastOrders = () => {
   return (
     <div className="min-h-screen p-6 relative">
       {/* Header */}
+      
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="text-center mb-8"
       >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Past Orders</h1>
-            <p className="text-white/60">View and manage your order history</p>
-          </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Past Orders</h1>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">View and manage your order history</p>
           
           <div className="flex items-center gap-3">
             <span className="text-white/60 text-sm">
@@ -167,7 +166,7 @@ const PastOrders = () => {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Bar */}
           <div className="relative flex-1">
-            <Search size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/50" />
+            <Search size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 z-10" />
             <input
               type="text"
               placeholder="Search orders by family member name or order ID..."

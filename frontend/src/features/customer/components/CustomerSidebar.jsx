@@ -55,7 +55,7 @@ const CustomerSidebar = () => {
       icon: <Users size={18} />,
     },
     {
-      path: "/medicine-info",
+      path: "/customer/medicine-info",
       label: "Medicine Info",
       icon: <Pill size={18} />,
     },

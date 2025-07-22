@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Sliders, Search, ChevronLeft, List, Map as MapIcon } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import PharmacyMap from "./components/PharmacyMap";
 import PharmacyFilters from "./components/PharmacyFilters";
 import PharmacyList from "./components/PharmacyList";
@@ -7,6 +8,9 @@ import { usePharmacyData } from "./hooks/usePharmacyData";
 
 
 const FindPharmacy = () => {
+  const [searchParams] = useSearchParams();
+  const isFromDashboard = searchParams.get('from') === 'dashboard';
+  
   const [viewMode, setViewMode] = useState("split"); // "map", "list", or "split"
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,9 +73,14 @@ const FindPharmacy = () => {
           {/* Header section */}
           <div className="mb-8 text-center md:text-left">
             <div className="inline-flex items-center mb-4">
-              <a href="/" className="flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 py-2 rounded-lg group w-fit">
+              <a 
+                href={isFromDashboard ? "/customer" : "/"} 
+                className="flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 py-2 rounded-lg group w-fit"
+              >
                 <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                <span className="font-medium text-sm sm:text-base">Back to Home</span>
+                <span className="font-medium text-sm sm:text-base">
+                  {isFromDashboard ? "Back to Dashboard" : "Back to Home"}
+                </span>
               </a>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
