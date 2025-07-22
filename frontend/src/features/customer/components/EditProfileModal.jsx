@@ -103,7 +103,7 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
     
     return (
       <div className="mb-4">
-        <label className="block text-white/90 text-sm font-medium mb-2">
+        <label className="block text-white/80 text-sm mb-2">
           {label}
         </label>
         <div className="relative flex items-center">
@@ -112,8 +112,8 @@ const EditProfileModal = ({ isOpen, onClose, userProfile = {} }) => {
               value={formData[field]}
               onChange={(e) => handleInputChange(field, e.target.value)}
               disabled={!isEditing}
-              className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 ${
-isEditing ? '' : 'cursor-not-allowed opacity-70'
+              className={`w-full px-3 py-2 pr-12 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:border-blue-400 transition-all duration-300 ${
+                isEditing ? '' : 'cursor-not-allowed opacity-70'
               }`}
             >
               {options?.map(option => (
@@ -129,8 +129,8 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
               disabled={!isEditing}
               placeholder={placeholder}
               rows="3"
-              className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 resize-none ${
- isEditing ? '' : 'cursor-not-allowed opacity-70'
+              className={`w-full px-3 py-2 pr-12 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:border-blue-400 transition-all duration-300 resize-none ${
+                isEditing ? '' : 'cursor-not-allowed opacity-70'
               }`}
             />
           ) : (
@@ -140,7 +140,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
               onChange={(e) => handleInputChange(field, e.target.value)}
               disabled={!isEditing}
               placeholder={placeholder}
-              className={`w-full px-4 py-3 pr-12 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300 ${
+              className={`w-full px-3 py-2 pr-12 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:border-blue-400 transition-all duration-300 ${
                 isEditing ? '' : 'cursor-not-allowed opacity-70'
               }`}
             />
@@ -148,9 +148,9 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
           
           <button
             onClick={() => isEditing ? handleFieldSave() : handleFieldEdit(field)}
-            className="absolute right-3 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 group"
+            className="absolute right-3 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-all duration-200"
           >
-            <Pencil size={16} className="text-white/70 group-hover:text-white" />
+            <Pencil size={16} className="text-white/80" />
           </button>
         </div>
       </div>
@@ -268,35 +268,52 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/60 p-4"
       role="dialog"
       aria-modal="true"
       ref={modalRef}
     >
-      <div className="relative w-full max-w-4xl mx-4 max-h-[90vh] bg-gradient-to-br from-primary via-primary-hover to-accent backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div className="relative w-full max-w-4xl max-h-[90vh] bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
+        <style>
+          {`
+            .edit-profile-scroll::-webkit-scrollbar {
+              width: 8px;
+              background: transparent;
+            }
+            .edit-profile-scroll::-webkit-scrollbar-thumb {
+              background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+              border-radius: 8px;
+            }
+            .edit-profile-scroll::-webkit-scrollbar-track {
+              background: transparent;
+            }
+            .edit-profile-scroll {
+              scrollbar-width: thin;
+              scrollbar-color: #3b82f6 #0000;
+            }
+          `}
+        </style>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2 rounded-xl">
-              <Pencil size={24} className="text-blue-300" />
-            </div>
+            <Pencil className="h-6 w-6" />
             Edit Profile
           </h2>
           <button
             onClick={handleClose}
-            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 group"
+            className="text-white/70 hover:text-white transition-colors"
           >
-            <X size={24} className="text-white/70 group-hover:text-white" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {/* Form Content - Scrollable */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] edit-profile-scroll">
           
           {/* Profile Picture Section */}
           <div className="flex justify-center mb-8">
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/30 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/40 bg-white/20 backdrop-blur-sm">
                 {profilePicturePreview ? (
                   <img
                     src={profilePicturePreview}
@@ -336,7 +353,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
               {profilePicturePreview && (
                 <button
                   onClick={removeProfilePicture}
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors duration-200"
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors duration-200 backdrop-blur-sm border border-white/20"
                 >
                   <X size={16} className="text-white" />
                 </button>
@@ -357,10 +374,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
             
             {/* Personal Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <div className="w-2 h-6 bg-blue-500 rounded-full"></div>
-                Personal Information
-              </h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
               
               <FormField label="First Name" field="firstName" />
               <FormField label="Last Name" field="lastName" />
@@ -377,10 +391,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
 
             {/* Medical Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <div className="w-2 h-6 bg-green-500 rounded-full"></div>
-                Medical Information
-              </h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Medical Information</h3>
               
               <FormField 
                 label="Blood Type" 
@@ -406,10 +417,7 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
 
             {/* Contact Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
-                Address Information
-              </h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Address Information</h3>
               
               <FormField label="Street Address" field="address" />
               <FormField label="City" field="city" />
@@ -420,21 +428,21 @@ isEditing ? '' : 'cursor-not-allowed opacity-70'
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-white/20 bg-white/5">
-          <Button
+        <div className="flex items-center justify-between p-6 border-t border-white/20 bg-white/10">
+          <button
             onClick={handleCancel}
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-300"
+            className="flex-1 bg-white/20 hover:bg-white/30 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 border border-white/30 mr-3"
           >
             Cancel
-          </Button>
+          </button>
           
-          <Button
+          <button
             onClick={handleSave}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white flex items-center gap-2 transform hover:scale-105 transition-all duration-300 shadow-lg"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2"
           >
             <Save size={18} />
             Save Changes
-          </Button>
+          </button>
         </div>
       </div>
     </div>

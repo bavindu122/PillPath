@@ -33,8 +33,7 @@ const initialFamilyMembers = [
         lastRefill: "2025-07-18",
         prescriptionId: "RX-250719-34",
         prescribedBy: "Dr. Jennifer Smith",
-        quantity: "30 tablets",
-        refillsRemaining: 2
+        quantity: "30 tablets"
       },
       { 
         name: "RX-250719-35", 
@@ -42,8 +41,7 @@ const initialFamilyMembers = [
         lastRefill: "2025-07-15",
         prescriptionId: "RX-250719-35",
         prescribedBy: "Dr. Jennifer Smith",
-        quantity: "60 capsules",
-        refillsRemaining: 3
+        quantity: "60 capsules"
       },
       { 
         name: "RX-250719-36", 
@@ -51,8 +49,7 @@ const initialFamilyMembers = [
         lastRefill: "2025-07-17",
         prescriptionId: "RX-250719-36",
         prescribedBy: "Dr. Jennifer Smith",
-        quantity: "120 softgels",
-        refillsRemaining: 1
+        quantity: "120 softgels"
       }
     ]
   },
@@ -72,22 +69,20 @@ const initialFamilyMembers = [
     medicalConditions: ["Hypertension", "Diabetes Type 2"],
     currentMedications: [
       { 
-        name: "Metformin 500mg", 
+        name: "RX-250710-05", 
         frequency: "Twice daily", 
         lastRefill: "2025-07-10",
-        prescriptionId: "RX-004-2025",
+        prescriptionId: "RX-250710-05",
         prescribedBy: "Dr. Sarah Johnson",
-        quantity: "60 tablets",
-        refillsRemaining: 1
+        quantity: "60 tablets"
       },
       { 
-        name: "Lisinopril 10mg", 
+        name: "RX-250712-01", 
         frequency: "Once daily", 
         lastRefill: "2025-07-12",
-        prescriptionId: "RX-005-2025",
+        prescriptionId: "RX-250712-01",
         prescribedBy: "Dr. Sarah Johnson",
-        quantity: "30 tablets",
-        refillsRemaining: 2
+        quantity: "30 tablets"
       }
     ]
   },
@@ -107,13 +102,12 @@ const initialFamilyMembers = [
     medicalConditions: ["Asthma"],
     currentMedications: [
       { 
-        name: "Albuterol Inhaler", 
+        name: "RX-250524-36", 
         frequency: "As needed", 
         lastRefill: "2025-07-05",
-        prescriptionId: "RX-006-2025",
+        prescriptionId: "RX-250524-36",
         prescribedBy: "Dr. Michael Chen",
-        quantity: "1 inhaler",
-        refillsRemaining: 0
+        quantity: "1 inhaler"
       }
     ]
   },
@@ -149,40 +143,36 @@ const initialFamilyMembers = [
     medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
     currentMedications: [
       { 
-        name: "Atorvastatin 20mg", 
+        name: "RX-250715-25", 
         frequency: "Once daily", 
         lastRefill: "2025-07-15",
-        prescriptionId: "RX-008-2025",
+        prescriptionId: "RX-250715-25",
         prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets",
-        refillsRemaining: 2
+        quantity: "30 tablets"
       },
       { 
-        name: "Carvedilol 6.25mg", 
+        name: "RX-250716-25", 
         frequency: "Twice daily", 
         lastRefill: "2025-07-16",
-        prescriptionId: "RX-009-2025",
+        prescriptionId: "RX-250716-25",
         prescribedBy: "Dr. David Thompson",
-        quantity: "60 tablets",
-        refillsRemaining: 1
+        quantity: "60 tablets"
       },
       { 
-        name: "Ibuprofen 400mg", 
+        name: "RX-250710-25", 
         frequency: "As needed", 
         lastRefill: "2025-07-10",
-        prescriptionId: "RX-010-2025",
+        prescriptionId: "RX-250710-25",
         prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets",
-        refillsRemaining: 3
+        quantity: "30 tablets"
       },
       { 
-        name: "Aspirin 81mg", 
+        name: "RX-250714-01", 
         frequency: "Once daily", 
         lastRefill: "2025-07-14",
-        prescriptionId: "RX-011-2025",
+        prescriptionId: "RX-250714-01",
         prescribedBy: "Dr. David Thompson",
-        quantity: "90 tablets",
-        refillsRemaining: 0
+        quantity: "90 tablets"
       }
     ]
   }

@@ -275,13 +275,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
                           <div>
                             <h4 className="text-xl font-semibold text-white">{prescription.name}</h4>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            prescription.refillsRemaining > 0 
-                              ? 'bg-green-500/20 text-green-400' 
-                              : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {prescription.refillsRemaining > 0 ? 'Active' : 'Refill Needed'}
-                          </span>
+                          
                         </div>
                         
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
