@@ -379,256 +379,289 @@ const ProductStores = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header */}
-        <div className="flex items-center mb-8">
+        {/* Back Button */}
+        <div className="flex items-center mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="mr-4 p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300"
+            className="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300"
           >
             <ArrowLeft size={20} className="text-white" />
           </button>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Find <span className="text-gradient-primary">{product.name}</span>{" "}
-            Near You
-          </h1>
         </div>
 
-        {/* Product Info Card */}
-        <div className="mb-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-          <div className="flex flex-col md:flex-row items-start gap-6">
-            <div className="w-24 h-24 bg-white/20 rounded-xl p-3 flex-shrink-0">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-contain rounded-lg"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h2 className="text-xl font-bold text-white mb-1">
-                    {product.name}
-                  </h2>
-                  <p className="text-gray-300 text-sm">{product.description}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  {renderStars(product.rating)}
-                  <span className="text-sm text-gray-400 ml-1">
-                    ({product.rating})
-                  </span>
-                </div>
+        {/* Main Layout: Two Column */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Side - Header and Filters */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 space-y-2">
+              {/* Product Header */}
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                  Find{" "}
+                  <span className="text-gradient-primary">{product.name}</span>{" "}
+                  Near You
+                </h1>
+                <p className="text-gray-300 text-sm">
+                  {filteredStores.length} stores found
+                </p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                <div>
-                  <span className="text-xs text-gray-400">Category</span>
-                  <p className="text-sm text-white font-medium">
-                    {product.category}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-xs text-gray-400">Dosage</span>
-                  <p className="text-sm text-white font-medium">
-                    {product.dosage}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-xs text-gray-400">Pack Size</span>
-                  <p className="text-sm text-white font-medium">
-                    {product.packSize}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-xs text-gray-400">Manufacturer</span>
-                  <p className="text-sm text-white font-medium">
-                    {product.manufacturer}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Filters and Sort */}
-        <div className="mb-6 flex flex-col md:flex-row gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-gray-400" />
-              <select
-                value={filterBy}
-                onChange={(e) => setFilterBy(e.target.value)}
-                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="all" className="bg-gray-800">
-                  All Stores
-                </option>
-                <option value="inStock" className="bg-gray-800">
-                  In Stock Only
-                </option>
-                <option value="verified" className="bg-gray-800">
-                  Verified Only
-                </option>
-                <option value="fastDelivery" className="bg-gray-800">
-                  Fast Delivery (≤30 min)
-                </option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <SortAsc size={16} className="text-gray-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-              >
-                <option value="distance" className="bg-gray-800">
-                  Distance
-                </option>
-                <option value="price" className="bg-gray-800">
-                  Price: Low to High
-                </option>
-                <option value="rating" className="bg-gray-800">
-                  Highest Rated
-                </option>
-                <option value="deliveryTime" className="bg-gray-800">
-                  Fastest Delivery
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div className="text-sm text-gray-400">
-            {filteredStores.length} stores found
-          </div>
-        </div>
-
-        {/* Store Cards */}
-        <div className="space-y-4">
-          {filteredStores.map((store) => (
-            <div
-              key={store.id}
-              className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300"
-            >
-              <div className="flex flex-col lg:flex-row items-start gap-6">
-                {/* Store Info */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-4">
+              {/* Product Info Card */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-20 h-20 bg-white/20 rounded-xl p-3 flex-shrink-0">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <h2 className="text-lg font-bold text-white mb-1">
+                      {product.name}
+                    </h2>
+                    <p className="text-gray-300 text-sm mb-2">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center justify-center gap-1 mb-3">
+                      {renderStars(product.rating)}
+                      <span className="text-sm text-gray-400 ml-1">
+                        ({product.rating})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 w-full text-center">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-bold text-white">
-                          {store.name}
-                        </h3>
-                        {store.verified && (
-                          <CheckCircle size={16} className="text-blue-400" />
+                      <span className="text-xs text-gray-400">Category</span>
+                      <p className="text-sm text-white font-medium">
+                        {product.category}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">Dosage</span>
+                      <p className="text-sm text-white font-medium">
+                        {product.dosage}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">Pack Size</span>
+                      <p className="text-sm text-white font-medium">
+                        {product.packSize}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-400">
+                        Manufacturer
+                      </span>
+                      <p className="text-sm text-white font-medium">
+                        {product.manufacturer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters and Sort */}
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4">
+                  Filter & Sort
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-2">
+                      Filter by
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Filter size={16} className="text-gray-400" />
+                      <select
+                        value={filterBy}
+                        onChange={(e) => setFilterBy(e.target.value)}
+                        className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="all" className="bg-gray-800">
+                          All Stores
+                        </option>
+                        <option value="inStock" className="bg-gray-800">
+                          In Stock Only
+                        </option>
+                        <option value="verified" className="bg-gray-800">
+                          Verified Only
+                        </option>
+                        <option value="fastDelivery" className="bg-gray-800">
+                          Fast Delivery (≤30 min)
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-2">
+                      Sort by
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <SortAsc size={16} className="text-gray-400" />
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="distance" className="bg-gray-800">
+                          Distance
+                        </option>
+                        <option value="price" className="bg-gray-800">
+                          Price: Low to High
+                        </option>
+                        <option value="rating" className="bg-gray-800">
+                          Highest Rated
+                        </option>
+                        <option value="deliveryTime" className="bg-gray-800">
+                          Fastest Delivery
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Pharmacy List (Scrollable) */}
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+              Available Stores
+            </h2>
+            <div className="h-[calc(120vh-200px)] overflow-y-auto pl-4 space-y-4 scrollbar-hide">
+              {filteredStores.map((store) => (
+                <div
+                  key={store.id}
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300"
+                >
+                  <div className="flex flex-col lg:flex-row items-start gap-6">
+                    {/* Store Info */}
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-bold text-white">
+                              {store.name}
+                            </h3>
+                            {store.verified && (
+                              <CheckCircle
+                                size={16}
+                                className="text-blue-400"
+                              />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-300">
+                            <div className="flex items-center gap-1">
+                              <MapPin size={14} />
+                              {store.address}
+                            </div>
+                            <span>•</span>
+                            <span>{store.distance}</span>
+                          </div>
+                        </div>
+                        <button className="p-2 text-gray-400 hover:text-white transition-colors">
+                          <Heart size={16} />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {renderStars(store.rating)}
+                          </div>
+                          <span className="text-sm text-gray-400">
+                            ({store.reviews})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Clock size={14} />
+                          {store.openTime}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Phone size={14} />
+                          {store.phone}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Truck size={14} />
+                          {store.deliveryTime}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {store.features.map((feature, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full"
+                          >
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Price and Order Section */}
+                    <div className="flex flex-col items-end gap-4 min-w-[200px]">
+                      <div className="text-right">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg font-bold text-white">
+                            Rs.{store.price}
+                          </span>
+                          {store.originalPrice > store.price && (
+                            <>
+                              <span className="text-sm text-gray-400 line-through">
+                                Rs.{store.originalPrice}
+                              </span>
+                              <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                                {store.discount}% OFF
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          + Rs.{store.deliveryFee} delivery
+                        </div>
+                      </div>
+
+                      <div className="text-right text-sm">
+                        {store.inStock ? (
+                          <div className="text-green-400 flex items-center gap-1">
+                            <Package size={14} />
+                            {store.stockCount} in stock
+                          </div>
+                        ) : (
+                          <div className="text-red-400 flex items-center gap-1">
+                            <Package size={14} />
+                            Out of stock
+                          </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-300">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {store.address}
-                        </div>
-                        <span>•</span>
-                        <span>{store.distance}</span>
-                      </div>
-                    </div>
-                    <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                      <Heart size={16} />
-                    </button>
-                  </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        {renderStars(store.rating)}
-                      </div>
-                      <span className="text-sm text-gray-400">
-                        ({store.reviews})
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                      <Clock size={14} />
-                      {store.openTime}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                      <Phone size={14} />
-                      {store.phone}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
-                      <Truck size={14} />
-                      {store.deliveryTime}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {store.features.map((feature, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full"
+                      <button
+                        onClick={() => handleOrderClick(store)}
+                        disabled={!store.inStock}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                          store.inStock
+                            ? "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-lg hover:shadow-xl"
+                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        }`}
                       >
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price and Order Section */}
-                <div className="flex flex-col items-end gap-4 min-w-[200px]">
-                  <div className="text-right">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg font-bold text-white">
-                        Rs.{store.price}
-                      </span>
-                      {store.originalPrice > store.price && (
-                        <>
-                          <span className="text-sm text-gray-400 line-through">
-                            Rs.{store.originalPrice}
-                          </span>
-                          <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
-                            {store.discount}% OFF
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      + Rs.{store.deliveryFee} delivery
+                        <ShoppingCart size={16} />
+                        {store.inStock ? "Order Now" : "Out of Stock"}
+                      </button>
                     </div>
                   </div>
-
-                  <div className="text-right text-sm">
-                    {store.inStock ? (
-                      <div className="text-green-400 flex items-center gap-1">
-                        <Package size={14} />
-                        {store.stockCount} in stock
-                      </div>
-                    ) : (
-                      <div className="text-red-400 flex items-center gap-1">
-                        <Package size={14} />
-                        Out of stock
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handleOrderClick(store)}
-                    disabled={!store.inStock}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                      store.inStock
-                        ? "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-lg hover:shadow-xl"
-                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    }`}
-                  >
-                    <ShoppingCart size={16} />
-                    {store.inStock ? "Order Now" : "Out of Stock"}
-                  </button>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Order Modal */}
         {showOrderModal && selectedStore && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-md w-full">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mt-12 max-w-md w-full">
               <h3 className="text-xl font-bold text-white mb-4">Place Order</h3>
 
               <div className="space-y-4 mb-6">
