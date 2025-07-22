@@ -155,7 +155,7 @@ const PharmacyForm = ({ onBack, onSubmit }) => {
         operatingHours: formData.operatingHours,
         services: formData.services,
         deliveryAvailable: formData.deliveryAvailable,
-        deliveryRadius: formData.deliveryRadius ? parseInt(formData.deliveryRadius) : null,
+        deliveryRadius: formData.deliveryRadius ? parseInt(formData.deliveryRadius, 10) : null,
         
         // Admin details
         adminFirstName: formData.adminFirstName,

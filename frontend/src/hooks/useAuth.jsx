@@ -31,11 +31,8 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
     } catch (error) {
       console.error("Auth check failed:", error);
-      if (
-        error.message.includes("Invalid credentials") ||
-        error.message.includes("401") ||
-        error.message.includes("Unauthorized")
-      ) {
+      const errorCode = error.code || mapErrorMessageToCode(error.message);
+      if (errorCode === "INVALID_CREDENTIALS" || errorCode === "UNAUTHORIZED") {
         logout();
       }
     } finally {
