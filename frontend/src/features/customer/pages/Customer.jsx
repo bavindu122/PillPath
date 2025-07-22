@@ -7,6 +7,7 @@ import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
 import FamilyProfiles from "./FamilyProfiles";
 import MedicineInfo from "./MedicineInfo";
+import ChatCustomer from "./ChatCustomer";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
@@ -34,11 +35,11 @@ const Customer = () => {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    console.log('User not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
+  // // Redirect to login if not authenticated
+  // if (!isAuthenticated) {
+  //   console.log('User not authenticated, redirecting to login');
+  //   return <Navigate to="/login" replace />;
+  // }
 
   return (
     <div className="flex min-h-screen relative overflow-hidden">
@@ -68,6 +69,7 @@ const Customer = () => {
           <Route path="/orders" element={<PastOrders />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
           <Route path="/medicine-info" element={<MedicineInfo />} />
+          <Route path="/chats" element={<ChatCustomer />} />
           <Route path="/order-preview/:prescriptionId" element={<OrderPreview />} />
           <Route
             path="/order-preview/:prescriptionId"

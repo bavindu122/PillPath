@@ -22,6 +22,7 @@ export const CUSTOMER_ROUTES = {
   FAMILY_PROFILES: '/customer/family-profiles',
   MEDICAL_RECORDS: '/customer/medical-records',
   ORDER_PREVIEW: '/customer/order-preview',
+  CHATS: '/customer/chats',
 };
 
 // Pharmacy Admin Routes
