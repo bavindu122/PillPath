@@ -71,8 +71,8 @@ const OrderHistoryList = () => {
       },
       { 
         title: "Total Revenue", 
-        value: `$${totalRevenue.toFixed(0)}`, 
-        subtitle: `Average: $${averageOrderValue.toFixed(2)}`, 
+        value: `Rs.${totalRevenue.toFixed(0)}/=`, 
+        subtitle: `Average: Rs.${averageOrderValue.toFixed(2)}`, 
         color: "green" 
       },
       { 
@@ -96,8 +96,7 @@ const OrderHistoryList = () => {
       subtitle="View and manage completed orders"
       isLoading={isLoading}
       loadingMessage="Loading order history..."
-      showBackButton={true}
-      onBack={() => navigate('/pharmacist/dashboard')}
+      showBackButton={false}
       headerActions={
         <button
           onClick={handleExport}

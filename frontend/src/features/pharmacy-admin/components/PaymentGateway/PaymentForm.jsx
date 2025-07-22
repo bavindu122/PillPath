@@ -265,7 +265,8 @@ const PaymentForm = ({ processPayment, isProcessing, balance, savedCards, onSave
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <DollarSign className="h-5 w-5 text-gray-400" />
+                {/* <DollarSign className="h-5 w-5 text-gray-400" /> */}
+                <span className="h-5 w-5 text-gray-400">Rs.</span> 
               </div>
               <input
                 type="text"
@@ -284,7 +285,7 @@ const PaymentForm = ({ processPayment, isProcessing, balance, savedCards, onSave
                 {validationErrors.amount}
               </p>
             )}
-            <p className="mt-1 text-sm text-gray-500">Available balance: ${balance?.toFixed(2) || '0.00'}</p>
+            <p className="mt-1 text-sm text-gray-500">Outstanding Bill: Rs.{balance?.toFixed(2) || '0.00'}</p>
           </div>
         </div>
 
@@ -492,7 +493,7 @@ const PaymentForm = ({ processPayment, isProcessing, balance, savedCards, onSave
               ) : (
                 <div className="flex items-center justify-center">
                   <Lock className="h-5 w-5 mr-2" />
-                  Complete Payment ${paymentDetails.amount || '0.00'}
+                  Complete Payment Rs.{paymentDetails.amount || '0.00'}
                 </div>
               )}
             </button>

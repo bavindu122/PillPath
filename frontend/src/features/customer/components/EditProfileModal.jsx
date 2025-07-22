@@ -213,7 +213,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
     return (
       <div className="mb-4">
-        <label className="block text-white/90 text-sm font-medium mb-2">
+        <label className="block text-white/80 text-sm mb-2">
           {label}
         </label>
         <div className="relative flex items-center">
@@ -293,7 +293,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/60 p-4"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
@@ -310,9 +310,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2 rounded-xl">
-              <Pencil size={24} className="text-blue-300" />
-            </div>
+            <Pencil className="h-6 w-6" />
             Edit Profile
           </h2>
           <button
@@ -320,7 +318,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 group"
             type="button"
           >
-            <X size={24} className="text-white/70 group-hover:text-white" />
+            <X className="h-6 w-6" />
           </button>
         </div>
 

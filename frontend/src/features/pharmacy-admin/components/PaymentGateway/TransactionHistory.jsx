@@ -162,11 +162,11 @@ const TransactionHistory = ({ transactions, isLoading }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
                     <span className={transaction.type === 'credit' ? 'text-red-600' : 'text-green-600'}>
-                      {transaction.type === 'credit' ? '-' : '+'}${transaction.amount.toFixed(2)}
+                      {transaction.type === 'credit' ? '-' : '+'}Rs.{transaction.amount.toFixed(2)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
-                    ${transaction.balance.toFixed(2)}
+                    Rs.{transaction.balance.toFixed(2)}
                   </td>
                 </tr>
               ))}

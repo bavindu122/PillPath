@@ -25,7 +25,7 @@ const ReviewPrescriptions = () => {
     // Mock data - replace with actual API call
     setTimeout(() => {
       setPrescription({
-        id: prescriptionId || 1,
+        id: "RX-250620-02",
         patientName: "Mr. McCrae",
         doctorName: "B.J. Wilks (Chemist)",
         dateUploaded: "17.12.25",

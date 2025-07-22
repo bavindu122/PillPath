@@ -6,21 +6,21 @@ export const orderService = {
     
     return [
       {
-        id: 'ORD-2024-001',
+        id: 'RX-250710-01',
         patient: {
           name: 'Sarah Johnson',
           email: 'sarah.johnson@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 123-4567'
+          phone: '+94 77 123 4567'
         },
         type: 'Prescription',
         items: 3,
         itemDetails: [
-          { name: 'Amoxicillin 500mg', quantity: 21, price: 15.99 },
-          { name: 'Ibuprofen 200mg', quantity: 30, price: 8.50 },
-          { name: 'Vitamin D3 1000IU', quantity: 60, price: 12.99 }
+          { name: 'Amoxicillin 500mg', quantity: 21, price: 1599.00 },
+          { name: 'Ibuprofen 200mg', quantity: 30, price: 850.00 },
+          { name: 'Vitamin D3 1000IU', quantity: 60, price: 1299.00 }
         ],
-        total: 127.50,
+        total: 1750.00,
         date: '2025-07-10',
         time: '10:30 AM',
         paymentMethod: 'Cash',
@@ -28,22 +28,22 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'ORD-2024-002',
+        id: 'RX-250627-02',
         patient: {
           name: 'Michael Chen',
           email: 'm.chen@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 234-5678'
+          phone: '+94 77 234 5678'
         },
         type: 'Prescription',
         items: 4,
         itemDetails: [
-          { name: 'Metformin 500mg', quantity: 90, price: 35.00 },
-          { name: 'Lisinopril 10mg', quantity: 30, price: 18.80 },
-          { name: 'Atorvastatin 20mg', quantity: 30, price: 25.99 },
-          { name: 'Aspirin 81mg', quantity: 90, price: 9.46 }
+          { name: 'Metformin 500mg', quantity: 90, price: 3500.00 },
+          { name: 'Lisinopril 10mg', quantity: 30, price: 1880.00 },
+          { name: 'Atorvastatin 20mg', quantity: 30, price: 2599.00 },
+          { name: 'Aspirin 81mg', quantity: 90, price: 946.00 }
         ],
-        total: 89.25,
+        total: 895.00,
         date: '2025-06-27',
         time: '02:15 PM',
         paymentMethod: 'Credit Card',
@@ -51,20 +51,20 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'ORD-2024-003',
+        id: 'RX-241226-03',
         patient: {
           name: 'Emma Davis',
           email: 'emma.davis@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 345-6789'
+          phone: '+94 77 345 6789'
         },
         type: 'OTC',
         items: 2,
         itemDetails: [
-          { name: 'Sertraline 50mg', quantity: 30, price: 45.99 },
-          { name: 'Alprazolam 0.5mg', quantity: 15, price: 25.00 }
+          { name: 'Sertraline 50mg', quantity: 30, price: 4599.00 },
+          { name: 'Alprazolam 0.5mg', quantity: 15, price: 2500.00 }
         ],
-        total: 245.80,
+        total: 2450.00,
         date: '2024-12-26',
         time: '11:45 AM',
         paymentMethod: 'Cash',
@@ -72,21 +72,21 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'ORD-2024-004',
+        id: 'RX-241225-04',
         patient: {
           name: 'Robert Wilson',
           email: 'r.wilson@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 456-7890'
+          phone: '+94 77 456 7890'
         },
         type: 'Prescription',
         items: 3,
         itemDetails: [
-          { name: 'Albuterol Inhaler', quantity: 2, price: 65.00 },
-          { name: 'Fluticasone Nasal Spray', quantity: 1, price: 28.99 },
-          { name: 'Montelukast 10mg', quantity: 30, price: 42.50 }
+          { name: 'Albuterol Inhaler', quantity: 2, price: 6500.00 },
+          { name: 'Fluticasone Nasal Spray', quantity: 1, price: 2899.00 },
+          { name: 'Montelukast 10mg', quantity: 30, price: 4250.00 }
         ],
-        total: 156.30,
+        total: 1563.00,
         date: '2024-12-25',
         time: '09:20 AM',
         paymentMethod: 'Credit Card',
@@ -94,19 +94,19 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'ORD-2024-005',
+        id: 'RX-241224-05',
         patient: {
           name: 'Lisa Thompson',
           email: 'l.thompson@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 567-8901'
+          phone: '+94 77 567 8901'
         },
         type: 'Prescription',
         items: 1,
         itemDetails: [
-          { name: 'Insulin Glargine (Lantus)', quantity: 3, price: 203.45 }
+          { name: 'Insulin Glargine (Lantus)', quantity: 3, price: 20345.00 }
         ],
-        total: 203.45,
+        total: 2034.00,
         date: '2024-12-24',
         time: '03:30 PM',
         paymentMethod: 'Cash',
@@ -114,20 +114,20 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'ORD-2024-006',
+        id: 'RX-241223-06',
         patient: {
           name: 'David Martinez',
           email: 'd.martinez@email.com',
           avatar: '/api/placeholder/40/40',
-          phone: '+1 (555) 678-9012'
+          phone: '+94 77 678 9012'
         },
         type: 'Prescription',
         items: 2,
         itemDetails: [
-          { name: 'Warfarin 5mg', quantity: 30, price: 28.99 },
-          { name: 'Furosemide 40mg', quantity: 30, price: 15.99 }
+          { name: 'Warfarin 5mg', quantity: 30, price: 2899.00 },
+          { name: 'Furosemide 40mg', quantity: 30, price: 1599.00 }
         ],
-        total: 285.00,
+        total: 2850.00,
         date: '2024-12-23',
         time: '01:00 PM',
         paymentMethod: 'Credit Card',

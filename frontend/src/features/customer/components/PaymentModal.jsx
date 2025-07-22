@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { X, DollarSign, Percent, CreditCard } from "lucide-react";
+import { X, DollarSign, Percent, CreditCard, Lock } from "lucide-react";
 
 const PaymentModal = ({
   isOpen,
@@ -12,6 +12,13 @@ const PaymentModal = ({
   onConfirmPayment
 }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState('');
+  const [showNoMedWarning, setShowNoMedWarning] = React.useState(false);
+  const [cardDetails, setCardDetails] = React.useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: ''
+  });
 
   const totalPrice = medications.reduce((sum, med) => sum + (med.selected ? med.price : 0), 0);
   const discountAmount = totalPrice * (discountPercentage / 100);
@@ -21,23 +28,81 @@ const PaymentModal = ({
     setSelectedPaymentMethod(method);
   };
 
-    const [showNoMedWarning, setShowNoMedWarning] = React.useState(false);
+  const handleCardInputChange = (field, value) => {
+    setCardDetails(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const formatCardNumber = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = matches && matches[0] || '';
+    const parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    if (parts.length) {
+      return parts.join(' ');
+    } else {
+      return v;
+    }
+  };
+
+  const formatExpiryDate = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    if (v.length >= 2) {
+      return v.substring(0, 2) + '/' + v.substring(2, 4);
+    }
+    return v;
+  };
 
   const handleConfirmPayment = () => {
     if (totalPrice === 0) {
       setShowNoMedWarning(true);
       return;
     }
+    
+    if (selectedPaymentMethod === 'card') {
+      // Validate card details
+      const { cardNumber, expiryDate, cvv, cardholderName } = cardDetails;
+      if (!cardNumber || !expiryDate || !cvv || !cardholderName) {
+        alert('Please fill in all card details');
+        return;
+      }
+      if (cardNumber.replace(/\s/g, '').length < 16) {
+        alert('Please enter a valid card number');
+        return;
+      }
+      if (cvv.length < 3) {
+        alert('Please enter a valid CVV');
+        return;
+      }
+    }
+    
     if (selectedPaymentMethod) {
-      onConfirmPayment(selectedPaymentMethod, finalTotal);
+      onConfirmPayment(selectedPaymentMethod, finalTotal, selectedPaymentMethod === 'card' ? cardDetails : null);
       setSelectedPaymentMethod('');
       setShowNoMedWarning(false);
+      setCardDetails({
+        cardNumber: '',
+        expiryDate: '',
+        cvv: '',
+        cardholderName: ''
+      });
     }
   };
 
   const handleClose = () => {
     setSelectedPaymentMethod('');
     setShowNoMedWarning(false);
+    setCardDetails({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: '',
+      cardholderName: ''
+    });
     onClose();
   };
   
@@ -173,6 +238,74 @@ const PaymentModal = ({
                   <span className="font-medium">Card Payment</span>
                 </div>
               </div>
+
+              {/* Card Payment Simulator */}
+              {selectedPaymentMethod === 'card' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4 space-y-4"
+                >
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Lock className="h-4 w-4 text-green-400" />
+                    <span className="text-green-400 text-sm font-medium">Secure Payment</span>
+                  </div>
+
+                  {/* Card Number */}
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2">Card Number</label>
+                    <input
+                      type="text"
+                      value={cardDetails.cardNumber}
+                      onChange={(e) => handleCardInputChange('cardNumber', formatCardNumber(e.target.value))}
+                      placeholder="1234 5678 9012 3456"
+                      maxLength="19"
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Expiry Date */}
+                    <div>
+                      <label className="block text-white/70 text-sm mb-2">Expiry Date</label>
+                      <input
+                        type="text"
+                        value={cardDetails.expiryDate}
+                        onChange={(e) => handleCardInputChange('expiryDate', formatExpiryDate(e.target.value))}
+                        placeholder="MM/YY"
+                        maxLength="5"
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* CVV */}
+                    <div>
+                      <label className="block text-white/70 text-sm mb-2">CVV</label>
+                      <input
+                        type="text"
+                        value={cardDetails.cvv}
+                        onChange={(e) => handleCardInputChange('cvv', e.target.value.replace(/\D/g, '').substring(0, 3))}
+                        placeholder="123"
+                        maxLength="3"
+                        className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Cardholder Name */}
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2">Cardholder Name</label>
+                    <input
+                      type="text"
+                      value={cardDetails.cardholderName}
+                      onChange={(e) => handleCardInputChange('cardholderName', e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+                    />
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
 

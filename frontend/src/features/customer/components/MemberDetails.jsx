@@ -14,17 +14,35 @@ import {
   FileText,
   Activity,
   Edit,
-  Crown
+  Crown,
+  Trash2
 } from "lucide-react";
 import EditProfileModal from "../components/EditProfileModal";
 
 
-const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
+const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDeleteMember && selectedProfile) {
+      onDeleteMember(selectedProfile.id);
+      setShowDeleteConfirmation(false);
+      onClose();
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmation(false);
   };
 
   const handleMainModalClick = (e) => {
@@ -71,7 +89,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header with Profile Hero Section */}
-          <div className="relative bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-8 border-b border-white/10 flex-shrink-0">
+          <div className="relative bg-gradient-to-r from-blue-600/30 to-purple-600/30 p-8 border-b border-white/10 flex-shrink-0 rounded-t-3xl">
             <div className="absolute top-4 right-4 flex gap-2">
              
               <motion.button
@@ -257,13 +275,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
                           <div>
                             <h4 className="text-xl font-semibold text-white">{prescription.name}</h4>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            prescription.refillsRemaining > 0 
-                              ? 'bg-green-500/20 text-green-400' 
-                              : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {prescription.refillsRemaining > 0 ? 'Active' : 'Refill Needed'}
-                          </span>
+                          
                         </div>
                         
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -430,26 +442,77 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
           </div>
 
           {/* Modal Footer */}
-          <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0">
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+          <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0 rounded-b-3xl">
+            {!showDeleteConfirmation ? (
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Upload size={18} />
+                  Upload New Prescription
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Edit size={18} />
+                  Edit Profile
+                </motion.button>
+                {selectedProfile?.relation !== "Me" && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleDeleteClick}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} />
+                    Delete
+                  </motion.button>
+                )}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
               >
-                <Upload size={18} />
-                Upload New Prescription
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsEditModalOpen(true)}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
-              >
-                <Edit size={18} />
-                Edit Profile
-              </motion.button>
-            </div>
+                <div className="text-center">
+                  <div className="flex justify-center mb-3">
+                    <div className="bg-red-500/20 p-3 rounded-full">
+                      <Trash2 size={24} className="text-red-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Delete Family Member</h3>
+                  <p className="text-white/70 text-sm">
+                    Are you sure you want to delete <span className="font-medium text-white">{selectedProfile?.name}</span>? 
+                    This action cannot be undone and will remove all their prescription history.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCancelDelete}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-medium transition-all duration-300 border border-white/20"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleConfirmDelete}
+                    className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} />
+                    Delete Permanently
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </motion.div>

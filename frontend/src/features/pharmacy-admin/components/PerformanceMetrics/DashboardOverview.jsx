@@ -45,7 +45,7 @@ const DashboardOverview = ({ data }) => {
     { type: 'Revenue', count: data.revenue.value, change: data.revenue.change },
     { type: 'Active Staff', count: data.activeStaff.value, new: data.activeStaff.new },
     { type: 'Inventory Items', count: data.inventoryItems.value, lowStock: data.inventoryItems.lowStock },
-    { type: 'Digital Wallet', count: data.digitalWallet.value, description: 'Current Balance' }, // New Digital Wallet entry
+    { type: 'Digital Wallet', count: data.digitalWallet.value, description: 'Outstanding Bill' }, // New Digital Wallet entry
   ];
 
   return (
@@ -70,7 +70,7 @@ const DashboardOverview = ({ data }) => {
                 {stat.type}
               </p>
               <p className="text-4xl font-extrabold text-gray-900 mb-1 group-hover:scale-105 transition-transform duration-200 text-center">
-                {stat.type === 'Digital Wallet' ? `$${stat.count}` : stat.count}
+                {stat.type === 'Digital Wallet' ? `Rs.${stat.count}` : stat.count}
               </p>
               {/* Conditional display for change/new/low stock/description information */}
               {stat.type === 'Total Orders' || stat.type === 'Revenue' ? (

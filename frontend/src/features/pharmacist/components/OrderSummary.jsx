@@ -113,7 +113,7 @@ const OrderSummary = ({ orderData, onReorder, onPrint, onExportPDF }) => {
                 
                 <div className="text-right">
                   <span className="text-lg font-semibold text-gray-900">
-                    ${item.totalPrice.toFixed(2)}
+                    Rs.{item.totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -138,17 +138,17 @@ const OrderSummary = ({ orderData, onReorder, onPrint, onExportPDF }) => {
         <div className="space-y-3 pt-4 border-t border-gray-200">
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">Subtotal:</span>
-            <span className="font-medium text-gray-800">${calculateSubtotal().toFixed(2)}</span>
+            <span className="font-medium text-gray-800">Rs.{calculateSubtotal().toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">Tax (8%):</span>
-            <span className="font-medium text-gray-800">${tax.toFixed(2)}</span>
+            <span className="font-medium text-gray-800">Rs.{tax.toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between items-center text-lg font-semibold pt-2 border-t border-gray-200">
             <span className="text-gray-800">Total Amount:</span>
-            <span className="text-blue-600">${total.toFixed(2)}</span>
+            <span className="text-blue-600">RS.{total.toFixed(2)}</span>
           </div>
         </div>
 

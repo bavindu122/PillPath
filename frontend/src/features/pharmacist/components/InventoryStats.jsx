@@ -1,17 +1,38 @@
 import React from 'react';
-import { ShoppingCart, Banknote, CreditCard, DollarSign, FileText } from 'lucide-react';
+import { Package, AlertTriangle, TrendingUp, Eye } from 'lucide-react';
 import '../pages/index-pharmacist.css';
 
-const OrderStatsCards = ({ stats }) => {
-  // Icon mapping based on common order stats
-  const getIcon = (title) => {
-    const titleLower = title.toLowerCase();
-    if (titleLower.includes('order')) return ShoppingCart;
-    if (titleLower.includes('revenue') || titleLower.includes('$')) return DollarSign;
-    if (titleLower.includes('cash')) return Banknote;        // or Banknote
-    if (titleLower.includes('card')) return CreditCard;
-    return FileText; // default icon
-  };
+const InventoryStats = ({ totalProducts, lowStockCount, filteredCount }) => {
+  const stats = [
+    {
+      title: "Total Products",
+      value: totalProducts.toString(),
+      subtitle: "In inventory",
+      icon: Package,
+      color: "blue"
+    },
+    {
+      title: "Low Stock Items",
+      value: lowStockCount.toString(),
+      subtitle: "Need attention",
+      icon: AlertTriangle,
+      color: lowStockCount > 0 ? "orange" : "green"
+    },
+    {
+      title: "Filtered Results",
+      value: filteredCount.toString(),
+      subtitle: "Currently showing",
+      icon: Eye,
+      color: "purple"
+    },
+    {
+      title: "In Stock Value",
+      value: "Rs.12,450/=",
+      subtitle: "Total inventory value",
+      icon: TrendingUp,
+      color: "green"
+    }
+  ];
 
   const getCardClass = (color) => {
     const classes = {
@@ -36,7 +57,7 @@ const OrderStatsCards = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => {
-        const Icon = getIcon(stat.title);
+        const Icon = stat.icon;
         return (
           <div
             key={index}
@@ -70,4 +91,4 @@ const OrderStatsCards = ({ stats }) => {
   );
 };
 
-export default OrderStatsCards;
+export default InventoryStats;
