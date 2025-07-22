@@ -35,11 +35,11 @@ const Customer = () => {
     );
   }
 
-  // // Redirect to login if not authenticated
-  // if (!isAuthenticated) {
-  //   console.log('User not authenticated, redirecting to login');
-  //   return <Navigate to="/login" replace />;
-  // }
+  // Redirect to login if not authenticated and bypass is not enabled
+  if (!isAuthenticated && process.env.REACT_APP_BYPASS_AUTH !== 'true') {
+    console.log('User not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="flex min-h-screen relative overflow-hidden">
