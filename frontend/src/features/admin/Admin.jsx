@@ -11,6 +11,10 @@ import AdminLogin from './pages/AdminLogin';
 import AdminRoute from '../../components/ProtectedRoute/AdminRoute';
 import { ADMIN_ROUTES } from '../../constants/routes'; // ✅ Add this
 
+import Sales from './pages/Sales';
+import Analytics from './pages/Analytics';
+import Setting from './pages/Setting';
+import Announcements from './pages/Announcements';
 const Admin = () => {
   return (
     <Routes>
@@ -28,6 +32,10 @@ const Admin = () => {
               <Route path="pharmacies" element={<Pharmacies />} />
               <Route path="prescriptions" element={<Prescription />} />
               <Route path="wallet" element={<WalletAndIncome />} />
+               <Route path="sales" element={<Sales />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="settings" element={<Setting />} />
+        <Route path="announcements" element={<Announcements />} />
             </Routes>
           </AdminLayout>
         </AdminRoute>
