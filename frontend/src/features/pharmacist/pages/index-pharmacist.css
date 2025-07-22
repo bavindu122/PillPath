@@ -1,0 +1,217 @@
+:root {
+  --pharma-blue: #2D5DA0;
+  --pharma-blue-hover: #1D4A80;
+  --pharma-green: #4CAF50;
+  --pharma-green-hover: #3D8C40;
+  --pharma-orange: #FFA726;
+  --pharma-red: #FF5252;
+  --pharma-purple: #8E44AD;
+  --pharma-bg-light: #F8FBFF;
+  --pharma-bg-dark: #1e293b;
+  --pharma-card-bg: #ffffffcc;
+  --pharma-card-bg-dark: #23272fbb;
+  --pharma-text-dark: #1A2530;
+  --pharma-text-light: #fff;
+  --pharma-text-muted: #94a3b8;
+  --pharma-border: #e0e7ef;
+  --pharma-border-dark: #374151;
+  --pharma-yellow: #FFC107;
+  --pharma-gray-50: #f9fafb;
+  --pharma-gray-100: #f3f4f6;
+  --pharma-gray-200: #e5e7eb;
+  --pharma-gray-300: #d1d5db;
+  --pharma-gray-400: #9ca3af;
+  --pharma-gray-500: #6b7280;
+  --pharma-gray-600: #4b5563;
+  --pharma-gray-700: #374151;
+  --pharma-gray-800: #1f2937;
+  --pharma-gray-900: #111827;
+  
+  /* Additional colors from existing components */
+  --pharma-blue-50: #eff6ff;
+  --pharma-blue-100: #dbeafe;
+  --pharma-blue-200: #bfdbfe;
+  --pharma-blue-600: #2563eb;
+  --pharma-blue-700: #1d4ed8;
+  --pharma-blue-800: #1e40af;
+  --pharma-green-500: #22c55e;
+  --pharma-green-100: #dcfce7;
+  --pharma-green-50: #f0fdf4;
+  --pharma-red-50: #fef2f2;
+  --pharma-red-100: #fee2e2;
+  --pharma-red-200: #fecaca;
+  --pharma-red-400: #f87171;
+  --pharma-red-500: #ef4444;
+  --pharma-red-800: #991b1b;
+  --pharma-orange-50: #fff7ed;
+  --pharma-orange-100: #ffedd5;
+  --pharma-orange-200: #fed7aa;
+  --pharma-orange-500: #f97316;
+  --pharma-orange-600: #ea580c;
+  --pharma-orange-800: #9a3412;
+  --pharma-yellow-50: #fefce8;
+  --pharma-yellow-100: #fef3c7;
+  --pharma-yellow-200: #fde68a;
+  --pharma-yellow-800: #92400e;
+  --pharma-purple-50: #f3e8ff;
+  --pharma-purple-100: #e9d5ff;
+  --pharma-purple-200: #ddd6fe;
+  --pharma-purple-600: #9333ea;
+  --pharma-purple-800: #6b21a8;
+  --pharma-green-200: #bbf7d0;
+  --pharma-green-600: #16a34a;
+}
+
+/* Utility classes */
+.pharma-bg-primary { background-color: var(--pharma-blue); }
+.pharma-bg-primary-hover { background-color: var(--pharma-blue-hover); }
+.pharma-bg-success { background-color: var(--pharma-green); }
+.pharma-bg-success-hover { background-color: var(--pharma-green-hover); }
+.pharma-bg-warning { background-color: var(--pharma-orange); }
+.pharma-bg-danger { background-color: var(--pharma-red); }
+.pharma-bg-info { background-color: var(--pharma-purple); }
+.pharma-bg-card { background-color: var(--pharma-card-bg); }
+.pharma-bg-light { background-color: var(--pharma-bg-light); }
+.pharma-bg-dark { background-color: var(--pharma-bg-dark); }
+.pharma-bg-yellow { background-color: var(--pharma-yellow); }
+
+/* Gray backgrounds */
+.pharma-bg-gray-50 { background-color: var(--pharma-gray-50); }
+.pharma-bg-gray-100 { background-color: var(--pharma-gray-100); }
+.pharma-bg-gray-200 { background-color: var(--pharma-gray-200); }
+.pharma-bg-gray-300 { background-color: var(--pharma-gray-300); }
+
+/* Text colors */
+.pharma-text-primary { color: var(--pharma-blue); }
+.pharma-text-success { color: var(--pharma-green); }
+.pharma-text-warning { color: var(--pharma-orange); }
+.pharma-text-danger { color: var(--pharma-red); }
+.pharma-text-info { color: var(--pharma-purple); }
+.pharma-text-dark { color: var(--pharma-text-dark); }
+.pharma-text-light { color: var(--pharma-text-light); }
+.pharma-text-muted { color: var(--pharma-text-muted); }
+.pharma-text-yellow { color: var(--pharma-yellow); }
+
+/* Gray text colors */
+.pharma-text-gray-500 { color: var(--pharma-gray-500); }
+.pharma-text-gray-600 { color: var(--pharma-gray-600); }
+.pharma-text-gray-700 { color: var(--pharma-gray-700); }
+.pharma-text-gray-800 { color: var(--pharma-gray-800); }
+
+/* Border colors */
+.pharma-border { border-color: var(--pharma-border); }
+.pharma-border-dark { border-color: var(--pharma-border-dark); }
+.pharma-border-primary { border-color: var(--pharma-blue); }
+.pharma-border-success { border-color: var(--pharma-green); }
+.pharma-border-warning { border-color: var(--pharma-orange); }
+.pharma-border-danger { border-color: var(--pharma-red); }
+
+/* Priority color combinations */
+.pharma-priority-high { 
+  background-color: rgba(255, 82, 82, 0.1); 
+  color: var(--pharma-red); 
+  border-color: rgba(255, 82, 82, 0.3); 
+}
+.pharma-priority-medium { 
+  background-color: rgba(255, 167, 38, 0.1); 
+  color: var(--pharma-orange); 
+  border-color: rgba(255, 167, 38, 0.3); 
+}
+.pharma-priority-low { 
+  background-color: rgba(76, 175, 80, 0.1); 
+  color: var(--pharma-green); 
+  border-color: rgba(76, 175, 80, 0.3); 
+}
+
+/* Existing component styles using CSS variables */
+.priority-high {
+  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+  color: var(--pharma-red-800);
+  border-color: var(--pharma-red-200);
+}
+.priority-medium {
+  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+  color: var(--pharma-yellow-800);
+  border-color: var(--pharma-yellow-200);
+}
+.priority-low {
+  background: linear-gradient(to right, var(--pharma-blue-50), var(--pharma-blue-100));
+  color: var(--pharma-blue-800);
+  border-color: var(--pharma-blue-200);
+}
+.priority-default {
+  background: var(--pharma-gray-100);
+  color: var(--pharma-gray-800);
+  border-color: var(--pharma-gray-200);
+}
+
+/* Alert styles */
+.alert-critical {
+  border-left: 4px solid var(--pharma-red-500);
+  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+}
+.alert-critical:hover {
+  background: linear-gradient(to right, var(--pharma-red-100), var(--pharma-red-200));
+}
+.alert-low {
+  border-left: 4px solid var(--pharma-orange-500);
+  background: linear-gradient(to right, var(--pharma-orange-50), var(--pharma-orange-100));
+}
+.alert-low:hover {
+  background: linear-gradient(to right, var(--pharma-orange-100), var(--pharma-orange-200));
+}
+.alert-medium {
+  border-left: 4px solid var(--pharma-yellow);
+  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+}
+.alert-medium:hover {
+  background: linear-gradient(to right, var(--pharma-yellow-100), var(--pharma-yellow-200));
+}
+.alert-default {
+  border-left: 4px solid var(--pharma-gray-500);
+  background: linear-gradient(to right, var(--pharma-gray-50), var(--pharma-gray-100));
+}
+.alert-default:hover {
+  background: linear-gradient(to right, var(--pharma-gray-100), var(--pharma-gray-200));
+}
+
+/* Text colors for alerts */
+.text-critical { color: var(--pharma-red-800); }
+.text-low { color: var(--pharma-orange-800); }
+.text-medium { color: var(--pharma-yellow-800); }
+.text-default { color: var(--pharma-gray-800); }
+
+/* Stats card styles */
+.stats-card-blue {
+  border-color: var(--pharma-blue-200);
+  background: linear-gradient(to bottom right, var(--pharma-blue-50), var(--pharma-blue-100));
+}
+.stats-card-green {
+  border-color: var(--pharma-green-200);
+  background: linear-gradient(to bottom right, var(--pharma-green-50), var(--pharma-green-100));
+}
+.stats-card-orange {
+  border-color: var(--pharma-orange-200);
+  background: linear-gradient(to bottom right, var(--pharma-orange-50), var(--pharma-orange-100));
+}
+.stats-card-purple {
+  border-color: var(--pharma-purple-200);
+  background: linear-gradient(to bottom right, var(--pharma-purple-50), var(--pharma-purple-50));
+}
+
+.stats-icon-blue { color: var(--pharma-blue-600); }
+.stats-icon-green { color: var(--pharma-green-600); }
+.stats-icon-orange { color: var(--pharma-orange-600); }
+.stats-icon-purple { color: var(--pharma-purple-600); }
+
+/* Dark mode */
+body.dark-mode {
+  background: var(--pharma-bg-dark);
+  color: var(--pharma-text-light);
+}
+body.dark-mode .pharma-bg-card {
+  background-color: var(--pharma-card-bg-dark);
+}
+body.dark-mode .pharma-border {
+  border-color: var(--pharma-border-dark);
+}

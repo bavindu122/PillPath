@@ -4,198 +4,204 @@ import {
   Users, 
   Plus, 
   Calendar, 
-  Heart,
-  Search,
-  Crown
+  Search
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
 import MemberDetails from "../components/MemberDetails";
+import AddMember from "../components/AddMember";
+
+// Sample family member data - moved outside component to avoid reference issues
+const initialFamilyMembers = [
+  {
+    id: 0,
+    name: "Senuja Udugampola",
+    relation: "Me",
+    age: 42,
+    profilePicture: assets.profile_pic,
+    email: "senuja@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-07-19",
+    activePrescriptions: 3,
+    totalPrescriptions: 47,
+    allergies: ["None known"],
+    bloodType: "O+",
+    medicalConditions: ["High Blood Pressure"],
+    currentMedications: [
+      { 
+        name: "RX-250719-34", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-18",
+        prescriptionId: "RX-250719-34",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250719-35", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-15",
+        prescriptionId: "RX-250719-35",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "60 capsules"
+      },
+      { 
+        name: "RX-250719-36", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-17",
+        prescriptionId: "RX-250719-36",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "120 softgels"
+      }
+    ]
+  },
+  {
+    id: 1,
+    name: "Sanuthma Munasinghe",
+    relation: "Spouse",
+    age: 45,
+    profilePicture: assets.profile_pic,
+    email: "sanuthma@email.com",
+    phone: "+94 792674517",
+    lastPrescriptionDate: "2025-07-15",
+    activePrescriptions: 2,
+    totalPrescriptions: 24,
+    allergies: ["Penicillin", "Peanuts"],
+    bloodType: "A+",
+    medicalConditions: ["Hypertension", "Diabetes Type 2"],
+    currentMedications: [
+      { 
+        name: "RX-250710-05", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-10",
+        prescriptionId: "RX-250710-05",
+        prescribedBy: "Dr. Sarah Johnson",
+        quantity: "60 tablets"
+      },
+      { 
+        name: "RX-250712-01", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-12",
+        prescriptionId: "RX-250712-01",
+        prescribedBy: "Dr. Sarah Johnson",
+        quantity: "30 tablets"
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Bavindu Shamen",
+    relation: "Son",
+    age: 16,
+    profilePicture: assets.profile_pic,
+    email: "bavindu@email.com",
+    phone: "+94 795725816",
+    lastPrescriptionDate: "2025-07-10",
+    activePrescriptions: 1,
+    totalPrescriptions: 8,
+    allergies: ["Shellfish"],
+    bloodType: "O+",
+    medicalConditions: ["Asthma"],
+    currentMedications: [
+      { 
+        name: "RX-250524-36", 
+        frequency: "As needed", 
+        lastRefill: "2025-07-05",
+        prescriptionId: "RX-250524-36",
+        prescribedBy: "Dr. Michael Chen",
+        quantity: "1 inhaler"
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Nirmi Kawmada",
+    relation: "Daughter",
+    age: 12,
+    profilePicture: assets.profile_pic,
+    email: "nirmia@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-06-28",
+    activePrescriptions: 0,
+    totalPrescriptions: 3,
+    allergies: ["None known"],
+    bloodType: "A+",
+    medicalConditions: ["None"],
+    currentMedications: []
+  },
+  {
+    id: 4,
+    name: "Tanuri Mandini",
+    relation: "Mother",
+    age: 72,
+    profilePicture: assets.profile_pic,
+    email: "tanuri@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-07-18",
+    activePrescriptions: 4,
+    totalPrescriptions: 156,
+    allergies: ["Sulfa drugs", "Latex"],
+    bloodType: "B+",
+    medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
+    currentMedications: [
+      { 
+        name: "RX-250715-25", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-15",
+        prescriptionId: "RX-250715-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250716-25", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-16",
+        prescriptionId: "RX-250716-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "60 tablets"
+      },
+      { 
+        name: "RX-250710-25", 
+        frequency: "As needed", 
+        lastRefill: "2025-07-10",
+        prescriptionId: "RX-250710-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250714-01", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-14",
+        prescriptionId: "RX-250714-01",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "90 tablets"
+      }
+    ]
+  }
+];
 
 const FamilyProfiles = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [familyMembersList, setFamilyMembersList] = useState(initialFamilyMembers);
 
-  // Sample family member data
-  const familyMembers = [
-    {
-      id: 0,
-      name: "John Doe",
-      relation: "Me",
-      age: 42,
-      profilePicture: assets.profile_pic,
-      email: "john.doe@email.com",
-      phone: "+1 (555) 000-1234",
-      lastPrescriptionDate: "2025-07-19",
-      activePrescriptions: 3,
-      totalPrescriptions: 47,
-      allergies: ["None known"],
-      bloodType: "O+",
-      medicalConditions: ["High Blood Pressure"],
-      currentMedications: [
-        { 
-          name: "RX-250719-34", 
-          frequency: "Once daily", 
-          lastRefill: "2025-07-18",
-          prescriptionId: "RX-250719-34",
-          prescribedBy: "Dr. Jennifer Smith",
-          quantity: "30 tablets",
-          refillsRemaining: 2
-        },
-        { 
-          name: "RX-250719-35", 
-          frequency: "Once daily", 
-          lastRefill: "2025-07-15",
-          prescriptionId: "RX-250719-35",
-          prescribedBy: "Dr. Jennifer Smith",
-          quantity: "60 capsules",
-          refillsRemaining: 3
-        },
-        { 
-          name: "RX-250719-36", 
-          frequency: "Twice daily", 
-          lastRefill: "2025-07-17",
-          prescriptionId: "RX-250719-36",
-          prescribedBy: "Dr. Jennifer Smith",
-          quantity: "120 softgels",
-          refillsRemaining: 1
-        }
-      ]
-    },
-    {
-      id: 1,
-      name: "Maria Silva",
-      relation: "Spouse",
-      age: 45,
-      profilePicture: assets.profile_pic,
-      email: "maria.silva@email.com",
-      phone: "+1 (555) 123-4567",
-      lastPrescriptionDate: "2025-07-15",
-      activePrescriptions: 2,
-      totalPrescriptions: 24,
-      allergies: ["Penicillin", "Peanuts"],
-      bloodType: "A+",
-      medicalConditions: ["Hypertension", "Diabetes Type 2"],
-      currentMedications: [
-        { 
-          name: "Metformin 500mg", 
-          frequency: "Twice daily", 
-          lastRefill: "2025-07-10",
-          prescriptionId: "RX-004-2025",
-          prescribedBy: "Dr. Sarah Johnson",
-          quantity: "60 tablets",
-          refillsRemaining: 1
-        },
-        { 
-          name: "Lisinopril 10mg", 
-          frequency: "Once daily", 
-          lastRefill: "2025-07-12",
-          prescriptionId: "RX-005-2025",
-          prescribedBy: "Dr. Sarah Johnson",
-          quantity: "30 tablets",
-          refillsRemaining: 2
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Alex Silva",
-      relation: "Son",
-      age: 16,
-      profilePicture: assets.profile_pic,
-      email: "alex.silva@email.com",
-      phone: "+1 (555) 987-6543",
-      lastPrescriptionDate: "2025-07-10",
-      activePrescriptions: 1,
-      totalPrescriptions: 8,
-      allergies: ["Shellfish"],
-      bloodType: "O+",
-      medicalConditions: ["Asthma"],
-      currentMedications: [
-        { 
-          name: "Albuterol Inhaler", 
-          frequency: "As needed", 
-          lastRefill: "2025-07-05",
-          prescriptionId: "RX-006-2025",
-          prescribedBy: "Dr. Michael Chen",
-          quantity: "1 inhaler",
-          refillsRemaining: 0
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: "Isabella Silva",
-      relation: "Daughter",
-      age: 12,
-      profilePicture: assets.profile_pic,
-      email: "isabella.silva@email.com",
-      phone: "+1 (555) 456-7890",
-      lastPrescriptionDate: "2025-06-28",
-      activePrescriptions: 0,
-      totalPrescriptions: 3,
-      allergies: ["None known"],
-      bloodType: "A+",
-      medicalConditions: ["None"],
-      currentMedications: []
-    },
-    {
-      id: 4,
-      name: "Robert Silva Sr.",
-      relation: "Father",
-      age: 72,
-      profilePicture: assets.profile_pic,
-      email: "robert.silva@email.com",
-      phone: "+1 (555) 321-0987",
-      lastPrescriptionDate: "2025-07-18",
-      activePrescriptions: 4,
-      totalPrescriptions: 156,
-      allergies: ["Sulfa drugs", "Latex"],
-      bloodType: "B+",
-      medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
-      currentMedications: [
-        { 
-          name: "Atorvastatin 20mg", 
-          frequency: "Once daily", 
-          lastRefill: "2025-07-15",
-          prescriptionId: "RX-008-2025",
-          prescribedBy: "Dr. David Thompson",
-          quantity: "30 tablets",
-          refillsRemaining: 2
-        },
-        { 
-          name: "Carvedilol 6.25mg", 
-          frequency: "Twice daily", 
-          lastRefill: "2025-07-16",
-          prescriptionId: "RX-009-2025",
-          prescribedBy: "Dr. David Thompson",
-          quantity: "60 tablets",
-          refillsRemaining: 1
-        },
-        { 
-          name: "Ibuprofen 400mg", 
-          frequency: "As needed", 
-          lastRefill: "2025-07-10",
-          prescriptionId: "RX-010-2025",
-          prescribedBy: "Dr. David Thompson",
-          quantity: "30 tablets",
-          refillsRemaining: 3
-        },
-        { 
-          name: "Aspirin 81mg", 
-          frequency: "Once daily", 
-          lastRefill: "2025-07-14",
-          prescriptionId: "RX-011-2025",
-          prescribedBy: "Dr. David Thompson",
-          quantity: "90 tablets",
-          refillsRemaining: 0
-        }
-      ]
-    }
-  ];
+  const handleAddMember = (memberToAdd) => {
+    // Add ID to the new member
+    const newMember = {
+      ...memberToAdd,
+      id: familyMembersList.length
+    };
+    
+    // Add to family members list
+    setFamilyMembersList(prev => [...prev, newMember]);
+  };
+
+  const handleDeleteMember = (memberId) => {
+    setFamilyMembersList(prev => prev.filter(member => member.id !== memberId));
+    setSelectedProfile(null);
+  };
 
   // Filter family members based on search term
-  const filteredMembers = familyMembers.filter(member =>
+  const filteredMembers = familyMembersList.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.relation.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -234,7 +240,7 @@ const FamilyProfiles = () => {
             className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Family <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Profiles</span>
+              Family Profiles 
             </h1>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
               Manage medication profiles and health information for your entire family in one secure place
@@ -349,12 +355,19 @@ const FamilyProfiles = () => {
         )}
       </div>
 
-      
+      {/* Add Member Modal */}
+      <AddMember 
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAddMember={handleAddMember}
+      />
+
       {/* Member Details Modal */}
       <MemberDetails 
         selectedProfile={selectedProfile} 
         isOpen={!!selectedProfile} 
-        onClose={closeModal} 
+        onClose={closeModal}
+        onDeleteMember={handleDeleteMember}
       />
     </div>
   );

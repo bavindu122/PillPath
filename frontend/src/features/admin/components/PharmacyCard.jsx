@@ -1,17 +1,29 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Eye, Trash2, UserPlus } from 'lucide-react';
+import { Mail, Phone, MapPin, Eye, Trash2, UserPlus, Building,Store } from 'lucide-react';
 import { useState } from 'react';
 import SuspendPharmacy from './pharmacyPopup/SuspendPharmacy';
 import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
 import ViewPharmacy from './pharmacyPopup/ViewPharmacy';
 
 
-const PharmacyCard = ({ pharmacy }) => {
+const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration, onRejectRegistration }) => {
 
     const [suspendPopup, setSuspendPopup] = useState(null);
     const [suspendReason, setSuspendReason] = useState('');
     const [activatePopup, setActivatePopup] = useState(null);
     const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+
+    const handleSuspendConfirm = () => {
+        onSuspend(suspendPopup, suspendReason);
+        setSuspendPopup(null);
+        setSuspendReason('');
+    };
+
+    const handleActivateConfirm = () => {
+        onActivate(activatePopup);
+        setActivatePopup(null);
+    };
+
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -38,6 +50,26 @@ const PharmacyCard = ({ pharmacy }) => {
 
   return (
     <div className="hover:shadow-lg transition-shadow rounded-2xl border-gray-300 border p-6 bg-white">
+      {/* Pharmacy Image Section */}
+      <div className="mb-4 flex justify-center">
+        {pharmacy.image ? (
+          <img 
+            src={pharmacy.image} 
+            alt={pharmacy.name}
+            className="w-20 h-20 rounded-full object-cover shadow-md"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div 
+          className={`w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center shadow-md ${pharmacy.image ? 'hidden' : 'flex'}`}
+        >
+          <Store size={32} className="text-gray-500" />
+        </div>
+      </div>
+
       <div className="pb-3">
         <div className="flex items-start justify-between">
           <div>
@@ -86,7 +118,7 @@ const PharmacyCard = ({ pharmacy }) => {
                       >
                         <UserPlus size={18} />
                       </button>
-                    ) : (
+                    ) : pharmacy.status === 'Active' ? (
                       <button
                         onClick={() => setSuspendPopup(pharmacy)}
                         className="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors"
@@ -94,7 +126,7 @@ const PharmacyCard = ({ pharmacy }) => {
                       >
                         <Trash2 size={18} />
                       </button>
-                    )}
+                    ):null}
 
           </div>
 
@@ -103,8 +135,18 @@ const PharmacyCard = ({ pharmacy }) => {
       </div>
 
       {selectedPharmacy && (
-        <ViewPharmacy pharmacy={selectedPharmacy} onClose={() => setSelectedPharmacy(null)} />
-        )}
+        <ViewPharmacy pharmacy={selectedPharmacy} 
+        onClose={() => setSelectedPharmacy(null)} 
+        onAcceptRegistration={(pharmacy) => {
+            onAcceptRegistration(pharmacy);
+            setSelectedPharmacy(null);  // ← This closes the popup
+        }}
+        onRejectRegistration={(pharmacy, reason) => {
+            onRejectRegistration(pharmacy, reason);
+            setSelectedPharmacy(null);  // ← This closes the popup
+        }}
+    />
+)}
 
       {suspendPopup && (
             <SuspendPharmacy
@@ -112,11 +154,7 @@ const PharmacyCard = ({ pharmacy }) => {
                 reason={suspendReason}
                 setReason={setSuspendReason}
                 onCancel={() => setSuspendPopup(null)}
-                onConfirm={() => {
-                console.log(`Suspended: ${suspendPopup.name}, Reason: ${suspendReason}`);
-                setSuspendPopup(null);
-                setSuspendReason('');
-                }}
+                onConfirm={handleSuspendConfirm}
             />
             )}
 
@@ -124,10 +162,7 @@ const PharmacyCard = ({ pharmacy }) => {
             <ActivePharmacy
                 pharmacy={activatePopup}
                 onCancel={() => setActivatePopup(null)}
-                onConfirm={() => {
-                console.log(`Activated: ${activatePopup.name}`);
-                setActivatePopup(null);
-                }}
+                onConfirm={handleActivateConfirm}
             />
             )}
 

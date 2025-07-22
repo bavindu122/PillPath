@@ -135,30 +135,7 @@ const OrderCard = ({ order, onView }) => {
                 Reorder
               </button>
             </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <MoreVertical size={18} className="text-white/60" />
-              </button>
-              {showDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="absolute right-0 top-full mt-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-20 min-w-[160px]"
-                >
-                  <button className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white text-sm flex items-center gap-2 rounded-t-xl cursor-pointer">
-                    <Eye size={14} />
-                    View Details
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white text-sm flex items-center gap-2 rounded-b-xl">
-                    <Repeat size={14} />
-                    Reorder
-                  </button>
-                </motion.div>
-              )}
-            </div>
+           
           </div>
         </div>
 

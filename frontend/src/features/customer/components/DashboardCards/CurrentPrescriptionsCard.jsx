@@ -1,5 +1,5 @@
 import React from "react";
-import { Pill, Clock, CalendarClock, RefreshCw, ChevronRight } from "lucide-react";
+import { Pill, MapPin, Building2, DollarSign, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const CurrentPrescriptionsCard = () => {
@@ -7,19 +7,19 @@ const CurrentPrescriptionsCard = () => {
     {
       id: 1,
       name: "RX-250714-01",
-      schedule: "Twice daily",
-      daysRemaining: 5,
-      status: "Ready",
-      refills: 2,
+      pharmacy: "HealthPlus ",
+      distance: 5,
+      status: "Ready to pickup",
+      price: 250,
       color: "blue"
     },
     {
       id: 2,
       name: "RX-250714-02",
-      schedule: "Once daily",
-      daysRemaining: 12,
-      status: "Processing",
-      refills: 1,
+      pharmacy: "Central Pharmacy",
+      distance: 12,
+      status: "Packing",
+      price: 1000,
       color: "purple"
     }
   ];
@@ -57,23 +57,25 @@ const CurrentPrescriptionsCard = () => {
                 
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <div className="flex items-center text-white/60 text-xs">
-                    <Clock size={12} className="mr-1" />
-                    {prescription.schedule}
+                    <Building2 size={12} className="mr-1" />
+                    {prescription.pharmacy}
                   </div>
                   <div className="flex items-center text-white/60 text-xs">
-                    <CalendarClock size={12} className="mr-1" />
-                    {prescription.daysRemaining} days left
+                    <MapPin size={12} className="mr-1" />
+                    {prescription.distance} km
                   </div>
                   <div className="flex items-center text-white/60 text-xs">
-                    <RefreshCw size={12} className="mr-1" />
-                    {prescription.refills} refills
+                    <DollarSign size={12} className="mr-1" />
+                    Rs. {prescription.price} 
                   </div>
                 </div>
               </div>
               <div>
                 <span className={`px-2 py-1 rounded-full text-xs ${
-                  prescription.status === "Ready" 
+                  prescription.status === "Ready to pickup" 
                     ? "bg-green-500/20 text-green-300" 
+                    : prescription.status === "Packing"
+                    ? "bg-blue-500/20 text-blue-300"
                     : "bg-yellow-500/20 text-yellow-300"
                 }`}>
                   {prescription.status}

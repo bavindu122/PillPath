@@ -8,6 +8,7 @@ import {
   Package,
   User
 } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const DeliveryTracking = ({ deliveryInfo }) => {
   if (!deliveryInfo) {

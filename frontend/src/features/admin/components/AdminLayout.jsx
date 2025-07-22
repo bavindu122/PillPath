@@ -1,6 +1,10 @@
-import { useState  } from 'react';
-import { Link ,useLocation} from 'react-router-dom'; 
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom'; 
 import { assets } from '../../../assets/assets';
+import { useAdminAuth } from '../../../hooks/useAdminAuth'; // ✅ Import admin auth
+import { ADMIN_ROUTES, PUBLIC_ROUTES } from '../../../constants/routes';
+
+
 
 
 import {
@@ -19,23 +23,40 @@ import {
   Bell,
   User,
   Wallet,
+  LogOut, // ✅ Import LogOut icon
+  ChevronDown, // ✅ Import ChevronDown for dropdown
 } from 'lucide-react';
-//import { Button } from '@/components/ui/button';
-//import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Overview', href: '/admin/overview', icon: LayoutDashboard },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Pharmacies', href: '/admin/pharmacies', icon: Building2 },
   { name: 'Prescriptions', href: '/admin/prescriptions', icon: FileText },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  {name:'Sales', href:'/admin/sales', icon: Activity},
   { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Announcements', href: '/admin/announcements', icon: Bell },
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false); // ✅ State for dropdown
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, admin, loading } = useAdminAuth(); // ✅ Get logout function and admin data
+
+  // ✅ Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout API fails, clear local storage and redirect
+      navigate('/admin/login');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,7 +81,6 @@ export default function AdminLayout({ children }) {
             >
             <X className="h-5 w-5" />
         </button>
-
         </div>
 
         <nav className="mt-8 px-4 ">
@@ -105,16 +125,86 @@ export default function AdminLayout({ children }) {
               <span className='text-lg'>PillPath Admin</span>
             </div>
 
-            <div className="flex items-center space-x-10">
+            <div className="flex items-center space-x-4">
               <div className="relative">
-                <Bell className="w-6 h-6 cursor-pointer text-blue-600" />
+                <Bell className="w-6 h-6 cursor-pointer text-blue-600 hover:text-blue-800 transition-colors" />
               </div>
 
-              <div className="relative flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <User className="h-8 w-8 text-blue-600" />
-                <div className="flex flex-col text-sm">
-                  <span className="text-gray-500">Administrator</span>
-                </div>
+              {/* ✅ Admin Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <User className="h-8 w-8 text-blue-600" />
+                  <div className="flex flex-col text-sm text-left">
+                    <span className="text-gray-900 font-medium">
+                      {admin?.username || 'Administrator'}
+                    </span>
+                    <span className="text-gray-500 text-xs">
+                      {admin?.adminLevel || 'Admin'}
+                    </span>
+                  </div>
+                  <ChevronDown 
+                    className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                      dropdownOpen ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </button>
+
+                {/* ✅ Dropdown Menu */}
+                {dropdownOpen && (
+                  <>
+                    {/* Overlay to close dropdown when clicking outside */}
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setDropdownOpen(false)}
+                    />
+                    
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                      {/* Profile Info */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">
+                          {admin?.username || 'Administrator'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          ID: {admin?.id || 'N/A'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Level: {admin?.adminLevel || 'Admin'}
+                        </p>
+                      </div>
+
+                      {/* Profile Actions */}
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            // Add profile settings navigation if needed
+                            console.log('Navigate to profile settings');
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          <Settings className="mr-3 h-4 w-4" />
+                          Profile Settings
+                        </button>
+                        
+                        {/* ✅ Logout Button */}
+                        <button
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            handleLogout();
+                          }}
+                          disabled={loading}
+                          className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <LogOut className="mr-3 h-4 w-4" />
+                          {loading ? 'Signing out...' : 'Sign Out'}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
