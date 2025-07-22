@@ -1,208 +1,183 @@
 import React, { useState } from "react";
-import { ArrowRight } from "lucide-react";
-import { Check } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { Clock, ClipboardCheck, HelpCircle, MessageSquare } from "lucide-react";
-import RoleSelector from "../components/RoleSelector";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Check } from "lucide-react";
+import RoleSelection from "../components/RoleSelector";
 import RegisterForm from "../components/RegisterForm";
-import Navbar from "../../../components/Layout/Navbar";
-import { useAuth } from "../../../hooks/useAuth";
-
+import { useAuth } from "../../../hooks/useAuth"; 
 export const Register = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const [currentStep, setCurrentStep] = useState("role");
+  const [selectedRole, setSelectedRole] = useState("");
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
 
-  // Redirect if already logged in
-  React.useEffect(() => {
-    if (user && registrationComplete) {
-      // Auto redirect customers to dashboard after successful registration
-      if (selectedRole === "customer") {
-        setTimeout(() => {
-          navigate("/customer/dashboard");
-        }, 3000);
-      }
-    }
-  }, [user, registrationComplete, selectedRole, navigate]);
+  const { register, loading, error } = useAuth();
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
+    setCurrentStep("form");
   };
 
-  const handleContinue = () => {
-    setShowForm(true);
+  const handleBackToRole = () => {
+    setCurrentStep("role");
+    setSelectedRole("");
   };
 
-  const handleBackToRoleSelection = () => {
-    setShowForm(false);
+  const handleRegistrationSubmit = async (formData, userType) => {
+    try {
+      console.log(`${userType} registration data:`, formData);
+      
+      // ✅ Now register is properly imported and available
+      const response = await register(formData, userType);
+      
+      console.log("Registration successful:", response);
+      setSubmittedData(response);
+      setRegistrationComplete(true);
+    } catch (error) {
+      console.error("Registration failed:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
-  const handleRegistrationSubmit = (responseData) => {
-    console.log("Registration successful:", responseData);
-    setSubmittedData(responseData);
-    setRegistrationComplete(true);
+  const getSuccessMessage = () => {
+    if (selectedRole === "customer") {
+      return {
+        title: "Welcome to PillPath!",
+        message: "Your account has been created successfully. You can now start exploring our services.",
+        action: "Go to Dashboard"
+      };
+    } else {
+      return {
+        title: "Registration Submitted!",
+        message: "Your pharmacy registration has been submitted for review. We'll notify you once it's approved.",
+        action: "Back to Home"
+      };
+    }
   };
+
+  if (registrationComplete) {
+    const successInfo = getSuccessMessage();
+    
+    return (
+      <div className="min-h-screen bg-dark-theme flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 text-center"
+        >
+          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check size={32} className="text-white" />
+          </div>
+          
+          <h2 className="text-2xl font-bold text-white mb-4">
+            {successInfo.title}
+          </h2>
+          
+          <p className="text-white/70 mb-8">
+            {successInfo.message}
+          </p>
+          
+          <Link
+            to={selectedRole === "customer" ? "/customer" : "/"}
+            className="inline-block bg-accent hover:bg-accent/90 text-white font-medium py-3 px-8 rounded-xl transition-colors duration-300"
+          >
+            {successInfo.action}
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden px-4 py-10 top-[-30px]">
-        {/* Background elements */}
-        <div className="absolute top-10 left-10 w-96 h-96 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
-        <div className="absolute top-32 right-20 w-80 h-80 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
-        <div className="absolute -bottom-20 left-32 w-96 h-96 bg-primary/30 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-secondary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-6000"></div>
+    <div className="min-h-screen bg-dark-theme relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full blur-3xl opacity-40 animate-pulse"></div>
+        <div className="absolute top-32 right-[5%] w-80 h-80 bg-indigo-400/15 rounded-full blur-3xl opacity-30 animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-[20%] w-72 h-72 bg-slate-600/20 rounded-full blur-3xl opacity-35 animate-pulse delay-2000"></div>
+        <div className="absolute bottom-32 right-[15%] w-88 h-88 bg-blue-400/15 rounded-full blur-3xl opacity-30 animate-pulse delay-3000"></div>
+      </div>
 
-        {/* Medical pattern background */}
-        <div className="medical-pattern absolute inset-0 opacity-5"></div>
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-6xl">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-300 mb-6">
+              <ArrowLeft size={20} />
+              Back to Home
+            </Link>
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
+            >
+              Join <span className="text-gradient-accent">PillPath</span>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-white/70 text-lg max-w-2xl mx-auto"
+            >
+              {currentStep === "role" 
+                ? "Choose your role to get started with our comprehensive pharmaceutical services"
+                : `Complete your ${selectedRole} registration`
+              }
+            </motion.p>
+          </div>
 
-        {/* Animated geometric shapes */}
-        <div className="absolute top-20 left-[20%] w-20 h-20 border-4 border-white/10 rounded-lg rotate-12 animate-spin-slow"></div>
-        <div className="absolute bottom-40 right-[15%] w-16 h-16 border-4 border-secondary/20 rounded-full animate-pulse-slow"></div>
+          {/* Content */}
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex justify-center"
+          >
+            {currentStep === "role" ? (
+              <RoleSelection onRoleSelect={handleRoleSelect} />
+            ) : (
+              <RegisterForm 
+                role={selectedRole} 
+                onBack={handleBackToRole}
+                onSubmit={handleRegistrationSubmit}
+              />
+            )}
+          </motion.div>
 
-        {/* Content container */}
-        <div className="relative z-10 w-full py-10">
-          {registrationComplete ? (
-            <div className="w-full max-w-md mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-8 animate-fade-in text-center">
-              <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
-                  selectedRole === "customer"
-                    ? "bg-green-500/20"
-                    : "bg-yellow-500/20"
-                }`}
-              >
-                {selectedRole === "customer" && user && (
-                  <div className="mt-4 p-3 bg-green-500/20 border border-green-500/40 rounded-lg">
-                    <p className="text-green-200 text-sm">
-                      Redirecting to your dashboard in 3 seconds...
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                {selectedRole === "customer"
-                  ? "Customer Registration Successful!"
-                  : "Pharmacy Registration Complete"}
-              </h2>
-
-              {selectedRole === "customer" ? (
-                <p className="text-white/80 mb-8">
-                  Your account has been created successfully. You can now log in
-                  to access all features.
-                </p>
-              ) : (
-                <div className="space-y-4 mb-8">
-                  <p className="text-white/80">
-                    Thank you for registering your pharmacy with PillPath!
-                  </p>
-
-                  <div className="bg-white/10 rounded-xl p-4 border border-white/10">
-                    <h3 className="text-white font-medium mb-2 flex items-center justify-center gap-2">
-                      <Clock size={18} className="text-yellow-400" />
-                      Pending Admin Review
-                    </h3>
-                    <p className="text-white/70 text-sm">
-                      Your registration data has been received and is awaiting
-                      review by our administrators. You will receive an email
-                      notification at{" "}
-                      <span className="text-white">
-                        {submittedData?.email || "your registered email"}
-                      </span>{" "}
-                      once your account is approved.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="bg-white/10 rounded-lg p-3 border border-white/10">
-                      <h4 className="text-white/90 font-medium mb-1 flex items-center gap-1">
-                        <Clock size={14} className="text-accent/80" /> Review
-                        Timeline
-                      </h4>
-                      <p className="text-white/70">
-                        Typically 1-2 business days
-                      </p>
-                    </div>
-
-                    <div className="bg-white/10 rounded-lg p-3 border border-white/10">
-                      <h4 className="text-white/90 font-medium mb-1 flex items-center gap-1">
-                        <HelpCircle size={14} className="text-accent/80" /> Need
-                        Help?
-                      </h4>
-                      <p className="text-white/70">Contact our support team</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 text-white/70 text-xs">
-                    <p>
-                      We verify all pharmacy information to ensure platform
-                      integrity and safety.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3">
-                <Link to="/login">
-                  <button
-                    className={`px-8 py-3 rounded-xl text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center justify-center gap-2 w-full
-          ${
-            selectedRole === "customer"
-              ? "bg-secondary hover:bg-secondary/90"
-              : "bg-white/20 hover:bg-white/30"
-          }`}
-                  >
-                    {selectedRole === "customer"
-                      ? "Go to Login"
-                      : "Return to Login"}
-                    <ArrowRight size={16} className="animate-bounce-gentle" />
-                  </button>
-                </Link>
-
-                {selectedRole === "pharmacy" && (
-                  <Link to="/contact">
-                    <button className="px-8 py-3 rounded-xl bg-accent/20 hover:bg-accent/30 text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center justify-center gap-2 w-full">
-                      Contact Support
-                      <MessageSquare size={16} />
-                    </button>
-                  </Link>
-                )}
+          {/* ✅ ADD: Show loading state */}
+          {loading && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="bg-white/15 backdrop-blur-xl rounded-2xl p-8 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                <p className="text-white">Processing registration...</p>
               </div>
             </div>
-          ) : !showForm ? (
-            <>
-              <RoleSelector onRoleSelect={handleRoleSelect} />
-              {selectedRole && (
-                <div className="mt-8 text-center animate-fade-in-up">
-                  <button
-                    onClick={handleContinue}
-                    className={`px-8 py-3 rounded-xl text-white font-medium transition-all duration-300 shadow-lg inline-flex items-center gap-2
-                      ${
-                        selectedRole === "customer"
-                          ? "bg-secondary hover:bg-secondary/90 shadow-secondary/30"
-                          : "bg-accent hover:bg-accent/90 shadow-accent/30"
-                      }`}
-                  >
-                    Continue as{" "}
-                    {selectedRole === "customer" ? "Customer" : "Pharmacy"}
-                    <ArrowRight size={16} className="animate-bounce-gentle" />
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <RegisterForm
-              role={selectedRole}
-              onBack={handleBackToRoleSelection}
-              onSubmit={handleRegistrationSubmit}
-            />
           )}
+
+          {/* ✅ ADD: Show error state */}
+          {error && (
+            <div className="fixed bottom-4 right-4 bg-red-500/90 backdrop-blur-sm text-white p-4 rounded-xl shadow-lg z-50">
+              <p className="font-medium">Registration Failed</p>
+              <p className="text-sm opacity-90">{error}</p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="text-center mt-12">
+            <p className="text-white/60">
+              Already have an account?{" "}
+              <Link to="/login" className="text-accent hover:text-accent/80 transition-colors duration-300 font-medium">
+                Sign in here
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -2,58 +2,96 @@ import { useState, useEffect } from "react";
 
 /**
  * Custom hook to manage form state for profile editing
- * @param {object} initialProfile - Initial profile data
+ * @param {object} initialProfile - Initial profile data from backend
  * @returns {object} Object containing form state and handlers
  */
-export const useProfileForm = (initialProfile = {}) => {
-  const [formData, setFormData] = useState({
-    firstName: initialProfile.firstName || "John",
-    lastName: initialProfile.lastName || "Doe",
-    email: initialProfile.email || "john.doe@email.com",
-    phone: initialProfile.phone || "+1 (555) 123-4567",
-    dateOfBirth: initialProfile.dateOfBirth || "1990-05-15",
-    gender: initialProfile.gender || "Male",
-    bloodType: initialProfile.bloodType || "O+",
-    height: initialProfile.height || "175",
-    weight: initialProfile.weight || "70",
-    address: initialProfile.address || "123 Main Street",
-    city: initialProfile.city || "New York",
-    state: initialProfile.state || "NY",
-    zipCode: initialProfile.zipCode || "10001",
-    emergencyContactName: initialProfile.emergencyContactName || "Jane Doe",
-    emergencyContactPhone: initialProfile.emergencyContactPhone || "+1 (555) 987-6543",
-    allergies: initialProfile.allergies || "",
-    medications: initialProfile.medications || "",
-    medicalConditions: initialProfile.medicalConditions || "",
-    insuranceProvider: initialProfile.insuranceProvider || "",
-    insurancePolicyNumber: initialProfile.insurancePolicyNumber || "",
-  });
+export const useProfileForm = (initialProfile = null) => {
+  // Initialize with empty values if no profile data
+  const getInitialFormData = (profile) => {
+    if (!profile) {
+      return {
+        username: "",
+        email: "",
+        fullName: "",
+        phoneNumber: "",
+        dateOfBirth: "",
+        address: "",
+        profilePictureUrl: "",
+        insuranceProvider: "",
+        insuranceId: "",
+        allergies: "",
+        medicalConditions: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+      };
+    }
 
+    return {
+      username: profile.username || "",
+      email: profile.email || "",
+      fullName: profile.fullName || "",
+      phoneNumber: profile.phoneNumber || "",
+      dateOfBirth: profile.dateOfBirth || "",
+      address: profile.address || "",
+      profilePictureUrl: profile.profilePictureUrl || "",
+      insuranceProvider: profile.insuranceProvider || "",
+      insuranceId: profile.insuranceId || "",
+      allergies: Array.isArray(profile.allergies)
+        ? profile.allergies.join(", ")
+        : profile.allergies || "",
+      medicalConditions: Array.isArray(profile.medicalConditions)
+        ? profile.medicalConditions.join(", ")
+        : profile.medicalConditions || "",
+      emergencyContactName: profile.emergencyContactName || "",
+      emergencyContactPhone: profile.emergencyContactPhone || "",
+    };
+  };
+
+  const [formData, setFormData] = useState(() =>
+    getInitialFormData(initialProfile)
+  );
+  const [originalData, setOriginalData] = useState(() =>
+    getInitialFormData(initialProfile)
+  );
   const [errors, setErrors] = useState({});
   const [isModified, setIsModified] = useState(false);
 
   // Update form data when initial profile changes
   useEffect(() => {
-    if (Object.keys(initialProfile).length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        ...initialProfile
-      }));
+    if (initialProfile && Object.keys(initialProfile).length > 0) {
+      const newFormData = getInitialFormData(initialProfile);
+
+      // ✅ Only update if the data actually changed to prevent unnecessary re-renders
+      setFormData((prevData) => {
+        const dataChanged =
+          JSON.stringify(prevData) !== JSON.stringify(newFormData);
+        return dataChanged ? newFormData : prevData;
+      });
+
+      setOriginalData((prevOriginal) => {
+        const originalChanged =
+          JSON.stringify(prevOriginal) !== JSON.stringify(newFormData);
+        return originalChanged ? newFormData : prevOriginal;
+      });
+
+      setIsModified(false);
     }
   }, [initialProfile]);
-
+  
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value, // Always store as string during editing
     }));
-    setIsModified(true);
-    
+
+    // Check if data has been modified
+    setIsModified(true); // Simplified - just mark as modified when any change occurs
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: undefined
+        [field]: undefined,
       }));
     }
   };
@@ -62,19 +100,19 @@ export const useProfileForm = (initialProfile = {}) => {
     const newErrors = {};
 
     // Required field validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
+    if (!formData.username?.trim()) {
+      newErrors.username = "Username is required";
     }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
+    if (!formData.fullName?.trim()) {
+      newErrors.fullName = "Full name is required";
     }
-    if (!formData.email.trim()) {
+    if (!formData.email?.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+    if (!formData.phoneNumber?.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
     }
 
     setErrors(newErrors);
@@ -82,40 +120,49 @@ export const useProfileForm = (initialProfile = {}) => {
   };
 
   const resetForm = () => {
-    setFormData({
-      firstName: initialProfile.firstName || "John",
-      lastName: initialProfile.lastName || "Doe",
-      email: initialProfile.email || "john.doe@email.com",
-      phone: initialProfile.phone || "+1 (555) 123-4567",
-      dateOfBirth: initialProfile.dateOfBirth || "1990-05-15",
-      gender: initialProfile.gender || "Male",
-      bloodType: initialProfile.bloodType || "O+",
-      height: initialProfile.height || "175",
-      weight: initialProfile.weight || "70",
-      address: initialProfile.address || "123 Main Street",
-      city: initialProfile.city || "New York",
-      state: initialProfile.state || "NY",
-      zipCode: initialProfile.zipCode || "10001",
-      emergencyContactName: initialProfile.emergencyContactName || "Jane Doe",
-      emergencyContactPhone: initialProfile.emergencyContactPhone || "+1 (555) 987-6543",
-      allergies: initialProfile.allergies || "",
-      medications: initialProfile.medications || "",
-      medicalConditions: initialProfile.medicalConditions || "",
-      insuranceProvider: initialProfile.insuranceProvider || "",
-      insurancePolicyNumber: initialProfile.insurancePolicyNumber || "",
-    });
+    setFormData(originalData);
     setErrors({});
     setIsModified(false);
   };
 
-  const submitForm = () => {
-    if (validateForm()) {
-      // Here you would typically make an API call to save the data
-      console.log("Profile updated:", formData);
-      setIsModified(false);
-      return true;
+  const submitForm = async () => {
+    if (!validateForm()) {
+      return false;
     }
-    return false;
+
+    try {
+      // Prepare data for backend - convert comma-separated strings back to arrays
+      const submitData = {
+        ...formData,
+        allergies: formData.allergies
+          ? formData.allergies
+              .split(",")
+              .map((item) => item.trim())
+              .filter((item) => item)
+          : [],
+        medicalConditions: formData.medicalConditions
+          ? formData.medicalConditions
+              .split(",")
+              .map((item) => item.trim())
+              .filter((item) => item)
+          : [],
+      };
+
+      // TODO: Make API call to update profile
+      console.log("Profile data to submit:", submitData);
+
+      // Here you would make the API call:
+      // const response = await ApiService.updateCustomerProfile(submitData);
+
+      setIsModified(false);
+      setOriginalData(formData);
+      return true;
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      // Set error message
+      setErrors({ submit: "Failed to update profile. Please try again." });
+      return false;
+    }
   };
 
   return {
@@ -126,6 +173,6 @@ export const useProfileForm = (initialProfile = {}) => {
     validateForm,
     resetForm,
     submitForm,
-    setFormData
+    setFormData,
   };
 };
