@@ -8,8 +8,8 @@ const MobileFloatingNav = () => {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/otc", label: "OTC Store", icon: ShoppingBag },
-    { path: "/services", label: "Services", icon: MapPin },
-    { path: "/find-pharmacy", label: "Find Pharmacies", icon: Info },
+    { path: "/services", label: "Services", icon: Info },
+    { path: "/find-pharmacy", label: "Find Pharmacies", icon: MapPin },
     { path: "/contact", label: "Contact", icon: Phone },
     { path: "/customer", label: "Profile", icon: User },
   ];

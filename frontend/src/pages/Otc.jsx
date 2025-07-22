@@ -251,6 +251,8 @@ const Otc = () => {
     navigate(`/otc-product/${productId}`);
   };
 
+  
+
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
   };
