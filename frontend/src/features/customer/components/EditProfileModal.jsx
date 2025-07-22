@@ -490,7 +490,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
-                    Emergency & Insurance
+                    Medical conditions
                   </h3>
 
                   <FormField
