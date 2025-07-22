@@ -99,10 +99,12 @@ const CustomerProfile = ({ removeBg = false }) => {
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
-                    <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                      <MapPin size={16} /> Find Pharmacy
-                    </Button>
-                    <Link to="/otc-store">
+                    <Link to="/find-pharmacy?from=dashboard">
+                      <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                        <MapPin size={16} /> Find Pharmacy
+                      </Button>
+                    </Link>
+                    <Link to="/otc?from=dashboard">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <ShoppingBag size={16} /> Browse OTC
                       </Button>
