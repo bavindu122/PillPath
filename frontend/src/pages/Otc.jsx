@@ -115,8 +115,8 @@ const otcProducts = [
     description: "Fast-acting pain reliever and fever reducer",
     image: paracetamolImg,
     rating: 4.5,
-    price: "$8.99",
-    originalPrice: "$12.99",
+    price: "Rs.8.99",
+    originalPrice: "Rs.12.99",
     category: "Pain Relief",
     inStock: true,
     discount: "31%",
@@ -128,8 +128,8 @@ const otcProducts = [
     description: "Anti-inflammatory pain relief for muscles and joints",
     image: ibuprofenImg,
     rating: 4.3,
-    price: "$12.99",
-    originalPrice: "$15.99",
+    price: "Rs.12.99",
+    originalPrice: "Rs.15.99",
     category: "Pain Relief",
     inStock: true,
     discount: "19%",
@@ -141,8 +141,8 @@ const otcProducts = [
     description: "Immune system support with antioxidants",
     image: vitaminCImg,
     rating: 4.7,
-    price: "$15.99",
-    originalPrice: "$19.99",
+    price: "Rs.15.99",
+    originalPrice: "Rs.19.99",
     category: "Vitamins",
     inStock: true,
     discount: "20%",
@@ -154,8 +154,8 @@ const otcProducts = [
     description: "Relieves persistent cough and throat irritation",
     image: coughSyrupImg,
     rating: 4.2,
-    price: "$9.99",
-    originalPrice: "$13.99",
+    price: "Rs.9.99",
+    originalPrice: "Rs.13.99",
     category: "Cold & Flu",
     inStock: true,
     discount: "29%",
@@ -167,8 +167,8 @@ const otcProducts = [
     description: "Fast relief from heartburn and indigestion",
     image: antacidImg,
     rating: 4.4,
-    price: "$7.99",
-    originalPrice: "$10.99",
+    price: "Rs.7.99",
+    originalPrice: "Rs.10.99",
     category: "Digestive",
     inStock: false,
     discount: "27%",
@@ -180,8 +180,8 @@ const otcProducts = [
     description: "Long-lasting relief from seasonal allergies",
     image: allergyReliefImg,
     rating: 4.6,
-    price: "$14.99",
-    originalPrice: "$18.99",
+    price: "Rs.14.99",
+    originalPrice: "Rs.18.99",
     category: "Allergy",
     inStock: true,
     discount: "21%",
@@ -407,7 +407,9 @@ const Otc = () => {
                   Start Shopping
                   <ArrowRight size={16} />
                 </button>
-                <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
+                <button 
+                onClick={() => navigate("/find-pharmacy")}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
                   <MapPin size={20} />
                   Find Nearby Pharmacy
                 </button>
@@ -673,18 +675,6 @@ const Otc = () => {
                       </div>
                     )}
 
-                    {/* Stock Status */}
-                    <div className="absolute top-4 left-4 z-10">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.inStock
-                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-red-500/20 text-red-400 border border-red-500/30"
-                        }`}
-                      >
-                        {product.inStock ? "In Stock" : "Out of Stock"}
-                      </span>
-                    </div>
 
                     {/* Product Image */}
                     <div className="flex justify-center mb-6 mt-8">
@@ -818,11 +808,6 @@ const Otc = () => {
               healthcare needs. Start shopping today!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <ShoppingCart size={20} />
-                Browse All Products
-                <ArrowRight size={16} />
-              </button>
               <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
                 <Phone size={20} />
                 Contact Support
