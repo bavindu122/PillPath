@@ -1,6 +1,7 @@
 import React from "react";
 import { MapPin, Star, Clock, Phone, Navigation, ArrowRight, Truck, Pill, Shield } from "lucide-react";
 import { calculateDistance } from "../utils/mapHelpers";
+import { ScrollContainer } from "../../../components/UIs";
 
 const PharmacyList = ({ 
   pharmacies, 
@@ -45,11 +46,16 @@ const PharmacyList = ({
   }
 
   return (
-    <div className="h-[600px] overflow-y-auto bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 p-4">
+    <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 p-4">
       <h3 className="font-bold text-lg mb-4 px-2">
         Found {pharmacies.length} {pharmacies.length === 1 ? 'pharmacy' : 'pharmacies'}
       </h3>
-      <div className="space-y-4">
+      <ScrollContainer 
+        maxHeight="540px" 
+        scrollbarTheme="default"
+        scrollbarWidth="6px"
+        className="space-y-4"
+      >
         {pharmacies.map((pharmacy) => (
           <div
             key={pharmacy.id}
@@ -141,7 +147,7 @@ const PharmacyList = ({
             </div>
           </div>
         ))}
-      </div>
+      </ScrollContainer>
     </div>
   );
 };
