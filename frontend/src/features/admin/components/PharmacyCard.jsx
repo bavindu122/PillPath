@@ -1,172 +1,330 @@
-import React from 'react';
-import { Mail, Phone, MapPin, Eye, Trash2, UserPlus, Building,Store } from 'lucide-react';
-import { useState } from 'react';
-import SuspendPharmacy from './pharmacyPopup/SuspendPharmacy';
-import ActivePharmacy from './pharmacyPopup/ActivePharmacy';
-import ViewPharmacy from './pharmacyPopup/ViewPharmacy';
+import React, { useState } from "react";
+import {
+  Building2,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Star,
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Pause,
+  Play,
+  Eye,
+  Award,
+  Truck,
+  Shield,
+} from "lucide-react";
 
+const PharmacyCard = ({
+  pharmacy,
+  onSuspend,
+  onActivate,
+  onAcceptRegistration,
+  onRejectRegistration,
+}) => {
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
 
-const PharmacyCard = ({ pharmacy, onSuspend, onActivate,onAcceptRegistration, onRejectRegistration }) => {
-
-    const [suspendPopup, setSuspendPopup] = useState(null);
-    const [suspendReason, setSuspendReason] = useState('');
-    const [activatePopup, setActivatePopup] = useState(null);
-    const [selectedPharmacy, setSelectedPharmacy] = useState(null);
-
-    const handleSuspendConfirm = () => {
-        onSuspend(suspendPopup, suspendReason);
-        setSuspendPopup(null);
-        setSuspendReason('');
-    };
-
-    const handleActivateConfirm = () => {
-        onActivate(activatePopup);
-        setActivatePopup(null);
-    };
-
-
-  const getStatusBadge = (status) => {
+  // ✅ Updated to use backend fields
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'Active':
-        return <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>;
-      case 'Suspended':
-        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Suspended</div>;
-      case 'Pending':
-        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</div>;
+      case "Active":
+        return "bg-green-100 text-green-800";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "Suspended":
+        return "bg-red-100 text-red-800";
+      case "Rejected":
+        return "bg-gray-100 text-gray-800";
       default:
-        return <div className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{status}</div>;
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getRatingStars = (rating) => {
-    if (rating === 0) return <span className="text-gray-400">Not rated</span>;
-    return (
-      <div className="flex items-center">
-        <span className="text-yellow-400">★</span>
-        <span className="ml-1 text-sm font-medium">{rating}</span>
-      </div>
-    );
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatOperatingHours = (hours) => {
+    if (!hours) return "Not specified";
+
+    const today = new Date().toLocaleLowerCase();
+    const days = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    const currentDay = days[new Date().getDay()];
+
+    return hours[currentDay] || "Closed";
+  };
+
+  const handleSuspend = () => {
+    if (suspendReason.trim()) {
+      onSuspend(pharmacy, suspendReason);
+      setShowSuspendModal(false);
+      setSuspendReason("");
+    }
+  };
+
+  const handleReject = () => {
+    if (rejectReason.trim()) {
+      onRejectRegistration(pharmacy, rejectReason);
+      setShowRejectModal(false);
+      setRejectReason("");
+    }
   };
 
   return (
-    <div className="hover:shadow-lg transition-shadow rounded-2xl border-gray-300 border p-6 bg-white">
-      {/* Pharmacy Image Section */}
-      <div className="mb-4 flex justify-center">
-        {pharmacy.image ? (
-          <img 
-            src={pharmacy.image} 
-            alt={pharmacy.name}
-            className="w-20 h-20 rounded-full object-cover shadow-md"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        <div 
-          className={`w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center shadow-md ${pharmacy.image ? 'hidden' : 'flex'}`}
-        >
-          <Store size={32} className="text-gray-500" />
-        </div>
-      </div>
+    <>
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden">
+        {/* ✅ Updated image handling */}
+        <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600">
+          {pharmacy.logoUrl ? (
+            <img
+              src={pharmacy.logoUrl}
+              alt={pharmacy.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <Building2 size={64} className="text-white/70" />
+            </div>
+          )}
 
-      <div className="pb-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-lg">{pharmacy.name}</div>
-            <p className="text-sm text-gray-500 mt-1">{pharmacy.license}</p>
+          {/* Status Badge */}
+          <div className="absolute top-3 right-3">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                pharmacy.status
+              )}`}
+            >
+              {pharmacy.status}
+            </span>
           </div>
-          {getStatusBadge(pharmacy.status)}
-        </div>
-      </div>
 
-      <div className="space-y-3">
-        <div className="space-y-2">
-          <div className="flex items-center text-sm text-gray-600">
-            <Mail className="h-4 w-4 mr-2" />
-            {pharmacy.email}
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Phone className="h-4 w-4 mr-2" />
-            {pharmacy.phone}
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <MapPin className="h-4 w-4 mr-2" />
-            {pharmacy.location}
-          </div>
-          
+          {/* Verification Badge */}
+          {pharmacy.isVerified && (
+            <div className="absolute top-3 left-3">
+              <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center space-x-1">
+                <Shield size={14} className="text-blue-600" />
+                <span className="text-xs font-medium text-blue-600">
+                  Verified
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-300">
-          <div>
-            <p className="text-sm font-medium">{pharmacy.orders} orders</p>
-            {getRatingStars(pharmacy.rating)}
+        <div className="p-6">
+          {/* ✅ Updated header info */}
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              {pharmacy.name}
+            </h3>
+
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <MapPin size={16} className="text-gray-400" />
+                <span>{pharmacy.address}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Phone size={16} className="text-gray-400" />
+                <span>{pharmacy.phoneNumber}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Mail size={16} className="text-gray-400" />
+                <span>{pharmacy.email}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Award size={16} className="text-gray-400" />
+                <span>License: {pharmacy.licenseNumber}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Clock size={16} className="text-gray-400" />
+                <span>
+                  Today: {formatOperatingHours(pharmacy.operatingHours)}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex space-x-2">
+
+          {/* ✅ Updated statistics */}
+          <div className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg">
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-1 mb-1">
+                <Star size={16} className="text-yellow-500" />
+                <span className="font-semibold text-gray-900">
+                  {pharmacy.averageRating?.toFixed(1) || "0.0"}
+                </span>
+              </div>
+              <span className="text-xs text-gray-500">
+                {pharmacy.totalReviews} reviews
+              </span>
+            </div>
+
+            <div className="text-center">
+              <div className="font-semibold text-gray-900 mb-1">
+                {pharmacy.deliveryAvailable ? "Yes" : "No"}
+              </div>
+              <div className="flex items-center justify-center space-x-1">
+                <Truck size={14} className="text-gray-400" />
+                <span className="text-xs text-gray-500">
+                  {pharmacy.deliveryAvailable
+                    ? `${pharmacy.deliveryRadius}km`
+                    : "No delivery"}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="font-semibold text-gray-900 mb-1">
+                {formatDate(pharmacy.createdAt)}
+              </div>
+              <span className="text-xs text-gray-500">Joined</span>
+            </div>
+          </div>
+
+          {/* ✅ Updated services display */}
+          {pharmacy.services && pharmacy.services.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">
+                Services:
+              </h4>
+              <div className="flex flex-wrap gap-1">
+                {pharmacy.services.slice(0, 3).map((service, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                  >
+                    {service}
+                  </span>
+                ))}
+                {pharmacy.services.length > 3 && (
+                  <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                    +{pharmacy.services.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Reason display for suspended/rejected */}
+          {(pharmacy.suspendReason || pharmacy.rejectReason) && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <h4 className="text-sm font-medium text-red-800 mb-1">
+                {pharmacy.status === "Suspended"
+                  ? "Suspension Reason:"
+                  : "Rejection Reason:"}
+              </h4>
+              <p className="text-sm text-red-600">
+                {pharmacy.suspendReason || pharmacy.rejectReason}
+              </p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-2">
             <button
-                      onClick={() => setSelectedPharmacy(pharmacy)}
-                      className="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-blue-100 transition-colors"
-                      title="View Details"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    {pharmacy.status === 'Suspended' ? (
-                      <button
-                        className="text-green-600 hover:text-green-900 p-2 rounded-full hover:bg-green-100 transition-colors"
-                        title="Activate Pharmacy"
-                        onClick={() => setActivatePopup(pharmacy)}
-                      >
-                        <UserPlus size={18} />
-                      </button>
-                    ) : pharmacy.status === 'Active' ? (
-                      <button
-                        onClick={() => setSuspendPopup(pharmacy)}
-                        className="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors"
-                        title="Suspend Pharmacy"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    ):null}
+              onClick={() => setShowDetails(true)}
+              className="flex-1 min-w-[100px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+            >
+              <Eye size={16} />
+              <span>Details</span>
+            </button>
 
+            {pharmacy.status === "Pending" && (
+              <>
+                <button
+                  onClick={() => onAcceptRegistration(pharmacy)}
+                  className="flex-1 min-w-[100px] bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+                >
+                  <CheckCircle size={16} />
+                  <span>Accept</span>
+                </button>
+                <button
+                  onClick={() => setShowRejectModal(true)}
+                  className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+                >
+                  <XCircle size={16} />
+                  <span>Reject</span>
+                </button>
+              </>
+            )}
+
+            {pharmacy.status === "Active" && (
+              <button
+                onClick={() => setShowSuspendModal(true)}
+                className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+              >
+                <Pause size={16} />
+                <span>Suspend</span>
+              </button>
+            )}
+
+            {pharmacy.status === "Suspended" && (
+              <button
+                onClick={() => onActivate(pharmacy)}
+                className="flex-1 min-w-[100px] bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-1"
+              >
+                <Play size={16} />
+                <span>Activate</span>
+              </button>
+            )}
           </div>
-
-          
         </div>
       </div>
-
+     
       {selectedPharmacy && (
-        <ViewPharmacy pharmacy={selectedPharmacy} 
-        onClose={() => setSelectedPharmacy(null)} 
-        onAcceptRegistration={(pharmacy) => {
+        <ViewPharmacy
+          pharmacy={selectedPharmacy}
+          onClose={() => setSelectedPharmacy(null)}
+          onAcceptRegistration={(pharmacy) => {
             onAcceptRegistration(pharmacy);
-            setSelectedPharmacy(null);  // ← This closes the popup
-        }}
-        onRejectRegistration={(pharmacy, reason) => {
+            setSelectedPharmacy(null); // ← This closes the popup
+          }}
+          onRejectRegistration={(pharmacy, reason) => {
             onRejectRegistration(pharmacy, reason);
-            setSelectedPharmacy(null);  // ← This closes the popup
-        }}
-    />
-)}
-
+            setSelectedPharmacy(null); // ← This closes the popup
+          }}
+        />
+      )}
       {suspendPopup && (
-            <SuspendPharmacy
-                pharmacy={suspendPopup}
-                reason={suspendReason}
-                setReason={setSuspendReason}
-                onCancel={() => setSuspendPopup(null)}
-                onConfirm={handleSuspendConfirm}
-            />
-            )}
-
-        {activatePopup && (
-            <ActivePharmacy
-                pharmacy={activatePopup}
-                onCancel={() => setActivatePopup(null)}
-                onConfirm={handleActivateConfirm}
-            />
-            )}
-
-    </div>
+        <SuspendPharmacy
+          pharmacy={suspendPopup}
+          reason={suspendReason}
+          setReason={setSuspendReason}
+          onCancel={() => setSuspendPopup(null)}
+          onConfirm={handleSuspendConfirm}
+        />
+      )}
+      {activatePopup && (
+        <ActivePharmacy
+          pharmacy={activatePopup}
+          onCancel={() => setActivatePopup(null)}
+          onConfirm={handleActivateConfirm}
+        />
+      )}
+    </>
   );
 };
 
