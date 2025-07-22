@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Send, Save, X, Plus, Minus } from 'lucide-react';
+import { Trash2, Send, Save, X, Plus, Minus, CreditCard } from 'lucide-react';
 import '../pages/index-pharmacist.css';
 
 const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSaveDraft, onAddMedicine }) => {
@@ -9,6 +9,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
   const [modalQuantity, setModalQuantity] = useState(1);
   const [modalDosage, setModalDosage] = useState('');
   const [modalPrice, setModalPrice] = useState(0);
+  const [cardPaymentEnabled, setCardPaymentEnabled] = useState(false);
 
   const calculateTotal = () => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -133,6 +134,41 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
             />
           </div>
+
+          {/* Payment Settings Toggle */}
+            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <CreditCard className="h-4 w-4 text-yellow-600" />
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-yellow-800">Card Payment Settings</h5>
+                    <p className="text-sm text-yellow-700">
+                      {cardPaymentEnabled ? 'Card payments are restricted for customers' : 'Card payments are enabled for customers'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setCardPaymentEnabled(!cardPaymentEnabled)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 ${
+                      cardPaymentEnabled ? 'bg-red-500' : 'bg-gray-300'
+                    }`}
+                  >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                      cardPaymentEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                  </button>
+                  <span className="ml-3 text-sm font-medium text-gray-700">
+                    {cardPaymentEnabled ? 'Disabled' : 'Enabled'}
+                  </span>
+                </div>
+              </div>
+            </div>          
 
           {/* Total and Actions */}
           {items.length > 0 && (
