@@ -78,7 +78,7 @@ const otcProducts = [
     description: "Pain reliever and fever reducer",
     image: paracetamolImg,
     rating: 4.5,
-    price: "$8.99",
+    price: "Rs.8.99",
     category: "Pain Relief",
   },
   {
@@ -87,7 +87,7 @@ const otcProducts = [
     description: "Anti-inflammatory pain relief",
     image: ibuprofenImg,
     rating: 4.3,
-    price: "$12.99",
+    price: "Rs.12.99",
     category: "Pain Relief",
   },
   {
@@ -96,7 +96,7 @@ const otcProducts = [
     description: "Immune system support",
     image: vitaminCImg,
     rating: 4.7,
-    price: "$15.99",
+    price: "Rs.15.99",
     category: "Vitamins",
   },
   {
@@ -105,7 +105,7 @@ const otcProducts = [
     description: "Relieves cough and throat irritation",
     image: coughSyrupImg,
     rating: 4.2,
-    price: "$9.99",
+    price: "Rs.9.99",
     category: "Cold & Flu",
   },
   {
@@ -114,7 +114,7 @@ const otcProducts = [
     description: "Relieves heartburn and indigestion",
     image: antacidImg,
     rating: 4.4,
-    price: "$7.99",
+    price: "Rs.7.99",
     category: "Digestive",
   },
   {
@@ -123,7 +123,7 @@ const otcProducts = [
     description: "Reduces allergy symptoms",
     image: allergyReliefImg,
     rating: 4.6,
-    price: "$14.99",
+    price: "Rs.14.99",
     category: "Allergy",
   },
 ];
@@ -574,12 +574,24 @@ const OtcProducts = () => {
 
         {/* Call to Action */}
         <div className="text-center">
-          <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-medium rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl">
-            <ShoppingCart size={18} />
-            Browse All Products
-            <ChevronRight size={16} />
-          </button>
-        </div>
+          <button 
+            onClick={() => {
+              navigate('/otc');
+      // Scroll to top after navigation
+              setTimeout(() => {
+                window.scrollTo({ 
+                  top: 0, 
+                  behavior: 'smooth' 
+              });
+              }, 100);
+        }}
+        className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-medium rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+      >
+        <ShoppingCart size={18} />
+        Browse All Products
+        <ChevronRight size={16} />
+      </button>
+      </div>
       </div>
     </section>
   );
