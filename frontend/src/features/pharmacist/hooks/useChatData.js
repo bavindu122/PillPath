@@ -235,7 +235,6 @@ export const useChatData = () => {
             sender: 'pharmacist',
             text: 'Let me check your prescription details. I\'ll need to verify with your doctor for the refill authorization.',
             timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
-            timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
             isRead: true
           }
         ]
