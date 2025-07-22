@@ -10,7 +10,7 @@ import {
   Pill,
   CreditCard
 } from "lucide-react";
-import PaymentModal from "../../../components/UIs/PaymentModal";
+import PaymentModal from "../components/PaymentModal";
 
 const Activities = () => {
   const navigate = useNavigate();
@@ -349,7 +349,7 @@ const Activities = () => {
                             <div className="text-center">
                               <div className="text-white/60 text-xs mb-1">Total:</div>
                               <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
-                                ${calculateTotalPrice(pharmacy.medications).toFixed(2)}
+                                Rs. {calculateTotalPrice(pharmacy.medications).toFixed(2)}
                               </div>
                             </div>
                           </div>
