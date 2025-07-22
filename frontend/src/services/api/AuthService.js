@@ -13,8 +13,14 @@ class ApiService {
       ...options,
     };
 
-    // Add auth token if available
-    const token = localStorage.getItem('auth_token');
+    // Add auth token if available (check both customer and admin tokens)
+    let token = null;
+    if (options.isAdmin) {
+      token = localStorage.getItem('admin_token');
+    } else {
+      token = localStorage.getItem('auth_token');
+    }
+    
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -63,9 +69,8 @@ class ApiService {
     }
   }
 
-  // ✅ Customer registration - Updated to match exact DTO structure
+  // ✅ Customer registration
   async registerCustomer(userData) {
-    // ✅ Include ALL fields that match CustomerRegistrationRequest DTO
     const registrationRequest = {
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -73,7 +78,7 @@ class ApiService {
       phone: userData.phone,
       password: userData.password,
       dateOfBirth: userData.dateOfBirth,
-      termsAccepted: userData.termsAccepted // ✅ Now included since it's in the DTO
+      termsAccepted: userData.termsAccepted
     };
 
     console.log('Sending customer registration request:', registrationRequest);
@@ -89,16 +94,31 @@ class ApiService {
     return PharmacyService.registerPharmacy(pharmacyData);
   }
 
-  // ✅ Customer login - Updated endpoint
-  async login(credentials) {
+  // ✅ Customer login
+  async loginCustomer(credentials) {
     const loginRequest = {
       email: credentials.email,
       password: credentials.password
     };
 
-    console.log('Sending login request:', loginRequest);
+    console.log('Sending customer login request:', loginRequest);
     
     return this.request('customers/login', {
+      method: 'POST',
+      body: loginRequest,
+    });
+  }
+
+  // ✅ Pharmacy Admin login - FIXED
+  async loginPharmacyAdmin(credentials) {
+    const loginRequest = {
+      email: credentials.email,
+      password: credentials.password
+    };
+
+    console.log('Sending pharmacy admin login request:', loginRequest);
+    
+    return this.request('pharmacies/login', {
       method: 'POST',
       body: loginRequest,
     });
@@ -111,6 +131,14 @@ class ApiService {
     });
   }
 
+  // ✅ Get pharmacy admin profile - FIXED
+  async getPharmacyAdminProfile() {
+    return this.request('pharmacies/profile', {
+      method: 'GET',
+      isAdmin: true
+    });
+  }
+
   // ✅ Update customer profile
   async updateUserProfile(profileData) {
     return this.request('customers/profile', {
@@ -119,11 +147,55 @@ class ApiService {
     });
   }
 
+  // ✅ Update pharmacy admin profile - FIXED
+  async updatePharmacyAdminProfile(profileData) {
+    return this.request('pharmacies/profile', {
+      method: 'PUT',
+      body: profileData,
+      isAdmin: true
+    });
+  }
+
   // ✅ Customer logout
-  async logout() {
+  async logoutCustomer() {
     return this.request('customers/logout', {
       method: 'POST',
     });
+  }
+
+  // ✅ Pharmacy admin logout - FIXED
+  async logoutPharmacyAdmin() {
+    return this.request('pharmacies/logout', {
+      method: 'POST',
+      isAdmin: true
+    });
+  }
+
+  // ✅ Generic login method
+  async login(credentials, userType = 'customer') {
+    if (userType === 'pharmacy-admin') {
+      return this.loginPharmacyAdmin(credentials);
+    } else {
+      return this.loginCustomer(credentials);
+    }
+  }
+
+  // ✅ Generic logout method
+  async logout(userType = 'customer') {
+    if (userType === 'pharmacy-admin') {
+      return this.logoutPharmacyAdmin();
+    } else {
+      return this.logoutCustomer();
+    }
+  }
+
+  // ✅ Generic profile method
+  async getProfile(userType = 'customer') {
+    if (userType === 'pharmacy-admin') {
+      return this.getPharmacyAdminProfile();
+    } else {
+      return this.getUserProfile();
+    }
   }
 }
 

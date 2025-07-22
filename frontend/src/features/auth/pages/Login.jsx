@@ -8,6 +8,8 @@ import {
   LogIn,
   Mail,
   AlertCircle,
+  Building2,
+  Users,
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,10 +19,11 @@ import { useAuth } from "../../../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loading, error, isAuthenticated } = useAuth();
+  const { login, loading, error, isAuthenticated, userType } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [loginType, setLoginType] = useState('customer'); // 'customer' or 'pharmacy-admin'
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,12 +36,18 @@ const Login = () => {
     return () => setMounted(false);
   }, []);
 
-  // Redirect if already authenticated
+  // ✅ Enhanced redirect logic based on user type
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/customer"); // Navigate to the customer route
+    if (isAuthenticated && userType) {
+      console.log('User authenticated, redirecting...', { userType });
+      if (userType === 'customer') {
+        navigate("/customer");
+      } else if (userType === 'pharmacy-admin') {
+        navigate("/pharmacy-admin");
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, userType, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -51,6 +60,16 @@ const Login = () => {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
     if (submitError) setSubmitError("");
+  };
+
+  // ✅ Fixed login type toggle with proper state management
+  const handleLoginTypeToggle = () => {
+    const newType = loginType === 'customer' ? 'pharmacy-admin' : 'customer';
+    console.log('Toggling login type from', loginType, 'to', newType);
+    setLoginType(newType);
+    setFormData({ email: "", password: "" });
+    setErrors({});
+    setSubmitError("");
   };
 
   const validate = () => {
@@ -70,6 +89,7 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ Fixed login handler with explicit type checking
   const handleSignIn = async (e) => {
     e.preventDefault();
 
@@ -77,18 +97,53 @@ const Login = () => {
 
     try {
       setSubmitError("");
-      const response = await login(formData);
-
-      // Navigation will be handled by the useEffect above
+      
+      // ✅ Explicit check and log of current login type
+      console.log('Current loginType state:', loginType);
+      console.log(`Attempting ${loginType} login with:`, formData);
+      
+      // ✅ Use the current loginType state directly
+      const currentLoginType = loginType;
+      const response = await login(formData, currentLoginType);
+      
       console.log("Login successful:", response);
+      
+      // Navigation will be handled by the useEffect above
     } catch (error) {
+      console.error('Login failed:', error);
       setSubmitError(error.message || "Login failed. Please try again.");
     }
   };
 
+  // ✅ Get dynamic content based on login type
+  const getLoginContent = () => {
+    if (loginType === 'pharmacy-admin') {
+      return {
+        title: "Pharmacy Admin Portal",
+        subtitle: "Manage your <span class='text-secondary-green'>pharmacy</span> operations",
+        icon: Building2,
+        color: "text-blue-500",
+        gradient: "from-blue-500/90 to-blue-600",
+        hoverGradient: "hover:from-blue-600 hover:to-indigo-600/70",
+      };
+    } else {
+      return {
+        title: "Customer Portal",
+        subtitle: "Your <span class='text-secondary-green'>health</span> journey starts <span class='text-accent-purple'>here</span>",
+        icon: User,
+        color: "text-secondary",
+        gradient: "from-secondary/90 to-secondary",
+        hoverGradient: "hover:from-secondary hover:to-accent/70",
+      };
+    }
+  };
+
+  const content = getLoginContent();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden px-4 py-25">
       <Navbar />
+      
       {/* Animated background elements */}
       <div className="absolute top-10 left-10 w-96 h-96 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
       <div className="absolute top-32 right-20 w-80 h-80 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
@@ -114,6 +169,53 @@ const Login = () => {
         <div className="absolute top-[5%] bottom-[5%] left-0 w-[1px] bg-white/20"></div>
         <div className="absolute top-[5%] bottom-[5%] right-0 w-[1px] bg-black/5"></div>
 
+        {/* ✅ Enhanced Login Type Toggle with explicit state display */}
+        <div className="w-full flex items-center justify-center mb-4 relative z-10 animate-fade-in-up delay-100">
+          <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 border border-white/20">
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Customer button clicked, current type:', loginType);
+                  if (loginType !== 'customer') {
+                    handleLoginTypeToggle();
+                  }
+                }}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  loginType === 'customer'
+                    ? 'bg-white/20 text-white shadow-sm'
+                    : 'text-white/60 hover:text-white/80'
+                }`}
+              >
+                <Users size={16} />
+                <span>Customer</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Pharmacy Admin button clicked, current type:', loginType);
+                  if (loginType !== 'pharmacy-admin') {
+                    handleLoginTypeToggle();
+                  }
+                }}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  loginType === 'pharmacy-admin'
+                    ? 'bg-white/20 text-white shadow-sm'
+                    : 'text-white/60 hover:text-white/80'
+                }`}
+              >
+                <Building2 size={16} />
+                <span>Pharmacy Admin</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ Debug info - remove this in production */}
+        <div className="text-xs text-white/60 text-center mb-2">
+          Current Login Type: {loginType}
+        </div>
+
         {/* Logo and branding */}
         <div className="flex flex-col items-center mb-1 relative z-10">
           <img
@@ -121,10 +223,10 @@ const Login = () => {
             alt="icon"
             className="w-20 h-20 sm:w-28 sm:h-28 md:w-34 md:h-34 filter drop-shadow-lg animate-fade-in-scale"
           />
-          <p className="text-light text-sm mt-1 animate-fade-in-up delay-200">
-            Your <span className="text-secondary-green">health</span> journey
-            starts <span className="text-accent-purple">here</span>
-          </p>
+          <p 
+            className="text-light text-sm mt-1 animate-fade-in-up delay-200"
+            dangerouslySetInnerHTML={{ __html: content.subtitle }}
+          />
 
           {/* Animated rings */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
@@ -157,7 +259,7 @@ const Login = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
+                placeholder={`Enter your ${loginType === 'pharmacy-admin' ? 'admin ' : ''}email`}
                 value={formData.email}
                 onChange={handleChange}
                 className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300 ${
@@ -222,14 +324,14 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Sign in button */}
+          {/* ✅ Dynamic Sign in button with explicit type display */}
           <div className="w-full animate-fade-in-up delay-600">
             <GradientButton
-              text={loading ? "Signing In..." : "Sign In"}
+              text={loading ? "Signing In..." : `Sign In as ${loginType === 'pharmacy-admin' ? 'Pharmacy Admin' : 'Customer'}`}
               icon={LogIn}
               iconSize={18}
-              gradient="from-secondary/90 to-secondary"
-              hoverGradient="hover:from-secondary hover:to-accent/70"
+              gradient={content.gradient}
+              hoverGradient={content.hoverGradient}
               type="submit"
               disabled={loading}
               className={`${loading ? "opacity-80 pointer-events-none" : ""}`}
@@ -237,98 +339,120 @@ const Login = () => {
           </div>
         </form>
 
-        {/* Social login divider */}
-        <div className="flex items-center w-full my-1 relative z-10 animate-fade-in-up delay-700">
-          <div className="flex-1 h-px bg-white/20"></div>
-          <span className="text-muted text-xs sm:text-sm px-4">
-            Or continue with
-          </span>
-          <div className="flex-1 h-px bg-white/20"></div>
-        </div>
-
-        {/* Enhanced Social login buttons */}
-        <div className="flex gap-4 relative z-10 animate-fade-in-up delay-800">
-          {/* Google */}
-          <button
-            type="button"
-            className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
-            disabled={loading}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 relative z-10"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
+        {/* ✅ Conditional Social login for customers only */}
+        {loginType === 'customer' && (
+          <>
+            {/* Social login divider */}
+            <div className="flex items-center w-full my-1 relative z-10 animate-fade-in-up delay-700">
+              <div className="flex-1 h-px bg-white/20"></div>
+              <span className="text-muted text-xs sm:text-sm px-4">
+                Or continue with
+              </span>
+              <div className="flex-1 h-px bg-white/20"></div>
             </div>
-          </button>
 
-          {/* Apple */}
-          <button
-            type="button"
-            className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
-            disabled={loading}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-white relative z-10"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+            {/* Enhanced Social login buttons */}
+            <div className="flex gap-4 relative z-10 animate-fade-in-up delay-800">
+              {/* Google */}
+              <button
+                type="button"
+                className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
+                disabled={loading}
               >
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-            </div>
-          </button>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 relative z-10"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                </div>
+              </button>
 
-          {/* Facebook */}
-          <button
-            type="button"
-            className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
-            disabled={loading}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 relative z-10"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+              {/* Apple */}
+              <button
+                type="button"
+                className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
+                disabled={loading}
               >
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-            </div>
-          </button>
-        </div>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-white relative z-10"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                  </svg>
+                </div>
+              </button>
 
-        {/* Create account */}
-        <div className="w-full mt-2 relative z-10 animate-fade-in-up delay-900">
-          <p className="text-muted text-xs sm:text-sm text-center">
-            Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="text-secondary-green font-medium hover:underline transition-all duration-200"
-            >
-              Create Account
-            </Link>
-          </p>
-        </div>
+              {/* Facebook */}
+              <button
+                type="button"
+                className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
+                disabled={loading}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 relative z-10"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  </svg>
+                </div>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ✅ Conditional Create account link for customers only */}
+        {loginType === 'customer' && (
+          <div className="w-full mt-2 relative z-10 animate-fade-in-up delay-900">
+            <p className="text-muted text-xs sm:text-sm text-center">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="text-secondary-green font-medium hover:underline transition-all duration-200"
+              >
+                Create Account
+              </Link>
+            </p>
+          </div>
+        )}
+
+        {/* ✅ Pharmacy admin specific note */}
+        {loginType === 'pharmacy-admin' && (
+          <div className="w-full mt-2 relative z-10 animate-fade-in-up delay-900">
+            <p className="text-muted text-xs sm:text-sm text-center">
+              Need pharmacy admin access?{" "}
+              <Link
+                to="/register"
+                className="text-secondary-green font-medium hover:underline transition-all duration-200"
+              >
+                Register Your Pharmacy
+              </Link>
+            </p>
+          </div>
+        )}
 
         {/* Medical/Pharmacy themed floating elements */}
         <div className="absolute top-[15%] right-[10%] w-8 h-4 bg-secondary/30 rounded-full rotate-45 animate-pulse-slow"></div>
