@@ -159,7 +159,7 @@ const FindPharmacy = () => {
 
             {/* Prescription Upload Status and Selected Pharmacies Counter - Side by Side */}
             {isFromPrescriptionUpload && (
-              <div className="mt-4 flex flex-col md:flex-row justify-start gap-6 max-w-4xl mx-auto md:mx-0">
+              <div className="mt-4 flex flex-col md:flex-row justify-between items-start gap-6 w-full max-w-7xl mx-auto md:mx-0">
                 {/* Prescription Upload Status */}
                 {prescriptionData && (
                   <div className="w-[300px] p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
@@ -177,24 +177,26 @@ const FindPharmacy = () => {
 
                 {/* Selected Pharmacies Counter */}
                 {selectedPharmacies.length > 0 && (
-                  <div className="w-[460px] ml-auto p-3 bg-blue-500/20 backdrop-blur-md rounded-xl border border-blue-300/30 self-start md:self-auto">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-blue-400" />
-                        <span className="text-white font-medium">
-                          {selectedPharmacies.length} Pharmacy(ies) Selected
-                        </span>
+                  <div className="w-[480px] p-6 bg-blue-500/20 backdrop-blur-md rounded-xl border border-blue-300/30 self-start md:self-auto">
+                    <div className="flex items-center justify-between h-full">
+                      <div className="flex items-center space-x-2 gap-2">
+                        <MapPin className="h-5 w-5 text-blue-400" />
+                        <div className="flex flex-col">
+                          <span className="text-white font-medium">
+                            {selectedPharmacies.length} Pharmacy(ies) Selected
+                          </span>
+                          <div className="text-white/60 text-sm">
+                            {selectedPharmacies.map(p => p.name).join(", ")}
+                          </div>
+                        </div>
                       </div>
                       <button
                         onClick={handleUploadToPharmaices}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2"
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2 self-center"
                       >
                         <Upload className="h-4 w-4" />
                         <span>Upload</span>
                       </button>
-                    </div>
-                    <div className="mt-2 text-white/60 text-sm">
-                      {selectedPharmacies.map(p => p.name).join(", ")}
                     </div>
                   </div>
                 )}
@@ -327,6 +329,8 @@ const FindPharmacy = () => {
                   setSelectedPharmacy={setSelectedPharmacy}
                   currentLocation={currentLocation}
                   viewMode={viewMode}
+                  isMultiSelect={isFromPrescriptionUpload}
+                  selectedPharmacies={selectedPharmacies}
                 />
               </div>
             )}
