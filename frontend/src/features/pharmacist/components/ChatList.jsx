@@ -1,5 +1,6 @@
 import React from 'react';
 import ChatConversationCard from './ChatConversationCard';
+import { ScrollContainer } from '../../../components/UIs';
 
 const ChatList = ({ conversations, currentConversation, onSelectConversation }) => {
   if (conversations.length === 0) {
@@ -27,9 +28,13 @@ const ChatList = ({ conversations, currentConversation, onSelectConversation }) 
           Conversations ({conversations.length})
         </h3>
       </div>
-      <div className="max-h-96 overflow-y-auto">
-        <div className="space-y-0">
-          {conversations.map((conversation) => (
+      <ScrollContainer 
+        maxHeight="384px" 
+        scrollbarTheme="default"
+        scrollbarWidth="6px"
+        className="space-y-0"
+      >
+        {conversations.map((conversation) => (
             <ChatConversationCard
               key={conversation.id}
               conversation={conversation}
@@ -37,8 +42,7 @@ const ChatList = ({ conversations, currentConversation, onSelectConversation }) 
               onSelect={() => onSelectConversation(conversation)}
             />
           ))}
-        </div>
-      </div>
+        </ScrollContainer>
     </div>
   );
 };

@@ -18,6 +18,7 @@ import {
   Trash2
 } from "lucide-react";
 import EditProfileModal from "../components/EditProfileModal";
+import { ModalScrollContainer } from "../../../components/UIs";
 
 
 const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
@@ -170,8 +171,8 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-8">
+          <ModalScrollContainer maxHeight="calc(95vh - 300px)">
+            <div className="space-y-6">
             {activeTab === "overview" && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -439,7 +440,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
               </motion.div>
             )}
           </div>
-          </div>
+          </ModalScrollContainer>
 
           {/* Modal Footer */}
           <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0 rounded-b-3xl">
