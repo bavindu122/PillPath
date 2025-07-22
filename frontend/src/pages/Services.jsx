@@ -381,7 +381,7 @@ const Services = () => {
       <Navbar />
       {/* Hero Section with Enhanced Glassmorphism */}
       {/* Hero Section with Enhanced Glassmorphism and 3D Model */}
-      <section className="relative overflow-hidden pt-10 pb-10">
+      <section className="relative overflow-hidden pt-20 pb-10">
         {/* Updated background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] -z-10"></div>
         <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-3xl animate-pulse-slow"></div>

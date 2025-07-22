@@ -26,6 +26,7 @@ import CustomerSidebar from "../components/CustomerSidebar";
 import PrescriptionUploadModal from "../../../components/Prescription/PrescriptionUploadModal";
 import { Link } from "react-router-dom";
 import { useCustomerModals } from "../hooks";
+import { useAuth } from "../../../hooks/useAuth";
 
 const CustomerProfile = ({ removeBg = false }) => {
   const {
@@ -35,16 +36,17 @@ const CustomerProfile = ({ removeBg = false }) => {
     setShowProfileModal,
     setShowEditProfileModal,
     openUploadModal,
-    closeUploadModal
+    closeUploadModal,
   } = useCustomerModals();
-  
-  const userName = "Senuja Udugampola"; // Replace with actual user name logic
+
+  const { user } = useAuth();
 
   return (
     <section
       className={`min-h-screen flex ${
-        removeBg ? "" : "bg-gradient-to-br from-primary via-primary-hover to-accent"
-
+        removeBg
+          ? ""
+          : "bg-gradient-to-br from-primary via-primary-hover to-accent"
       } relative overflow-hidden`}
     >
       {!removeBg && (
@@ -68,36 +70,38 @@ const CustomerProfile = ({ removeBg = false }) => {
               <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
                 <div className="relative">
                   <img
-                    src={assets.profile_pic}
+                    src={user?.profilePictureUrl || assets.profile_pic}
                     alt="User profile picture"
                     className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/30 shadow-lg animate-fade-in-scale"
+                    onError={(e) => {
+                      // Fallback to default image if user's profile picture fails to load
+                      e.target.src = assets.profile_pic;
+                    }}
                   />
-                  
                 </div>
 
                 <div className="flex-1 text-left">
                   <h1 className="text-2xl md:text-3xl text-white font-bold mb-2 animate-fade-in-up delay-200">
                     Welcome back,{" "}
-                    <span className="text-gradient-secondary">{userName}!</span>
+                    <span className="text-gradient-secondary">
+                      {user?.fullName || user?.firstName || "Customer"}!
+                    </span>
                   </h1>
                   <p className="text-white/80 mb-6 animate-fade-in-up delay-300">
                     Manage your prescriptions and health with ease from your
                     personalized dashboard
                   </p>
-
                   {/* Quick action buttons */}
                   <div className="flex flex-wrap gap-3 animate-fade-in-up delay-400">
-                    <Button 
+                    <Button
                       className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg"
                       onClick={openUploadModal}
                     >
                       <Upload size={16} /> Upload Prescription
                     </Button>
-                    <Link to="/find-pharmacy?from=dashboard">
-                      <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                        <MapPin size={16} /> Find Pharmacy
-                      </Button>
-                    </Link>
+                    <Button className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                      <MapPin size={16} /> Find Pharmacy
+                    </Button>
                     <Link to="/otc-store">
                       <Button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
                         <ShoppingBag size={16} /> Browse OTC
@@ -114,91 +118,8 @@ const CustomerProfile = ({ removeBg = false }) => {
                   <Pencil size={16} /> Edit Profile
                 </Button>
               </div>
-
-              {/* Subtle divider */}
-              <div className="w-full h-px bg-white/10 my-6"></div>
-
-              {/* Stats row */}
-              {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up delay-500">
-          
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="bg-blue-600/20 p-2 rounded-lg group-hover:bg-blue-500/30 transition-colors">
-                      <Pill size={18} className="text-blue-200" />
-                    </div>
-                    <div className="text-white text-2xl font-bold">2</div>
-                  </div>
-                  <p className="text-white/100 text-sm">Active Prescriptions</p>
-                  <div className="mt-2 flex items-center">
-                    <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-blue-400 to-blue-600 h-1 rounded-full w-3/4 animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="bg-orange-800/20 p-2 rounded-lg group-hover:bg-orange-500/30 transition-colors">
-                      <ShoppingBag size={18} className="text-orange-200" />
-                    </div>
-                    <div className="text-white text-2xl font-bold">1</div>
-                  </div>
-                  <p className="text-white/100 text-sm">Pending Orders</p>
-                  <div className="mt-2 flex items-center text-orange-300 text-xs">
-                    <div className="w-2 h-2 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
-                    In Progress
-                  </div>
-                </div>
-
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="bg-yellow-600/20 p-2 rounded-lg group-hover:bg-yellow-500/30 transition-colors">
-                      <Star
-                        size={18}
-                        className="text-yellow-400 fill-yellow-200"
-                      />
-                    </div>
-                    <div className="text-white text-2xl font-bold">1,247</div>
-                  </div>
-                  <p className="text-white/100 text-sm">Loyalty Points</p>
-                  <div className="mt-2 flex items-center text-yellow-300 text-xs">
-                    <Award size={12} className="mr-1" />
-                    Gold Member
-                  </div>
-                </div>
-
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-accent/30 transition-all duration-300 hover:scale-105 group cursor-pointer">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="bg-purple-500/20 p-2 rounded-lg group-hover:bg-purple-500/30 transition-colors">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-purple-200"
-                      >
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                      </svg>
-                    </div>
-                    <div className="text-white text-2xl font-bold">2</div>
-                  </div>
-                  <p className="text-white/100 text-sm">Family Members</p>
-                  <div className="mt-2 flex -space-x-1">
-                    <div className="w-5 h-5 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full border border-white/30"></div>
-                    <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full border border-white/30"></div>
-                  </div>
-                </div>
-              </div> */}
             </div>
-          </div>
+          </div>  
 
           {/* Main Sections in a 2-column grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -340,15 +261,9 @@ const CustomerProfile = ({ removeBg = false }) => {
       <EditProfileModal
         isOpen={showEditProfileModal}
         onClose={() => setShowEditProfileModal(false)}
-        userProfile={{
-          firstName: "Senuja",
-          lastName: "Udugampola",
-          email: "senuja@email.com",
-          phone: "+94 703034515",
-          // Add more user data here when available
-        }}
+        // Remove userProfile prop since we're getting it from useAuth now
       />
-      
+
       <PrescriptionUploadModal
         isOpen={isUploadModalOpen}
         onClose={closeUploadModal}
