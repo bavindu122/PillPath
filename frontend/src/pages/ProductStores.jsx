@@ -244,6 +244,11 @@ const ProductStores = () => {
   // Use selectedStoreState as selectedStore for compatibility
   const selectedStore = selectedStoreState;
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     // Get product data
     const productInfo = productData[productId];
