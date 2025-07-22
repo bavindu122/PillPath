@@ -19,9 +19,9 @@ const InventoryTable = ({ products, sortBy, sortOrder, onSort, onEditProduct }) 
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return 'Rs.' + new Intl.NumberFormat('en-LK', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(price);
   };
 

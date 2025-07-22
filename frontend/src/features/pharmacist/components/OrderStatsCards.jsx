@@ -1,18 +1,15 @@
 import React from 'react';
-import { ShoppingCart, Clock, CheckCircle, DollarSign, Package, TrendingUp, AlertCircle, FileText } from 'lucide-react';
+import { ShoppingCart, Banknote, CreditCard, DollarSign, FileText } from 'lucide-react';
 import '../pages/index-pharmacist.css';
 
 const OrderStatsCards = ({ stats }) => {
   // Icon mapping based on common order stats
   const getIcon = (title) => {
     const titleLower = title.toLowerCase();
-    if (titleLower.includes('total') || titleLower.includes('order')) return ShoppingCart;
-    if (titleLower.includes('pending') || titleLower.includes('waiting')) return Clock;
-    if (titleLower.includes('completed') || titleLower.includes('delivered')) return CheckCircle;
-    if (titleLower.includes('revenue') || titleLower.includes('value') || titleLower.includes('$')) return DollarSign;
-    if (titleLower.includes('product') || titleLower.includes('item')) return Package;
-    if (titleLower.includes('growth') || titleLower.includes('trend')) return TrendingUp;
-    if (titleLower.includes('urgent') || titleLower.includes('priority')) return AlertCircle;
+    if (titleLower.includes('order')) return ShoppingCart;
+    if (titleLower.includes('revenue') || titleLower.includes('$')) return DollarSign;
+    if (titleLower.includes('cash')) return Banknote;        // or Banknote
+    if (titleLower.includes('card')) return CreditCard;
     return FileText; // default icon
   };
 

@@ -117,8 +117,7 @@ const PrescriptionQueue = () => {
       subtitle="Review and process pending prescriptions"
       isLoading={isLoading}
       loadingMessage="Loading Prescription Queue..."
-      showBackButton={true}
-      onBack={() => navigate('/pharmacist/dashboard')}
+      showBackButton={false}
       headerActions={headerActions}
     >
       {/* Filters and Search */}

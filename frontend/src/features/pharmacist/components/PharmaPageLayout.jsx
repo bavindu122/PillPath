@@ -67,7 +67,7 @@ const PharmaPageLayout = ({
                     className="flex items-center space-x-2 sm:space-x-3 text-gray-600 hover:text-blue-600 transition-all duration-300 hover:bg-blue-50 px-3 sm:px-4 py-2 rounded-lg group w-fit"
                   >
                     <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 transition-transform duration-300" />
-                    <span className="font-medium text-sm sm:text-base">Back To Dashboard</span>
+                    <span className="font-medium text-sm sm:text-base">Back To Previous</span>
                   </button>
                 )}
 

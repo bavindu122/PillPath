@@ -78,18 +78,6 @@ const Sidebar = () => {
       icon: MessageSquare, 
       label: 'Chat',
       path: '/pharmacist/chat'
-    },
-    { 
-      id: 'reports', 
-      icon: BarChart3, 
-      label: 'Reports',
-      path: '#'
-    },
-    { 
-      id: 'settings', 
-      icon: Settings, 
-      label: 'Settings',
-      path: '#'
     }
   ];
 

@@ -116,7 +116,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Total</span>
-                        <span className="text-gray-700 font-medium">${order.total.toFixed(2)}</span>
+                        <span className="text-gray-700 font-medium">Rs.{order.total.toFixed(2)}</span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Date</span>

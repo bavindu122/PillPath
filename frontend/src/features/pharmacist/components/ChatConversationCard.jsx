@@ -115,7 +115,7 @@ const ChatConversationCard = ({ conversation, isSelected, onSelect }) => {
           {/* Prescription ID if available */}
           {prescriptionId && (
             <p className="text-xs mb-1" style={{ color: 'var(--pharma-text-secondary)' }}>
-              Rx #{prescriptionId}
+              {prescriptionId}
             </p>
           )}
 

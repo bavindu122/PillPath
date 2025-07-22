@@ -27,7 +27,7 @@ const InventoryStats = ({ totalProducts, lowStockCount, filteredCount }) => {
     },
     {
       title: "In Stock Value",
-      value: "$12,450",
+      value: "Rs.12,450/=",
       subtitle: "Total inventory value",
       icon: TrendingUp,
       color: "green"

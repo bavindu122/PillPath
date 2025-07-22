@@ -39,8 +39,7 @@ const Chat = () => {
         subtitle="Communicate with patients about prescriptions and inquiries"
         isLoading={true}
         loadingMessage="Loading Conversations..."
-        showBackButton={true}
-        onBack={() => navigate('/pharmacist/dashboard')}
+        showBackButton={false}
       />
     );
   }
@@ -50,8 +49,7 @@ const Chat = () => {
       <PharmaPageLayout
         title="Patient Chat"
         subtitle="Communicate with patients about prescriptions and inquiries"
-        showBackButton={true}
-        onBack={() => navigate('/pharmacist/dashboard')}
+        showBackButton={false}
       >
         <div className="rounded-lg p-6 mb-6" style={{ backgroundColor: 'var(--pharma-red-50)', borderColor: 'var(--pharma-red-200)' }}>
           <div className="flex items-center">
@@ -92,8 +90,7 @@ const Chat = () => {
       title="Patient Chat"
       subtitle="Communicate with patients about prescriptions and inquiries"
       isLoading={false}
-      showBackButton={true}
-      onBack={() => navigate('/pharmacist/dashboard')}
+      showBackButton={false}
       headerActions={headerActions}
     >
       <div className="space-y-6">

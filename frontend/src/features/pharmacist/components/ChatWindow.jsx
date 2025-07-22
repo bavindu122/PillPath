@@ -117,7 +117,7 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
               <div className="flex items-center space-x-2">
                 {prescriptionId && (
                   <span className="text-sm" style={{ color: 'var(--pharma-text-secondary)' }}>
-                    Rx #{prescriptionId}
+                    {prescriptionId}
                   </span>
                 )}
                 <span className="text-sm" style={{ color: 'var(--pharma-text-secondary)' }}>•</span>

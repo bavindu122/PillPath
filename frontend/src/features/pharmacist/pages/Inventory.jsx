@@ -52,8 +52,7 @@ const Inventory = () => {
         subtitle="Manage product prices and stock quantities"
         isLoading={true}
         loadingMessage="Loading Inventory..."
-        showBackButton={true}
-        onBack={() => navigate('/pharmacist/dashboard')}
+        showBackButton={false}
       />
     );
   }
@@ -63,8 +62,7 @@ const Inventory = () => {
       <PharmaPageLayout
         title="Inventory Management"
         subtitle="Manage product prices and stock quantities"
-        showBackButton={true}
-        onBack={() => navigate('/pharmacist/dashboard')}
+        showBackButton={false}
       >
         <div className="rounded-lg p-6 mb-6" style={{ backgroundColor: 'var(--pharma-red-50)', borderColor: 'var(--pharma-red-200)' }}>
           <div className="flex items-center">
@@ -88,8 +86,7 @@ const Inventory = () => {
       title="Inventory Management"
       subtitle="Manage product prices and stock quantities"
       isLoading={false}
-      showBackButton={true}
-      onBack={() => navigate('/pharmacist/dashboard')}
+      showBackButton={false}
       headerActions={headerActions}
     >
       <div className="space-y-6">
