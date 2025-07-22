@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronDown, User } from "lucide-react";
+import { ScrollContainer } from "../../../components/UIs";
 
 const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
   const [selectedMember, setSelectedMember] = useState("Select Family Member");
@@ -56,32 +57,18 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        <style>
-          {`
-            .past-order-modal-scroll::-webkit-scrollbar {
-              width: 8px;
-              background: transparent;
-            }
-            .past-order-modal-scroll::-webkit-scrollbar-thumb {
-              background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
-              border-radius: 8px;
-            }
-            .past-order-modal-scroll::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            .past-order-modal-scroll {
-              scrollbar-width: thin;
-              scrollbar-color: #22c55e #0000;
-            }
-          `}
-        </style>
-        <motion.div
-          className="bg-gradient-to-br from-blue-400/20 via-blue-600/20 to-blue-800/20 backdrop-blur-sm rounded-xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto past-order-modal-scroll"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          onClick={(e) => e.stopPropagation()}
+        <ScrollContainer
+          className="bg-gradient-to-br from-blue-400/20 via-blue-600/20 to-blue-800/20 backdrop-blur-sm rounded-xl border border-white/20 max-w-4xl w-full"
+          maxHeight="90vh"
+          scrollbarTheme="green"
+          scrollbarWidth="8px"
         >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
           {/* Modal Header */}
           <div className="flex items-center justify-between p-6 border-b border-white/10">
             <div className="text-center flex-1">
@@ -193,7 +180,8 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
               </div>
             </div>
           </div>
-        </motion.div>
+          </motion.div>
+        </ScrollContainer>
       </motion.div>
     </AnimatePresence>
   );

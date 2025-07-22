@@ -4,6 +4,7 @@ import Button from "./Button";
 import { useProfileForm } from "../hooks";
 import { useAuth } from "../../../hooks/useAuth";
 import { customerService } from "../../../services/api/CustomerService";
+import { ModalScrollContainer } from "../../../components/UIs";
 
 const EditProfileModal = ({ isOpen, onClose }) => {
   const { user, loading, updateUser } = useAuth();
@@ -331,7 +332,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         ) : (
           <>
             {/* Form Content - Scrollable */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+            <ModalScrollContainer>
               {/* Profile Picture Section */}
               <div className="mb-8 text-center">
                 <h3 className="text-lg font-semibold text-white mb-6 flex items-center justify-center gap-2">
@@ -531,7 +532,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                   <FormField label="Insurance ID" field="insuranceId" />
                 </div>
               </div>
-            </div>
+            </ModalScrollContainer>
 
             {/* Footer */}
             <div className="flex items-center justify-between p-6 border-t border-white/20 bg-white/5">
