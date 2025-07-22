@@ -16,7 +16,7 @@ const MobileFloatingNav = () => {
 
   return (
     <div className="block lg:hidden fixed bottom-4 left-4 right-4 z-50">
-      <div className="bg-white/90 backdrop-blur-lg shadow-xl rounded-xl border border-gray-100 p-2">
+      <div className="navbar-bg-mobile-menu rounded-xl border navbar-border-light p-2">
         <nav className="flex justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -31,13 +31,12 @@ const MobileFloatingNav = () => {
                 <div
                   className={`p-2 rounded-full transition-all duration-300 ${
                     isActive
-                      ? "bg-primary text-white shadow-md"
-                      : "text-gray-500 hover:text-primary"
+                      ? "navbar-blue-bg navbar-text-white shadow-md"
+                      : "navbar-text-secondary hover:navbar-blue-text"
                   }`}
                 >
                   <Icon size={20} />
                   
-                  {/* Notification dot example */}
                   {item.hasNotification && (
                     <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
@@ -45,14 +44,14 @@ const MobileFloatingNav = () => {
                 
                 <span
                   className={`text-[10px] mt-1 transition-all duration-300 ${
-                    isActive ? "text-primary font-medium" : "text-gray-500"
+                    isActive ? "navbar-blue-text font-medium" : "navbar-text-secondary"
                   }`}
                 >
                   {item.label}
                 </span>
                 
                 {isActive && (
-                  <span className="absolute -bottom-2 w-1 h-1 bg-primary rounded-full"></span>
+                  <span className="absolute -bottom-2 w-1 h-1 navbar-blue-bg rounded-full"></span>
                 )}
               </NavLink>
             );

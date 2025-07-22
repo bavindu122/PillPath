@@ -11,23 +11,23 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import GradientButton from "../../../components/UIs/GradientButton";
-import { useAuth } from "../../../hooks/useAuth";
 
 const CustomerForm = ({ onBack, onSubmit }) => {
-  const { register, loading, error } = useAuth();
+  // ✅ Updated form data to match CustomerRegistrationRequest DTO
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
     password: "",
-    confirmPassword: "",
+    confirmPassword: "", // UI only field
     dateOfBirth: "",
-    termsAccepted: false,
+    termsAccepted: false, // UI only field
   });
 
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -46,31 +46,35 @@ const CustomerForm = ({ onBack, onSubmit }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.firstName) newErrors.firstName = "First name is required";
-    if (!formData.lastName) newErrors.lastName = "Last name is required";
+    if (!formData.firstName.trim())
+      newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
 
-    if (!formData.email) {
+    if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
 
-    if (!formData.phone) newErrors.phone = "Phone number is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    if (!formData.dateOfBirth)
+    if (!formData.dateOfBirth) {
       newErrors.dateOfBirth = "Date of birth is required";
-    if (!formData.termsAccepted)
+    }
+
+    if (!formData.termsAccepted) {
       newErrors.termsAccepted = "You must accept the terms";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -82,17 +86,33 @@ const CustomerForm = ({ onBack, onSubmit }) => {
     if (!validate()) return;
 
     try {
+      setLoading(true);
       setSubmitError("");
 
-      // Prepare data for API (exclude confirmPassword)
-      const { confirmPassword, ...registrationData } = formData;
+      // ✅ Prepare data for backend (include termsAccepted since it's in DTO)
+      const registrationData = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        dateOfBirth: formData.dateOfBirth,
+        termsAccepted: formData.termsAccepted // ✅ Include since it's in DTO
+      };
 
-      const response = await register(registrationData, "customer");
-      onSubmit(response);
+      console.log("Submitting customer registration:", registrationData);
+
+      // Call parent's onSubmit which will use the register function from useAuth
+      await onSubmit(registrationData);
+      
     } catch (error) {
+      console.error("Registration error:", error);
       setSubmitError(error.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="w-full max-w-xl mx-auto bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-6 md:p-8 animate-fade-in">
@@ -104,9 +124,12 @@ const CustomerForm = ({ onBack, onSubmit }) => {
       </p>
 
       {/* Display submission error */}
-      {(submitError || error) && (
+      {submitError && (
         <div className="mb-4 p-3 bg-red-500/20 border border-red-500/40 rounded-lg">
-          <p className="text-red-200 text-sm">{submitError || error}</p>
+          <p className="text-red-200 text-sm flex items-center gap-2">
+            <Info size={16} />
+            {submitError}
+          </p>
         </div>
       )}
 
@@ -127,6 +150,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                   errors.firstName ? "border-red-400" : "border-white/30"
                 } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
                 placeholder="Enter first name"
+                disabled={loading}
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                 <User size={20} />
@@ -154,6 +178,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                   errors.lastName ? "border-red-400" : "border-white/30"
                 } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
                 placeholder="Enter last name"
+                disabled={loading}
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
                 <User size={20} />
@@ -182,6 +207,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 errors.email ? "border-red-400" : "border-white/30"
               } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
               placeholder="Enter your email"
+              disabled={loading}
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
               <Mail size={20} />
@@ -209,6 +235,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 errors.phone ? "border-red-400" : "border-white/30"
               } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
               placeholder="Enter phone number"
+              disabled={loading}
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
               <Phone size={20} />
@@ -217,6 +244,33 @@ const CustomerForm = ({ onBack, onSubmit }) => {
           {errors.phone && (
             <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
               <Info size={12} /> {errors.phone}
+            </p>
+          )}
+        </div>
+
+        {/* Date of Birth */}
+        <div className="relative group">
+          <label className="block text-white/90 text-sm font-medium mb-2">
+            Date of Birth <span className="text-secondary">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${
+                errors.dateOfBirth ? "border-red-400" : "border-white/30"
+              } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
+              disabled={loading}
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+              <Calendar size={20} />
+            </div>
+          </div>
+          {errors.dateOfBirth && (
+            <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+              <Info size={12} /> {errors.dateOfBirth}
             </p>
           )}
         </div>
@@ -236,6 +290,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 errors.password ? "border-red-400" : "border-white/30"
               } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
               placeholder="Create a password"
+              disabled={loading}
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
               <Lock size={20} />
@@ -263,6 +318,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 errors.confirmPassword ? "border-red-400" : "border-white/30"
               } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
               placeholder="Confirm your password"
+              disabled={loading}
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
               <Lock size={20} />
@@ -271,32 +327,6 @@ const CustomerForm = ({ onBack, onSubmit }) => {
           {errors.confirmPassword && (
             <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
               <Info size={12} /> {errors.confirmPassword}
-            </p>
-          )}
-        </div>
-
-        {/* Date of Birth */}
-        <div className="relative group">
-          <label className="block text-white/90 text-sm font-medium mb-2">
-            Date of Birth <span className="text-secondary">*</span>
-          </label>
-          <div className="relative">
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              className={`w-full rounded-xl bg-white/20 backdrop-blur-sm border ${
-                errors.dateOfBirth ? "border-red-400" : "border-white/30"
-              } placeholder-white/60 text-white pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:bg-white/25 transition-all duration-300`}
-            />
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-              <Calendar size={20} />
-            </div>
-          </div>
-          {errors.dateOfBirth && (
-            <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
-              <Info size={12} /> {errors.dateOfBirth}
             </p>
           )}
         </div>
@@ -315,6 +345,7 @@ const CustomerForm = ({ onBack, onSubmit }) => {
                 checked={formData.termsAccepted}
                 onChange={handleChange}
                 className="peer appearance-none w-5 h-5 border border-white/30 rounded checked:bg-secondary checked:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40 transition-all duration-300"
+                disabled={loading}
               />
               <Check
                 size={16}
