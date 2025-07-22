@@ -14,17 +14,35 @@ import {
   FileText,
   Activity,
   Edit,
-  Crown
+  Crown,
+  Trash2
 } from "lucide-react";
 import EditProfileModal from "../components/EditProfileModal";
 
 
-const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
+const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDeleteMember && selectedProfile) {
+      onDeleteMember(selectedProfile.id);
+      setShowDeleteConfirmation(false);
+      onClose();
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmation(false);
   };
 
   const handleMainModalClick = (e) => {
@@ -59,7 +77,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 rounded-full backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         onClick={handleMainModalClick}
       >
         <motion.div
@@ -431,25 +449,76 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose }) => {
 
           {/* Modal Footer */}
           <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0 rounded-b-3xl">
-            <div className="flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+            {!showDeleteConfirmation ? (
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Upload size={18} />
+                  Upload New Prescription
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Edit size={18} />
+                  Edit Profile
+                </motion.button>
+                {selectedProfile?.relation !== "Me" && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleDeleteClick}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-6 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} />
+                    Delete
+                  </motion.button>
+                )}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
               >
-                <Upload size={18} />
-                Upload New Prescription
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setIsEditModalOpen(true)}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
-              >
-                <Edit size={18} />
-                Edit Profile
-              </motion.button>
-            </div>
+                <div className="text-center">
+                  <div className="flex justify-center mb-3">
+                    <div className="bg-red-500/20 p-3 rounded-full">
+                      <Trash2 size={24} className="text-red-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Delete Family Member</h3>
+                  <p className="text-white/70 text-sm">
+                    Are you sure you want to delete <span className="font-medium text-white">{selectedProfile?.name}</span>? 
+                    This action cannot be undone and will remove all their prescription history.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCancelDelete}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-medium transition-all duration-300 border border-white/20"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleConfirmDelete}
+                    className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} />
+                    Delete Permanently
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </motion.div>
       </motion.div>
