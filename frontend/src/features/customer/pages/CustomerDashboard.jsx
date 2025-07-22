@@ -118,8 +118,11 @@ const CustomerProfile = ({ removeBg = false }) => {
                   <Pencil size={16} /> Edit Profile
                 </Button>
               </div>
+
+              {/* Subtle divider */}
+              <div className="w-full h-px bg-white/10 my-6"></div>
             </div>
-          </div>  
+          </div>
 
           {/* Main Sections in a 2-column grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -131,7 +134,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                   <span className="bg-blue-600/20 p-2 rounded-lg mr-2">
                     <Calendar size={20} className="text-blue-200" />
                   </span>
-                  Order Management
+                  Health Management
                   <Button className="ml-auto flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white">
                     <ChevronRight size={16} />
                   </Button>
@@ -242,7 +245,7 @@ const CustomerProfile = ({ removeBg = false }) => {
                     </span>
                     Nearby Pharmacies
                   </h2>
-                  <Link to="/find-pharmacy?from=dashboard">
+                  <Link to="/find-pharmacies">
                     <Button
                       size="sm"
                       className="bg-white/20 hover:bg-white/30 text-white text-xs"
@@ -252,6 +255,56 @@ const CustomerProfile = ({ removeBg = false }) => {
                   </Link>
                 </div>
                 <NearbyPharmaciesCard />
+              </div>
+
+              {/* Medication Reminders */}
+              <div className="bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-6 animate-fade-in-up delay-600">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl text-white font-bold flex items-center">
+                    <span className="bg-red-500/20 p-2 rounded-lg mr-2">
+                      <Bell size={20} className="text-red-400" />
+                    </span>
+                    Medication Reminders
+                  </h2>
+                  <Button
+                    size="sm"
+                    className="bg-white/20 hover:bg-white/30 text-white text-xs"
+                  >
+                    Add New
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-white font-medium">
+                          Metformin 500mg
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          8:00 AM & 8:00 PM
+                        </p>
+                      </div>
+                      <div className="bg-blue-500/20 rounded-lg p-2 h-fit">
+                        <Bell size={18} className="text-blue-400" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-white font-medium">
+                          Lisinopril 10mg
+                        </p>
+                        <p className="text-white/60 text-sm">9:00 AM</p>
+                      </div>
+                      <div className="bg-blue-500/20 rounded-lg p-2 h-fit">
+                        <Bell size={18} className="text-blue-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
