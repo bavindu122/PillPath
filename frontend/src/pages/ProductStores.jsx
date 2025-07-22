@@ -235,6 +235,37 @@ const ProductStores = () => {
     []
   );
 
+  // Helper function to parse delivery time to minutes for consistent comparison
+  const parseDeliveryTime = (deliveryTime) => {
+    if (!deliveryTime) return 9999;
+
+    const lowerTime = deliveryTime.toLowerCase();
+
+    // Handle special cases
+    if (lowerTime.includes("next day")) {
+      return 1440; // 24 hours in minutes
+    }
+    if (lowerTime.includes("24/7") || lowerTime.includes("same day")) {
+      return 0; // Immediate availability
+    }
+
+    // Extract numeric value and handle different formats
+    const numericMatch = deliveryTime.match(/\d+/);
+    if (!numericMatch) {
+      return 9999; // Unknown/invalid format goes to end
+    }
+
+    const parsed = parseInt(numericMatch[0]);
+
+    // Handle different time units
+    if (lowerTime.includes("hour")) {
+      return parsed * 60; // Convert hours to minutes
+    }
+
+    // Default assumption is minutes for values like "30 mins", "45", etc.
+    return isNaN(parsed) ? 9999 : parsed;
+  };
+
   // Helper to reset quantity when store changes
   const setSelectedStore = (store) => {
     setSelectedStoreState(store);
@@ -255,8 +286,8 @@ const ProductStores = () => {
     if (productInfo) {
       setProduct(productInfo);
     } else {
-      // Handle product not found
-      navigate("/404");
+      // Handle product not found - navigate to home page
+      navigate("/");
     }
   }, [productId, navigate]);
 
@@ -270,7 +301,9 @@ const ProductStores = () => {
     } else if (filterBy === "verified") {
       filtered = filtered.filter((store) => store.verified);
     } else if (filterBy === "fastDelivery") {
-      filtered = filtered.filter((store) => parseInt(store.deliveryTime) <= 30);
+      filtered = filtered.filter(
+        (store) => parseDeliveryTime(store.deliveryTime) <= 30
+      );
     }
 
     // Apply sorting
@@ -283,17 +316,9 @@ const ProductStores = () => {
         case "distance":
           return parseFloat(a.distance) - parseFloat(b.distance);
         case "deliveryTime":
-          // Helper function to normalize delivery time to minutes for sorting
-          const getDeliveryMinutes = (deliveryTime) => {
-            if (deliveryTime.toLowerCase().includes("next day")) {
-              return 1440; // 24 hours in minutes
-            }
-            const parsed = parseInt(deliveryTime);
-            return isNaN(parsed) ? 9999 : parsed; // Put unknown times at the end
-          };
           return (
-            getDeliveryMinutes(a.deliveryTime) -
-            getDeliveryMinutes(b.deliveryTime)
+            parseDeliveryTime(a.deliveryTime) -
+            parseDeliveryTime(b.deliveryTime)
           );
         default:
           return 0;
@@ -312,13 +337,6 @@ const ProductStores = () => {
   const handlePlaceOrder = () => {
     if (paymentMethod === "cash") {
       // Handle cash payment - simply close modal and confirm order
-      console.log("Order placed with cash payment:", {
-        product: product,
-        store: selectedStore,
-        quantity: quantity,
-        total: (selectedStore.price * quantity).toFixed(2),
-        paymentMethod: "cash",
-      });
       setShowOrderModal(false);
       // You can add navigation to order confirmation page or show success message
     } else {
@@ -329,14 +347,6 @@ const ProductStores = () => {
 
   const handleCardPayment = () => {
     // Handle card payment logic here
-    console.log("Order placed with card payment:", {
-      product: product,
-      store: selectedStore,
-      quantity: quantity,
-      total: (selectedStore.price * quantity).toFixed(2),
-      paymentMethod: "card",
-      cardDetails: cardDetails,
-    });
     setShowPaymentModal(false);
     setShowOrderModal(false);
     // Reset form
