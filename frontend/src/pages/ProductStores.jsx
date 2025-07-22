@@ -575,12 +575,12 @@ const ProductStores = () => {
                   <div className="text-right">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg font-bold text-white">
-                        ${store.price}
+                        Rs.{store.price}
                       </span>
                       {store.originalPrice > store.price && (
                         <>
                           <span className="text-sm text-gray-400 line-through">
-                            ${store.originalPrice}
+                            Rs.{store.originalPrice}
                           </span>
                           <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
                             {store.discount}% OFF
@@ -589,7 +589,7 @@ const ProductStores = () => {
                       )}
                     </div>
                     <div className="text-xs text-gray-400">
-                      + ${store.deliveryFee} delivery
+                      + Rs.{store.deliveryFee} delivery
                     </div>
                   </div>
 
@@ -643,7 +643,7 @@ const ProductStores = () => {
                 <div>
                   <span className="text-sm text-gray-400">Price per item</span>
                   <p className="text-white font-medium">
-                    ${selectedStore.price}
+                    Rs.{selectedStore.price}
                   </p>
                 </div>
                 <div>
@@ -693,7 +693,9 @@ const ProductStores = () => {
                 <div className="border-t border-white/20 pt-4">
                   <div className="flex justify-between text-lg font-bold text-white">
                     <span>Total:</span>
-                    <span>${(selectedStore.price * quantity).toFixed(2)}</span>
+                    <span>
+                      Rs.{(selectedStore.price * quantity).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -737,18 +739,18 @@ const ProductStores = () => {
                         {product.name} x {quantity}
                       </span>
                       <span>
-                        ${(selectedStore.price * quantity).toFixed(2)}
+                        Rs.{(selectedStore.price * quantity).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex justify-between text-gray-300">
                       <span>Delivery Fee</span>
-                      <span>${selectedStore.deliveryFee}</span>
+                      <span>Rs.{selectedStore.deliveryFee}</span>
                     </div>
                     <div className="border-t border-white/20 pt-2 mt-2">
                       <div className="flex justify-between text-white font-bold">
                         <span>Total</span>
                         <span>
-                          $
+                          Rs.
                           {(
                             selectedStore.price * quantity +
                             selectedStore.deliveryFee
@@ -870,7 +872,7 @@ const ProductStores = () => {
                   className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-600 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CreditCard size={16} />
-                  Pay $
+                  Pay Rs.
                   {(
                     selectedStore.price * quantity +
                     selectedStore.deliveryFee

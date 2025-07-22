@@ -14,10 +14,10 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  {/*if (!isAuthenticated) {
     // Redirect to admin login page with return url
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
-  }
+  }*/}
 
   return children;
 };
