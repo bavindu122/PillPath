@@ -13,12 +13,13 @@ import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
 import Navbar from "./components/Layout/Navbar";
 
-import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin"; 
+import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 import Customer from "./features/customer/pages/Customer";
 import FindPharmacy from "./pages/FindPharmacies/FindPharmacy";
 import Admin from "./features/admin/Admin";
 import PharmacyProfile from "./pages/FindPharmacies/PharmacyProfile";
+import ProductStores from "./pages/ProductStores";
 
 const App = () => {
   const location = useLocation();
@@ -30,7 +31,10 @@ const App = () => {
   return (
     <AuthProvider>
       <div>
-        {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isPharmacyAdminPath && <Navbar />}
+        {!isAdminPath &&
+          !isPharmacistPath &&
+          !isCustomerPath &&
+          !isPharmacyAdminPath && <Navbar />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -43,15 +47,19 @@ const App = () => {
           <Route path="/pharmacist/*" element={<Pharmacist />} />
           <Route path="/customer/*" element={<Customer />} />
           <Route path="/find-pharmacy" element={<FindPharmacy />} />
-          <Route 
-            path="/admin/*" 
+          <Route
+            path="/product-stores/:productId"
+            element={<ProductStores />}
+          />
+          <Route
+            path="/admin/*"
             element={
               <AdminAuthProvider>
                 <Admin />
               </AdminAuthProvider>
-            } 
+            }
           />
-          
+
           <Route
             path="/pharma-profile/:pharmacyId"
             element={<PharmacyProfile />}
@@ -59,12 +67,13 @@ const App = () => {
           <Route path="/pharma-profile" element={<PharmacyProfile />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
-        {!isAdminPath && !isPharmacistPath && !isCustomerPath && !isPharmacyAdminPath && <Footer />}
+        {!isAdminPath &&
+          !isPharmacistPath &&
+          !isCustomerPath &&
+          !isPharmacyAdminPath && <Footer />}
       </div>
     </AuthProvider>
   );
 };
-
-
 
 export default App;

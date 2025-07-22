@@ -255,6 +255,11 @@ const Otc = () => {
     setSelectedCategory(categoryId);
   };
 
+  const handleFindStoresClick = (e, productId) => {
+    e.stopPropagation(); // Prevent triggering the product click
+    navigate(`/product-stores/${productId}`);
+  };
+
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -726,7 +731,7 @@ const Otc = () => {
                           disabled={!product.inStock}
                         >
                           <ShoppingCart size={16} />
-                          {product.inStock ? "Add to Cart" : "Out of Stock"}
+                          {product.inStock ? "Find Stores" : "Out of Stock"}
                         </button>
                         <button className="p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-300">
                           <Heart size={16} className="text-white" />

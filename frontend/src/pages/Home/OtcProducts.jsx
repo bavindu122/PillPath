@@ -204,6 +204,11 @@ const OtcProducts = () => {
     navigate(`/otc-category/${categoryId}`);
   };
 
+  const handleFindStoresClick = (e, productId) => {
+    e.stopPropagation(); // Prevent triggering the product click
+    navigate(`/product-stores/${productId}`);
+  };
+
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -534,6 +539,7 @@ const OtcProducts = () => {
 
                     {/* Button */}
                     <button
+                      onClick={(e) => handleFindStoresClick(e, product.id)}
                       className={`flex items-center justify-center gap-2 w-full py-2 rounded-xl transition-all duration-300 text-xs ${
                         hoveredProduct === product.id
                           ? "bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg"
