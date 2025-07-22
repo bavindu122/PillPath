@@ -6,7 +6,7 @@ export const orderService = {
     
     return [
       {
-        id: 'RX-250710-01',
+        id: 'ORD-2025-001',
         patient: {
           name: 'Sarah Johnson',
           email: 'sarah.johnson@email.com',
@@ -28,7 +28,7 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-250627-02',
+        id: 'ORD-2025-002',
         patient: {
           name: 'Michael Chen',
           email: 'm.chen@email.com',
@@ -51,7 +51,7 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241226-03',
+        id: 'ORD-2024-003',
         patient: {
           name: 'Emma Davis',
           email: 'emma.davis@email.com',
@@ -72,7 +72,7 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241225-04',
+        id: 'ORD-2024-004',
         patient: {
           name: 'Robert Wilson',
           email: 'r.wilson@email.com',
@@ -94,7 +94,7 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241224-05',
+        id: 'ORD-2024-005',
         patient: {
           name: 'Lisa Thompson',
           email: 'l.thompson@email.com',
@@ -114,7 +114,7 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241223-06',
+        id: 'ORD-2024-006',
         patient: {
           name: 'David Martinez',
           email: 'd.martinez@email.com',

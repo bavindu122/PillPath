@@ -71,7 +71,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold pharma-text-dark">Processed Prescriptions</h3>
+        <h3 className="text-xl font-semibold pharma-text-dark">Processed Orders</h3>
         <div className="text-sm pharma-text-muted">
           Showing 1 to {Math.min(10, orders.length)} of {orders.length} results
         </div>
