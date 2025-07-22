@@ -9,6 +9,7 @@ import Prescription from './pages/Prescription';
 import WalletAndIncome from './pages/WalletAndIncome';
 import AdminLogin from './pages/AdminLogin';
 import AdminRoute from '../../components/ProtectedRoute/AdminRoute';
+import { ADMIN_ROUTES } from '../../constants/routes'; // ✅ Add this
 
 const Admin = () => {
   return (

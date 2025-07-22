@@ -1,3 +1,4 @@
+import { ADMIN_ROUTES, PUBLIC_ROUTES } from '../../../constants/routes';
 import React, { useState, useEffect } from "react";
 import {
   Eye,
@@ -35,7 +36,7 @@ const AdminLogin = () => {
   // ✅ Redirect if already authenticated - redirect to /admin (dashboard)
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/admin"); // ✅ Navigate to /admin which will redirect to /admin/overview
+      navigate(ADMIN_ROUTES.DASHBOARD); // ✅ Navigate to /admin which will redirect to /admin/overview
     }
   }, [isAuthenticated, navigate]);
 
@@ -79,12 +80,12 @@ const AdminLogin = () => {
 
       const response = await login(formData);
 
-      console.log("Admin login successful:", response);
+      console.log("Admin login successful:");
 
-      // ✅ Don't rely on response.success here since login() handles that
+
       // If login() doesn't throw an error, it was successful
       console.log("Redirecting to admin dashboard...");
-      navigate("/admin");
+      navigate(ADMIN_ROUTES.DASHBOARD);
     } catch (error) {
       console.error("Login failed:", error);
       setSubmitError(error.message || "Admin login failed. Please try again.");
