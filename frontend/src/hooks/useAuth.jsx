@@ -1,19 +1,19 @@
-import { useState, useContext, createContext, useEffect } from 'react';
-import ApiService from '../services/api/AuthService';
+import { useState, useContext, createContext, useEffect } from "react";
+import ApiService from "../services/api/AuthService";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('auth_token')); // Consistent naming
+  const [token, setToken] = useState(localStorage.getItem("auth_token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,11 +27,14 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       setLoading(true);
-      const userData = await ApiService.getUserProfile(token);
+      const userData = await ApiService.getUserProfile();
       setUser(userData);
     } catch (error) {
-      console.error('Auth check failed:', error);
-      logout();
+      console.error("Auth check failed:", error);
+      const errorCode = error.code || mapErrorMessageToCode(error.message);
+      if (errorCode === "INVALID_CREDENTIALS" || errorCode === "UNAUTHORIZED") {
+        logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -43,17 +46,28 @@ export const AuthProvider = ({ children }) => {
       setError(null);
 
       let response;
-      if (userType === 'customer') {
+      if (userType === "customer") {
         response = await ApiService.registerCustomer(userData);
-      } else {
-        response = await ApiService.registerPharmacy(userData);
-      }
 
-      // For customer registration, auto-login if token is returned
-      if (userType === 'customer' && response.token) {
-        setToken(response.token);
-        setUser(response.user);
-        localStorage.setItem('auth_token', response.token);
+        // ✅ Handle backend response format
+        if (response && response.success) {
+          // If backend returns token immediately upon registration
+          if (response.token) {
+            setToken(response.token);
+            setUser({
+              ...response.user || response.customer,
+              userType: 'customer'
+            });
+            localStorage.setItem("auth_token", response.token);
+          }
+        } else if (response && !response.success) {
+          // Handle registration failure
+          throw new Error(response.message || "Registration failed");
+        }
+      } else if (userType === "pharmacy") {
+        // ✅ For pharmacies, just register (no immediate login)
+        response = await ApiService.registerPharmacy(userData);
+        // Don't set token/user for pharmacy - they need admin approval
       }
 
       return response;
@@ -71,11 +85,19 @@ export const AuthProvider = ({ children }) => {
       setError(null);
 
       const response = await ApiService.login(credentials);
-      
-      if (response.token) {
-        setToken(response.token);
-        setUser(response.user);
-        localStorage.setItem('auth_token', response.token);
+
+      // ✅ Handle backend login response format
+      if (response && response.success) {
+        if (response.token) {
+          setToken(response.token);
+          setUser({
+            ...response.user || response.customer,
+            userType: 'customer'
+          });
+          localStorage.setItem("auth_token", response.token);
+        }
+      } else if (response && !response.success) {
+        throw new Error(response.message || "Login failed");
       }
 
       return response;
@@ -90,8 +112,16 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
     setError(null);
+  };
+
+  // ✅ Update user method
+  const updateUser = (updatedUserData) => {
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...updatedUserData,
+    }));
   };
 
   const value = {
@@ -102,13 +132,11 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    updateUser,
     checkAuthStatus,
     isAuthenticated: !!token,
+    userType: user?.userType || null,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

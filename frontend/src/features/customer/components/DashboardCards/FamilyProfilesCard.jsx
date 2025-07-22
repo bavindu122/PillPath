@@ -6,7 +6,7 @@ const FamilyProfilesCard = () => {
   const familyMembers = [
     {
       id: 1,
-      name: "Maria Silva",
+      name: "Sanu Munasinghe",
       relation: "Spouse",
       activePrescriptions: 2,
       initial: "M",
@@ -15,7 +15,7 @@ const FamilyProfilesCard = () => {
     },
     {
       id: 2,
-      name: "Alex Silva",
+      name: "Bavindu Shamen",
       relation: "Son",
       activePrescriptions: 1,
       initial: "A",

@@ -1,11 +1,11 @@
 import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import { AdminAuthProvider } from "./hooks/useAdminAuth"; // ✅ Import AdminAuthProvider
 
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Otc from "./pages/Otc";
-
 import Contact from "./pages/Contact";
 import Services from "./pages/Services";
 import Login from "./features/auth/pages/Login";
@@ -25,8 +25,8 @@ const App = () => {
   const isPharmacistPath = location.pathname.startsWith("/pharmacist");
   const isPharmacyAdminPath = location.pathname.startsWith("/pharmacy");
   const isCustomerPath = location.pathname.startsWith("/customer");
-
   const isAdminPath = location.pathname.startsWith("/admin");
+
   return (
     <AuthProvider>
       <div>
@@ -43,7 +43,15 @@ const App = () => {
           <Route path="/pharmacist/*" element={<Pharmacist />} />
           <Route path="/customer/*" element={<Customer />} />
           <Route path="/find-pharmacy" element={<FindPharmacy />} />
-          <Route path="/admin/*" element={<Admin />} />
+          <Route 
+            path="/admin/*" 
+            element={
+              <AdminAuthProvider>
+                <Admin />
+              </AdminAuthProvider>
+            } 
+          />
+          
           <Route
             path="/pharma-profile/:pharmacyId"
             element={<PharmacyProfile />}
