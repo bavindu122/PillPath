@@ -7,16 +7,14 @@ const RecentOrdersCard = () => {
     {
       id: "RX-250718-19",
       pharmacy: "Central Pharmacy",
-      status: "Out for Delivery",
-      eta: "2 hours",
+      eta: "Rs.978",
       date: "July 10, 2025",
       items: 3
     },
     {
       id: "RX-250719-20",
       pharmacy: "HealthCare Pharmacy",
-      status: "Ready",
-      eta: "Ready for pickup",
+      eta: "Rs.2900",
       date: "July 8, 2025",
       items: 2
     }
@@ -31,9 +29,6 @@ const RecentOrdersCard = () => {
           </span>
           <h3 className="text-white font-semibold">Recent Orders</h3>
         </div>
-        <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
-          {orders.length} Active
-        </span>
       </div>
 
       <div className="space-y-3 mb-3">
@@ -50,13 +45,7 @@ const RecentOrdersCard = () => {
               <div>
                 <div className="flex items-center">
                   <h4 className="text-white font-medium">{order.id}</h4>
-                  <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                    order.status === "Out for Delivery" 
-                      ? "bg-blue-500/20 text-blue-300" 
-                      : "bg-green-500/20 text-green-300"
-                  }`}>
-                    {order.status}
-                  </span>
+                  
                 </div>
                 
                 <div className="mt-3 space-y-1.5">
@@ -68,7 +57,7 @@ const RecentOrdersCard = () => {
                     {order.status === "Out for Delivery" ? (
                       <>
                         <Ship size={12} className="mr-1 text-blue-300" />
-                        Estimated delivery: {order.eta}
+                        {order.eta}
                       </>
                     ) : (
                       <>

@@ -59,7 +59,7 @@ const CustomerSidebar = () => {
       label: "Medicine Info",
       icon: <Pill size={18} />,
     },
-    { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
+    
   ];
 
   // Handle logout functionality
