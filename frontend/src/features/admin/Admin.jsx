@@ -33,9 +33,9 @@ const Admin = () => {
               <Route path="prescriptions" element={<Prescription />} />
               <Route path="wallet" element={<WalletAndIncome />} />
                <Route path="sales" element={<Sales />} />
-        <Route path="analytics" element={<Analytics />} />
-        <Route path="settings" element={<Setting />} />
-        <Route path="announcements" element={<Announcements />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="settings" element={<Setting />} />
+              <Route path="announcements" element={<Announcements />} />
             </Routes>
           </AdminLayout>
         </AdminRoute>
