@@ -141,7 +141,7 @@ const CurrentStorefrontProductCard = ({ product, onRemoveFromStore, onUpdateProd
           <h3 className="text-lg font-medium text-gray-800 mb-1">{product.name}</h3>
           <p className="text-sm text-gray-600 line-clamp-2 mb-2">{product.description}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-bold text-blue-600">${product.price.toFixed(2)}</span>
+            <span className="font-bold text-blue-600">Rs.{product.price.toFixed(2)}</span>
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStockStatusColor(product.status)}`}>
               {product.status}
             </span>
@@ -218,7 +218,7 @@ const CurrentStorefrontProductCard = ({ product, onRemoveFromStore, onUpdateProd
 
                 <div>
                   <label htmlFor="edit-price" className="block text-gray-700 text-sm font-medium mb-2">
-                    Price ($) <span className="text-red-500">*</span>
+                    Price (Rs.) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"

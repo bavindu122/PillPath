@@ -102,7 +102,7 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
 
             <div>
               <label htmlFor="price" className="block text-gray-700 text-sm font-medium mb-2">
-                Price ($) <span className="text-red-500">*</span>
+                Price (Rs.) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"

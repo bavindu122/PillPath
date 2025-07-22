@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const usePaymentGateway = () => {
-  const [balance, setBalance] = useState(5000.00);
+  const [balance, setBalance] = useState(100.00);
   const [transactions, setTransactions] = useState([]);
   const [savedCards, setSavedCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,8 +32,10 @@ const usePaymentGateway = () => {
       setIsLoading(true);
       
       const types = ['credit', 'debit'];
-      const categories = ['Purchase', 'Refund', 'Supplier Payment', 'Insurance Reimbursement'];
-      const recipients = ['MediSupply Co.', 'PharmTech Inc.', 'HealthCare Systems', 'Med Insurance Inc.', 'Customer Refund'];
+      // const categories = ['Purchase', 'Refund', 'Supplier Payment', 'Insurance Reimbursement'];
+      const categories = ['Purchase', 'Refund', 'Bill Payment'];
+      // const recipients = ['MediSupply Co.', 'PharmTech Inc.', 'HealthCare Systems', 'Med Insurance Inc.', 'Customer Refund'];
+      const recipients = [ 'Pillpath System', 'Customer Refund'];
       
       const mockTransactions = Array.from({ length: 15 }, (_, index) => {
         const date = new Date();
@@ -43,12 +45,23 @@ const usePaymentGateway = () => {
         const amount = +(Math.random() * 1000 + 50).toFixed(2);
         const category = categories[Math.floor(Math.random() * categories.length)];
         
+        // let recipient;
+        // if (category === 'Refund') {
+        //   recipient = 'Customer Refund';
+        // } else if (category === 'Insurance Reimbursement') {
+        //   recipient = 'Med Insurance Inc.';
+        // } else {
+        //   recipient = recipients[Math.floor(Math.random() * (recipients.length - 1))];
+        // }
+
         let recipient;
         if (category === 'Refund') {
           recipient = 'Customer Refund';
-        } else if (category === 'Insurance Reimbursement') {
-          recipient = 'Med Insurance Inc.';
-        } else {
+        } else if (category === 'Bill Payment') {
+          recipient = 'Pillpath System';
+        } else if (category === 'Purchase') {
+          recipient = 'Customer purchase';
+      }else {
           recipient = recipients[Math.floor(Math.random() * (recipients.length - 1))];
         }
         

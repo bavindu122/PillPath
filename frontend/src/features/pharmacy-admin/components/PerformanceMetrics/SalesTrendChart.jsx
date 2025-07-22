@@ -26,7 +26,7 @@ const SalesTrendChart = ({ data }) => {
     labels: data.labels,
     datasets: [
       {
-        label: 'Sales ($)',
+        label: 'Sales (Rs.)',
         data: data.values,
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
