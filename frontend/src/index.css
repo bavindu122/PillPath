@@ -18,7 +18,7 @@
   --color-text-light: #FFFFFF;     /* Pure white for maximum contrast on dark backgrounds */
   --color-text-primary: #4FA4FF;   /* Brighter, more vibrant blue that pops on glass */
   --color-text-secondary: #3EE686; /* More vibrant green with higher contrast */
-   --color-text-accent: #BF40BF;  /* Brighter purple that stands out on glass */
+  --color-text-accent: #BF40BF;    /* Brighter purple that stands out on glass */
 
   /* Updated semantic colors to match */
   --color-text-success: #2EE07A;   /* Brighter success green */
@@ -29,10 +29,82 @@
   /* Additional useful colors */
   --color-upload-bg: rgba(248, 251, 255, 0.9); /* Semi-transparent light background */
   --color-upload-bg-hover: #D1E5F0; /* Lighter blue hover */
-   /* New vibrant colors */
+  /* New vibrant colors */
   --color-step-yellow: #FFC107; /* Eye-catching yellow for steps */
   --color-step-pink: #E91E63;   /* Bold pink accent */
 
+  /* Dark Theme Background Variables */
+  --color-dark-bg-primary: #1e293b;    /* slate-800 */
+  --color-dark-bg-secondary: #1e3a8a;  /* blue-900 */
+  --color-dark-bg-accent: #3730a3;     /* indigo-900 */
+  
+  /* Dark Theme Floating Elements */
+  --color-dark-float-blue: rgba(59, 130, 246, 0.1);     /* blue-500/10 */
+  --color-dark-float-indigo: rgba(129, 140, 248, 0.15); /* indigo-400/15 */
+  --color-dark-float-slate: rgba(100, 116, 139, 0.2);   /* slate-600/20 */
+  --color-dark-float-blue-light: rgba(96, 165, 250, 0.15); /* blue-400/15 */
+
+  /* ===== NAVBAR COLOR SYSTEM ===== */
+  
+  /* Navbar Background & Glass Effects */
+  --navbar-bg-default: rgba(255, 255, 255, 0.9);
+  --navbar-bg-scrolled: rgba(255, 255, 255, 0.7);
+  --navbar-bg-mobile-menu: rgba(255, 255, 255, 0.9);
+  --navbar-glass-blur: blur(12px);
+  --navbar-glass-blur-heavy: blur(20px);
+  
+  /* Navbar Text Colors */
+  --navbar-text-primary: #334155;      /* slate-700 */
+  --navbar-text-secondary: #64748b;    /* slate-500 */
+  --navbar-text-muted: #94a3b8;        /* slate-400 */
+  --navbar-text-white: #ffffff;
+  --navbar-text-welcome: #64748b;      /* slate-500 */
+  --navbar-text-username: #1e293b;     /* slate-800 */
+  
+  /* Navbar Blue Theme */
+  --navbar-blue-primary: #3b82f6;      /* blue-500 */
+  --navbar-blue-secondary: #2563eb;    /* blue-600 */
+  --navbar-blue-dark: #1d4ed8;         /* blue-700 */
+  --navbar-blue-light: #60a5fa;        /* blue-400 */
+  --navbar-blue-hover: #1e40af;        /* blue-800 */
+  
+  /* Navbar Interactive Elements */
+  --navbar-hover-bg: #f1f5f9;          /* slate-50 */
+  --navbar-hover-bg-blue: #eff6ff;     /* blue-50 */
+  --navbar-active-bg: var(--color-primary);
+  --navbar-border-light: #e2e8f0;      /* slate-200 */
+  --navbar-border-blue: #3b82f6;       /* blue-500 */
+  
+  /* Navbar Gradients */
+  --navbar-gradient-blue: linear-gradient(135deg, #3b82f6, #2563eb);
+  --navbar-gradient-blue-purple: linear-gradient(135deg, #2563eb, #6366f1);
+  --navbar-gradient-indigo-purple: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --navbar-gradient-shine: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  
+  /* Navbar Shadows */
+  --navbar-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --navbar-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --navbar-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --navbar-shadow-blue: 0 10px 25px rgba(59, 130, 246, 0.15);
+  
+  /* Navbar Button States */
+  --navbar-btn-outline-border: var(--navbar-blue-primary);
+  --navbar-btn-outline-text: var(--navbar-blue-secondary);
+  --navbar-btn-outline-hover-bg: var(--navbar-blue-primary);
+  --navbar-btn-filled-bg: var(--navbar-gradient-blue);
+  --navbar-btn-filled-hover-bg: var(--navbar-gradient-blue-purple);
+  
+  /* Notification & Badge Colors */
+  --navbar-notification-bg: linear-gradient(135deg, #ef4444, #dc2626); /* red gradient */
+  --navbar-notification-text: #ffffff;
+  --navbar-notification-ring: #ffffff;
+  --navbar-notification-count: 3;
+  
+  /* Profile & Avatar */
+  --navbar-avatar-border: var(--navbar-border-light);
+  --navbar-avatar-border-hover: var(--navbar-blue-light);
+  --navbar-avatar-size-desktop: 2.5rem; /* 40px */
+  --navbar-avatar-size-mobile: 2rem;    /* 32px */
 }
 
 /* Base font styles */
@@ -62,7 +134,6 @@ h1, h2, h3, h4, h5, h6 {
 .text-secondary-green { color: var(--color-text-secondary); }
 .text-accent-purple {
   color: #e040fb;
-  
   letter-spacing: 0.02em;
 }
 
@@ -97,6 +168,7 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
   text-fill-color: transparent;
 }
+
 .text-shadow-sm {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
@@ -105,3 +177,250 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
 }
 
+/* ===== NAVBAR UTILITY CLASSES ===== */
+
+/* Navbar Background Classes */
+.navbar-bg-default {
+  background: var(--navbar-bg-default);
+  backdrop-filter: var(--navbar-glass-blur);
+}
+
+.navbar-bg-scrolled {
+  background: var(--navbar-bg-scrolled);
+  backdrop-filter: var(--navbar-glass-blur-heavy);
+  box-shadow: var(--navbar-shadow-md);
+}
+
+.navbar-bg-mobile-menu {
+  background: var(--navbar-bg-mobile-menu);
+  backdrop-filter: var(--navbar-glass-blur-heavy);
+  box-shadow: var(--navbar-shadow-lg);
+}
+
+/* Navbar Text Classes */
+.navbar-text-primary { color: var(--navbar-text-primary); }
+.navbar-text-secondary { color: var(--navbar-text-secondary); }
+.navbar-text-muted { color: var(--navbar-text-muted); }
+.navbar-text-white { color: var(--navbar-text-white); }
+.navbar-text-welcome { color: var(--navbar-text-welcome); }
+.navbar-text-username { color: var(--navbar-text-username); }
+
+/* Navbar Button Classes */
+.navbar-btn-outline {
+  border: 2px solid var(--navbar-btn-outline-border);
+  color: var(--navbar-btn-outline-text);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.navbar-btn-outline:hover {
+  background: var(--navbar-btn-outline-hover-bg);
+  color: var(--navbar-text-white);
+  box-shadow: var(--navbar-shadow-blue);
+}
+
+.navbar-btn-filled {
+  background: var(--navbar-btn-filled-bg);
+  color: var(--navbar-text-white);
+  transition: all 0.3s ease;
+}
+
+.navbar-btn-filled:hover {
+  background: var(--navbar-btn-filled-hover-bg);
+  box-shadow: var(--navbar-shadow-blue);
+  transform: scale(1.05);
+}
+
+/* Navbar Interactive Elements */
+.navbar-hover-bg {
+  transition: background-color 0.2s ease;
+}
+
+.navbar-hover-bg:hover {
+  background-color: var(--navbar-hover-bg);
+}
+
+.navbar-hover-bg-blue {
+  transition: background-color 0.2s ease;
+}
+
+.navbar-hover-bg-blue:hover {
+  background-color: var(--navbar-hover-bg-blue);
+}
+
+/* Navbar Avatar Classes */
+.navbar-avatar {
+  width: var(--navbar-avatar-size-desktop);
+  height: var(--navbar-avatar-size-desktop);
+  border: 2px solid var(--navbar-avatar-border);
+  transition: border-color 0.2s ease;
+}
+
+.navbar-avatar:hover {
+  border-color: var(--navbar-avatar-border-hover);
+}
+
+.navbar-avatar-mobile {
+  width: var(--navbar-avatar-size-mobile);
+  height: var(--navbar-avatar-size-mobile);
+}
+
+/* Navbar Notification Badge */
+.navbar-notification-badge {
+  background: var(--navbar-notification-bg);
+  color: var(--navbar-notification-text);
+  box-shadow: 0 0 0 2px var(--navbar-notification-ring);
+}
+
+/* Navbar Blue Theme Classes */
+.navbar-blue-text { color: var(--navbar-blue-primary); }
+.navbar-blue-text:hover { color: var(--navbar-blue-hover); }
+.navbar-blue-bg { background-color: var(--navbar-blue-primary); }
+.navbar-blue-border { border-color: var(--navbar-blue-primary); }
+
+/* Navbar Gradients */
+.navbar-gradient-blue {
+  background: var(--navbar-gradient-blue);
+}
+
+.navbar-gradient-blue-purple {
+  background: var(--navbar-gradient-blue-purple);
+}
+
+.navbar-gradient-shine {
+  background: var(--navbar-gradient-shine);
+}
+
+/* ===== DARK THEME BACKGROUND UTILITIES ===== */
+
+/* Main Dark Background Pattern */
+.bg-dark-theme {
+  background: linear-gradient(135deg, var(--color-dark-bg-primary), var(--color-dark-bg-secondary), var(--color-dark-bg-accent));
+}
+
+/* Individual background gradients for flexibility */
+.bg-dark-gradient-1 {
+  background: linear-gradient(to bottom right, #1e293b, #1e3a8a, #3730a3);
+}
+
+.bg-dark-gradient-2 {
+  background: linear-gradient(135deg, #0f172a, #1e3a8a, #312e81);
+}
+
+.bg-dark-gradient-3 {
+  background: linear-gradient(to right, #1e293b, #1e40af, #3730a3);
+}
+
+/* Dark Theme Floating Elements */
+.dark-float-element-1 {
+  background-color: var(--color-dark-float-blue);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.4;
+}
+
+.dark-float-element-2 {
+  background-color: var(--color-dark-float-indigo);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.3;
+}
+
+.dark-float-element-3 {
+  background-color: var(--color-dark-float-slate);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.35;
+}
+
+.dark-float-element-4 {
+  background-color: var(--color-dark-float-blue-light);
+  mix-blend-mode: multiply;
+  filter: blur(48px);
+  opacity: 0.3;
+}
+
+/* Dark Theme Section Base Class */
+.dark-section-base {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e293b, #1e3a8a, #3730a3);
+}
+
+/* Dark Theme Floating Pattern Component */
+.dark-floating-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.dark-floating-pattern::before {
+  content: '';
+  position: absolute;
+  top: 5rem;
+  left: 10%;
+  width: 24rem;
+  height: 24rem;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(3rem);
+  opacity: 0.4;
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.dark-floating-pattern::after {
+  content: '';
+  position: absolute;
+  top: 8rem;
+  right: 5rem;
+  width: 20rem;
+  height: 20rem;
+  background-color: rgba(129, 140, 248, 0.15);
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  filter: blur(3rem);
+  opacity: 0.3;
+  animation: float-delay 8s ease-in-out infinite;
+}
+
+/* Enhanced Glass Card for Dark Theme */
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-dark-hover {
+  transition: all 0.3s ease;
+}
+
+.glass-card-dark-hover:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark Theme Text Utilities */
+.text-dark-theme-primary {
+  color: #e2e8f0; /* slate-200 */
+}
+
+.text-dark-theme-secondary {
+  color: #cbd5e1; /* slate-300 */
+}
+
+.text-dark-theme-muted {
+  color: #94a3b8; /* slate-400 */
+}
+
+/* Medical Pattern for Dark Theme */
+.medical-pattern-dark {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.1;
+}

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
-import { NavLink, useNavigate } from "react-router-dom";
-import { BellDot, Menu, LogOutIcon } from "lucide-react";
-import ProfileModal from "../../features/customer/components/ProfileModal";
+import { useNavigate } from "react-router-dom";
+import { BellDot, Menu, LogOut } from "lucide-react";
+
+import DesktopNav from "./components/DesktopNav";
+import ProfileDropdown from "./components/ProfileDropdown";
+import MobileFloatingNav from "./components/MobileFloatingNav";
+import { useAuth } from "../../hooks/useAuth";
+import ProfileImage from "../common/ProfileImage";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -12,8 +17,13 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  const { logout, isAuthenticated, user } = useAuth();
 
-  // Track scroll position for styling changes
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -23,33 +33,25 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-  };
-
-  const handleMouseEnter = () => {
-    setShowDropdown(true);
-  };
-
-  const handleMouseLeave = () => {
-    setShowDropdown(false);
-  };
+  const toggleDropdown = () => setShowDropdown(!showDropdown);
+  const handleMouseEnter = () => setShowDropdown(true);
+  const handleMouseLeave = () => setShowDropdown(false);
 
   return (
     <>
-      <div className="h-[72px] md:h-[80px]"></div>
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      />
+      <div className="h-[72px] md:h-[60px]"></div>
 
+      {/* Top Navigation Bar */}
       <div
-        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-4 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/70 backdrop-blur-md shadow-md"
-            : "bg-white/90 backdrop-blur-sm"
+        className={`fixed top-0 left-0 right-0 flex items-center justify-between text-sm py-2 z-40 transition-all duration-300 ${
+          scrolled ? "navbar-bg-scrolled" : "navbar-bg-default"
         }`}
       >
         {/* Logo */}
@@ -60,172 +62,130 @@ const Navbar = () => {
           onClick={() => navigate("/")}
         />
 
-        {/* Desktop Navigation (hidden on mobile) */}
-        <div className="hidden md:flex border border-gray-400 rounded-full px-4 py-1 lg:px-6 lg:py-2">
-          <ul className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-medium text-gray-700 text-sm whitespace-nowrap">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Home</li>
-            </NavLink>
-            {/* Other navigation links remain unchanged */}
-            <NavLink
-              to="/services"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Services</li>
-            </NavLink>
-            <NavLink
-              to="/otc"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">OTC Store</li>
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">About Us</li>
-            </NavLink>
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
-                `px-2 py-1 lg:px-3 rounded-full transition-all duration-300 ${
-                  isActive
-                    ? "text-white border bg-pButton"
-                    : "text-gray-700 hover:text-primary hover:bg-upload-bg-hover"
-                }`
-              }
-            >
-              <li className="py-1">Contact</li>
-            </NavLink>
-          </ul>
-        </div>
-
-        {/* Desktop Account Section */}
+        {/* Desktop Navigation */}
+        <DesktopNav />
+        
         <div className="hidden md:flex items-center gap-4 mr-6">
-          {token ? (
-            <div
-              className="flex items-center gap-4"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <BellDot className="w-6 h-6 cursor-pointer" />
-              <img
-                src={assets.profile_pic}
-                alt="profile"
-                className="w-10 h-10 rounded-full cursor-pointer"
-                onClick={toggleDropdown}
-              />
-              <div
-                className={`absolute top-0 right-0 mt-16 mr-6 text-base font-medium text-gray-600 z-50 transition-all duration-200 ${
-                  showDropdown ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
-              >
-                <div className="min-w-48 bg-white rounded-lg shadow-lg flex flex-col gap-4 p-4">
-                <NavLink
-                  to="/customer"
-                  className="cursor-pointer hover:text-pButton">
-              Profile
-            </NavLink>
-                  
-                  <p className="cursor-pointer hover:text-pButton">Settings</p>
-                  <div className="border-t border-gray-200 pt-2">
-                    <p
-                      onClick={() => setToken(false)}
-                      className="cursor-pointer hover:text-pButton flex items-center gap-2"
-                    >
-                      <LogOutIcon size={16} />
-                      <span>Logout</span>
-                    </p>
-                  </div>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-5">
+              {/* User greeting */}
+              <div className="hidden lg:block text-right">
+                <p className="text-sm navbar-text-welcome font-medium">
+                  Welcome back,
+                </p>
+                <p className="text-sm navbar-text-username font-semibold truncate max-w-[140px]">
+                  {user?.fullName || user?.firstName || "User"}
+                </p>
+              </div>
+
+              {/* Notification bell */}
+              <div className="relative group">
+                <div className="p-2 rounded-full navbar-hover-bg navbar-hover-bg-blue cursor-pointer">
+                  <BellDot className="w-5 h-5 navbar-text-secondary group-hover:navbar-blue-text transition-colors duration-200" />
                 </div>
+                <span className="absolute -top-1 -right-1 navbar-notification-badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg">
+                  3
+                </span>
+              </div>
+
+              {/* Profile section */}
+              <div
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div className="flex items-center gap-2 cursor-pointer group p-1 rounded-full navbar-hover-bg transition-all duration-200">
+                  <ProfileImage
+                    src={user?.profilePictureUrl}
+                    alt="profile"
+                    className="navbar-avatar rounded-full shadow-sm"
+                    onClick={toggleDropdown}
+                  />
+                  <svg
+                    className="w-4 h-4 navbar-text-muted group-hover:navbar-blue-text transition-colors duration-200"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <ProfileDropdown show={showDropdown} setToken={setToken} />
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-pButton text-white px-6 py-2 lg:px-8 lg:py-3 rounded-full font-light hover:bg-pButtonH whitespace-nowrap"
-            >
-              Create account
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Sign in button */}
+              <button
+                onClick={() => navigate("/login")}
+                className="group relative px-6 py-2.5 lg:px-8 lg:py-3 navbar-btn-outline rounded-full font-medium whitespace-nowrap overflow-hidden"
+              >
+                <span className="relative z-10 font-semibold">Sign in</span>
+                <div className="absolute inset-0 navbar-gradient-blue transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              </button>
+
+              {/* Create account button */}
+              <button
+                onClick={() => navigate("/register")}
+                className="group relative px-6 py-2.5 lg:px-8 lg:py-3 navbar-btn-filled rounded-full font-semibold whitespace-nowrap overflow-hidden"
+              >
+                <span className="relative z-10">Create account</span>
+                <div className="absolute inset-0 navbar-gradient-blue-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 navbar-gradient-shine -skew-x-12 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+              </button>
+            </div>
           )}
         </div>
 
-        {/* Mobile Section  */}
+        {/* Mobile Header Actions */}
         <div className="md:hidden flex items-center gap-4 mr-4">
-          {token ? (
-            <img
-              src={assets.profile_pic}
+          {isAuthenticated ? (
+            <ProfileImage
+              src={user?.profilePictureUrl}
               alt="profile"
-              className="w-8 h-8 rounded-full"
+              className="navbar-avatar-mobile rounded-full cursor-pointer"
+              onClick={toggleDropdown}
             />
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="bg-pButton text-white px-4 py-2 rounded-full font-light hover:bg-pButtonH whitespace-nowrap text-sm"
+              className="navbar-btn-outline px-4 py-2 rounded-full font-light whitespace-nowrap text-sm"
             >
-              Create account
+              Sign in
             </button>
           )}
           <Menu
-            className="w-6 h-6 cursor-pointer"
+            className="w-6 h-6 cursor-pointer navbar-text-primary"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
           />
         </div>
 
-        {/* shown when menu button is clicked */}
+        {/* Mobile Menu Dropdown */}
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg rounded-b-lg z-50 p-4">
-            <ul className="flex flex-col gap-3 font-medium text-gray-700">
-              {/* Mobile menu links remain unchanged */}
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg transition-all duration-300 ${
-                    isActive
-                      ? "text-white border bg-pButton"
-                      : "text-gray-700 hover:text-white hover:bg-pButton"
-                  }`
-                }
-                onClick={() => setShowMobileMenu(false)}
+          <div className="md:hidden absolute top-full left-0 right-0 navbar-bg-mobile-menu rounded-b-2xl z-50 p-4 border-t border-gray-100">
+            <div className="flex flex-col gap-3 font-medium navbar-text-primary">
+              <button
+                onClick={handleLogout}
+                className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left flex items-center gap-3"
               >
-                <li>Home</li>
-              </NavLink>
-              {/* Other mobile navigation links */}
-              {/* ... */}
-            </ul>
+                <LogOut size={18} />
+                Logout
+              </button>
+              <button
+                onClick={() => {
+                  setShowProfileModal(true);
+                  setShowMobileMenu(false);
+                }}
+                className="px-4 py-3 rounded-xl bg-gray-100 hover:bg-primary hover:text-white transition-all duration-300 text-left"
+              >
+                Settings
+              </button>
+            </div>
           </div>
         )}
       </div>
-      
-      {/* Profile Modal */}
-      <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
+
+      <MobileFloatingNav />
     </>
   );
 };

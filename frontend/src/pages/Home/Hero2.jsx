@@ -2,45 +2,55 @@ import React from "react";
 import { MapPin, Locate, Search } from "lucide-react";
 import { assets } from "../../assets/assets";
 import GradientButton from "../../components/UIs/GradientButton";
+import { useNavigate } from "react-router-dom";
 import GlassCard from "../../components/UIs/GlassCard";
 
 const Hero2 = () => {
+  const navigate = useNavigate();
+
+  const handleFindPharmacy = () => {
+    navigate("/find-pharmacy");
+  };
   return (
-    <div className="relative flex flex-col min-h-[75vh] sm:max-h-[90vh] md:flex-row flex-wrap bg-gradient-to-b from-primary to-primary-hover z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
+    <div className="relative flex flex-col min-h-[75vh] sm:max-h-[90vh] md:flex-row flex-wrap z-0 rounded-2xl px-4 md:px-8 lg:px-18 shadow-lg overflow-hidden top-5">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B]"></div>
+
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
       {/* Background Elements */}
+
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute top-10 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float-delay"></div>
+        <div className="absolute top-10 left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float-delay"></div>
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-secondary/10 rounded-full blur-xl animate-float-slow"></div>
       </div>
       {/* Title Section */}
-           <div className="w-full text-center mb-8 md:mb-12 fade-in relative z-10">
-             <h1 className="flex flex-row sm:flex-row items-center justify-center gap-1 sm:gap-3 relative">
-               {/* 3D PILL text with less glow */}
-               <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transform transition-all duration-700 animate-title-entrance opacity-0 translate-y-10 ">
-                 PHAR
-               </span>
-     
-               <div className="bottom-[-35px] relative mx-0 sm:mx-2 my-2 sm:my-0 transform-gpu">
-                 {/* Subtle background for 3D depth */}
-                 <div className="absolute -inset-1 bg-secondary/10 rounded-full blur-md"></div>
-     
-                 {/* Logo with 3D shadow effect */}
-                 <div className="relative transform-gpu animate-logo-entrance opacity-0 scale-70">
-                   <img
-                     src={assets.logo2}
-                     alt="PillPath logo"
-                     className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain filter drop-shadow-[2px_4px_6px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-transform duration-300"
-                   />
-                 </div>
-               </div>
-     
-               {/* 3D PATH text with less glow */}
-               <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 ">
-                 MARCY
-               </span>
-             </h1>
-     
-           </div>
+      <div className="w-full text-center mb-8 md:mb-12 fade-in relative z-10">
+        <h1 className="flex flex-row sm:flex-row items-center justify-center gap-1 sm:gap-3 relative">
+          {/* 3D PILL text with less glow */}
+          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transform transition-all duration-700 animate-title-entrance opacity-0 translate-y-10 ">
+            PHAR
+          </span>
+
+          <div className="bottom-[-35px] relative mx-0 sm:mx-2 my-2 sm:my-0 transform-gpu">
+            {/* Subtle background for 3D depth */}
+            <div className="absolute -inset-1  rounded-full blur-md"></div>
+
+            {/* Logo with 3D shadow effect */}
+            <div className="relative transform-gpu animate-logo-entrance opacity-0 scale-70">
+              <img
+                src={assets.logo2}
+                alt="PillPath logo"
+                className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain filter drop-shadow-[2px_4px_6px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          </div>
+
+          {/* 3D PATH text with less glow */}
+          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 ">
+            MACY
+          </span>
+        </h1>
+      </div>
 
       {/* Main Content Area */}
       <div className="p-5 flex flex-col lg:flex-row items-center justify-between mx-auto relative z-10 w-full gap-8 lg:gap-12 xl:gap-20">
@@ -71,9 +81,9 @@ const Hero2 = () => {
         <div className="flex-1 flex justify-center max-w-full lg:max-w-[40%] my-4 lg:my-0 animate-fade-in-scale delay-400">
           {assets.pharmacy_img ? (
             <img
-              src={assets.pharmacy_img}
+              src={assets.findPharmacy}
               alt="Pharmacy service"
-              className="object-contain w-full h-auto max-h-[300px] md:max-h-[400px] lg:max-h-[500px] mx-3 float-animation drop-shadow-2xl"
+              className="object-contain w-full h-auto max-h-[300px] md:max-h-[400px] lg:max-h-[400px] mx-3 float-animation drop-shadow-2xl"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.style.display = "none";
@@ -102,7 +112,7 @@ const Hero2 = () => {
             gradient="from-accent to-accent"
             hoverGradient="hover:from-accent hover:to-accent/90"
             animationDelay="delay-600"
-            onClick={() => console.log("Finding nearby pharmacies...")}
+            onClick={handleFindPharmacy}
           />
 
           <p className="text-[10px] md:text-[11px] text-center text-gray-900 mt-2 md:mt-3 flex items-center justify-center gap-1">

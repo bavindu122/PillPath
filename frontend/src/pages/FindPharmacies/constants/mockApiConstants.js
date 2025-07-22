@@ -1,0 +1,1 @@
+export const MOCK_API_DELAY_MS = 1000; // 1 second delay for mock API

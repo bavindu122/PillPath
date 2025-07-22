@@ -17,6 +17,10 @@ import delivery_img from './img/home/delivery_img.png'
 import find_pharmacy_img from './img/home/find_pharmacy_img.png'
 import upload_rx_img from './img/home/upload_rx_img.png'  
 import cta_img from './img/home/cta_img.png'
+import granpa from './img/home/granpa.png'
+import findPharmacy from './img/home/findPharmacy.png'
+import grannyOtc from './img/home/grannyOtc.png' 
+import otc from './img/home/otc.png'
 
 export const assets = {
     logo1,
@@ -33,6 +37,9 @@ export const assets = {
     delivery_img,
     find_pharmacy_img,
     upload_rx_img,
-    cta_img
-
+    cta_img,
+    granpa,
+    findPharmacy,
+    grannyOtc,
+    otc
 }

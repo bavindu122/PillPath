@@ -34,7 +34,7 @@ const PharmacyFilters = ({ filters, setFilters, closeFilters }) => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold flex items-center gap-2 text-dark">
+        <h3 className="text-xl font-bold flex items-center gap-2 text-light">
           <Sliders size={20} className="text-primary" />
           Filter Pharmacies
         </h3>
@@ -129,48 +129,6 @@ const PharmacyFilters = ({ filters, setFilters, closeFilters }) => {
               <label className="flex items-center text-gray-700 cursor-pointer">
                 <Truck size={16} className="mr-2 text-secondary" />
                 Delivery Available
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional filters */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-          <h4 className="font-semibold mb-3 text-dark">Payment & Insurance</h4>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <button
-                onClick={() => handleToggleFilter("acceptsInsurance")}
-                className={`w-5 h-5 rounded mr-2 flex items-center justify-center ${
-                  filters.acceptsInsurance ? "bg-primary text-white" : "bg-white border border-gray-300"
-                }`}
-              >
-                {filters.acceptsInsurance && <Check size={12} />}
-              </button>
-              <label className="flex items-center text-gray-700 cursor-pointer">
-                <CreditCard size={16} className="mr-2 text-primary" />
-                Accepts Insurance
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Medical services */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-          <h4 className="font-semibold mb-3 text-dark">Medical Services</h4>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <button
-                onClick={() => handleToggleFilter("hasVaccinations")}
-                className={`w-5 h-5 rounded mr-2 flex items-center justify-center ${
-                  filters.hasVaccinations ? "bg-primary text-white" : "bg-white border border-gray-300"
-                }`}
-              >
-                {filters.hasVaccinations && <Check size={12} />}
-              </button>
-              <label className="flex items-center text-gray-700 cursor-pointer">
-                <Pill size={16} className="mr-2 text-secondary" />
-                Vaccination Services
               </label>
             </div>
           </div>

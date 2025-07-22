@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { filterPharmacies } from "../utils/filterHelpers";
+import { MOCK_API_DELAY_MS } from "../constants/mockApiConstants";
 
 export const usePharmacyData = (currentLocation) => {
   const [pharmacies, setPharmacies] = useState([]);
@@ -33,14 +34,12 @@ export const usePharmacyData = (currentLocation) => {
             address: "123 Medical Lane, Colombo 05",
             lat: currentLocation ? currentLocation.lat + 0.01 : 6.9371,
             lng: currentLocation ? currentLocation.lng + 0.01 : 79.8712,
-            rating: 4.8,
+            rating: 3,
             hours: "Open until 10:00 PM",
             phone: "+94 11 234 5678",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Health+First"
+            logo: "/src/assets/img/find/healthfirst.jpeg"
           },
           {
             id: 2,
@@ -52,10 +51,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open 24 hours",
             phone: "+94 11 345 6789",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: true,
-            hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=MediCare+"
+            logo: "/src/assets/img/find/medicare.jpeg"
           },
           {
             id: 3,
@@ -67,10 +64,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 9:00 PM",
             phone: "+94 11 456 7890",
             hasDelivery: false,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Family+Care"
+            logo: "/src/assets/img/find/familycare.jpeg"
           },
           {
             id: 4,
@@ -82,10 +77,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 8:00 PM",
             phone: "+94 11 567 8901",
             hasDelivery: true,
-            acceptsInsurance: false,
             has24HourService: false,
-            hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=City+Health"
+            logo: "/src/assets/img/find/cityhealth.png"
           },
           {
             id: 5,
@@ -97,10 +90,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open 24 hours",
             phone: "+94 11 678 9012",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: true,
-            hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=MediCenter"
+            logo: "/src/assets/img/find/24-7.png"
           },
           {
             id: 6,
@@ -112,10 +103,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 11:00 PM",
             phone: "+94 11 789 0123",
             hasDelivery: true,
-            acceptsInsurance: false,
             has24HourService: false,
-            hasVaccinations: false,
-            logo: "https://via.placeholder.com/150?text=QuickMed"
+            logo: "/src/assets/img/find/quickmed.jpg"
           },
           {
             id: 7,
@@ -127,10 +116,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 9:30 PM",
             phone: "+94 11 890 1234",
             hasDelivery: false,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Union+Pharmacy"
+            logo: "/src/assets/img/find/union.png"
           },
           {
             id: 8,
@@ -142,10 +129,8 @@ export const usePharmacyData = (currentLocation) => {
             hours: "Open until 10:30 PM",
             phone: "+94 11 901 2345",
             hasDelivery: true,
-            acceptsInsurance: true,
             has24HourService: false,
-            hasVaccinations: true,
-            logo: "https://via.placeholder.com/150?text=Wellness"
+            logo: "/src/assets/img/find/wellness.jpg"
           }
         ];
         

@@ -6,7 +6,7 @@ const CurrentPrescriptionsCard = () => {
   const prescriptions = [
     {
       id: 1,
-      name: "Metformin 500mg",
+      name: "RX-250714-01",
       schedule: "Twice daily",
       daysRemaining: 5,
       status: "Ready",
@@ -15,7 +15,7 @@ const CurrentPrescriptionsCard = () => {
     },
     {
       id: 2,
-      name: "Lisinopril 10mg",
+      name: "RX-250714-02",
       schedule: "Once daily",
       daysRemaining: 12,
       status: "Processing",
@@ -28,8 +28,8 @@ const CurrentPrescriptionsCard = () => {
     <div className="h-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="bg-blue-500/20 p-2 rounded-lg">
-            <Pill size={18} className="text-blue-400" />
+          <span className="bg-blue-600/20 p-2 rounded-lg">
+            <Pill size={18} className="text-blue-200" />
           </span>
           <h3 className="text-white font-semibold">Current Prescriptions</h3>
         </div>

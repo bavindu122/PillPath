@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import '../pages/index-pharmacist.css';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -31,6 +32,9 @@ const Sidebar = () => {
     }
     if (path.includes('/review')) {
       return 'prescriptions';
+    }
+    if (path.includes('/orders')) {
+      return 'orders';
     }
     return 'dashboard';
   };

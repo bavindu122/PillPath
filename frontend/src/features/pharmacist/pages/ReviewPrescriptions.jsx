@@ -5,6 +5,7 @@ import PrescriptionViewer from '../components/PrescriptionViewer';
 import MedicineSearch from '../components/MedicineSearch';
 import OrderPreview from '../components/OrderPreview';
 import ChatWidget from '../components/ChatWidget';
+import './index-pharmacist.css';
 
 const ReviewPrescriptions = () => {
   const navigate = useNavigate();

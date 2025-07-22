@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User } from 'lucide-react';
+import '../pages/index-pharmacist.css';
 
 const ChatWidget = ({ messages, onSendMessage, patientName }) => {
   const [newMessage, setNewMessage] = useState('');

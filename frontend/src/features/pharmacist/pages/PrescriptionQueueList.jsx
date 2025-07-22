@@ -15,6 +15,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PharmaPageLayout from '../components/PharmaPageLayout';
 import useListData from '../hooks/useListData';
 import { prescriptionService } from '../services/prescriptionService';
+import './index-pharmacist.css';
 
 const PrescriptionQueue = () => {
   const navigate = useNavigate();
@@ -147,9 +148,9 @@ const PrescriptionQueue = () => {
               className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors duration-200"
             >
               <option value="all">All Priorities</option>
-              <option value="high">High Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="low">Low Priority</option>
+              <option value="High Priority">High Priority</option>
+              <option value="Medium Priority">Medium Priority</option>
+              <option value="Low Priority">Low Priority</option>
             </select>
           </div>
 
