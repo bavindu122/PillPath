@@ -48,7 +48,7 @@ const CustomerSidebar = () => {
       >
         {/* Logo and Toggle Button */}
         <div className="flex items-center justify-between px-4 mb-8">
-          <div className="flex items-center">
+          <NavLink to="/" className="flex items-center hover:opacity-80 transition-opacity duration-200">
             <img src={assets.logo2} alt="PillPath Logo" className="h-8 w-8" />
             <AnimatePresence>
               {isExpanded && (
@@ -63,7 +63,7 @@ const CustomerSidebar = () => {
                 </motion.h1>
               )}
             </AnimatePresence>
-          </div>
+          </NavLink>
           <motion.button
             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-1.5 focus:outline-none"
             onClick={toggleSidebar}
