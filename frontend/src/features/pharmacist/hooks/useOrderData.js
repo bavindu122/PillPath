@@ -20,7 +20,7 @@ export const useOrderData = (orderId) => {
       
       // Mock order data
       const orderResult = {
-        orderNumber: `RX-250710-01`,
+        orderNumber: `ORD-2024-001`,
         patientName: "Mr. McCrae",
         patientEmail: "mccrae@email.com",
         patientPhone: "+94 77 123 4567",
