@@ -1,34 +1,55 @@
 import React from 'react';
-import { ShoppingCart, Banknote, CreditCard, DollarSign, FileText } from 'lucide-react';
+import { MessageSquare, Users, Clock, CheckCircle } from 'lucide-react';
 import '../pages/index-pharmacist.css';
 
-const OrderStatsCards = ({ stats }) => {
-  // Icon mapping based on common order stats
-  const getIcon = (title) => {
-    const titleLower = title.toLowerCase();
-    if (titleLower.includes('order')) return ShoppingCart;
-    if (titleLower.includes('revenue') || titleLower.includes('$')) return DollarSign;
-    if (titleLower.includes('cash')) return Banknote;        // or Banknote
-    if (titleLower.includes('card')) return CreditCard;
-    return FileText; // default icon
-  };
+const ChatStats = ({ totalChats, unreadCount, activeChats, resolvedChats }) => {
+  const stats = [
+    {
+      title: 'Total Conversations',
+      value: totalChats.toString(),
+      subtitle: 'Active communications',
+      icon: MessageSquare,
+      color: 'blue'
+    },
+    {
+      title: 'Unread Messages',
+      value: unreadCount.toString(),
+      subtitle: 'Require attention',
+      icon: Users,
+      color: 'red'
+    },
+    {
+      title: 'Active Chats',
+      value: activeChats.toString(),
+      subtitle: 'Currently ongoing',
+      icon: Clock,
+      color: 'yellow'
+    },
+    {
+      title: 'Resolved Today',
+      value: resolvedChats.toString(),
+      subtitle: 'Completed today',
+      icon: CheckCircle,
+      color: 'green'
+    }
+  ];
 
   const getCardClass = (color) => {
     const classes = {
-      blue: 'inventory-stats-blue',
-      green: 'inventory-stats-green',
-      orange: 'inventory-stats-orange',
-      purple: 'inventory-stats-purple'
+      blue: 'chat-stats-blue',
+      red: 'chat-stats-red',
+      yellow: 'chat-stats-yellow',
+      green: 'chat-stats-green'
     };
     return classes[color] || classes.blue;
   };
 
   const getIconClass = (color) => {
     const classes = {
-      blue: 'inventory-icon-blue',
-      green: 'inventory-icon-green',
-      orange: 'inventory-icon-orange',
-      purple: 'inventory-icon-purple'
+      blue: 'chat-icon-blue',
+      red: 'chat-icon-red',
+      yellow: 'chat-icon-yellow',
+      green: 'chat-icon-green'
     };
     return classes[color] || classes.blue;
   };
@@ -36,7 +57,7 @@ const OrderStatsCards = ({ stats }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => {
-        const Icon = getIcon(stat.title);
+        const Icon = stat.icon;
         return (
           <div
             key={index}
@@ -70,4 +91,4 @@ const OrderStatsCards = ({ stats }) => {
   );
 };
 
-export default OrderStatsCards;
+export default ChatStats;

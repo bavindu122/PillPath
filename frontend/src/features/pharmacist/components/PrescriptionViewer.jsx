@@ -38,7 +38,7 @@ const PrescriptionViewer = ({ prescription }) => {
                 Prescription Review
               </h2>
               <p className="text-sm pharma-text-gray-600 mt-1">
-                Patient: {prescription?.patientName || 'Loading...'} | Order #PX-{prescription?.id || '000'}
+                Patient: {prescription?.patientName || 'Loading...'} | Order {prescription?.id || '000'}
               </p>
             </div>
             

@@ -161,9 +161,9 @@ const OrderDetails = ({ order }) => {
                       {item.category === 'prescription' ? 'Prescription' : 'OTC'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.price.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">Rs.{item.price.toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{item.quantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${item.total.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">Rs.{item.total.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -176,17 +176,17 @@ const OrderDetails = ({ order }) => {
           <div className="w-full md:w-64 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Subtotal:</span>
-              <span className="text-gray-900 font-medium">${order.subtotal.toFixed(2)}</span>
+              <span className="text-gray-900 font-medium">Rs.{order.subtotal.toFixed(2)}</span>
             </div>
             
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Tax (7%):</span>
-              <span className="text-gray-900 font-medium">${order.tax.toFixed(2)}</span>
+              <span className="text-gray-900 font-medium">Rs.{order.tax.toFixed(2)}</span>
             </div>
             
             <div className="pt-3 border-t border-gray-200 flex justify-between">
               <span className="text-lg text-gray-900 font-bold">Total:</span>
-              <span className="text-lg text-gray-900 font-bold">${order.total.toFixed(2)}</span>
+              <span className="text-lg text-gray-900 font-bold">Rs.{order.total.toFixed(2)}</span>
             </div>
           </div>
         </div>

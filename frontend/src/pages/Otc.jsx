@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   ShoppingCart,
   Star,
@@ -214,6 +214,9 @@ const features = [
 
 const Otc = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isFromDashboard = searchParams.get('from') === 'dashboard';
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
@@ -339,6 +342,21 @@ const Otc = () => {
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 px-4 overflow-hidden">
         <div className="container mx-auto max-w-7xl relative z-10">
+          {/* Back to Dashboard Button - Only show when coming from dashboard */}
+          {isFromDashboard && (
+            <div className="mb-6">
+              <Link 
+                to="/customer" 
+                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-4 py-2 rounded-lg group w-fit"
+              >
+                <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                <span className="font-medium text-sm sm:text-base">
+                  Back to Dashboard
+                </span>
+              </Link>
+            </div>
+          )}
+          
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8 animate-fade-in-up">

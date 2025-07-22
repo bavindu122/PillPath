@@ -106,7 +106,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="text-sm font-medium text-gray-900">Rs.{(item.price * item.quantity).toFixed(2)}</span>
                     <button
                       onClick={() => onRemoveItem(item.id)}
                       className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200"
@@ -141,7 +141,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
                   <span className="text-2xl font-bold text-blue-600">
-                    ${calculateTotal().toFixed(2)}
+                    Rs.{calculateTotal().toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -219,7 +219,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
                 {/* Unit Price */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Unit Price ($)
+                    Unit Price (Rs.)
                   </label>
                   <input
                     type="number"
@@ -264,7 +264,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total Price:</span>
                     <span className="text-lg font-bold text-blue-600">
-                      ${calculateModalTotal()}
+                      Rs.{calculateModalTotal()}
                     </span>
                   </div>
                 </div>

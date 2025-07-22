@@ -8,11 +8,13 @@
   --pharma-purple: #8E44AD;
   --pharma-bg-light: #F8FBFF;
   --pharma-bg-dark: #1e293b;
-  --pharma-card-bg: #ffffffcc;
+  --pharma-card-bg: #ffffff;
   --pharma-card-bg-dark: #23272fbb;
   --pharma-text-dark: #1A2530;
   --pharma-text-light: #fff;
   --pharma-text-muted: #94a3b8;
+  --pharma-text-primary: #1f2937;
+  --pharma-text-secondary: #6b7280;
   --pharma-border: #e0e7ef;
   --pharma-border-dark: #374151;
   --pharma-yellow: #FFC107;
@@ -125,17 +127,17 @@
 
 /* Existing component styles using CSS variables */
 .priority-high {
-  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+  background: var(--pharma-red-100);
   color: var(--pharma-red-800);
   border-color: var(--pharma-red-200);
 }
 .priority-medium {
-  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+  background: var(--pharma-yellow-100);
   color: var(--pharma-yellow-800);
   border-color: var(--pharma-yellow-200);
 }
 .priority-low {
-  background: linear-gradient(to right, var(--pharma-blue-50), var(--pharma-blue-100));
+  background: var(--pharma-blue-100);
   color: var(--pharma-blue-800);
   border-color: var(--pharma-blue-200);
 }
@@ -148,31 +150,31 @@
 /* Alert styles */
 .alert-critical {
   border-left: 4px solid var(--pharma-red-500);
-  background: linear-gradient(to right, var(--pharma-red-50), var(--pharma-red-100));
+  background: var(--pharma-red-100);
 }
 .alert-critical:hover {
-  background: linear-gradient(to right, var(--pharma-red-100), var(--pharma-red-200));
+  background: var(--pharma-red-200);
 }
 .alert-low {
   border-left: 4px solid var(--pharma-orange-500);
-  background: linear-gradient(to right, var(--pharma-orange-50), var(--pharma-orange-100));
+  background: var(--pharma-orange-100);
 }
 .alert-low:hover {
-  background: linear-gradient(to right, var(--pharma-orange-100), var(--pharma-orange-200));
+  background: var(--pharma-orange-200);
 }
 .alert-medium {
   border-left: 4px solid var(--pharma-yellow);
-  background: linear-gradient(to right, var(--pharma-yellow-50), var(--pharma-yellow-100));
+  background: var(--pharma-yellow-100);
 }
 .alert-medium:hover {
-  background: linear-gradient(to right, var(--pharma-yellow-100), var(--pharma-yellow-200));
+  background: var(--pharma-yellow-200);
 }
 .alert-default {
   border-left: 4px solid var(--pharma-gray-500);
-  background: linear-gradient(to right, var(--pharma-gray-50), var(--pharma-gray-100));
+  background: var(--pharma-gray-100);
 }
 .alert-default:hover {
-  background: linear-gradient(to right, var(--pharma-gray-100), var(--pharma-gray-200));
+  background: var(--pharma-gray-200);
 }
 
 /* Text colors for alerts */
@@ -184,25 +186,287 @@
 /* Stats card styles */
 .stats-card-blue {
   border-color: var(--pharma-blue-200);
-  background: linear-gradient(to bottom right, var(--pharma-blue-50), var(--pharma-blue-100));
+  background: var(--pharma-blue-100);
 }
 .stats-card-green {
   border-color: var(--pharma-green-200);
-  background: linear-gradient(to bottom right, var(--pharma-green-50), var(--pharma-green-100));
+  background: var(--pharma-green-100);
 }
 .stats-card-orange {
   border-color: var(--pharma-orange-200);
-  background: linear-gradient(to bottom right, var(--pharma-orange-50), var(--pharma-orange-100));
+  background: var(--pharma-orange-100);
 }
 .stats-card-purple {
   border-color: var(--pharma-purple-200);
-  background: linear-gradient(to bottom right, var(--pharma-purple-50), var(--pharma-purple-50));
+  background: var(--pharma-purple-100);
 }
 
 .stats-icon-blue { color: var(--pharma-blue-600); }
 .stats-icon-green { color: var(--pharma-green-600); }
 .stats-icon-orange { color: var(--pharma-orange-600); }
 .stats-icon-purple { color: var(--pharma-purple-600); }
+
+/* Inventory Stats card styles */
+.inventory-stats-blue {
+  border-color: var(--pharma-blue-200);
+  background: var(--pharma-blue-100);
+}
+.inventory-stats-green {
+  border-color: var(--pharma-green-200);
+  background: var(--pharma-green-100);
+}
+.inventory-stats-orange {
+  border-color: var(--pharma-orange-200);
+  background: var(--pharma-orange-100);
+}
+.inventory-stats-purple {
+  border-color: var(--pharma-purple-200);
+  background: var(--pharma-purple-100);
+}
+
+.inventory-icon-blue { color: var(--pharma-blue-600); }
+.inventory-icon-green { color: var(--pharma-green-600); }
+.inventory-icon-orange { color: var(--pharma-orange-600); }
+.inventory-icon-purple { color: var(--pharma-purple-600); }
+
+/* Inventory specific styles */
+.inventory-filters-card {
+  background: var(--pharma-card-bg);
+  border-color: var(--pharma-border);
+}
+
+.inventory-table-card {
+  background: var(--pharma-card-bg);
+  border-color: var(--pharma-border);
+}
+
+.inventory-table-header {
+  background: var(--pharma-gray-100);
+  border-bottom: 1px solid var(--pharma-border);
+}
+
+.inventory-table-header th {
+  color: var(--pharma-gray-700);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.inventory-table-row {
+  border-bottom: 1px solid var(--pharma-border);
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+.inventory-table-row:last-child {
+  border-bottom: none;
+}
+
+.inventory-category-badge {
+  background: var(--pharma-blue-100);
+  color: var(--pharma-blue-800);
+}
+
+.inventory-stock-low {
+  background: var(--pharma-red-100);
+  color: var(--pharma-red-800);
+}
+
+.inventory-stock-medium {
+  background: var(--pharma-orange-100);
+  color: var(--pharma-orange-800);
+}
+
+.inventory-stock-good {
+  background: var(--pharma-green-100);
+  color: var(--pharma-green-800);
+}
+
+.inventory-edit-btn {
+  background: var(--pharma-purple-50);
+  color: var(--pharma-purple-600);
+  transition: background 0.2s, color 0.2s;
+}
+.inventory-edit-btn:hover {
+  background: var(--pharma-purple-100);
+  color: var(--pharma-purple-800);
+}
+
+/* Product Edit Modal */
+.product-edit-modal {
+  background-color: var(--pharma-card-bg);
+  border: 1px solid var(--pharma-border);
+}
+
+.product-edit-input {
+  border-color: var(--pharma-border);
+  background: var(--pharma-gray-50);
+  color: var(--pharma-text-dark);
+}
+
+.product-edit-input:focus {
+  border-color: var(--pharma-blue);
+  box-shadow: 0 0 0 3px rgba(45, 93, 160, 0.1);
+}
+
+.product-edit-input-error {
+  border-color: var(--pharma-red);
+  background: var(--pharma-red-50);
+  color: var(--pharma-text-dark);
+}
+
+.product-edit-input-error:focus {
+  border-color: var(--pharma-red);
+  box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.1);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Chat Stats styling */
+.chat-stats-blue {
+  background: var(--pharma-blue-100);
+  border-color: var(--pharma-blue-200);
+}
+
+.chat-stats-red {
+  background: var(--pharma-red-100);
+  border-color: var(--pharma-red-200);
+}
+
+.chat-stats-yellow {
+  background: var(--pharma-orange-100);
+  border-color: var(--pharma-orange-200);
+}
+
+.chat-stats-green {
+  background: var(--pharma-green-100);
+  border-color: var(--pharma-green-200);
+}
+
+.chat-icon-blue {
+  color: var(--pharma-blue-600);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-red {
+  color: var(--pharma-red-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-yellow {
+  color: var(--pharma-orange-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-icon-green {
+  color: var(--pharma-green-500);
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Chat specific styles */
+.chat-message-bubble {
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+.chat-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pharma-gray-300) transparent;
+}
+
+.chat-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--pharma-gray-300);
+  border-radius: 3px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb:hover {
+  background-color: var(--pharma-gray-400);
+}
+
+.chat-message-time {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.chat-conversation-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-conversation-card:hover {
+  background-color: var(--pharma-gray-50);
+  transform: translateY(-1px);
+}
+
+.chat-conversation-card.selected {
+  background-color: var(--pharma-blue-50);
+  border-left: 4px solid var(--pharma-blue-600);
+}
+
+.chat-input-area {
+  border-top: 1px solid var(--pharma-border);
+  background-color: var(--pharma-bg-light);
+}
+
+.chat-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chat-status-active {
+  background-color: var(--pharma-green-500);
+}
+
+.chat-status-waiting {
+  background-color: var(--pharma-orange-500);
+}
+
+.chat-status-resolved {
+  background-color: var(--pharma-gray-400);
+}
 
 /* Dark mode */
 body.dark-mode {

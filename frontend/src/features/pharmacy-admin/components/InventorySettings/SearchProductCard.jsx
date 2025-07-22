@@ -22,7 +22,7 @@ const SearchProductCard = ({ product, onAddToStore }) => {
         <div>
           <div className="font-semibold text-gray-800">{product.name}</div>
           <div className="text-sm text-gray-500 mb-1">{product.description}</div>
-          <div className="text-lg font-bold text-blue-600">${product.price.toFixed(2)}</div>
+          <div className="text-lg font-bold text-blue-600">Rs.{product.price.toFixed(2)}</div>
         </div>
       </div>
       

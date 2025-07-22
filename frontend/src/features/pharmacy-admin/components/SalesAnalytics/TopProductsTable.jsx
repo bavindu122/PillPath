@@ -184,7 +184,7 @@ const TopProductsTable = ({ products = sampleProducts }) => {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center p-3 bg-gray-50 rounded-xl">
                     <p className="text-xs text-gray-500 mb-1">Revenue</p>
-                    <p className="text-lg font-bold text-gray-900">${product.sales.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-gray-900">Rs.{product.sales.toLocaleString()}</p>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-xl">
                     <p className="text-xs text-gray-500 mb-1">Units Sold</p>
