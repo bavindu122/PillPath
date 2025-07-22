@@ -35,7 +35,7 @@ const PharmacistDashboard = () => {
     setPrescriptions([
       {
         id: 1,
-        patientName: "John Smith",
+        patientName: "RX-250714-02",
         medication: "Amoxicillin 500mg - 30 tablets",
         priority: "High Priority",
         date: "2025-07-04",
@@ -44,7 +44,7 @@ const PharmacistDashboard = () => {
       },
       {
         id: 2,
-        patientName: "Maria Garcia",
+        patientName: "RX-250714-02",
         medication: "Metformin 850mg - 60 tablets",
         priority: "Medium Priority",
         date: "2025-07-04",
@@ -53,7 +53,7 @@ const PharmacistDashboard = () => {
       },
       {
         id: 3,
-        patientName: "Robert Davis",
+        patientName: "RX-250714-03",
         medication: "Lisinopril 10mg - 30 tablets",
         priority: "Low Priority",
         date: "2025-07-04",
@@ -62,7 +62,7 @@ const PharmacistDashboard = () => {
       },
       {
         id: 4,
-        patientName: "Linda Thompson",
+        patientName: "RX-250714-04",
         medication: "Atorvastatin 20mg - 90 tablets",
         priority: "Medium Priority",
         date: "2025-07-04",
@@ -71,7 +71,7 @@ const PharmacistDashboard = () => {
       },
       {
         id: 5,
-        patientName: "Sarah Johnson",
+        patientName: "RX-250714-05",
         medication: "Omeprazole 40mg - 14 capsules",
         priority: "High Priority",
         time: "4:10 PM",
