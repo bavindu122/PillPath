@@ -12,12 +12,12 @@ import {
   Navigation,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
 import Star from "./Star";
 
 const PrescriptionUploadModal = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState(1); // 1: Upload Options, 2: Preview, 3: Pharmacy Selection
-  const [uploadMethod, setUploadMethod] = useState(null); // "device" or "camera"
+  const [step, setStep] = useState(1);
+  const [uploadMethod, setUploadMethod] = useState(null);
   const [prescriptionImage, setPrescriptionImage] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const fileInputRef = useRef(null);
@@ -28,8 +28,20 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
   const handleFindPharmacy = () => {
-    navigate("/find-pharmacy");
+    // Pass prescription data and modal state to FindPharmacy page
+    const prescriptionData = {
+      image: prescriptionImage,
+      note: note,
+      uploadMethod: uploadMethod
+    };
+    
+    // Store prescription data in sessionStorage for retrieval
+    sessionStorage.setItem('prescriptionData', JSON.stringify(prescriptionData));
+    
+    // Navigate to FindPharmacy with special parameter indicating it's from prescription upload
+    navigate("/find-pharmacy?from=prescription-upload");
     handleClose();
   };
 
