@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Clock, AlertCircle, CheckCircle, Paperclip, Smile } from 'lucide-react';
+import { ScrollContainer } from '../../../components/UIs';
 
 const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
   const [message, setMessage] = useState('');
@@ -142,9 +143,13 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
       </div>
 
       {/* Messages */}
-    <div className="flex-1 overflow-y-auto chat-scroll-area">
-        <div className="p-4 space-y-4">
-          {messages.map((msg, index) => {
+      <ScrollContainer 
+        maxHeight="calc(700px - 220px)" 
+        scrollbarTheme="default"
+        scrollbarWidth="6px"
+        className="p-4 space-y-4"
+      >
+        {messages.map((msg, index) => {
             const isPharmacist = msg.sender === 'pharmacist';
             const showDate = index === 0 || 
               formatMessageDate(msg.timestamp) !== formatMessageDate(messages[index - 1]?.timestamp);
@@ -189,8 +194,7 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
             );
           })}
           <div ref={messagesEndRef} />
-        </div>
-      </div>
+        </ScrollContainer>
 
       {/* Message Input */}
       <div className="chat-input-area p-4">
