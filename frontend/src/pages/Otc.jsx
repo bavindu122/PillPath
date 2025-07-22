@@ -450,7 +450,10 @@ const Otc = () => {
               {/* Search Bar */}
               <div className="flex-1 relative">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Search
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="text"
                     placeholder="Search medications, vitamins, or health products..."
@@ -721,6 +724,7 @@ const Otc = () => {
                       {/* Buttons */}
                       <div className="flex gap-2">
                         <button
+                          onClick={(e) => handleFindStoresClick(e, product.id)}
                           className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
                             product.inStock
                               ? hoveredProduct === product.id
@@ -792,8 +796,8 @@ const Otc = () => {
               Ready to Get Started?
             </h3>
             <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of satisfied customers who trust PillPath for
-              their healthcare needs. Start shopping today!
+              Join thousands of satisfied customers who trust PillPath for their
+              healthcare needs. Start shopping today!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl">
