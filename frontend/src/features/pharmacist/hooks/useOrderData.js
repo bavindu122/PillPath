@@ -20,15 +20,14 @@ export const useOrderData = (orderId) => {
       
       // Mock order data
       const orderResult = {
-        id: orderId || "PX-2025-001",
-        orderNumber: `PX-${orderId || "2025-001"}`,
+        orderNumber: `RX-250710-01`,
         patientName: "Mr. McCrae",
         patientEmail: "mccrae@email.com",
-        patientPhone: "+1 (555) 123-4567",
+        patientPhone: "+94 77 123 4567",
         pharmacistName: "Dr. Sarah Johnson",
         dateCreated: "2025-07-10",
         dateCompleted: "2025-07-11",
-        totalAmount: 67.48,
+        totalAmount: 6748.00,
         paymentMethod: "Credit Card",
         status: "Completed",
         prescriptionImageUrl: "/src/assets/img/prescription.jpeg",
@@ -40,8 +39,8 @@ export const useOrderData = (orderId) => {
             dosage: "150mg",
             genericName: "Modern equivalent of Ac. Salicyl",
             quantity: 30,
-            unitPrice: 15.99,
-            totalPrice: 47.97,
+            unitPrice: 1599.00,
+            totalPrice: 4797.00,
             available: true,
             historicalNote: "Equivalent to gr 120 Ac. Salicyl from prescription"
           },
@@ -50,8 +49,8 @@ export const useOrderData = (orderId) => {
             name: "Topical Pain Relief Cream",
             genericName: "Modern equivalent of Collod Flexile",
             quantity: 1,
-            unitPrice: 24.50,
-            totalPrice: 24.50,
+            unitPrice: 2450.00,
+            totalPrice: 2450.00,
             available: true,
             historicalNote: "Modern substitute for historical Collod Flexile"
           }

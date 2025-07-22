@@ -89,13 +89,6 @@ const OrderTable = ({ orders, onPrintOrder }) => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 flex-1">
-                  {/* Patient Avatar */}
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-md transition-shadow duration-200" style={{ background: 'linear-gradient(to bottom right, var(--pharma-gray-100), var(--pharma-gray-200))' }}>
-                      <User className="h-6 w-6 pharma-text-primary" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 pharma-bg-success rounded-full border-2 border-white"></div>
-                  </div>
 
                   {/* Order Details */}
                   <div className="flex-1">
@@ -123,7 +116,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Total</span>
-                        <span className="text-gray-700 font-medium">${order.total.toFixed(2)}</span>
+                        <span className="text-gray-700 font-medium">Rs.{order.total.toFixed(2)}</span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Date</span>
@@ -153,7 +146,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                 <div className="flex items-center space-x-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
                   <Link
                     to={`/pharmacist/orders/${order.id}`}
-                    className="flex items-center space-x-1 px-4 py-2 bg-blue-100 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                    className="flex items-center space-x-1 px-4 py-2 bg-blue-200 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   >
                     <Eye className="h-3 w-3" />
                     <span>View</span>
@@ -162,7 +155,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                   {order.actions.includes('print') && (
                     <button
                       onClick={() => onPrintOrder(order.id)}
-                      className="flex items-center space-x-1 px-4 py-2 bg-green-100 text-green-700 text-xs font-medium rounded-lg hover:bg-green-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                      className="flex items-center space-x-1 px-4 py-2 bg-green-200 text-green-700 text-xs font-medium rounded-lg hover:bg-green-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                     >
                       <Printer className="h-3 w-3" />
                       <span>Print</span>

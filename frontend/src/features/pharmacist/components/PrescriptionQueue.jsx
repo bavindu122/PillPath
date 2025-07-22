@@ -78,7 +78,7 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
                   to={`/pharmacist/review/${prescription.id}`}
                   className="flex items-center space-x-1 px-4 py-2 text-xs font-medium rounded-lg hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   style={{
-                    background: 'linear-gradient(to right, var(--pharma-blue-100), var(--pharma-blue-200))',
+                    background: 'var(--pharma-blue-200)',
                     color: 'var(--pharma-blue-800)'
                   }}
                 >
@@ -89,7 +89,7 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
                   onClick={() => onClarify(prescription.id)}
                   className="flex items-center space-x-1 px-4 py-2 text-xs font-medium rounded-lg hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   style={{
-                    background: 'linear-gradient(to right, var(--pharma-yellow-100), var(--pharma-yellow-200))',
+                    background: 'var(--pharma-yellow-200)',
                     color: 'var(--pharma-yellow-800)'
                   }}
                 >
@@ -100,7 +100,7 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
                   onClick={() => onReject(prescription.id)}
                   className="flex items-center space-x-1 px-4 py-2 text-xs font-medium rounded-lg hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   style={{
-                    background: 'linear-gradient(to right, var(--pharma-red-100), var(--pharma-red-200))',
+                    background: 'var(--pharma-red-200)',
                     color: 'var(--pharma-red-800)'
                   }}
                 >
