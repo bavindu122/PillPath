@@ -5,7 +5,7 @@ import logo from "../../assets/logo1.png";
 
 const Footer = () => {
   return (
-    <footer className="relative z-0 overflow-hidden">
+    <footer id ="contact" className="relative z-0 overflow-hidden">
       {/* Dark Background matching OTC Products */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B]"></div>
 
