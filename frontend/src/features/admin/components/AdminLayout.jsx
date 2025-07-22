@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../../../assets/assets";
 import { useAdminAuth } from "../../../hooks/useAdminAuth"; // ✅ Import admin auth
@@ -42,6 +42,11 @@ export default function AdminLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, admin, loading } = useAdminAuth(); // ✅ Get logout function and admin data
+
+  // Scroll to top when location changes (when navigating between admin pages)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   // ✅ Handle logout
   const handleLogout = async () => {
