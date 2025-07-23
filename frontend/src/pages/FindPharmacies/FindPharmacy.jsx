@@ -191,7 +191,7 @@ const FindPharmacy = () => {
                         </div>
                       </div>
                       <button
-                        onClick={handleUploadToPharmaices}
+                        onClick={handleUploadToPharmacies}
                         className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2 self-center"
                       >
                         <Upload className="h-4 w-4" />
