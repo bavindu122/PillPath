@@ -77,7 +77,7 @@ const FindPharmacy = () => {
     }
   };
 
-  const handleUploadToPharmaices = async () => {
+  const handleUploadToPharmacies = async () => {
     if (selectedPharmacies.length === 0) {
       alert("Please select at least one pharmacy.");
       return;
