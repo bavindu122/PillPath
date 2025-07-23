@@ -22,7 +22,7 @@ export const useOrderData = (orderId) => {
       const orderResult = {
         orderNumber: `ORD-250713-15`,
         patientName: "Mrs. Perera",
-        patientEmail: "SP@email.com",
+        patientEmail: "saranap@email.com",
         patientPhone: "+94 77 123 4567",
         pharmacistName: "Dr. Sarah Johnson",
         dateCreated: "2025-07-10",
