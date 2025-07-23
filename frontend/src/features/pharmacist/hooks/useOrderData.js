@@ -21,8 +21,8 @@ export const useOrderData = (orderId) => {
       // Mock order data
       const orderResult = {
         orderNumber: `ORD-250713-15`,
-        patientName: "Mr. McCrae",
-        patientEmail: "mccrae@email.com",
+        patientName: "Mrs. Perera",
+        patientEmail: "SP@email.com",
         patientPhone: "+94 77 123 4567",
         pharmacistName: "Dr. Sarah Johnson",
         dateCreated: "2025-07-10",
@@ -66,7 +66,7 @@ export const useOrderData = (orderId) => {
         estimatedTime: "2-3 business days",
         actualDeliveryTime: "2 business days",
         deliveryStatus: "Delivered",
-        signedBy: "John McCrae"
+        signedBy: "Sarangi Perera"
       };
 
       setOrderData(orderResult);

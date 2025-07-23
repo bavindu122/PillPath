@@ -26,7 +26,7 @@ const ReviewPrescriptions = () => {
     setTimeout(() => {
       setPrescription({
         id: "RX-250714-02",
-        patientName: "Mr. McCrae",
+        patientName: "Mrs. Perera",
         doctorName: "B.J. Wilks (Chemist)",
         dateUploaded: "17.12.25",
         status: "pending_review",

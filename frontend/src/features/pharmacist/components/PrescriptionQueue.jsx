@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Clock, Calendar, User, XCircle, MessageCircle, Eye } from 'lucide-react';
+import { Filter, Clock, Calendar, XCircle, MessageCircle, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import '../pages/index-pharmacist.css';
 
@@ -24,10 +24,6 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
           <div className="w-1 h-6 rounded-full mr-3" style={{ background: 'linear-gradient(to bottom, var(--pharma-blue-600), var(--pharma-blue-700))' }}></div>
           Prescription Queue
         </h2>
-        <button className="flex items-center space-x-2 px-4 py-2 border rounded-lg hover:shadow-md transition-all duration-200 group nav-item" style={{ borderColor: 'var(--pharma-gray-300)', backgroundColor: 'transparent' }}>
-          <Filter className="h-4 w-4 group-hover:rotate-12 transition-transform duration-200" />
-          <span className="text-sm font-medium">Filter</span>
-        </button>
       </div>
 
       <div className="space-y-4">
@@ -43,12 +39,6 @@ const PrescriptionQueue = ({ prescriptions, onApprove, onReject, onClarify }) =>
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4">
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center group-hover:shadow-md transition-shadow duration-200" style={{ background: 'linear-gradient(to bottom right, var(--pharma-gray-200), var(--pharma-gray-300))' }}>
-                    <User className="h-6 w-6" style={{ color: 'var(--pharma-gray-600)' }} />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white status-indicator" style={{ backgroundColor: 'var(--pharma-green-500)' }}></div>
-                </div>
                 
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-4">

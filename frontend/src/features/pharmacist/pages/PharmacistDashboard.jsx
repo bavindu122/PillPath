@@ -87,8 +87,8 @@ const PharmacistDashboard = () => {
     ]);
 
     setMessages([
-      { id: 1, name: "Emma Wilson", message: "Question about dosage...", unread: true },
-      { id: 2, name: "Michael Chen", message: "Prescription ready?", unread: false }
+      { id: 1, name: "Sanath Ranathunga", message: "Question about dosage...", unread: true },
+      { id: 2, name: "Amal Perera", message: "Prescription ready?", unread: false }
     ]);
 
     setIsLoading(false);
