@@ -48,12 +48,7 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
       </div>
 
       {/* Messages */}
-      <ScrollContainer 
-        maxHeight="calc(640px - 180px)" 
-        scrollbarTheme="default"
-        scrollbarWidth="6px"
-        className="p-4 space-y-4"
-      >
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
             <div
               key={message.id}
@@ -76,7 +71,7 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
             </div>
           ))}
           <div ref={messagesEndRef} />
-        </ScrollContainer>
+      </div>
 
       {/* Message Input */}
       <div className="p-4 border-t border-gray-200 flex-shrink-0">

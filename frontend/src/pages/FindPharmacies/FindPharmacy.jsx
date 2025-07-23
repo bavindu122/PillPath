@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Sliders, Search, ChevronLeft, List, Map as MapIcon } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { MapPin, Sliders, Search, ChevronLeft, List, Map as MapIcon, Upload, Check } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import PharmacyMap from "./components/PharmacyMap";
 import PharmacyFilters from "./components/PharmacyFilters";
 import PharmacyList from "./components/PharmacyList";
 import { usePharmacyData } from "./hooks/usePharmacyData";
 
-
 const FindPharmacy = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const isFromDashboard = searchParams.get('from') === 'dashboard';
+  const isFromPrescriptionUpload = searchParams.get('from') === 'prescription-upload';
   
-  const [viewMode, setViewMode] = useState("split"); // "map", "list", or "split"
+  const [viewMode, setViewMode] = useState("split");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [selectedPharmacies, setSelectedPharmacies] = useState([]);
+  const [prescriptionData, setPrescriptionData] = useState(null);
   
   const {
     pharmacies,
@@ -26,7 +29,16 @@ const FindPharmacy = () => {
     filteredPharmacies,
   } = usePharmacyData(currentLocation);
 
-  // Get user's current location on component mount
+  // Load prescription data if coming from prescription upload
+  useEffect(() => {
+    if (isFromPrescriptionUpload) {
+      const storedData = sessionStorage.getItem('prescriptionData');
+      if (storedData) {
+        setPrescriptionData(JSON.parse(storedData));
+      }
+    }
+  }, [isFromPrescriptionUpload]);
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -38,22 +50,70 @@ const FindPharmacy = () => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          // Default to Colombo, Sri Lanka if location access is denied
           setCurrentLocation({ lat: 6.9271, lng: 79.8612 });
         }
       );
     } else {
-      // Default to Colombo, Sri Lanka if geolocation is not supported
       setCurrentLocation({ lat: 6.9271, lng: 79.8612 });
     }
   }, []);
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter pharmacies based on search query
+  const handlePharmacySelect = (pharmacy) => {
+    if (isFromPrescriptionUpload) {
+      setSelectedPharmacies(prev => {
+        const isAlreadySelected = prev.find(p => p.id === pharmacy.id);
+        if (isAlreadySelected) {
+          return prev.filter(p => p.id !== pharmacy.id);
+        } else {
+          return [...prev, pharmacy];
+        }
+      });
+    } else {
+      setSelectedPharmacy(pharmacy);
+    }
+  };
+
+  const handleUploadToPharmacies = async () => {
+    if (selectedPharmacies.length === 0) {
+      alert("Please select at least one pharmacy.");
+      return;
+    }
+
+    // Simulate upload process
+    const uploadPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 2000);
+    });
+
+    await uploadPromise;
+
+    // Clean up session storage
+    sessionStorage.removeItem('prescriptionData');
+    
+    // Show success message
+    alert(`Prescription uploaded successfully to ${selectedPharmacies.length} pharmacy(ies)!`);
+    
+    // Navigate to activities page
+    navigate("/customer/activities");
+  };
+
+  const getBackButtonText = () => {
+    if (isFromPrescriptionUpload) return "Back to Upload";
+    if (isFromDashboard) return "Back to Dashboard";
+    return "Back to Home";
+  };
+
+  const getBackButtonLink = () => {
+    if (isFromPrescriptionUpload) return "#"; // Stay on page or close modal
+    if (isFromDashboard) return "/customer";
+    return "/";
+  };
+
   const searchedPharmacies = searchQuery
     ? filteredPharmacies.filter((pharmacy) =>
         pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -73,23 +133,75 @@ const FindPharmacy = () => {
           {/* Header section */}
           <div className="mb-8 text-center md:text-left">
             <div className="inline-flex items-center mb-4">
-              <a 
-                href={isFromDashboard ? "/customer" : "/"} 
-                className="flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 py-2 rounded-lg group w-fit"
-              >
-                <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                <span className="font-medium text-sm sm:text-base">
-                  {isFromDashboard ? "Back to Dashboard" : "Back to Home"}
-                </span>
-              </a>
+              {!isFromPrescriptionUpload && (
+                <a 
+                  href={getBackButtonLink()} 
+                  className="flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 py-2 rounded-lg group w-fit"
+                >
+                  <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+                  <span className="font-medium text-sm sm:text-base">
+                    {getBackButtonText()}
+                  </span>
+                </a>
+              )}
             </div>
+            
             <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
-              Find Nearby Pharmacies
+              {isFromPrescriptionUpload ? "Select Pharmacies for Upload" : "Find Nearby Pharmacies"}
             </h1>
+            
             <p className="text-white/70 max-w-2xl mx-auto md:mx-0">
-              Discover pharmacies near you, check their ratings, operating hours, and available services.
-              Use filters to find exactly what you need.
+              {isFromPrescriptionUpload 
+                ? "Choose one or more pharmacies to send your prescription to. You can compare prices and services."
+                : "Discover pharmacies near you, check their ratings, operating hours, and available services. Use filters to find exactly what you need."
+              }
             </p>
+
+            {/* Prescription Upload Status and Selected Pharmacies Counter - Side by Side */}
+            {isFromPrescriptionUpload && (
+              <div className="mt-4 flex flex-col md:flex-row justify-between items-start gap-6 w-full max-w-7xl mx-auto md:mx-0">
+                {/* Prescription Upload Status */}
+                {prescriptionData && (
+                  <div className="w-[300px] p-6 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                        <Check className="h-5 w-5 text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">Prescription Ready</p>
+                        <p className="text-white/60 text-sm">Select pharmacies to upload to</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected Pharmacies Counter */}
+                {selectedPharmacies.length > 0 && (
+                  <div className="w-[480px] p-6 bg-blue-500/20 backdrop-blur-md rounded-xl border border-blue-300/30 self-start md:self-auto">
+                    <div className="flex items-center justify-between h-full">
+                      <div className="flex items-center space-x-2 gap-2">
+                        <MapPin className="h-5 w-5 text-blue-400" />
+                        <div className="flex flex-col">
+                          <span className="text-white font-medium">
+                            {selectedPharmacies.length} Pharmacy(ies) Selected
+                          </span>
+                          <div className="text-white/60 text-sm">
+                            {selectedPharmacies.map(p => p.name).join(", ")}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleUploadToPharmacies}
+                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2 self-center"
+                      >
+                        <Upload className="h-4 w-4" />
+                        <span>Upload</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Search and view toggle */}
@@ -191,7 +303,7 @@ const FindPharmacy = () => {
             </button>
           </div>
 
-          {/* Filter section - slides in/out */}
+          {/* Filter section */}
           <div
             className={`${
               isFilterOpen ? "max-h-[500px] opacity-100 mb-6" : "max-h-0 opacity-0 overflow-hidden"
@@ -217,6 +329,8 @@ const FindPharmacy = () => {
                   setSelectedPharmacy={setSelectedPharmacy}
                   currentLocation={currentLocation}
                   viewMode={viewMode}
+                  isMultiSelect={isFromPrescriptionUpload}
+                  selectedPharmacies={selectedPharmacies}
                 />
               </div>
             )}
@@ -231,8 +345,10 @@ const FindPharmacy = () => {
                   loading={loading} 
                   error={error}
                   selectedPharmacy={selectedPharmacy}
-                  setSelectedPharmacy={setSelectedPharmacy}
+                  setSelectedPharmacy={handlePharmacySelect}
                   currentLocation={currentLocation}
+                  isMultiSelect={isFromPrescriptionUpload}
+                  selectedPharmacies={selectedPharmacies}
                 />
               </div>
             )}
