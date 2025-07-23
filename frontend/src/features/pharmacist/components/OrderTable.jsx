@@ -8,13 +8,21 @@ const OrderTable = ({ orders, onPrintOrder }) => {
     switch (type.toLowerCase()) {
       case 'prescription':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'rgba(45, 93, 160, 0.1)', color: 'var(--pharma-blue)' }}>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: 'var(--pharma-blue-100)', // #bfdbfe
+              color: 'var(--pharma-blue-800)' // dark blue text
+            }}>
             📋 Prescription
           </span>
         );
       case 'otc':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border pharma-text-danger" style={{ backgroundColor: 'rgba(255, 82, 82, 0.1)', borderColor: 'rgba(255, 82, 82, 0.3)' }}>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: 'var(--pharma-red-100)', // light red
+              color: 'var(--pharma-red-800)' // dark red text
+            }}>
             💊 OTC
           </span>
         );
@@ -27,13 +35,22 @@ const OrderTable = ({ orders, onPrintOrder }) => {
     switch (paymentMethod.toLowerCase()) {
       case 'cash':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium pharma-text-success" style={{ backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: 'var(--pharma-green-100)', // light green
+              color: 'var(--pharma-green-600)' // dark green text
+            }}>
             💵 Cash
           </span>
         );
       case 'credit card':
+      case 'card':
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium pharma-text-info" style={{ backgroundColor: 'rgba(142, 68, 173, 0.1)' }}>
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: 'var(--pharma-purple-100)', // light purple
+              color: 'var(--pharma-purple-600)' // dark purple text
+            }}>
             💳 Card
           </span>
         );
