@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const customerToken = localStorage.getItem("auth_token");
     const adminToken = localStorage.getItem("admin_token");
+    const pharmacistToken = localStorage.getItem("pharmacist_token");
 
     if (customerToken) {
       setToken(customerToken);
@@ -31,12 +32,33 @@ export const AuthProvider = ({ children }) => {
       setToken(adminToken);
       setUserType("pharmacy-admin");
       checkAuthStatus("pharmacy-admin");
+    } else if (pharmacistToken) {
+      setToken(pharmacistToken);
+      setUserType("pharmacist");
+      checkAuthStatus("pharmacist");
     }
   }, []);
 
   const checkAuthStatus = async (type = userType) => {
     try {
       setLoading(true);
+      
+      // ✅ Check for hardcoded users in localStorage
+      if (type === 'pharmacy-admin' || type === 'pharmacist') {
+        const storageKey = `${type}_data`;
+        const userData = JSON.parse(localStorage.getItem(storageKey));
+        
+        if (userData) {
+          console.log(`Found hardcoded ${type} data:`, userData);
+          setUser({
+            ...userData,
+            userType: type,
+          });
+          return;
+        }
+      }
+      
+      // For customers, proceed with normal API call
       const userData = await ApiService.getProfile(type);
 
       // Handle nested response structure
@@ -53,6 +75,43 @@ export const AuthProvider = ({ children }) => {
       ) {
         logout();
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ NEW: Set hardcoded user for pharmacy admin and pharmacist
+  const setHardcodedUser = async (userData, type) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log(`Setting hardcoded ${type}:`, userData);
+      
+      // Generate a fake token
+      const fakeToken = `hardcoded-token-${type}-${Date.now()}`;
+      
+      // Set the user data
+      setUser({
+        ...userData,
+        userType: type,
+      });
+      
+      // Set token and user type
+      setToken(fakeToken);
+      setUserType(type);
+      
+      // Store in localStorage
+      const storageKey = type === 'pharmacy-admin' ? 'admin_token' : 'pharmacist_token';
+      localStorage.setItem(storageKey, fakeToken);
+      localStorage.setItem(`${type}_data`, JSON.stringify(userData));
+      
+      console.log(`Successfully set hardcoded ${type}`);
+      return { success: true, message: `Logged in as ${type}` };
+    } catch (error) {
+      console.error("Hardcoded login error:", error);
+      setError(error.message);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -104,8 +163,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ...existing code...
-
   const login = async (credentials, type = "customer") => {
     try {
       setLoading(true);
@@ -144,11 +201,19 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem("admin_token", tokenData);
             // Clear customer token if exists
             localStorage.removeItem("auth_token");
+            localStorage.removeItem("pharmacist_token");
+          } else if (type === "pharmacist") {
+            console.log("Storing pharmacist token");
+            localStorage.setItem("pharmacist_token", tokenData);
+            // Clear other tokens
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("admin_token");
           } else {
             console.log("Storing customer token");
             localStorage.setItem("auth_token", tokenData);
-            // Clear admin token if exists
+            // Clear other tokens
             localStorage.removeItem("admin_token");
+            localStorage.removeItem("pharmacist_token");
           }
 
           console.log(`Successfully logged in as ${type}`);
@@ -174,11 +239,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ...rest of existing code...
   const logout = async () => {
     try {
-      // Call logout API if user is logged in
-      if (userType) {
+      // Only call logout API for customer logins
+      if (userType === "customer") {
         await ApiService.logout(userType);
       }
     } catch (error) {
@@ -191,6 +255,9 @@ export const AuthProvider = ({ children }) => {
       setUserType(null);
       localStorage.removeItem("auth_token");
       localStorage.removeItem("admin_token");
+      localStorage.removeItem("pharmacist_token");
+      localStorage.removeItem("pharmacy-admin_data");
+      localStorage.removeItem("pharmacist_data");
       localStorage.removeItem("admin_data");
       setError(null);
     }
@@ -215,9 +282,11 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     checkAuthStatus,
+    setHardcodedUser, // ✅ Export the new method
     isAuthenticated: !!token,
     isCustomer: userType === "customer",
     isPharmacyAdmin: userType === "pharmacy-admin",
+    isPharmacist: userType === "pharmacist", // ✅ Add this check
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
