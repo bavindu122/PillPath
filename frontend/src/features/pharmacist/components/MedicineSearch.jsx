@@ -316,7 +316,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Total Price:</span>
                     <span className="text-lg font-bold text-blue-600">
-                      ${calculateModalTotal()}
+                      Rs.{calculateModalTotal()}
                     </span>
                   </div>
                 </div>

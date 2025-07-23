@@ -6,10 +6,10 @@ export const orderService = {
     
     return [
       {
-        id: 'RX-250710-01',
+        id: 'ORD-250713-01',
         patient: {
-          name: 'Sarah Johnson',
-          email: 'sarah.johnson@email.com',
+          name: 'Randika Wasana',
+          email: 'rwasana@gmail.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 123 4567'
         },
@@ -24,14 +24,14 @@ export const orderService = {
         date: '2025-07-10',
         time: '10:30 AM',
         paymentMethod: 'Cash',
-        notes: 'Patient allergic to penicillin - verified safe alternative',
+        notes: 'None',
         actions: ['view', 'print']
       },
       {
-        id: 'RX-250627-02',
+        id: 'ORD-250713-02',
         patient: {
-          name: 'Michael Chen',
-          email: 'm.chen@email.com',
+          name: 'Shakila Udara',
+          email: 'sakau@email.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 234 5678'
         },
@@ -51,10 +51,10 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241226-03',
+        id: 'ORD-250713-01',
         patient: {
-          name: 'Emma Davis',
-          email: 'emma.davis@email.com',
+          name: 'Nadun Dharshana',
+          email: 'naddar@email.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 345 6789'
         },
@@ -72,10 +72,10 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241225-04',
+        id: 'ORD-250713-04',
         patient: {
-          name: 'Robert Wilson',
-          email: 'r.wilson@email.com',
+          name: 'Sarangi Perera',
+          email: 'saranap@email.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 456 7890'
         },
@@ -94,10 +94,10 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241224-05',
+        id: 'ORD-250713-05',
         patient: {
-          name: 'Lisa Thompson',
-          email: 'l.thompson@email.com',
+          name: 'Chathurani Silva',
+          email: 'chasilva@email.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 567 8901'
         },
@@ -114,10 +114,10 @@ export const orderService = {
         actions: ['view', 'print']
       },
       {
-        id: 'RX-241223-06',
+        id: 'ORD-250713-06',
         patient: {
-          name: 'David Martinez',
-          email: 'd.martinez@email.com',
+          name: 'Saman Perera',
+          email: 'samanp@email.com',
           avatar: '/api/placeholder/40/40',
           phone: '+94 77 678 9012'
         },

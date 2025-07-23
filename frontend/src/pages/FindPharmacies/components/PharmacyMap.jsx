@@ -38,7 +38,9 @@ const PharmacyMap = ({
   selectedPharmacy, 
   setSelectedPharmacy, 
   currentLocation,
-  viewMode 
+  viewMode,
+  isMultiSelect = false,           // <-- add this
+  selectedPharmacies = []          // <-- add this
 }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -82,6 +84,10 @@ const PharmacyMap = ({
           0% { transform: scale(0.5); opacity: 1; }
           100% { transform: scale(1.5); opacity: 0; }
         }
+        @keyframes greenPulse {
+          0% { transform: scale(0.5); opacity: 1; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
       `;
       document.head.appendChild(style);
     }
@@ -103,9 +109,17 @@ const PharmacyMap = ({
       });
       markersRef.current = {};
 
+      // Helper to check if a pharmacy is selected (multi or single)
+      const isPharmacySelected = (pharmacy) => {
+        if (isMultiSelect) {
+          return selectedPharmacies.some(p => p.id === pharmacy.id);
+        }
+        return selectedPharmacy && selectedPharmacy.id === pharmacy.id;
+      };
+
       // Add markers for each pharmacy
       pharmacies.forEach(pharmacy => {
-        const isSelected = selectedPharmacy && selectedPharmacy.id === pharmacy.id;
+        const isSelected = isPharmacySelected(pharmacy); // <-- use this
         
         const markerStyle = {
           width: '36px',
@@ -127,11 +141,14 @@ const PharmacyMap = ({
 
         const pharmacyIcon = L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style="${convertStyleObjectToString(markerStyle)}"
-                      onmouseover="if (!this.classList.contains('selected')) { this.style.background='#f5f5f5'; this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.2)'; }"
-                      onmouseout="if (!this.classList.contains('selected')) { this.style.background='white'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'; }"
-                      class="${isSelected ? 'selected' : ''}">
-                  <img src="${logo3}" alt="Pharmacy" style="width: 20px; height: 20px; object-fit: contain;" />
+          html: `<div style="position: relative; width: 36px; height: 36px;">
+                  <div style="${convertStyleObjectToString(markerStyle)}"
+                       onmouseover="if (!this.classList.contains('selected')) { this.style.background='#f5f5f5'; this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.2)'; }"
+                       onmouseout="if (!this.classList.contains('selected')) { this.style.background='white'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)'; }"
+                       class="${isSelected ? 'selected' : ''}">
+                    <img src="${logo3}" alt="Pharmacy" style="width: 20px; height: 20px; object-fit: contain;" />
+                  </div>
+                  ${isSelected ? `<div style="position: absolute; top: -9px; left: -9px; width: 54px; height: 54px; background-color: rgba(34, 139, 34, 0.5); border-radius: 50%; animation: greenPulse 2s infinite; z-index: -1;"></div>` : ''}
                 </div>`,
           iconSize: [36, 36],
           iconAnchor: [18, 18]

@@ -244,9 +244,8 @@ const PrescriptionQueue = () => {
                             </div>
                           </div>
                           
-                          <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">{prescription.medication}</p>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
+                          <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">{prescription.medication}</p>                          
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
                             <span className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 flex-shrink-0" />
                               <span className="truncate">{prescription.time}</span>

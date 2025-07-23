@@ -56,7 +56,7 @@ export const useChatData = () => {
       {
         id: 1,
         patientId: 'P001',
-        patientName: 'Emma Wilson',
+        patientName: 'Isurangi Wasana',
         patientEmail: 'emma.wilson@email.com',
         patientAvatar: '/src/assets/img/meds/pharma.jpg',
         lastMessage: 'Thank you for the clarification about the dosage. When should I take the medication?',
@@ -114,7 +114,7 @@ export const useChatData = () => {
       {
         id: 2,
         patientId: 'P002',
-        patientName: 'Michael Chen',
+        patientName: 'Shakila Udara',
         patientEmail: 'michael.chen@email.com',
         patientAvatar: '/src/assets/img/meds/pharma.jpg',
         lastMessage: 'Is my prescription ready for pickup?',
@@ -140,7 +140,7 @@ export const useChatData = () => {
       {
         id: 3,
         patientId: 'P003',
-        patientName: 'Sarah Johnson',
+        patientName: 'Asini Manel',
         patientEmail: 'sarah.johnson@email.com',
         patientAvatar: '/src/assets/img/meds/pharma.jpg',
         lastMessage: 'Thank you for your help!',
@@ -182,7 +182,7 @@ export const useChatData = () => {
       {
         id: 4,
         patientId: 'P004',
-        patientName: 'David Rodriguez',
+        patientName: 'Nadun Dharshana',
         patientEmail: 'david.rodriguez@email.com',
         patientAvatar: '/src/assets/img/meds/pharma.jpg',
         lastMessage: 'Are there any side effects I should watch for?',
@@ -208,7 +208,7 @@ export const useChatData = () => {
       {
         id: 5,
         patientId: 'P005',
-        patientName: 'Lisa Anderson',
+        patientName: 'Sarangi Perera',
         patientEmail: 'lisa.anderson@email.com',
         patientAvatar: '/src/assets/img/meds/pharma.jpg',
         lastMessage: 'Can I get a refill on this prescription?',
