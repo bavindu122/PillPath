@@ -94,7 +94,7 @@ const SalesAnalyticsPage = () => {
         <SalesSummaryCard
           title="Total Sales"
           value={salesSummary.totalSales.toLocaleString()}
-          prefix="$"
+          prefix="Rs."
           change={salesSummary.salesGrowth}
           icon={DollarIcon}
         />
@@ -107,7 +107,7 @@ const SalesAnalyticsPage = () => {
         <SalesSummaryCard
           title="Average Order Value"
           value={salesSummary.averageOrderValue.toFixed(2)}
-          prefix="$"
+          prefix="Rs."
           change={(salesSummary.salesGrowth - salesSummary.ordersGrowth).toFixed(1)}
           icon={ReceiptIcon}
         />

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Clock, Star, ChevronRight, PlusCircle, Check, Upload, FileText } from 'lucide-react';
+import { ModalScrollContainer } from '../../../components/UIs/ScrollContainer';
 
 const OrderFromAnotherPharmacyModal = ({ 
   isOpen, 
@@ -144,7 +145,7 @@ const OrderFromAnotherPharmacyModal = ({
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <ModalScrollContainer className="flex-1">
             <div className="space-y-6">
               <p className="text-center text-gray-700">
                 Select a pharmacy to send your prescription to
@@ -272,7 +273,7 @@ const OrderFromAnotherPharmacyModal = ({
                 </motion.button>
               </div>
             </div>
-          </div>
+          </ModalScrollContainer>
         </motion.div>
       </AnimatePresence>
     </div>

@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Star from "./Star";
+import { ScrollContainer } from "../../components/UIs";
 
 const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
@@ -494,7 +495,12 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Pharmacy List */}
-                    <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin">
+                    <ScrollContainer 
+                      maxHeight="320px" 
+                      scrollbarTheme="default"
+                      scrollbarWidth="6px"
+                      className="space-y-3"
+                    >
                       {nearbyPharmacies.map((pharmacy, index) => (
                         <motion.div
                           key={pharmacy.id}
@@ -574,7 +580,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                           </div>
                         </motion.div>
                       ))}
-                    </div>
+                    </ScrollContainer>
 
                     {/* View More Option */}
                     <motion.button

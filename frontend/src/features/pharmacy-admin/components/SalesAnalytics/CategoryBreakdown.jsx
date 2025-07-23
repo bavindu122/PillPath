@@ -70,7 +70,7 @@ const CategoryBreakdown = ({ salesByCategory: paymentDistribution }) => { // Ali
               align="center" // Centered the legend
               formatter={(value, entry) => {
                 const { category, sales } = paymentDistribution.find(item => item.category === value);
-                return <span className="text-sm text-gray-700">{category} (${sales.toLocaleString()})</span>;
+                return <span className="text-sm text-gray-700">{category} (Rs.{sales.toLocaleString()})</span>;
               }}
             />
           </PieChart>
@@ -88,7 +88,7 @@ const CategoryBreakdown = ({ salesByCategory: paymentDistribution }) => { // Ali
                 <p className="text-sm font-medium">{paymentType.category}</p>
               </div>
               {/* For payment distribution, 'orders' might not be directly relevant, but keeping the structure */}
-              <p className="text-xs text-gray-500 mt-1">${paymentType.sales.toLocaleString()} sales</p>
+              <p className="text-xs text-gray-500 mt-1">Rs.{paymentType.sales.toLocaleString()} sales</p>
             </div>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
               paymentType.growth >= 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User } from 'lucide-react';
 import '../pages/index-pharmacist.css';
+import { ScrollContainer } from '../../../components/UIs';
 
 const ChatWidget = ({ messages, onSendMessage, patientName }) => {
   const [newMessage, setNewMessage] = useState('');
@@ -47,9 +48,13 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
       </div>
 
       {/* Messages */}
-      <div className="p-4 flex-1 overflow-y-auto">
-        <div className="space-y-4">
-          {messages.map((message) => (
+      <ScrollContainer 
+        maxHeight="calc(640px - 180px)" 
+        scrollbarTheme="default"
+        scrollbarWidth="6px"
+        className="p-4 space-y-4"
+      >
+        {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.sender === 'pharmacist' ? 'justify-end' : 'justify-start'}`}
@@ -71,8 +76,7 @@ const ChatWidget = ({ messages, onSendMessage, patientName }) => {
             </div>
           ))}
           <div ref={messagesEndRef} />
-        </div>
-      </div>
+        </ScrollContainer>
 
       {/* Message Input */}
       <div className="p-4 border-t border-gray-200 flex-shrink-0">

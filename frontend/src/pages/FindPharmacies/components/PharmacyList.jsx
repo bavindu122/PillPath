@@ -1,6 +1,7 @@
 import React from "react";
 import { MapPin, Star, Clock, Phone, Navigation, ArrowRight, Truck, Pill, Shield, Check, Plus, Minus } from "lucide-react";
 import { calculateDistance } from "../utils/mapHelpers";
+import { ScrollContainer } from "../../../components/UIs";
 
 const PharmacyList = ({ 
   pharmacies, 
