@@ -18,55 +18,38 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Initialize tokens and user type on app start
+  // ✅ Initialize authentication on app start
   useEffect(() => {
-    const customerToken = localStorage.getItem("auth_token");
-    const adminToken = localStorage.getItem("admin_token");
-    const pharmacistToken = localStorage.getItem("pharmacist_token");
+    const storedToken = localStorage.getItem("auth_token");
+    const storedUserType = localStorage.getItem("user_type");
+    const storedUser = localStorage.getItem("user_data");
 
-    if (customerToken) {
-      setToken(customerToken);
-      setUserType("customer");
-      checkAuthStatus("customer");
-    } else if (adminToken) {
-      setToken(adminToken);
-      setUserType("pharmacy-admin");
-      checkAuthStatus("pharmacy-admin");
-    } else if (pharmacistToken) {
-      setToken(pharmacistToken);
-      setUserType("pharmacist");
-      checkAuthStatus("pharmacist");
+    if (storedToken && storedUserType && storedUser) {
+      try {
+        setToken(storedToken);
+        setUserType(storedUserType);
+        setUser(JSON.parse(storedUser));
+        console.log("Restored authentication from localStorage:", {
+          userType: storedUserType,
+          user: JSON.parse(storedUser),
+        });
+      } catch (error) {
+        console.error("Failed to restore authentication:", error);
+        // Clear corrupted data
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_type");
+        localStorage.removeItem("user_data");
+      }
     }
   }, []);
 
-  const checkAuthStatus = async (type = userType) => {
+  const checkAuthStatus = async () => {
     try {
       setLoading(true);
+      const userData = await ApiService.getUserProfile();
 
-      // ✅ Check for hardcoded users in localStorage
-      if (type === "pharmacy-admin" || type === "pharmacist") {
-        const storageKey = `${type}_data`;
-        const userData = JSON.parse(localStorage.getItem(storageKey));
-
-        if (userData) {
-          console.log(`Found hardcoded ${type} data:`, userData);
-          setUser({
-            ...userData,
-            userType: type,
-          });
-          return;
-        }
-      }
-
-      // For customers, proceed with normal API call
-      const userData = await ApiService.getProfile(type);
-
-      // Handle nested response structure
       const actualUserData = userData.data || userData;
-      setUser({
-        ...actualUserData,
-        userType: type,
-      });
+      setUser(actualUserData);
     } catch (error) {
       console.error("Auth check failed:", error);
       if (
@@ -75,44 +58,6 @@ export const AuthProvider = ({ children }) => {
       ) {
         logout();
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ✅ NEW: Set hardcoded user for pharmacy admin and pharmacist
-  const setHardcodedUser = async (userData, type) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log(`Setting hardcoded ${type}:`, userData);
-
-      // Generate a fake token
-      const fakeToken = `hardcoded-token-${type}-${Date.now()}`;
-
-      // Set the user data
-      setUser({
-        ...userData,
-        userType: type,
-      });
-
-      // Set token and user type
-      setToken(fakeToken);
-      setUserType(type);
-
-      // Store in localStorage
-      const storageKey =
-        type === "pharmacy-admin" ? "admin_token" : "pharmacist_token";
-      localStorage.setItem(storageKey, fakeToken);
-      localStorage.setItem(`${type}_data`, JSON.stringify(userData));
-
-      console.log(`Successfully set hardcoded ${type}`);
-      return { success: true, message: `Logged in as ${type}` };
-    } catch (error) {
-      console.error("Hardcoded login error:", error);
-      setError(error.message);
-      throw error;
     } finally {
       setLoading(false);
     }
@@ -127,7 +72,6 @@ export const AuthProvider = ({ children }) => {
 
       let response;
       if (type === "customer") {
-        // ✅ FIXED: Validate the actual form data, not response data
         if (!userData.email || !userData.password) {
           throw new Error("Email and password are required");
         }
@@ -152,7 +96,6 @@ export const AuthProvider = ({ children }) => {
         } catch (apiError) {
           console.error("Registration API error:", apiError);
 
-          // ✅ Handle common registration errors
           if (
             apiError.message.includes("already exists") ||
             apiError.message.includes("already registered") ||
@@ -164,11 +107,9 @@ export const AuthProvider = ({ children }) => {
           throw apiError;
         }
 
-        // ✅ Handle CustomerRegistrationResponse format
         if (response && response.success) {
           console.log("Registration successful, response:", response);
 
-          // ✅ The backend returns: { id, username, email, fullName, message, success }
           const userData = {
             id: response.id,
             username: response.username,
@@ -177,13 +118,12 @@ export const AuthProvider = ({ children }) => {
             userType: "customer",
           };
 
-          console.log("Setting user data from registration response:", userData);
-
-          // ✅ Set user but not token (user needs to login separately)
+          console.log(
+            "Setting user data from registration response:",
+            userData
+          );
           setUser(userData);
           setUserType("customer");
-
-          // Don't set token - user will need to login after registration
         } else if (response && !response.success) {
           console.error("Registration response indicates failure:", response);
           throw new Error(response.message || "Registration failed");
@@ -205,73 +145,85 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (credentials, type = "customer") => {
+  // ✅ UPDATED: Unified login that handles all user types
+  const login = async (credentials) => {
     try {
       setLoading(true);
       setError(null);
 
-      // ✅ Enhanced debugging
-      console.log("=== LOGIN ATTEMPT ===");
-      console.log("Received type parameter:", type);
+      console.log("=== UNIFIED LOGIN ATTEMPT ===");
       console.log("Credentials:", credentials);
 
-      const response = await ApiService.login(credentials, type);
+      const response = await ApiService.login(credentials);
       console.log("Login response received:", response);
 
-      // ✅ Handle nested backend login response format
       if (response && response.success) {
-        // Extract nested data - your backend returns data nested in "data" object
-        const responseData = response.data || response;
-        const tokenData = responseData.token || response.token;
-        const userData = responseData.user || response.user;
+        const {
+          token: authToken,
+          userType: backendUserType,
+          userProfile,
+        } = response;
 
-        console.log("Extracted token:", tokenData);
-        console.log("Extracted user data:", userData);
-        console.log("Login type being processed:", type);
+        console.log("Extracted data:", {
+          token: authToken,
+          userType: backendUserType,
+          userProfile,
+        });
 
-        if (tokenData && userData) {
-          setToken(tokenData);
-          setUser({
-            ...userData,
-            userType: type,
-          });
-          setUserType(type);
-
-          // Store token in appropriate localStorage key
-          if (type === "pharmacy-admin") {
-            console.log("Storing admin token");
-            localStorage.setItem("admin_token", tokenData);
-            // Clear customer token if exists
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("pharmacist_token");
-          } else if (type === "pharmacist") {
-            console.log("Storing pharmacist token");
-            localStorage.setItem("pharmacist_token", tokenData);
-            // Clear other tokens
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("admin_token");
-          } else {
-            console.log("Storing customer token");
-            localStorage.setItem("auth_token", tokenData);
-            // Clear other tokens
-            localStorage.removeItem("admin_token");
-            localStorage.removeItem("pharmacist_token");
+        if (authToken && userProfile && backendUserType) {
+          // ✅ Map backend userType to frontend userType
+          let frontendUserType;
+          switch (backendUserType) {
+            case "CUSTOMER":
+              frontendUserType = "customer";
+              break;
+            case "PHARMACY_ADMIN":
+              frontendUserType = "pharmacy-admin";
+              break;
+            case "PHARMACIST":
+              frontendUserType = "pharmacist";
+              break;
+            case "ADMIN":
+              frontendUserType = "admin";
+              break;
+            default:
+              frontendUserType = "customer";
           }
 
-          console.log(`Successfully logged in as ${type}`);
-        } else {
-          console.error("Missing token or user data in response");
-          throw new Error(
-            "Invalid response format - missing token or user data"
+          // ✅ Set state
+          setToken(authToken);
+          setUser({
+            ...userProfile,
+            userType: frontendUserType,
+          });
+          setUserType(frontendUserType);
+
+          // ✅ Store in localStorage
+          localStorage.setItem("auth_token", authToken);
+          localStorage.setItem("user_type", frontendUserType);
+          localStorage.setItem(
+            "user_data",
+            JSON.stringify({
+              ...userProfile,
+              userType: frontendUserType,
+            })
           );
+
+          console.log(`Successfully logged in as ${frontendUserType}`);
+
+          return {
+            ...response,
+            userType: frontendUserType,
+          };
+        } else {
+          console.error("Missing required data in response");
+          throw new Error("Invalid response format - missing required data");
         }
       } else if (response && !response.success) {
         throw new Error(response.message || "Login failed");
       } else {
         throw new Error("Invalid response format");
       }
-
-      return response;
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message);
@@ -283,34 +235,34 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Only call logout API for customer logins
-      if (userType === "customer") {
-        await ApiService.logout(userType);
+      // Only call logout API for authenticated users
+      if (token) {
+        await ApiService.logout();
       }
     } catch (error) {
       console.error("Logout API call failed:", error);
-      // Continue with local logout even if API fails
     } finally {
       // Clear all local state and tokens
       setToken(null);
       setUser(null);
       setUserType(null);
       localStorage.removeItem("auth_token");
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("pharmacist_token");
-      localStorage.removeItem("pharmacy-admin_data");
-      localStorage.removeItem("pharmacist_data");
-      localStorage.removeItem("admin_data");
+      localStorage.removeItem("user_type");
+      localStorage.removeItem("user_data");
       setError(null);
     }
   };
 
-  // ✅ Update user method
   const updateUser = (updatedUserData) => {
-    setUser((prevUser) => ({
-      ...prevUser,
+    const newUserData = {
+      ...user,
       ...updatedUserData,
-    }));
+    };
+
+    setUser(newUserData);
+
+    // Update localStorage
+    localStorage.setItem("user_data", JSON.stringify(newUserData));
   };
 
   const value = {
@@ -324,11 +276,11 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     checkAuthStatus,
-    setHardcodedUser, // ✅ Export the new method
     isAuthenticated: !!token,
     isCustomer: userType === "customer",
     isPharmacyAdmin: userType === "pharmacy-admin",
-    isPharmacist: userType === "pharmacist", // ✅ Add this check
+    isPharmacist: userType === "pharmacist",
+    isAdmin: userType === "admin",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

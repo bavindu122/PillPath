@@ -14,14 +14,8 @@ class ApiService {
       ...options,
     };
 
-    // Add auth token if available (check both customer and admin tokens)
-    let token = null;
-    if (options.isAdmin) {
-      token = localStorage.getItem("admin_token");
-    } else {
-      token = localStorage.getItem("auth_token");
-    }
-
+    // Add auth token if available
+    const token = localStorage.getItem("auth_token");
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -53,7 +47,6 @@ class ApiService {
           } else if (data.error) {
             throw new Error(data.error);
           } else if (!data.success && data.errors) {
-            // Handle validation errors
             const errorMessages = Array.isArray(data.errors)
               ? data.errors.join(", ")
               : Object.values(data.errors).join(", ");
@@ -70,23 +63,21 @@ class ApiService {
     }
   }
 
-  // ✅ Customer registration with exact backend field mapping
+  // ✅ Customer registration
   async registerCustomer(userData) {
     try {
       console.log("Preparing customer registration data...");
 
-      // ✅ FIXED: Map to exact backend CustomerRegistrationRequest format
       const registrationRequest = {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        phone: userData.phone || "", // ✅ FIXED: Backend expects 'phone' not 'phoneNumber'
+        phone: userData.phone || "",
         password: userData.password,
-        dateOfBirth: userData.dateOfBirth, // Backend expects LocalDate, will parse YYYY-MM-DD
+        dateOfBirth: userData.dateOfBirth,
         termsAccepted: userData.termsAccepted,
       };
 
-      // ✅ FIXED: Validate required fields based on backend requirements
       if (!registrationRequest.email || !registrationRequest.password) {
         throw new Error("Email and password are required");
       }
@@ -103,10 +94,7 @@ class ApiService {
         throw new Error("Terms acceptance is required");
       }
 
-      console.log(
-        "Sending customer registration request (backend format):",
-        registrationRequest
-      );
+      console.log("Sending customer registration request:", registrationRequest);
 
       return this.request("customers/register", {
         method: "POST",
@@ -123,108 +111,56 @@ class ApiService {
     return PharmacyService.registerPharmacy(pharmacyData);
   }
 
-  // ✅ Customer login
-  async loginCustomer(credentials) {
+  // ✅ UPDATED: Unified login method
+  async login(credentials) {
     const loginRequest = {
       email: credentials.email,
       password: credentials.password,
     };
 
-    console.log("Sending customer login request:", loginRequest);
+    console.log("Sending unified login request:", loginRequest);
 
-    return this.request("customers/login", {
+    return this.request("users/login", {
       method: "POST",
       body: loginRequest,
     });
   }
 
-  // ✅ Pharmacy Admin login - FIXED
-  async loginPharmacyAdmin(credentials) {
-    const loginRequest = {
-      email: credentials.email,
-      password: credentials.password,
-    };
-
-    console.log("Sending pharmacy admin login request:", loginRequest);
-
-    return this.request("pharmacies/login", {
-      method: "POST",
-      body: loginRequest,
-    });
-  }
-
-  // ✅ Get customer profile
+  
+  // ✅ Get user profile (works for all user types)
   async getUserProfile() {
-    return this.request("customers/profile", {
+    return this.request("customer/profile", {
       method: "GET",
     });
   }
 
-  // ✅ Get pharmacy admin profile - FIXED
-  async getPharmacyAdminProfile() {
-    return this.request("pharmacies/profile", {
-      method: "GET",
-      isAdmin: true,
-    });
-  }
-
-  // ✅ Update customer profile
+  // ✅ Update user profile
   async updateUserProfile(profileData) {
-    return this.request("customers/profile", {
+    return this.request("users/profile", {
       method: "PUT",
       body: profileData,
     });
   }
 
-  // ✅ Update pharmacy admin profile - FIXED
-  async updatePharmacyAdminProfile(profileData) {
-    return this.request("pharmacies/profile", {
-      method: "PUT",
-      body: profileData,
-      isAdmin: true,
-    });
-  }
-
-  // ✅ Customer logout
-  async logoutCustomer() {
-    return this.request("customers/logout", {
+  // ✅ User logout
+  async logout() {
+    return this.request("users/logout", {
       method: "POST",
     });
   }
 
-  // ✅ Pharmacy admin logout - FIXED
-  async logoutPharmacyAdmin() {
-    return this.request("pharmacies/logout", {
-      method: "POST",
-      isAdmin: true,
-    });
+  // ✅ Remove old separate methods as they're no longer needed
+  // Keep backward compatibility for now
+  async loginCustomer(credentials) {
+    return this.login(credentials);
   }
 
-  // ✅ Generic login method
-  async login(credentials, userType = "customer") {
-    if (userType === "pharmacy-admin") {
-      return this.loginPharmacyAdmin(credentials);
-    } else {
-      return this.loginCustomer(credentials);
-    }
+  async loginPharmacyAdmin(credentials) {
+    return this.login(credentials);
   }
 
-  // ✅ Generic logout method
-  async logout(userType = "customer") {
-    if (userType === "pharmacy-admin") {
-      return this.logoutPharmacyAdmin();
-    } else {
-      return this.logoutCustomer();
-    }
-  }
-
-  // ✅ Generic profile method
   async getProfile(userType = "customer") {
-    if (userType === "pharmacy-admin") {
-      return this.getPharmacyAdminProfile();
-    } else {
-      return this.getUserProfile();
-    }
+    return this.getUserProfile();
   }
 }
 
