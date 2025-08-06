@@ -1,13 +1,14 @@
-import PharmacyService from './PharmacyService';
+import PharmacyService from "./PharmacyService";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
 
 class ApiService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -16,46 +17,46 @@ class ApiService {
     // Add auth token if available (check both customer and admin tokens)
     let token = null;
     if (options.isAdmin) {
-      token = localStorage.getItem('admin_token');
+      token = localStorage.getItem("admin_token");
     } else {
-      token = localStorage.getItem('auth_token');
+      token = localStorage.getItem("auth_token");
     }
-    
+
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    if (config.body && typeof config.body === 'object') {
+    if (config.body && typeof config.body === "object") {
       config.body = JSON.stringify(config.body);
     }
 
     try {
-      console.log('Making API request:', url, config);
+      console.log("Making API request:", url, config);
       const response = await fetch(url, config);
-      
+
       let data;
-      const contentType = response.headers.get('content-type');
-      
-      if (contentType && contentType.includes('application/json')) {
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
         data = await response.text();
       }
 
-      console.log('API response:', response.status, data);
+      console.log("API response:", response.status, data);
 
       if (!response.ok) {
         // Handle different error formats from backend
-        if (data && typeof data === 'object') {
+        if (data && typeof data === "object") {
           if (data.message) {
             throw new Error(data.message);
           } else if (data.error) {
             throw new Error(data.error);
           } else if (!data.success && data.errors) {
             // Handle validation errors
-            const errorMessages = Array.isArray(data.errors) 
-              ? data.errors.join(', ') 
-              : Object.values(data.errors).join(', ');
+            const errorMessages = Array.isArray(data.errors)
+              ? data.errors.join(", ")
+              : Object.values(data.errors).join(", ");
             throw new Error(errorMessages);
           }
         }
@@ -64,29 +65,57 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       throw error;
     }
   }
 
-  // ✅ Customer registration
+  // ✅ Customer registration with exact backend field mapping
   async registerCustomer(userData) {
-    const registrationRequest = {
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email,
-      phone: userData.phone,
-      password: userData.password,
-      dateOfBirth: userData.dateOfBirth,
-      termsAccepted: userData.termsAccepted
-    };
+    try {
+      console.log("Preparing customer registration data...");
 
-    console.log('Sending customer registration request:', registrationRequest);
-    
-    return this.request('customers/register', {
-      method: 'POST',
-      body: registrationRequest,
-    });
+      // ✅ FIXED: Map to exact backend CustomerRegistrationRequest format
+      const registrationRequest = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone || "", // ✅ FIXED: Backend expects 'phone' not 'phoneNumber'
+        password: userData.password,
+        dateOfBirth: userData.dateOfBirth, // Backend expects LocalDate, will parse YYYY-MM-DD
+        termsAccepted: userData.termsAccepted,
+      };
+
+      // ✅ FIXED: Validate required fields based on backend requirements
+      if (!registrationRequest.email || !registrationRequest.password) {
+        throw new Error("Email and password are required");
+      }
+
+      if (!registrationRequest.firstName || !registrationRequest.lastName) {
+        throw new Error("First name and last name are required");
+      }
+
+      if (!registrationRequest.dateOfBirth) {
+        throw new Error("Date of birth is required");
+      }
+
+      if (!registrationRequest.termsAccepted) {
+        throw new Error("Terms acceptance is required");
+      }
+
+      console.log(
+        "Sending customer registration request (backend format):",
+        registrationRequest
+      );
+
+      return this.request("customers/register", {
+        method: "POST",
+        body: registrationRequest,
+      });
+    } catch (error) {
+      console.error("Customer registration preparation failed:", error);
+      throw error;
+    }
   }
 
   // ✅ Pharmacy registration
@@ -98,13 +127,13 @@ class ApiService {
   async loginCustomer(credentials) {
     const loginRequest = {
       email: credentials.email,
-      password: credentials.password
+      password: credentials.password,
     };
 
-    console.log('Sending customer login request:', loginRequest);
-    
-    return this.request('customers/login', {
-      method: 'POST',
+    console.log("Sending customer login request:", loginRequest);
+
+    return this.request("customers/login", {
+      method: "POST",
       body: loginRequest,
     });
   }
@@ -113,67 +142,67 @@ class ApiService {
   async loginPharmacyAdmin(credentials) {
     const loginRequest = {
       email: credentials.email,
-      password: credentials.password
+      password: credentials.password,
     };
 
-    console.log('Sending pharmacy admin login request:', loginRequest);
-    
-    return this.request('pharmacies/login', {
-      method: 'POST',
+    console.log("Sending pharmacy admin login request:", loginRequest);
+
+    return this.request("pharmacies/login", {
+      method: "POST",
       body: loginRequest,
     });
   }
 
   // ✅ Get customer profile
   async getUserProfile() {
-    return this.request('customers/profile', {
-      method: 'GET',
+    return this.request("customers/profile", {
+      method: "GET",
     });
   }
 
   // ✅ Get pharmacy admin profile - FIXED
   async getPharmacyAdminProfile() {
-    return this.request('pharmacies/profile', {
-      method: 'GET',
-      isAdmin: true
+    return this.request("pharmacies/profile", {
+      method: "GET",
+      isAdmin: true,
     });
   }
 
   // ✅ Update customer profile
   async updateUserProfile(profileData) {
-    return this.request('customers/profile', {
-      method: 'PUT',
+    return this.request("customers/profile", {
+      method: "PUT",
       body: profileData,
     });
   }
 
   // ✅ Update pharmacy admin profile - FIXED
   async updatePharmacyAdminProfile(profileData) {
-    return this.request('pharmacies/profile', {
-      method: 'PUT',
+    return this.request("pharmacies/profile", {
+      method: "PUT",
       body: profileData,
-      isAdmin: true
+      isAdmin: true,
     });
   }
 
   // ✅ Customer logout
   async logoutCustomer() {
-    return this.request('customers/logout', {
-      method: 'POST',
+    return this.request("customers/logout", {
+      method: "POST",
     });
   }
 
   // ✅ Pharmacy admin logout - FIXED
   async logoutPharmacyAdmin() {
-    return this.request('pharmacies/logout', {
-      method: 'POST',
-      isAdmin: true
+    return this.request("pharmacies/logout", {
+      method: "POST",
+      isAdmin: true,
     });
   }
 
   // ✅ Generic login method
-  async login(credentials, userType = 'customer') {
-    if (userType === 'pharmacy-admin') {
+  async login(credentials, userType = "customer") {
+    if (userType === "pharmacy-admin") {
       return this.loginPharmacyAdmin(credentials);
     } else {
       return this.loginCustomer(credentials);
@@ -181,8 +210,8 @@ class ApiService {
   }
 
   // ✅ Generic logout method
-  async logout(userType = 'customer') {
-    if (userType === 'pharmacy-admin') {
+  async logout(userType = "customer") {
+    if (userType === "pharmacy-admin") {
       return this.logoutPharmacyAdmin();
     } else {
       return this.logoutCustomer();
@@ -190,8 +219,8 @@ class ApiService {
   }
 
   // ✅ Generic profile method
-  async getProfile(userType = 'customer') {
-    if (userType === 'pharmacy-admin') {
+  async getProfile(userType = "customer") {
+    if (userType === "pharmacy-admin") {
       return this.getPharmacyAdminProfile();
     } else {
       return this.getUserProfile();

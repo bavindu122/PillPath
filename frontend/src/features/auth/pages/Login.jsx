@@ -36,7 +36,7 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [loginType, setLoginType] = useState('customer'); // 'customer', 'pharmacy-admin', or 'pharmacist'
+  const [loginType, setLoginType] = useState('customer'); 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -268,26 +268,7 @@ const Login = () => {
           </div>
         </div>
 
-        {/* ✅ Hardcoded credentials info for non-customer logins */}
-        {/* {loginType !== 'customer' && (
-          <div className="w-full mb-2 p-3 bg-blue-500/20 border border-blue-500/40 rounded-lg animate-fade-in text-xs">
-            <p className="text-white text-center mb-1 font-semibold">
-              Use these hardcoded credentials:
-            </p>
-            <div className="flex justify-between items-center">
-              <span className="text-blue-200">Email:</span>
-              <code className="bg-black/20 px-2 py-1 rounded text-white">
-                {HARDCODED_CREDENTIALS[loginType].email}
-              </code>
-            </div>
-            <div className="flex justify-between items-center mt-1">
-              <span className="text-blue-200">Password:</span>
-              <code className="bg-black/20 px-2 py-1 rounded text-white">
-                {HARDCODED_CREDENTIALS[loginType].password}
-              </code>
-            </div>
-          </div>
-        )} */}
+        
 
         {/* Logo and branding */}
         <div className="flex flex-col items-center mb-1 relative z-10">

@@ -42,12 +42,12 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async (type = userType) => {
     try {
       setLoading(true);
-      
+
       // ✅ Check for hardcoded users in localStorage
-      if (type === 'pharmacy-admin' || type === 'pharmacist') {
+      if (type === "pharmacy-admin" || type === "pharmacist") {
         const storageKey = `${type}_data`;
         const userData = JSON.parse(localStorage.getItem(storageKey));
-        
+
         if (userData) {
           console.log(`Found hardcoded ${type} data:`, userData);
           setUser({
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
           return;
         }
       }
-      
+
       // For customers, proceed with normal API call
       const userData = await ApiService.getProfile(type);
 
@@ -85,27 +85,28 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log(`Setting hardcoded ${type}:`, userData);
-      
+
       // Generate a fake token
       const fakeToken = `hardcoded-token-${type}-${Date.now()}`;
-      
+
       // Set the user data
       setUser({
         ...userData,
         userType: type,
       });
-      
+
       // Set token and user type
       setToken(fakeToken);
       setUserType(type);
-      
+
       // Store in localStorage
-      const storageKey = type === 'pharmacy-admin' ? 'admin_token' : 'pharmacist_token';
+      const storageKey =
+        type === "pharmacy-admin" ? "admin_token" : "pharmacist_token";
       localStorage.setItem(storageKey, fakeToken);
       localStorage.setItem(`${type}_data`, JSON.stringify(userData));
-      
+
       console.log(`Successfully set hardcoded ${type}`);
       return { success: true, message: `Logged in as ${type}` };
     } catch (error) {
@@ -122,41 +123,82 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      console.log(`Starting ${type} registration with data:`, userData);
+
       let response;
       if (type === "customer") {
-        response = await ApiService.registerCustomer(userData);
+        // ✅ FIXED: Validate the actual form data, not response data
+        if (!userData.email || !userData.password) {
+          throw new Error("Email and password are required");
+        }
 
-        // Handle backend response format
-        if (response && response.success) {
-          // Extract nested data
-          const responseData = response.data || response;
-          const tokenData = responseData.token || response.token;
-          const userData =
-            responseData.user ||
-            response.user ||
-            responseData.customer ||
-            response.customer;
+        if (!userData.firstName || !userData.lastName) {
+          throw new Error("First name and last name are required");
+        }
 
-          if (tokenData) {
-            setToken(tokenData);
-            setUser({
-              ...userData,
-              userType: "customer",
-            });
-            setUserType("customer");
-            localStorage.setItem("auth_token", tokenData);
+        if (!userData.dateOfBirth) {
+          throw new Error("Date of birth is required");
+        }
+
+        if (!userData.termsAccepted) {
+          throw new Error("You must accept the terms and conditions");
+        }
+
+        console.log("Submitting customer registration:", userData);
+
+        try {
+          response = await ApiService.registerCustomer(userData);
+          console.log("Registration API response:", response);
+        } catch (apiError) {
+          console.error("Registration API error:", apiError);
+
+          // ✅ Handle common registration errors
+          if (
+            apiError.message.includes("already exists") ||
+            apiError.message.includes("already registered") ||
+            apiError.message.includes("email")
+          ) {
+            throw new Error("This email is already registered");
           }
+
+          throw apiError;
+        }
+
+        // ✅ Handle CustomerRegistrationResponse format
+        if (response && response.success) {
+          console.log("Registration successful, response:", response);
+
+          // ✅ The backend returns: { id, username, email, fullName, message, success }
+          const userData = {
+            id: response.id,
+            username: response.username,
+            email: response.email,
+            fullName: response.fullName,
+            userType: "customer",
+          };
+
+          console.log("Setting user data from registration response:", userData);
+
+          // ✅ Set user but not token (user needs to login separately)
+          setUser(userData);
+          setUserType("customer");
+
+          // Don't set token - user will need to login after registration
         } else if (response && !response.success) {
+          console.error("Registration response indicates failure:", response);
           throw new Error(response.message || "Registration failed");
+        } else {
+          console.error("Unexpected registration response format:", response);
+          throw new Error("Unexpected response format");
         }
       } else if (type === "pharmacy") {
         response = await ApiService.registerPharmacy(userData);
-        // Don't set token/user for pharmacy - they need admin approval
       }
 
       return response;
     } catch (error) {
-      setError(error.message);
+      console.error(`${type} registration failed:`, error);
+      setError(error.message || `${type} registration failed`);
       throw error;
     } finally {
       setLoading(false);
