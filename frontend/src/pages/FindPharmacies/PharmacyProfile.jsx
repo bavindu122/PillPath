@@ -24,6 +24,23 @@ const PharmacyProfile = () => {
   const actualPharmacyId = pharmacyId || "1";
   const { pharmacy, loading, error, reviews, otcProducts } = usePharmacyProfile(actualPharmacyId);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isFromPrescriptionUpload, setIsFromPrescriptionUpload] = useState(false);
+
+  // Check if user came from prescription upload flow
+  useEffect(() => {
+    const prescriptionData = sessionStorage.getItem('prescriptionData');
+    if (prescriptionData) {
+      setIsFromPrescriptionUpload(true);
+    }
+  }, []);
+
+  // Determine back link based on context
+  const getBackLink = () => {
+    if (isFromPrescriptionUpload) {
+      return "/find-pharmacy?from=prescription-upload";
+    }
+    return "/find-pharmacy";
+  };
 
   // Map product IDs to imported images
   const getProductImage = (product) => {
@@ -331,11 +348,13 @@ const PharmacyProfile = () => {
         {/* Navigation */}
         <div className="mb-6">
           <Link 
-            to="/find-pharmacy" 
+            to={getBackLink()}
             className="flex items-center space-x-2 sm:space-x-3 text-white/80 hover:text-white transition-all duration-300 hover:bg-white/10 px-3 sm:px-4 py-2 rounded-lg group w-fit"
           >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 group-hover:-translate-x-1 transition-transform duration-300" />
-            <span className="font-medium text-sm sm:text-base">Back to Pharmacy Search</span>
+            <span className="font-medium text-sm sm:text-base">
+              {isFromPrescriptionUpload ? "Back to Pharmacy Selection" : "Back to Pharmacy Search"}
+            </span>
           </Link>
         </div>
 

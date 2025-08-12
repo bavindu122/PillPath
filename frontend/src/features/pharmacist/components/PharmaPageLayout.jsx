@@ -59,8 +59,8 @@ const PharmaPageLayout = ({
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
           {/* Page Header */}
           {(title || showBackButton || headerActions) && (
-            <div className="dashboard-fade-in-1 mb-6 lg:mb-8">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+  <div className="dashboard-fade-in-1 mb-6 lg:mb-8 h-16 flex">
+    <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 mb-4 sm:mb-6 w-full h-full items-center">
                 {showBackButton && onBack && (
                   <button
                     onClick={onBack}
@@ -72,14 +72,14 @@ const PharmaPageLayout = ({
                 )}
 
                 {title && (
-                  <div className="text-center flex-1">
+                  <div className="text-center flex-1 sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 py-6 sm:py-8">
                     <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-gray-800">{title}</h1>
                     {subtitle && <p className="text-gray-600 mt-1 text-sm sm:text-base">{subtitle}</p>}
                   </div>
                 )}
 
                 {headerActions && (
-                  <div className="flex items-center space-x-2 sm:space-x-4 justify-center sm:justify-end">
+                  <div className="flex items-center space-x-2 sm:space-x-4 justify-center sm:justify-end sm:ml-auto">
                     {headerActions}
                   </div>
                 )}

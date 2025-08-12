@@ -7,8 +7,7 @@ export const prescriptionService = {
     return [
       {
         id: 1,
-        patientName: "John Smith",
-        medication: "Amoxicillin 500mg - 30 tablets",
+        patientName: "RX-250714-02",
         priority: "High Priority",
         time: "10:30 AM",
         date: "2025-07-04",
@@ -19,8 +18,7 @@ export const prescriptionService = {
       },
       {
         id: 2,
-        patientName: "Maria Garcia",
-        medication: "Metformin 850mg - 60 tablets",
+        patientName: " RX-250714-02",
         priority: "Medium Priority",
         time: "11:15 AM",
         date: "2025-07-04",
@@ -31,8 +29,7 @@ export const prescriptionService = {
       },
       {
         id: 3,
-        patientName: "Robert Davis",
-        medication: "Lisinopril 10mg - 30 tablets",
+        patientName: "RX-250714-02",
         priority: "Low Priority",
         time: "2:45 PM",
         date: "2025-07-04",
@@ -43,8 +40,7 @@ export const prescriptionService = {
       },
       {
         id: 4,
-        patientName: "Linda Thompson",
-        medication: "Atorvastatin 20mg - 90 tablets",
+        patientName: "RX-250714-02",
         priority: "Medium Priority",
         time: "3:20 PM",
         date: "2025-07-04",
@@ -55,8 +51,7 @@ export const prescriptionService = {
       },
       {
         id: 5,
-        patientName: "Sarah Johnson",
-        medication: "Omeprazole 40mg - 14 capsules",
+        patientName: "RX-250714-02",
         priority: "High Priority",
         time: "4:10 PM",
         date: "2025-07-04",
@@ -67,8 +62,7 @@ export const prescriptionService = {
       },
       {
         id: 6,
-        patientName: "Michael Chen",
-        medication: "Hydrochlorothiazide 25mg - 30 tablets",
+        patientName: "Order RX-250714-02",
         priority: "Low Priority",
         time: "4:45 PM",
         date: "2025-07-04",
@@ -84,7 +78,7 @@ export const prescriptionService = {
   getFilterConfig() {
     return {
       defaultSort: 'time',
-      searchFields: ['patientName', 'medication', 'prescribedBy'],
+      searchFields: ['patientName', 'prescribedBy'],
       customFilters: {
         priority: (item, value) => item.priority.toLowerCase() === value.toLowerCase(),
         status: (item, value) => item.status === value
