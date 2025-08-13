@@ -130,6 +130,22 @@ export default function StaffManagement() {
       return;
     }
 
+    // Password strength requirements
+    if (
+      !editingStaffId &&
+      (
+        !newStaff.password ||
+        newStaff.password.length < 8 ||
+        !/[A-Z]/.test(newStaff.password) ||
+        !/[a-z]/.test(newStaff.password) ||
+        !/[0-9]/.test(newStaff.password) ||
+        !/[!@#$%^&*(),.?":{}|<>]/.test(newStaff.password)
+      )
+    ) {
+      setError('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.');
+      return;
+    }
+
     if (!editingStaffId && newStaff.password.length < 6) {
       setError('Password must be at least 6 characters long');
       return;
