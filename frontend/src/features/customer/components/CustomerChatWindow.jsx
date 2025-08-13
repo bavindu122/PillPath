@@ -84,6 +84,9 @@ const CustomerChatWindow = ({ selectedChat, onClose }) => {
         };
         setMessages(prev => [...prev, response]);
       }, 2000);
+
+      // Cleanup timeout if selectedChat changes or component unmounts
+      return () => clearTimeout(timeoutId);
     }
   };
 
