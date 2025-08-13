@@ -76,7 +76,7 @@ const CustomerChatWindow = ({ selectedChat, onClose }) => {
       // Simulate pharmacy response after a delay
       setTimeout(() => {
         const response = {
-          id: messages.length + 2,
+          id: Date.now() + Math.floor(Math.random() * 1000), // Generate a unique ID
           sender: 'pharmacy',
           message: 'Thank you for your message. We will get back to you shortly.',
           timestamp: new Date().toISOString(),
