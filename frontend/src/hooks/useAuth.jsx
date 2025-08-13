@@ -13,14 +13,33 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("auth_token"));
+  const [userType, setUserType] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Check if user is logged in on app start
+  // ✅ Initialize authentication on app start
   useEffect(() => {
-    if (token) {
-      checkAuthStatus();
+    const storedToken = localStorage.getItem("auth_token");
+    const storedUserType = localStorage.getItem("user_type");
+    const storedUser = localStorage.getItem("user_data");
+
+    if (storedToken && storedUserType && storedUser) {
+      try {
+        setToken(storedToken);
+        setUserType(storedUserType);
+        setUser(JSON.parse(storedUser));
+        console.log("Restored authentication from localStorage:", {
+          userType: storedUserType,
+          user: JSON.parse(storedUser),
+        });
+      } catch (error) {
+        console.error("Failed to restore authentication:", error);
+        // Clear corrupted data
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_type");
+        localStorage.removeItem("user_data");
+      }
     }
   }, []);
 
@@ -28,11 +47,15 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const userData = await ApiService.getUserProfile();
-      setUser(userData);
+
+      const actualUserData = userData.data || userData;
+      setUser(actualUserData);
     } catch (error) {
       console.error("Auth check failed:", error);
-      const errorCode = error.code || mapErrorMessageToCode(error.message);
-      if (errorCode === "INVALID_CREDENTIALS" || errorCode === "UNAUTHORIZED") {
+      if (
+        error.message.includes("Unauthorized") ||
+        error.message.includes("Invalid")
+      ) {
         logout();
       }
     } finally {
@@ -40,68 +63,169 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData, userType) => {
+  const register = async (userData, type = "customer") => {
     try {
       setLoading(true);
       setError(null);
 
-      let response;
-      if (userType === "customer") {
-        response = await ApiService.registerCustomer(userData);
+      console.log(`Starting ${type} registration with data:`, userData);
 
-        // ✅ Handle backend response format
-        if (response && response.success) {
-          // If backend returns token immediately upon registration
-          if (response.token) {
-            setToken(response.token);
-            setUser({
-              ...response.user || response.customer,
-              userType: 'customer'
-            });
-            localStorage.setItem("auth_token", response.token);
-          }
-        } else if (response && !response.success) {
-          // Handle registration failure
-          throw new Error(response.message || "Registration failed");
+      let response;
+      if (type === "customer") {
+        if (!userData.email || !userData.password) {
+          throw new Error("Email and password are required");
         }
-      } else if (userType === "pharmacy") {
-        // ✅ For pharmacies, just register (no immediate login)
+
+        if (!userData.firstName || !userData.lastName) {
+          throw new Error("First name and last name are required");
+        }
+
+        if (!userData.dateOfBirth) {
+          throw new Error("Date of birth is required");
+        }
+
+        if (!userData.termsAccepted) {
+          throw new Error("You must accept the terms and conditions");
+        }
+
+        console.log("Submitting customer registration:", userData);
+
+        try {
+          response = await ApiService.registerCustomer(userData);
+          console.log("Registration API response:", response);
+        } catch (apiError) {
+          console.error("Registration API error:", apiError);
+
+          if (
+            apiError.message.includes("already exists") ||
+            apiError.message.includes("already registered") ||
+            apiError.message.includes("email")
+          ) {
+            throw new Error("This email is already registered");
+          }
+
+          throw apiError;
+        }
+
+        if (response && response.success) {
+          console.log("Registration successful, response:", response);
+
+          const userData = {
+            id: response.id,
+            username: response.username,
+            email: response.email,
+            fullName: response.fullName,
+            userType: "customer",
+          };
+
+          console.log(
+            "Setting user data from registration response:",
+            userData
+          );
+          setUser(userData);
+          setUserType("customer");
+        } else if (response && !response.success) {
+          console.error("Registration response indicates failure:", response);
+          throw new Error(response.message || "Registration failed");
+        } else {
+          console.error("Unexpected registration response format:", response);
+          throw new Error("Unexpected response format");
+        }
+      } else if (type === "pharmacy") {
         response = await ApiService.registerPharmacy(userData);
-        // Don't set token/user for pharmacy - they need admin approval
       }
 
       return response;
     } catch (error) {
-      setError(error.message);
+      console.error(`${type} registration failed:`, error);
+      setError(error.message || `${type} registration failed`);
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ UPDATED: Unified login that handles all user types
   const login = async (credentials) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await ApiService.login(credentials);
+      console.log("=== UNIFIED LOGIN ATTEMPT ===");
+      console.log("Credentials:", credentials);
 
-      // ✅ Handle backend login response format
+      const response = await ApiService.login(credentials);
+      console.log("Login response received:", response);
+
       if (response && response.success) {
-        if (response.token) {
-          setToken(response.token);
+        const {
+          token: authToken,
+          userType: backendUserType,
+          userProfile,
+        } = response;
+
+        console.log("Extracted data:", {
+          token: authToken,
+          userType: backendUserType,
+          userProfile,
+        });
+
+        if (authToken && userProfile && backendUserType) {
+          // ✅ Map backend userType to frontend userType
+          let frontendUserType;
+          switch (backendUserType) {
+            case "CUSTOMER":
+              frontendUserType = "customer";
+              break;
+            case "PHARMACY_ADMIN":
+              frontendUserType = "pharmacy-admin";
+              break;
+            case "PHARMACIST":
+              frontendUserType = "pharmacist";
+              break;
+            case "ADMIN":
+              frontendUserType = "admin";
+              break;
+            default:
+              frontendUserType = "customer";
+          }
+
+          // ✅ Set state
+          setToken(authToken);
           setUser({
-            ...response.user || response.customer,
-            userType: 'customer'
+            ...userProfile,
+            userType: frontendUserType,
           });
-          localStorage.setItem("auth_token", response.token);
+          setUserType(frontendUserType);
+
+          // ✅ Store in localStorage
+          localStorage.setItem("auth_token", authToken);
+          localStorage.setItem("user_type", frontendUserType);
+          localStorage.setItem(
+            "user_data",
+            JSON.stringify({
+              ...userProfile,
+              userType: frontendUserType,
+            })
+          );
+
+          console.log(`Successfully logged in as ${frontendUserType}`);
+
+          return {
+            ...response,
+            userType: frontendUserType,
+          };
+        } else {
+          console.error("Missing required data in response");
+          throw new Error("Invalid response format - missing required data");
         }
       } else if (response && !response.success) {
         throw new Error(response.message || "Login failed");
+      } else {
+        throw new Error("Invalid response format");
       }
-
-      return response;
     } catch (error) {
+      console.error("Login error:", error);
       setError(error.message);
       throw error;
     } finally {
@@ -109,24 +233,42 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("auth_token");
-    setError(null);
+  const logout = async () => {
+    try {
+      // Only call logout API for authenticated users
+      if (token) {
+        await ApiService.logout();
+      }
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    } finally {
+      // Clear all local state and tokens
+      setToken(null);
+      setUser(null);
+      setUserType(null);
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_type");
+      localStorage.removeItem("user_data");
+      setError(null);
+    }
   };
 
-  // ✅ Update user method
   const updateUser = (updatedUserData) => {
-    setUser((prevUser) => ({
-      ...prevUser,
+    const newUserData = {
+      ...user,
       ...updatedUserData,
-    }));
+    };
+
+    setUser(newUserData);
+
+    // Update localStorage
+    localStorage.setItem("user_data", JSON.stringify(newUserData));
   };
 
   const value = {
     user,
     token,
+    userType,
     loading,
     error,
     register,
@@ -135,7 +277,10 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     checkAuthStatus,
     isAuthenticated: !!token,
-    userType: user?.userType || null,
+    isCustomer: userType === "customer",
+    isPharmacyAdmin: userType === "pharmacy-admin",
+    isPharmacist: userType === "pharmacist",
+    isAdmin: userType === "admin",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

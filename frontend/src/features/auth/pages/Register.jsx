@@ -5,13 +5,14 @@ import { ArrowLeft, Check } from "lucide-react";
 import RoleSelection from "../components/RoleSelector";
 import RegisterForm from "../components/RegisterForm";
 import { useAuth } from "../../../hooks/useAuth"; 
+
 export const Register = () => {
   const [currentStep, setCurrentStep] = useState("role");
   const [selectedRole, setSelectedRole] = useState("");
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
 
-  const { register, loading, error } = useAuth();
+  const { loading, error } = useAuth(); // ✅ FIXED: Don't destructure register here
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -23,19 +24,14 @@ export const Register = () => {
     setSelectedRole("");
   };
 
-  const handleRegistrationSubmit = async (formData, userType) => {
+  // ✅ FIXED: This should just handle the response from RegisterForm
+  const handleRegistrationSubmit = async (response) => {
     try {
-      console.log(`${userType} registration data:`, formData);
-      
-      // ✅ Now register is properly imported and available
-      const response = await register(formData, userType);
-      
       console.log("Registration successful:", response);
       setSubmittedData(response);
       setRegistrationComplete(true);
     } catch (error) {
       console.error("Registration failed:", error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -78,10 +74,10 @@ export const Register = () => {
           </p>
           
           <Link
-            to={selectedRole === "customer" ? "/customer" : "/"}
+            to={selectedRole === "customer" ? "/login" : "/"} // ✅ FIXED: Redirect to login after registration
             className="inline-block bg-accent hover:bg-accent/90 text-white font-medium py-3 px-8 rounded-xl transition-colors duration-300"
           >
-            {successInfo.action}
+            {selectedRole === "customer" ? "Login Now" : successInfo.action}
           </Link>
         </motion.div>
       </div>
@@ -143,12 +139,12 @@ export const Register = () => {
               <RegisterForm 
                 role={selectedRole} 
                 onBack={handleBackToRole}
-                onSubmit={handleRegistrationSubmit}
+                onSubmit={handleRegistrationSubmit} // ✅ This will receive the response
               />
             )}
           </motion.div>
 
-          {/* ✅ ADD: Show loading state */}
+          {/* ✅ Show loading state */}
           {loading && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="bg-white/15 backdrop-blur-xl rounded-2xl p-8 text-center">
@@ -158,7 +154,7 @@ export const Register = () => {
             </div>
           )}
 
-          {/* ✅ ADD: Show error state */}
+          {/* ✅ Show error state */}
           {error && (
             <div className="fixed bottom-4 right-4 bg-red-500/90 backdrop-blur-sm text-white p-4 rounded-xl shadow-lg z-50">
               <p className="font-medium">Registration Failed</p>

@@ -15,7 +15,10 @@ export const tokenUtils = {
   removeAuthToken: () => localStorage.removeItem('auth_token'),
   
   // Remove admin auth token
-  removeAdminToken: () => localStorage.removeItem('admin_token'),
+  removeAdminToken: () => {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_data');
+  },
   
   // Clear all tokens
   clearAllTokens: () => {

@@ -31,6 +31,19 @@
   animation: float 6s ease-in-out infinite;
 }
 
+/* Random floating animation for particles */
+@keyframes float-random {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  25% { transform: translate(20px, -15px) rotate(90deg); }
+  50% { transform: translate(-10px, -25px) rotate(180deg); }
+  75% { transform: translate(-20px, 10px) rotate(270deg); }
+  100% { transform: translate(0px, 0px) rotate(360deg); }
+}
+
+.animate-float-random {
+  animation: float-random 20s ease-in-out infinite;
+}
+
 /* Spin animation */
 @keyframes spin-slow {
   from { transform: rotate(0deg); }

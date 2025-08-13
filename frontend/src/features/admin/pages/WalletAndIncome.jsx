@@ -1193,11 +1193,9 @@ const WalletAndIncome = () => {
                         Commission ID
                       </th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">
-                        Order ID
+                        Pharmacy
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">
-                        Order Date
-                      </th>
+
                       <th className="px-4 py-2 text-left text-xs font-medium text-blue-500 uppercase">
                         Month Due
                       </th>
@@ -1223,11 +1221,9 @@ const WalletAndIncome = () => {
                             {tx.id}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.orderId}
+                            {tx.pharmacyName}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.date}
-                          </td>
+
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             {tx.commissionMonth}
                           </td>

@@ -25,8 +25,8 @@ const ReviewPrescriptions = () => {
     // Mock data - replace with actual API call
     setTimeout(() => {
       setPrescription({
-        id: "RX-250620-02",
-        patientName: "Mr. McCrae",
+        id: "RX-250714-02",
+        patientName: "Mrs. Perera",
         doctorName: "B.J. Wilks (Chemist)",
         dateUploaded: "17.12.25",
         status: "pending_review",
@@ -42,7 +42,7 @@ const ReviewPrescriptions = () => {
           dosage: "150mg",
           genericName: "Modern equivalent of Ac. Salicyl",
           quantity: 30,
-          price: 15.99,
+          price: 150.00, // Converted to Rs
           available: true,
           historicalNote: "Equivalent to gr 120 Ac. Salicyl from prescription"
         },
@@ -51,7 +51,7 @@ const ReviewPrescriptions = () => {
           name: "Topical Pain Relief Cream",
           genericName: "Modern equivalent of Collod Flexile",
           quantity: 1,
-          price: 24.50,
+          price: 2450.00, // Converted to Rs
           available: true,
           historicalNote: "Modern substitute for historical Collod Flexile"
         }

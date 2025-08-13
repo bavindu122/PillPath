@@ -92,9 +92,9 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
   const { patientName, patientAvatar, status, priority, prescriptionId, messages } = conversation;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm flex flex-col" style={{ height: '700px' }}>
+    <div className="bg-white rounded-lg shadow-sm flex flex-col h-full" style={{ height: '700px' }}>
       {/* Chat Header */}
-      <div className="p-4 border-b" style={{ borderColor: 'var(--pharma-border)' }}>
+      <div className="p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--pharma-border)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {/* Avatar */}
@@ -143,12 +143,7 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
       </div>
 
       {/* Messages */}
-      <ScrollContainer 
-        maxHeight="calc(700px - 220px)" 
-        scrollbarTheme="default"
-        scrollbarWidth="6px"
-        className="p-4 space-y-4"
-      >
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, index) => {
             const isPharmacist = msg.sender === 'pharmacist';
             const showDate = index === 0 || 
@@ -194,10 +189,10 @@ const ChatWindow = ({ conversation, sendingMessage, onSendMessage }) => {
             );
           })}
           <div ref={messagesEndRef} />
-        </ScrollContainer>
+      </div>
 
       {/* Message Input */}
-      <div className="chat-input-area p-4">
+      <div className="chat-input-area p-4 flex-shrink-0 border-t" style={{ borderColor: 'var(--pharma-border)' }}>
         <form onSubmit={handleSendMessage} className="flex items-end space-x-3">
           <div className="flex-1 flex items-center">
             <textarea
