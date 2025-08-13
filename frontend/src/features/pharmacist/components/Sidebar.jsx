@@ -115,7 +115,7 @@ const Sidebar = () => {
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}
       `}>
         <div className="mb-8 mt-12 xl:mt-0">
-          <Link to="/pharmacist" className="block" onClick={closeMobileMenu}>
+          <Link to="/" className="block" onClick={closeMobileMenu}>
             <h2 className="text-xl font-bold text-gradient-primary flex items-center gap-2">
               <img src={assets.logo3} alt="PillPath Logo" className="ml-2 h-8 w-auto" />
               PillPath
