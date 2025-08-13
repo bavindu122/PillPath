@@ -132,7 +132,89 @@ export const AuthProvider = ({ children }) => {
           throw new Error("Unexpected response format");
         }
       } else if (type === "pharmacy") {
-        response = await ApiService.registerPharmacy(userData);
+        // ✅ UPDATED: Validate pharmacy registration data including location
+        if (!userData.name || !userData.address) {
+          throw new Error("Pharmacy name and address are required");
+        }
+
+        if (!userData.latitude || !userData.longitude) {
+          throw new Error(
+            "Pharmacy location (latitude and longitude) is required"
+          );
+        }
+
+        if (!userData.adminEmail || !userData.adminPassword) {
+          throw new Error("Admin email and password are required");
+        }
+
+        // ✅ Validate coordinates
+        const lat = parseFloat(userData.latitude);
+        const lng = parseFloat(userData.longitude);
+
+        if (isNaN(lat) || isNaN(lng)) {
+          throw new Error(
+            "Valid latitude and longitude coordinates are required"
+          );
+        }
+
+        if (lat < -90 || lat > 90) {
+          throw new Error("Latitude must be between -90 and 90 degrees");
+        }
+
+        if (lng < -180 || lng > 180) {
+          throw new Error("Longitude must be between -180 and 180 degrees");
+        }
+
+        console.log(
+          "Submitting pharmacy registration with location:",
+          userData
+        );
+
+        try {
+          response = await ApiService.registerPharmacy(userData);
+          console.log("Pharmacy registration API response:", response);
+        } catch (apiError) {
+          console.error("Pharmacy registration API error:", apiError);
+
+          if (
+            apiError.message.includes("already exists") ||
+            apiError.message.includes("already registered") ||
+            apiError.message.includes("email")
+          ) {
+            throw new Error("This email is already registered");
+          }
+
+          throw apiError;
+        }
+
+        if (response && response.success) {
+          console.log("Pharmacy registration successful:", response);
+
+          // Handle pharmacy registration response
+          const pharmacyUserData = {
+            id: response.pharmacyId || response.id,
+            username: response.username,
+            email: response.email,
+            fullName: response.fullName,
+            pharmacyName: response.pharmacyName,
+            userType: "pharmacy-admin",
+          };
+
+          setUser(pharmacyUserData);
+          setUserType("pharmacy-admin");
+        } else if (response && !response.success) {
+          console.error(
+            "Pharmacy registration response indicates failure:",
+            response
+          );
+          throw new Error(response.message || "Pharmacy registration failed");
+        } else {
+          console.error(
+            "Unexpected pharmacy registration response format:",
+            response
+          );
+          throw new Error("Unexpected response format");
+        }
       }
 
       return response;
