@@ -157,6 +157,67 @@ class PharmacyService {
       body: operations, // Array of PharmacyManagementDTO objects
     });
   }
+
+  // ✅ Register pharmacy
+  async registerPharmacy(pharmacyData) {
+    try {
+      console.log("Preparing pharmacy registration data...");
+
+      const registrationRequest = {
+        // Pharmacy details
+        name: pharmacyData.name,
+        address: pharmacyData.address,
+        phoneNumber: pharmacyData.phoneNumber,
+        email: pharmacyData.email,
+        licenseNumber: pharmacyData.licenseNumber,
+        licenseExpiryDate: pharmacyData.licenseExpiryDate,
+        operatingHours: pharmacyData.operatingHours || {},
+        services: pharmacyData.services || [],
+        deliveryAvailable: pharmacyData.deliveryAvailable || false,
+        deliveryRadius: pharmacyData.deliveryRadius || null,
+
+        // Admin details
+        adminFirstName: pharmacyData.adminFirstName,
+        adminLastName: pharmacyData.adminLastName,
+        adminEmail: pharmacyData.adminEmail,
+        adminPassword: pharmacyData.adminPassword,
+        adminPhoneNumber: pharmacyData.adminPhoneNumber,
+        adminPosition: pharmacyData.adminPosition,
+        adminLicenseNumber: pharmacyData.adminLicenseNumber,
+      };
+
+      // Validation
+      if (!registrationRequest.name || !registrationRequest.address) {
+        throw new Error("Pharmacy name and address are required");
+      }
+
+      if (!registrationRequest.email || !registrationRequest.phoneNumber) {
+        throw new Error("Email and phone number are required");
+      }
+
+      if (!registrationRequest.licenseNumber) {
+        throw new Error("Pharmacy license number is required");
+      }
+
+      if (!registrationRequest.adminFirstName || !registrationRequest.adminLastName) {
+        throw new Error("Admin first name and last name are required");
+      }
+
+      if (!registrationRequest.adminEmail || !registrationRequest.adminPassword) {
+        throw new Error("Admin email and password are required");
+      }
+
+      console.log("Sending pharmacy registration request:", registrationRequest);
+
+      return this.request("pharmacies/register", {
+        method: "POST",
+        body: registrationRequest,
+      });
+    } catch (error) {
+      console.error("Pharmacy registration preparation failed:", error);
+      throw error;
+    }
+  }
 }
 
 export default new PharmacyService();
