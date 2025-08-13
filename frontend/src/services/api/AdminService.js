@@ -171,6 +171,41 @@ class AdminService {
       method: "GET",
     });
   }
+  async getAnnouncements(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/announcements${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async addAnnouncement(announcementData) {
+    return this.request("admin/announcements", {
+      method: "POST",
+      body: announcementData,
+    });
+  }
+
+  async updateAnnouncement(announcementId, announcementData) {
+    return this.request(`admin/announcements/${announcementId}`, {
+      method: "PUT",
+      body: announcementData,
+    });
+  }
+
+  async deleteAnnouncement(announcementId) {
+    return this.request(`admin/announcements/${announcementId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async toggleAnnouncementStatus(announcementId) {
+    return this.request(`admin/announcements/${announcementId}/toggle-status`, {
+      method: "PATCH",
+    });
+  }
 }
 
 export default new AdminService();
