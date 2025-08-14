@@ -206,6 +206,22 @@ class AdminService {
       method: "PATCH",
     });
   }
+
+  async getPublicAnnouncements(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `public/announcements${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Don't include Authorization header for public endpoints
+        }
+      }
+    );
+  }
 }
+
+
 
 export default new AdminService();
