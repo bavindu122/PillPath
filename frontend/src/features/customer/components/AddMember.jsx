@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { addFamilyMember } from '../services/AddFamilyMemberService';
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X,
@@ -10,6 +11,7 @@ import {
   Plus
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
+// import { addFamilyMember } from '../../services/api/CustomerService'; // adjust path as needed
 
 const AddMember = ({ isOpen, onClose, onAddMember }) => {
   // Form state for adding new member
@@ -55,40 +57,6 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
     }));
   };
 
-  const handleSubmitNewMember = (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!newMember.name || !newMember.relation || !newMember.age) {
-      alert("Please fill in all required fields (Name, Relation, Age)");
-      return;
-    }
-
-    // Create new member object
-    const memberToAdd = {
-      name: newMember.name,
-      relation: newMember.relation,
-      age: parseInt(newMember.age),
-      profilePicture: newMember.profilePicture,
-      email: newMember.email,
-      phone: newMember.phone,
-      lastPrescriptionDate: new Date().toISOString().split('T')[0],
-      activePrescriptions: 0,
-      totalPrescriptions: 0,
-      allergies: newMember.allergies.filter(allergy => allergy.trim() !== ""),
-      bloodType: newMember.bloodType,
-      medicalConditions: newMember.medicalConditions.filter(condition => condition.trim() !== ""),
-      currentMedications: []
-    };
-
-    // Call parent handler
-    onAddMember(memberToAdd);
-    
-    // Reset form and close modal
-    resetForm();
-    onClose();
-  };
-
   const resetForm = () => {
     setNewMember({
       name: "",
@@ -109,6 +77,36 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
     onClose();
   };
 
+  const handleSubmitNewMember = async (e) => {
+    e.preventDefault();
+    // Basic validation
+    if (!newMember.name || !newMember.relation || !newMember.age) {
+      alert("Please fill in all required fields (Name, Relation, Age)");
+      return;
+    }
+    // Prepare member data for API
+    const memberData = {
+      ...newMember,
+      age: parseInt(newMember.age),
+      allergies: newMember.allergies.filter(a => a.trim() !== ""),
+      medicalConditions: newMember.medicalConditions.filter(c => c.trim() !== ""),
+      currentMedications: newMember.currentMedications || [],
+      lastPrescriptionDate: new Date().toISOString().split('T')[0],
+      activePrescriptions: 0,
+      totalPrescriptions: 0
+    };
+    console.log('Submitting member data:', memberData);
+    try {
+      const result = await addFamilyMember(memberData);
+      console.log('Member added successfully:', result);
+      if (onAddMember) onAddMember(result);
+      resetForm();
+      onClose();
+    } catch (error) {
+      console.error('Failed to add family member:', error);
+      alert(`Failed to add family member: ${error.message}`);
+    }
+  };
   if (!isOpen) return null;
 
   return (
