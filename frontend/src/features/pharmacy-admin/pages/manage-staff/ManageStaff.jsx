@@ -510,252 +510,302 @@ export default function StaffManagement() {
                 </h3>
               </div>
 
-              <form onSubmit={handleAddStaff} className="space-y-4">
-                {/* Full Name Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    value={newStaff.fullName}
-                    onChange={(e) => setNewStaff({ ...newStaff, fullName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
+<form onSubmit={handleAddStaff} className="space-y-4">
+  {/* Full Name Field */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+    <input
+      type="text"
+      value={newStaff.fullName}
+      onChange={(e) => setNewStaff({ ...newStaff, fullName: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      required
+      minLength={2}
+      maxLength={100}
+      pattern="^[a-zA-Z\s]+$"
+      title="Full name should only contain letters and spaces, 2-100 characters"
+      placeholder="Enter full name"
+    />
+  </div>
 
-                {/* Email Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                  <input
-                    type="email"
-                    value={newStaff.email}
-                    onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
+  {/* Email Field */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+    <input
+      type="email"
+      value={newStaff.email}
+      onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      required
+      maxLength={150}
+      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+      title="Please enter a valid email address"
+      placeholder="Enter email address"
+    />
+  </div>
 
-                {/* Phone Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={newStaff.phoneNumber}
-                    onChange={(e) => setNewStaff({ ...newStaff, phoneNumber: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
+  {/* Phone Field */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+    <input
+      type="tel"
+      value={newStaff.phoneNumber}
+      onChange={(e) => setNewStaff({ ...newStaff, phoneNumber: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      minLength={10}
+      maxLength={15}
+      pattern="^[\+]?[0-9\-\(\)\s]+$"
+      title="Phone number should be 10-15 digits and may include +, -, (), spaces"
+      placeholder="Enter phone number (10-15 digits)"
+    />
+  </div>
 
-                {/* Date of Birth */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                  <input
-                    type="date"
-                    value={newStaff.dateOfBirth}
-                    onChange={(e) => setNewStaff({ ...newStaff, dateOfBirth: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
+  {/* Date of Birth */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+    <input
+      type="date"
+      value={newStaff.dateOfBirth}
+      onChange={(e) => setNewStaff({ ...newStaff, dateOfBirth: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      required
+      min="1950-01-01"
+      max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+      title="Staff member must be at least 18 years old"
+    />
+  </div>
 
-                {/* Profile Picture */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
-                  <div className="flex items-center space-x-4">
-                    {newStaff.profilePictureUrl ? (
-                      <img src={newStaff.profilePictureUrl} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
-                        {newStaff.fullName.charAt(0)}
-                      </div>
-                    )}
-                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                      <div className="flex items-center">
-                        <Camera className="h-4 w-4 mr-2" />
-                        <span className="text-sm font-medium">Upload Image</span>
-                      </div>
-                      <input
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </label>
-                  </div>
-                </div>
+  {/* Profile Picture - existing code remains the same */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+    <div className="flex items-center space-x-4">
+      {newStaff.profilePictureUrl ? (
+        <img src={newStaff.profilePictureUrl} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
+      ) : (
+        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
+          {newStaff.fullName.charAt(0)}
+        </div>
+      )}
+      <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+        <div className="flex items-center">
+          <Camera className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">Upload Image</span>
+        </div>
+        <input
+          type="file"
+          className="sr-only"
+          accept="image/jpeg,image/jpg,image/png,image/gif"
+          onChange={handleImageUpload}
+        />
+      </label>
+    </div>
+  </div>
 
-                {/* License Number */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">License Number *</label>
-                  <input
-                    type="text"
-                    value={newStaff.licenseNumber}
-                    onChange={(e) => setNewStaff({ ...newStaff, licenseNumber: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                    disabled={editingStaffId}
-                  />
-                </div>
+  {/* License Number */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">License Number *</label>
+    <input
+      type="text"
+      value={newStaff.licenseNumber}
+      onChange={(e) => setNewStaff({ ...newStaff, licenseNumber: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      required
+      minLength={5}
+      maxLength={20}
+      pattern="^[A-Z0-9]+$"
+      title="License number should be 5-20 characters, uppercase letters and numbers only"
+      placeholder="Enter license number (e.g., PH123456)"
+      disabled={editingStaffId}
+    />
+  </div>
 
-                {/* License Expiry Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">License Expiry Date</label>
-                  <input
-                    type="date"
-                    value={newStaff.licenseExpiryDate}
-                    onChange={(e) => setNewStaff({ ...newStaff, licenseExpiryDate: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
+  {/* License Expiry Date */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">License Expiry Date</label>
+    <input
+      type="date"
+      value={newStaff.licenseExpiryDate}
+      onChange={(e) => setNewStaff({ ...newStaff, licenseExpiryDate: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      min={new Date().toISOString().split('T')[0]}
+      title="License expiry date must be in the future"
+    />
+  </div>
 
-                {/* Specialization */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
-                  <input
-                    type="text"
-                    value={newStaff.specialization}
-                    onChange={(e) => setNewStaff({ ...newStaff, specialization: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    placeholder="e.g., Clinical Pharmacy, Pediatric Pharmacy"
-                  />
-                </div>
+  {/* Specialization */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+    <input
+      type="text"
+      value={newStaff.specialization}
+      onChange={(e) => setNewStaff({ ...newStaff, specialization: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      maxLength={100}
+      pattern="^[a-zA-Z\s,.-]*$"
+      title="Specialization should only contain letters, spaces, commas, periods, and hyphens"
+      placeholder="e.g., Clinical Pharmacy, Pediatric Pharmacy"
+    />
+  </div>
 
-                {/* Years of Experience */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="50"
-                    value={newStaff.yearsOfExperience}
-                    onChange={(e) => setNewStaff({ ...newStaff, yearsOfExperience: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
+  {/* Years of Experience */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience *</label>
+    <input
+      type="number"
+      min="0"
+      max="50"
+      step="1"
+      value={newStaff.yearsOfExperience}
+      onChange={(e) => setNewStaff({ ...newStaff, yearsOfExperience: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      required
+      title="Years of experience must be between 0 and 50"
+      placeholder="Enter years of experience"
+    />
+  </div>
 
-                {/* Hire Date (only show when adding new staff) */}
-                {!editingStaffId && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
-                    <input
-                      type="date"
-                      value={newStaff.hireDate}
-                      onChange={(e) => setNewStaff({ ...newStaff, hireDate: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    />
-                  </div>
-                )}
+  {/* Hire Date (only show when adding new staff) */}
+  {!editingStaffId && (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
+      <input
+        type="date"
+        value={newStaff.hireDate}
+        onChange={(e) => setNewStaff({ ...newStaff, hireDate: e.target.value })}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+        min="2020-01-01"
+        max={new Date().toISOString().split('T')[0]}
+        title="Hire date cannot be in the future"
+      />
+    </div>
+  )}
 
-                {/* Shift Schedule */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Shift Schedule</label>
-                  <select
-                    value={newStaff.shiftSchedule}
-                    onChange={(e) => setNewStaff({ ...newStaff, shiftSchedule: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Select Shift</option>
-                    <option value="MORNING">Morning (6AM - 2PM)</option>
-                    <option value="AFTERNOON">Afternoon (2PM - 10PM)</option>
-                    <option value="NIGHT">Night (10PM - 6AM)</option>
-                    <option value="FULL_TIME">Full Time (9AM - 5PM)</option>
-                    <option value="PART_TIME">Part Time</option>
-                    <option value="FLEXIBLE">Flexible</option>
-                  </select>
-                </div>
+  {/* Shift Schedule - existing code remains the same */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Shift Schedule</label>
+    <select
+      value={newStaff.shiftSchedule}
+      onChange={(e) => setNewStaff({ ...newStaff, shiftSchedule: e.target.value })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+    >
+      <option value="">Select Shift</option>
+      <option value="MORNING">Morning (6AM - 2PM)</option>
+      <option value="AFTERNOON">Afternoon (2PM - 10PM)</option>
+      <option value="NIGHT">Night (10PM - 6AM)</option>
+      <option value="FULL_TIME">Full Time (9AM - 5PM)</option>
+      <option value="PART_TIME">Part Time</option>
+      <option value="FLEXIBLE">Flexible</option>
+    </select>
+  </div>
 
-                {/* Certifications */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
-                  <textarea
-                    value={newStaff.certifications.join(', ')}
-                    onChange={(e) => setNewStaff({ 
-                      ...newStaff, 
-                      certifications: e.target.value.split(',').map(cert => cert.trim()).filter(cert => cert.length > 0)
-                    })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    placeholder="Enter certifications separated by commas"
-                    rows="3"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Separate multiple certifications with commas</p>
-                </div>
+  {/* Certifications */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+    <textarea
+      value={newStaff.certifications.join(', ')}
+      onChange={(e) => setNewStaff({ 
+        ...newStaff, 
+        certifications: e.target.value.split(',').map(cert => cert.trim()).filter(cert => cert.length > 0)
+      })}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+      placeholder="Enter certifications separated by commas"
+      rows="3"
+      maxLength={500}
+      title="Maximum 500 characters"
+    />
+    <p className="text-xs text-gray-500 mt-1">Separate multiple certifications with commas (max 500 characters)</p>
+  </div>
 
-                {/* Password Field (only show when adding new staff) */}
-                {!editingStaffId && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={newStaff.password}
-                          onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 pr-12"
-                          required
-                          minLength={6}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          tabIndex={-1}
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Re-enter Password *</label>
-                      <div className="relative">
-                        <input
-                          type={showReenterPassword ? "text" : "password"}
-                          value={newStaff.confirmPassword}
-                          onChange={(e) => setNewStaff({ ...newStaff, confirmPassword: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 pr-12"
-                          required
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          onClick={() => setShowReenterPassword((prev) => !prev)}
-                          tabIndex={-1}
-                        >
-                          {showReenterPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
+  {/* Password Field (only show when adding new staff) */}
+  {!editingStaffId && (
+    <>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={newStaff.password}
+            onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 pr-12"
+            required
+            minLength={8}
+            maxLength={50}
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+            title="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
+            placeholder="Enter strong password"
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            onClick={() => setShowPassword((prev) => !prev)}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Must include uppercase, lowercase, number, and special character</p>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Re-enter Password *</label>
+        <div className="relative">
+          <input
+            type={showReenterPassword ? "text" : "password"}
+            value={newStaff.confirmPassword}
+            onChange={(e) => setNewStaff({ ...newStaff, confirmPassword: e.target.value })}
+            className={`w-full px-4 py-2 border rounded-lg text-gray-800 focus:ring-2 pr-12 ${
+              newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword
+                ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            }`}
+            required
+            minLength={8}
+            maxLength={50}
+            placeholder="Re-enter password"
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            onClick={() => setShowReenterPassword((prev) => !prev)}
+            tabIndex={-1}
+          >
+            {showReenterPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
+        {newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword && (
+          <p className="text-sm text-red-600 mt-1">Passwords do not match</p>
+        )}
+      </div>
+    </>
+  )}
 
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddStaffModal(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    disabled={loading}
-                  >
-                    <div className="flex items-center">
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ) : (
-                        <Sparkles className="h-4 w-4 mr-2" />
-                      )}
-                      <span className="font-medium">
-                        {editingStaffId ? 'Update Staff' : 'Add Staff'}
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              </form>
+  {/* Action Buttons - existing code remains the same */}
+  <div className="flex justify-end space-x-4 pt-4">
+    <button
+      type="button"
+      onClick={() => setShowAddStaffModal(false)}
+      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+      disabled={loading}
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+      disabled={loading || (newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword)}
+    >
+      <div className="flex items-center">
+        {loading ? (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+        ) : (
+          <Sparkles className="h-4 w-4 mr-2" />
+        )}
+        <span className="font-medium">
+          {editingStaffId ? 'Update Staff' : 'Add Staff'}
+        </span>
+      </div>
+    </button>
+  </div>
+</form>
             </div>
           </div>
         </div>
