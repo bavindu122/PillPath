@@ -73,6 +73,7 @@ const ChatCustomer = () => {
     const updatedChats = chats.map(c => 
       c.id === chat.id ? { ...c, unreadCount: 0 } : c
     );
+    setChats(updatedChats);
   };
 
   return (
