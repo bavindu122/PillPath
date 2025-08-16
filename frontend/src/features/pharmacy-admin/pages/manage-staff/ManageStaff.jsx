@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Edit3, Search, Camera, Sparkles, Users, Shield, Eye, EyeOff } from 'lucide-react';
-import { staffService } from '../../services/staffService';
+import staffService from '../../services/staffService';
 import { usePharmacyAuth } from '../../../../hooks/usePharmacyAuth';
 
 export default function StaffManagement() {
@@ -8,17 +8,20 @@ export default function StaffManagement() {
   const [staffMembers, setStaffMembers] = useState([]);
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
   const [newStaff, setNewStaff] = useState({
-    firstName: '',
-    lastName: '',
-    profilePictureUrl: '',
+    fullName: '',
     email: '',
     phoneNumber: '',
     password: '',
     confirmPassword: '',
+    dateOfBirth: '',
+    profilePictureUrl: '',
     licenseNumber: '',
-    position: '',
+    licenseExpiryDate: '',
+    specialization: '',
     yearsOfExperience: '',
-    shiftSchedule: ''
+    hireDate: '',
+    shiftSchedule: '',
+    certifications: []
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [editingStaffId, setEditingStaffId] = useState(null);
@@ -120,29 +123,13 @@ export default function StaffManagement() {
       return;
     }
 
-    if (!newStaff.firstName || !newStaff.lastName || !newStaff.email || !newStaff.licenseNumber) {
+    if (!newStaff.fullName || !newStaff.email || !newStaff.licenseNumber) {
       setError('Please fill in all required fields');
       return;
     }
 
     if (!editingStaffId && newStaff.password !== newStaff.confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-
-    // Password strength requirements
-    if (
-      !editingStaffId &&
-      (
-        !newStaff.password ||
-        newStaff.password.length < 8 ||
-        !/[A-Z]/.test(newStaff.password) ||
-        !/[a-z]/.test(newStaff.password) ||
-        !/[0-9]/.test(newStaff.password) ||
-        !/[!@#$%^&*(),.?":{}|<>]/.test(newStaff.password)
-      )
-    ) {
-      setError('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.');
       return;
     }
 
@@ -158,45 +145,58 @@ export default function StaffManagement() {
       if (editingStaffId) {
         // Update existing staff member
         const updateData = {
-          firstName: newStaff.firstName,
-          lastName: newStaff.lastName,
+          fullName: newStaff.fullName,
           email: newStaff.email,
           phoneNumber: newStaff.phoneNumber,
-          position: newStaff.position,
+          dateOfBirth: newStaff.dateOfBirth,
           licenseNumber: newStaff.licenseNumber,
+          licenseExpiryDate: newStaff.licenseExpiryDate,
+          specialization: newStaff.specialization,
+          yearsOfExperience: newStaff.yearsOfExperience ? parseInt(newStaff.yearsOfExperience) : null,
+          shiftSchedule: newStaff.shiftSchedule,
+          certifications: newStaff.certifications
         };
 
         await staffService.updateStaffMember(editingStaffId, updateData);
         setEditingStaffId(null);
       } else {
-        // Add new staff member - match backend PharmacistCreateRequest DTO
+        // Add new staff member
         const staffData = {
-          firstName: newStaff.firstName,
-          lastName: newStaff.lastName,
+          fullName: newStaff.fullName,
           email: newStaff.email,
           password: newStaff.password,
           phoneNumber: newStaff.phoneNumber,
-          position: newStaff.position || 'PHARMACIST',
+          dateOfBirth: newStaff.dateOfBirth,
+          profilePictureUrl: newStaff.profilePictureUrl,
           licenseNumber: newStaff.licenseNumber,
+          licenseExpiryDate: newStaff.licenseExpiryDate,
+          specialization: newStaff.specialization,
+          yearsOfExperience: newStaff.yearsOfExperience ? parseInt(newStaff.yearsOfExperience) : null,
+          hireDate: newStaff.hireDate,
+          shiftSchedule: newStaff.shiftSchedule,
+          certifications: newStaff.certifications,
           pharmacyId: parseInt(pharmacyId)
         };
 
-        await staffService.addStaffMember(pharmacyId, staffData);
+        await staffService.createStaffMember(staffData);
       }
 
       // Reset form and close modal
       setNewStaff({
-        firstName: '',
-        lastName: '',
-        profilePictureUrl: '',
+        fullName: '',
         email: '',
         phoneNumber: '',
         password: '',
         confirmPassword: '',
+        dateOfBirth: '',
+        profilePictureUrl: '',
         licenseNumber: '',
-        position: '',
+        licenseExpiryDate: '',
+        specialization: '',
         yearsOfExperience: '',
-        shiftSchedule: ''
+        hireDate: '',
+        shiftSchedule: '',
+        certifications: []
       });
       setShowAddStaffModal(false);
 
@@ -243,15 +243,18 @@ export default function StaffManagement() {
   const handleEditStaff = (staff) => {
     setEditingStaffId(staff.id);
     setNewStaff({
-      firstName: staff.firstName || '',
-      lastName: staff.lastName || '',
-      profilePictureUrl: staff.profilePictureUrl || '',
+      fullName: staff.fullName || '',
       email: staff.email || '',
       phoneNumber: staff.phoneNumber || '',
+      dateOfBirth: staff.dateOfBirth || '',
+      profilePictureUrl: staff.profilePictureUrl || '',
       licenseNumber: staff.licenseNumber || '',
-      position: staff.position || '',
+      licenseExpiryDate: staff.licenseExpiryDate || '',
+      specialization: staff.specialization || '',
       yearsOfExperience: staff.yearsOfExperience || '',
+      hireDate: staff.hireDate || '',
       shiftSchedule: staff.shiftSchedule || '',
+      certifications: staff.certifications || [],
       password: '',
       confirmPassword: ''
     });
@@ -259,7 +262,7 @@ export default function StaffManagement() {
   };
 
   const filteredStaff = staffMembers.filter(staff => {
-    const fullName = `${staff.firstName || ''} ${staff.lastName || ''}`.toLowerCase();
+    const fullName = (staff.fullName || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     return fullName.includes(searchLower) || 
            (staff.email && staff.email.toLowerCase().includes(searchLower));
@@ -355,17 +358,20 @@ export default function StaffManagement() {
               onClick={() => {
                 setEditingStaffId(null);
                 setNewStaff({
-                  firstName: '',
-                  lastName: '',
-                  profilePictureUrl: '',
+                  fullName: '',
                   email: '',
                   phoneNumber: '',
                   password: '',
                   confirmPassword: '',
+                  dateOfBirth: '',
+                  profilePictureUrl: '',
                   licenseNumber: '',
-                  position: '',
+                  licenseExpiryDate: '',
+                  specialization: '',
                   yearsOfExperience: '',
-                  shiftSchedule: ''
+                  hireDate: '',
+                  shiftSchedule: '',
+                  certifications: []
                 });
                 setShowAddStaffModal(true);
               }}
@@ -426,12 +432,12 @@ export default function StaffManagement() {
                         {staff.profilePictureUrl ? (
                           <img
                             src={staff.profilePictureUrl}
-                            alt={`${staff.firstName} ${staff.lastName}'s profile`}
+                            alt={`${staff.fullName}'s profile`}
                             className="w-20 h-20 rounded-full object-cover border-4 border-white shadow"
                           />
                         ) : (
                           <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow">
-                            {staff.firstName?.charAt(0) || '?'}{staff.lastName?.charAt(0) || '?'}
+                            {staff.fullName?.charAt(0) || '?'}
                           </div>
                         )}
                         {/* Status indicator */}
@@ -444,15 +450,18 @@ export default function StaffManagement() {
                     {/* Staff Info */}
                     <div className="text-center mb-4">
                       <h3 className="text-xl font-bold text-gray-800 mb-2">
-                        {staff.firstName || 'N/A'} {staff.lastName || 'N/A'}
+                        {staff.fullName || 'N/A'}
                       </h3>
                       <p className="text-sm text-gray-500 mb-1">{staff.email || 'No email'}</p>
                       <p className="text-sm text-gray-500 mb-1">{staff.phoneNumber || 'No phone'}</p>
-                      {staff.position && (
-                        <p className="text-sm text-blue-600 font-medium">{staff.position}</p>
+                      {staff.specialization && (
+                        <p className="text-sm text-blue-600 font-medium">{staff.specialization}</p>
                       )}
                       {staff.licenseNumber && (
                         <p className="text-xs text-gray-400">License: {staff.licenseNumber}</p>
+                      )}
+                      {staff.yearsOfExperience && (
+                        <p className="text-xs text-gray-400">{staff.yearsOfExperience} years experience</p>
                       )}
                     </div>
 
@@ -502,54 +511,16 @@ export default function StaffManagement() {
               </div>
 
               <form onSubmit={handleAddStaff} className="space-y-4">
-                {/* First Name Field */}
+                {/* Full Name Field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                   <input
                     type="text"
-                    value={newStaff.firstName}
-                    onChange={(e) => setNewStaff({ ...newStaff, firstName: e.target.value })}
+                    value={newStaff.fullName}
+                    onChange={(e) => setNewStaff({ ...newStaff, fullName: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
                   />
-                </div>
-
-                {/* Last Name Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    value={newStaff.lastName}
-                    onChange={(e) => setNewStaff({ ...newStaff, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
-
-                {/* Profile Picture */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
-                  <div className="flex items-center space-x-4">
-                    {newStaff.profilePictureUrl ? (
-                      <img src={newStaff.profilePictureUrl} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
-                        {newStaff.firstName.charAt(0)}{newStaff.lastName.charAt(0) || '?'}
-                      </div>
-                    )}
-                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                      <div className="flex items-center">
-                        <Camera className="h-4 w-4 mr-2" />
-                        <span className="text-sm font-medium">Upload Image</span>
-                      </div>
-                      <input
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </label>
-                  </div>
                 </div>
 
                 {/* Email Field */}
@@ -575,6 +546,44 @@ export default function StaffManagement() {
                   />
                 </div>
 
+                {/* Date of Birth */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                  <input
+                    type="date"
+                    value={newStaff.dateOfBirth}
+                    onChange={(e) => setNewStaff({ ...newStaff, dateOfBirth: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                  />
+                </div>
+
+                {/* Profile Picture */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                  <div className="flex items-center space-x-4">
+                    {newStaff.profilePictureUrl ? (
+                      <img src={newStaff.profilePictureUrl} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
+                        {newStaff.fullName.charAt(0)}
+                      </div>
+                    )}
+                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                      <div className="flex items-center">
+                        <Camera className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Upload Image</span>
+                      </div>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 {/* License Number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">License Number *</label>
@@ -584,23 +593,92 @@ export default function StaffManagement() {
                     onChange={(e) => setNewStaff({ ...newStaff, licenseNumber: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
-                    disabled={editingStaffId} // Don't allow editing license number
+                    disabled={editingStaffId}
                   />
                 </div>
 
-                {/* Position */}
+                {/* License Expiry Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">License Expiry Date</label>
+                  <input
+                    type="date"
+                    value={newStaff.licenseExpiryDate}
+                    onChange={(e) => setNewStaff({ ...newStaff, licenseExpiryDate: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  />
+                </div>
+
+                {/* Specialization */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                  <input
+                    type="text"
+                    value={newStaff.specialization}
+                    onChange={(e) => setNewStaff({ ...newStaff, specialization: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    placeholder="e.g., Clinical Pharmacy, Pediatric Pharmacy"
+                  />
+                </div>
+
+                {/* Years of Experience */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={newStaff.yearsOfExperience}
+                    onChange={(e) => setNewStaff({ ...newStaff, yearsOfExperience: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                  />
+                </div>
+
+                {/* Hire Date (only show when adding new staff) */}
+                {!editingStaffId && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
+                    <input
+                      type="date"
+                      value={newStaff.hireDate}
+                      onChange={(e) => setNewStaff({ ...newStaff, hireDate: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    />
+                  </div>
+                )}
+
+                {/* Shift Schedule */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Shift Schedule</label>
                   <select
-                    value={newStaff.position}
-                    onChange={(e) => setNewStaff({ ...newStaff, position: e.target.value })}
+                    value={newStaff.shiftSchedule}
+                    onChange={(e) => setNewStaff({ ...newStaff, shiftSchedule: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   >
-                    <option value="">Select Position</option>
-                    <option value="PHARMACIST">Pharmacist</option>
-                    <option value="PHARMACY_TECHNICIAN">Pharmacy Technician</option>
-                    <option value="PHARMACY_ASSISTANT">Pharmacy Assistant</option>
+                    <option value="">Select Shift</option>
+                    <option value="MORNING">Morning (6AM - 2PM)</option>
+                    <option value="AFTERNOON">Afternoon (2PM - 10PM)</option>
+                    <option value="NIGHT">Night (10PM - 6AM)</option>
+                    <option value="FULL_TIME">Full Time (9AM - 5PM)</option>
+                    <option value="PART_TIME">Part Time</option>
+                    <option value="FLEXIBLE">Flexible</option>
                   </select>
+                </div>
+
+                {/* Certifications */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+                  <textarea
+                    value={newStaff.certifications.join(', ')}
+                    onChange={(e) => setNewStaff({ 
+                      ...newStaff, 
+                      certifications: e.target.value.split(',').map(cert => cert.trim()).filter(cert => cert.length > 0)
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    placeholder="Enter certifications separated by commas"
+                    rows="3"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separate multiple certifications with commas</p>
                 </div>
 
                 {/* Password Field (only show when adding new staff) */}
