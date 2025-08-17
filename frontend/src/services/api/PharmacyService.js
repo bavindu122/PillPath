@@ -91,9 +91,7 @@ class PharmacyService {
     searchParams.append("radiusKm", radius.toString());
 
     const queryString = searchParams.toString();
-    const endpoint = `pharmacies/map${
-      queryString ? `?${queryString}` : ""
-    }`;
+    const endpoint = `pharmacies/map${queryString ? `?${queryString}` : ""}`;
 
     return this.request(endpoint, {
       method: "GET",
@@ -302,12 +300,6 @@ class PharmacyService {
     }
   }
 
-  // ✅ UPDATED: Get all pharmacies for customer "find pharmacy" feature (keeping for backward compatibility)
-  async getPharmaciesForCustomers(filters = {}) {
-    // This method now calls the same backend endpoint as getPharmaciesForMap
-    return this.getPharmaciesForMap({
-      userLat: filters.latitude,
-      userLng: filters.longitude,
   // ✅ UPDATED: Get all pharmacies for customer "find pharmacy" feature (uses public endpoint)
   async getPharmaciesForCustomers(filters = {}) {
     // Use a public/customer endpoint for pharmacy search
