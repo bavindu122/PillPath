@@ -23,9 +23,10 @@ class PharmacyService {
       }
     } else if (
       endpoint !== "pharmacies/register" &&
-      endpoint !== "pharmacies/public"
+      endpoint !== "pharmacies/public" &&
+      !endpoint.includes("/map")
     ) {
-      // Add regular auth token for non-admin, non-registration endpoints
+      // Add regular auth token for non-admin, non-registration, non-map endpoints
       const token = localStorage.getItem("auth_token");
       if (token && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -73,6 +74,30 @@ class PharmacyService {
       console.error("Pharmacy API request failed:", error);
       throw error;
     }
+  }
+
+  // ✅ NEW: Get pharmacies for map display (using the real backend endpoint)
+  async getPharmaciesForMap(params = {}) {
+    const searchParams = new URLSearchParams();
+
+    // Add location parameters
+    if (params.userLat && params.userLng) {
+      searchParams.append("userLat", params.userLat.toString());
+      searchParams.append("userLng", params.userLng.toString());
+    }
+
+    // Add radius parameter (default to 10km if not provided)
+    const radius = params.radiusKm || 10;
+    searchParams.append("radiusKm", radius.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = `admin/pharmacies/map${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return this.request(endpoint, {
+      method: "GET",
+    });
   }
 
   // ✅ Get pharmacy statistics for admin dashboard
@@ -277,37 +302,13 @@ class PharmacyService {
     }
   }
 
-  // ✅ NEW: Get all pharmacies for customer "find pharmacy" feature
+  // ✅ UPDATED: Get all pharmacies for customer "find pharmacy" feature (keeping for backward compatibility)
   async getPharmaciesForCustomers(filters = {}) {
-    const params = new URLSearchParams();
-
-    // Location-based search
-    if (filters.latitude && filters.longitude) {
-      params.append("lat", filters.latitude);
-      params.append("lng", filters.longitude);
-    }
-    if (filters.radius) {
-      params.append("radius", filters.radius);
-    }
-
-    // Service filters
-    if (filters.hasDelivery) {
-      params.append("hasDelivery", filters.hasDelivery);
-    }
-    if (filters.has24HourService) {
-      params.append("has24HourService", filters.has24HourService);
-    }
-
-    // Search filters
-    if (filters.search) {
-      params.append("search", filters.search);
-    }
-
-    const queryString = params.toString();
-    const endpoint = `pharmacies/public${queryString ? `?${queryString}` : ""}`;
-
-    return this.request(endpoint, {
-      method: "GET",
+    // This method now calls the same backend endpoint as getPharmaciesForMap
+    return this.getPharmaciesForMap({
+      userLat: filters.latitude,
+      userLng: filters.longitude,
+      radiusKm: filters.radius || 10,
     });
   }
 
