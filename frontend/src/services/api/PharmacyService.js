@@ -308,7 +308,16 @@ class PharmacyService {
     return this.getPharmaciesForMap({
       userLat: filters.latitude,
       userLng: filters.longitude,
-      radiusKm: filters.radius || 10,
+  // ✅ UPDATED: Get all pharmacies for customer "find pharmacy" feature (uses public endpoint)
+  async getPharmaciesForCustomers(filters = {}) {
+    // Use a public/customer endpoint for pharmacy search
+    return this.request("pharmacies/nearby", {
+      method: "GET",
+      params: {
+        latitude: filters.latitude,
+        longitude: filters.longitude,
+        radius: filters.radius || 10,
+      },
     });
   }
 
