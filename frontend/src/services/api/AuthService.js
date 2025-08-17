@@ -14,10 +14,12 @@ class ApiService {
       ...options,
     };
 
-    // Add auth token if available
-    const token = localStorage.getItem("auth_token");
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // ✅ FIXED: Only add auth token for authenticated endpoints, not registration
+    if (!endpoint.includes('/register') && !endpoint.includes('/login')) {
+      const token = localStorage.getItem("auth_token");
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     if (config.body && typeof config.body === "object") {
@@ -63,16 +65,16 @@ class ApiService {
     }
   }
 
-  // ✅ Customer registration
+  // ✅ Customer registration (NO AUTH TOKEN)
   async registerCustomer(userData) {
     try {
       console.log("Preparing customer registration data...");
 
       const registrationRequest = {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phone: userData.phone || "",
+        firstName: userData.firstName.trim(),
+        lastName: userData.lastName.trim(),
+        email: userData.email.trim().toLowerCase(),
+        phone: userData.phone ? userData.phone.trim() : "",
         password: userData.password,
         dateOfBirth: userData.dateOfBirth,
         termsAccepted: userData.termsAccepted,
@@ -99,6 +101,10 @@ class ApiService {
       return this.request("customers/register", {
         method: "POST",
         body: registrationRequest,
+        headers: {
+          "Content-Type": "application/json"
+          // No Authorization header for registration
+        }
       });
     } catch (error) {
       console.error("Customer registration preparation failed:", error);
@@ -106,15 +112,38 @@ class ApiService {
     }
   }
 
-  // ✅ Pharmacy registration
+  // ✅ UPDATED: Pharmacy registration with location validation (NO AUTH TOKEN)
   async registerPharmacy(pharmacyData) {
-    return PharmacyService.registerPharmacy(pharmacyData);
+    try {
+      console.log("AuthService: Preparing pharmacy registration with location...");
+
+      // ✅ Additional validation before calling PharmacyService
+      if (!pharmacyData.latitude || !pharmacyData.longitude) {
+        throw new Error("Pharmacy location (latitude and longitude) is required");
+      }
+
+      // ✅ Validate coordinates format
+      const lat = parseFloat(pharmacyData.latitude);
+      const lng = parseFloat(pharmacyData.longitude);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        throw new Error("Invalid coordinate format. Please provide valid numbers for latitude and longitude");
+      }
+
+      console.log("AuthService: Location validated, calling PharmacyService...");
+
+      // ✅ Call PharmacyService which includes location in the request
+      return PharmacyService.registerPharmacy(pharmacyData);
+    } catch (error) {
+      console.error("AuthService: Pharmacy registration failed:", error);
+      throw error;
+    }
   }
 
-  // ✅ UPDATED: Unified login method
+  // ✅ Unified login method
   async login(credentials) {
     const loginRequest = {
-      email: credentials.email,
+      email: credentials.email.trim().toLowerCase(),
       password: credentials.password,
     };
 
@@ -123,10 +152,13 @@ class ApiService {
     return this.request("users/login", {
       method: "POST",
       body: loginRequest,
+      headers: {
+        "Content-Type": "application/json"
+        // No Authorization header for login
+      }
     });
   }
 
-  
   // ✅ Get user profile (works for all user types)
   async getUserProfile() {
     return this.request("customer/profile", {
@@ -149,8 +181,12 @@ class ApiService {
     });
   }
 
-  // ✅ Remove old separate methods as they're no longer needed
-  // Keep backward compatibility for now
+  // ✅ NEW: Get pharmacies for find pharmacy feature
+  async getPharmacies(filters = {}) {
+    return PharmacyService.getPharmaciesForCustomers(filters);
+  }
+
+  // ✅ Keep backward compatibility
   async loginCustomer(credentials) {
     return this.login(credentials);
   }
