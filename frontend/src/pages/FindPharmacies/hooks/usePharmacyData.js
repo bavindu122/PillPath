@@ -84,7 +84,30 @@ export const usePharmacyData = (currentLocation) => {
 
         // ✅ Fallback to empty array instead of mock data
         setPharmacies([]);
-      } finally {
+        let errorMessage = "Failed to load pharmacies. Please try again later.";
+        // More specific error handling
+        if (err.response) {
+          // Server responded with a status code outside 2xx
+          if (err.response.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          } else if (err.response.status === 404) {
+            errorMessage = "No pharmacies found in your area.";
+          } else if (err.response.status === 401 || err.response.status === 403) {
+            errorMessage = "You are not authorized to access pharmacy data.";
+          } else {
+            errorMessage = `Error: ${err.response.statusText || "Unexpected error."}`;
+          }
+        } else if (err.request) {
+          // Request was made but no response received
+          errorMessage = "Network error. Please check your internet connection.";
+        } else if (err.message && err.message.toLowerCase().includes("timeout")) {
+         errorMessage = "Request timed out. Please try again.";
+       }
+       setError(errorMessage);
+
+       // ✅ Fallback to empty array instead of mock data
+       setPharmacies([]);
+     } finally {
         setLoading(false);
       }
     };
