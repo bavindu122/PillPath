@@ -91,7 +91,7 @@ class PharmacyService {
     searchParams.append("radiusKm", radius.toString());
 
     const queryString = searchParams.toString();
-    const endpoint = `admin/pharmacies/map${
+    const endpoint = `pharmacies/map${
       queryString ? `?${queryString}` : ""
     }`;
 
