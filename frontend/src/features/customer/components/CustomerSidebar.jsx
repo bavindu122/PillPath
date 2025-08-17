@@ -17,6 +17,7 @@ import {
   LogOut,
   FileText,
   Activity,
+  MessageCircle,
 } from "lucide-react";
 import { useCustomerSidebar } from "../hooks";
 import { useAuth } from "../../../hooks/useAuth"; // Add this import
@@ -58,6 +59,11 @@ const CustomerSidebar = () => {
       path: "/customer/medicine-info",
       label: "Medicine Info",
       icon: <Pill size={18} />,
+    },
+    {
+      path: "/customer/chats",
+      label: "Chats",
+      icon: <MessageCircle size={18} />,
     },
     
   ];
