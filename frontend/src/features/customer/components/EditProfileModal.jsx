@@ -4,10 +4,39 @@ import Button from "./Button";
 import { useProfileForm } from "../hooks";
 import { useAuth } from "../../../hooks/useAuth";
 import { customerService } from "../../../services/api/CustomerService";
+import FamilyMemberService from "../services/FamilyMemberService";
 import { ModalScrollContainer } from "../../../components/UIs";
 
-const EditProfileModal = ({ isOpen, onClose }) => {
+const EditProfileModal = ({ 
+  isOpen, 
+  onClose, 
+  familyMember = null, // ✅ NEW: Accept family member data
+  isFamilyMember = false, // ✅ NEW: Flag to indicate if editing family member
+  onFamilyMemberUpdate = null // ✅ NEW: Callback for family member updates
+}) => {
   const { user, loading, updateUser } = useAuth();
+  
+  // ✅ NEW: Use family member data if provided, otherwise use current user
+  const profileData = isFamilyMember && familyMember ? familyMember : user;
+
+  // Add debugging to ensure correct data is being used
+  useEffect(() => {
+    console.log('=== EDIT PROFILE MODAL DEBUG ===');
+    console.log('isFamilyMember:', isFamilyMember);
+    console.log('familyMember:', familyMember);
+    console.log('familyMember.id:', familyMember?.id);
+    console.log('user:', user);
+    console.log('profileData being used:', profileData);
+    
+    // Check if family member has required fields
+    if (isFamilyMember && familyMember) {
+      console.log('Family member fields:', Object.keys(familyMember));
+      if (!familyMember.id) {
+        console.warn('⚠️ Family member does not have an ID field! This will cause API calls to fail.');
+        console.log('Available fields:', Object.keys(familyMember));
+      }
+    }
+  }, [isFamilyMember, familyMember, user, profileData]);
 
   const {
     formData,
@@ -17,7 +46,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     validateForm,
     resetForm,
     submitForm,
-  } = useProfileForm(user);
+  } = useProfileForm(profileData); // ✅ CHANGED: Use profileData instead of user
 
   const [editingField, setEditingField] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
@@ -29,10 +58,10 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
   // Set initial profile image preview
   useEffect(() => {
-    if (user?.profilePictureUrl) {
-      setProfileImagePreview(user.profilePictureUrl);
+    if (profileData?.profilePictureUrl) {
+      setProfileImagePreview(profileData.profilePictureUrl);
     }
-  }, [user]);
+  }, [profileData]);
 
   const handleFieldEdit = (field) => {
     setEditingField(field);
@@ -42,19 +71,30 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     setEditingField(null);
   };
 
-  // ✅ NEW: Upload profile picture to Cloudinary
+  // ✅ Upload profile picture to Cloudinary
   const uploadProfilePicture = async (file) => {
     setUploadingImage(true);
     try {
-      const result = await customerService.uploadProfilePicture(file);
+      let result;
+      
+      if (isFamilyMember && familyMember?.id) {
+        // Upload family member profile picture
+        console.log('Uploading family member profile picture...');
+        result = await FamilyMemberService.uploadFamilyMemberProfilePicture(familyMember.id, file);
+      } else {
+        // Upload current user profile picture
+        result = await customerService.uploadProfilePicture(file);
+      }
 
       if (result.success) {
         // Update local state
         setProfileImagePreview(result.imageUrl);
         handleInputChange("profilePictureUrl", result.imageUrl);
 
-        // Update user context
-        updateUser({ ...user, profilePictureUrl: result.imageUrl });
+        // Update appropriate context
+        if (!isFamilyMember) {
+          updateUser({ ...user, profilePictureUrl: result.imageUrl });
+        }
 
         return result.imageUrl;
       } else {
@@ -80,31 +120,98 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
       // Then update profile data if modified
       if (isModified) {
-        // Prepare data for backend
-        const profileData = {
-          ...formData,
+        // ✅ FIXED: Prepare data for backend with correct field mapping for family members
+        const profileUpdateData = isFamilyMember ? {
+          // For family members - match the AddMemberDTO structure
+          name: formData.fullName || formData.name,
+          relation: formData.relation,
+          age: formData.age,
+          profilePicture: formData.profilePictureUrl || formData.profilePicture,
+          email: formData.email,
+          phone: formData.phoneNumber || formData.phone,
+          lastPrescriptionDate: formData.lastPrescriptionDate,
+          activePrescriptions: formData.activePrescriptions,
+          totalPrescriptions: formData.totalPrescriptions,
+          bloodType: formData.bloodType,
           allergies: formData.allergies
-            ? formData.allergies
-                .split(",")
-                .map((item) => item.trim())
-                .filter((item) => item)
+            ? (typeof formData.allergies === 'string' 
+                ? formData.allergies.split(",").map((item) => item.trim()).filter((item) => item)
+                : formData.allergies)
             : [],
           medicalConditions: formData.medicalConditions
-            ? formData.medicalConditions
-                .split(",")
-                .map((item) => item.trim())
-                .filter((item) => item)
+            ? (typeof formData.medicalConditions === 'string'
+                ? formData.medicalConditions.split(",").map((item) => item.trim()).filter((item) => item)
+                : formData.medicalConditions)
+            : [],
+          currentMedications: formData.currentMedications
+            ? (typeof formData.currentMedications === 'string'
+                ? formData.currentMedications.split(",").map((item) => item.trim()).filter((item) => item)
+                : formData.currentMedications)
+            : []
+        } : {
+          // For current user - match the customer update structure
+          username: formData.username,
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          dateOfBirth: formData.dateOfBirth,
+          address: formData.address,
+          profilePictureUrl: formData.profilePictureUrl,
+          insuranceProvider: formData.insuranceProvider,
+          insuranceId: formData.insuranceId,
+          emergencyContactName: formData.emergencyContactName,
+          emergencyContactPhone: formData.emergencyContactPhone,
+          preferredPharmacyId: formData.preferredPharmacyId || null,
+          allergies: formData.allergies
+            ? (typeof formData.allergies === 'string' 
+                ? formData.allergies.split(",").map((item) => item.trim()).filter((item) => item)
+                : formData.allergies)
+            : [],
+          medicalConditions: formData.medicalConditions
+            ? (typeof formData.medicalConditions === 'string'
+                ? formData.medicalConditions.split(",").map((item) => item.trim()).filter((item) => item)
+                : formData.medicalConditions)
             : [],
         };
 
-        const result = await customerService.updateProfile(profileData);
+        console.log('=== SENDING PROFILE UPDATE ===');
+        console.log('Is family member:', isFamilyMember);
+        console.log('Profile data being sent:', profileUpdateData);
+
+        let result;
+        
+        // ✅ Different update logic for family members vs current user
+        if (isFamilyMember && familyMember?.id) {
+          // Update family member profile
+          console.log('Updating family member profile...');
+          console.log('Family member ID:', familyMember.id);
+          
+          result = await FamilyMemberService.updateFamilyMemberProfile(familyMember.id, profileUpdateData);
+          
+          // Call the update callback if provided
+          if (onFamilyMemberUpdate && result.success) {
+            onFamilyMemberUpdate(result.familyMember);
+          }
+        } else {
+          // Update current user profile
+          console.log('Updating current user profile...');
+          result = await customerService.updateProfile(profileUpdateData);
+          
+          if (result.success) {
+            // Update user context with new data
+            updateUser(result.customer);
+          }
+        }
 
         if (result.success) {
-          // Update user context with new data
-          updateUser(result.customer);
+          console.log('Profile update successful:', result);
           resetForm();
+          alert(isFamilyMember 
+            ? 'Family member profile updated successfully!' 
+            : 'Profile updated successfully!'
+          );
         } else {
-          throw new Error(result.message);
+          throw new Error(result.message || 'Failed to update profile');
         }
       }
 
@@ -119,22 +226,26 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
   const handleClose = () => {
     resetForm();
-    setProfileImagePreview(user?.profilePictureUrl || null);
+    setProfileImagePreview(profileData?.profilePictureUrl || null);
     setSelectedFile(null);
+    setEditingField(null);
     onClose();
   };
 
   const handleCancel = () => {
     resetForm();
-    setProfileImagePreview(user?.profilePictureUrl || null);
+    setProfileImagePreview(profileData?.profilePictureUrl || null);
     setSelectedFile(null);
+    setEditingField(null);
     onClose();
   };
+
   const handleFieldBlur = (field) => {
     if (editingField === field) {
       setEditingField(null);
     }
   };
+
   const handleFieldKeyDown = (e, field) => {
     if (e.key === "Enter" && editingField === field) {
       setEditingField(null);
@@ -179,7 +290,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // ✅ UPDATED: Upload image immediately when selected
+  // ✅ Upload image immediately when selected
   const handleImmediateUpload = async () => {
     if (selectedFile) {
       try {
@@ -194,7 +305,6 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // Inside EditProfileModal.jsx
   const FormField = ({
     label,
     field,
@@ -273,7 +383,9 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         )}
       </div>
     );
-  }; // Accessibility: focus trap and escape key
+  };
+
+  // Accessibility: focus trap and escape key
   useEffect(() => {
     if (!isOpen) return;
 
@@ -312,14 +424,18 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <Pencil className="h-6 w-6" />
-            Edit Profile
+            {/* ✅ NEW: Dynamic title based on context */}
+            {isFamilyMember 
+              ? `Edit ${familyMember?.fullName || 'Family Member'}'s Profile`
+              : 'Edit Profile'
+            }
           </h2>
           <button
             onClick={handleClose}
             className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 group"
             type="button"
           >
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6 text-white" />
           </button>
         </div>
 
@@ -435,7 +551,8 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     Personal Information
                   </h3>
 
-                  <FormField label="Username" field="username" />
+                  {/* Show username only for current user */}
+                  {!isFamilyMember && <FormField label="Username" field="username" />}
                   <FormField label="Full Name" field="fullName" />
                   <FormField label="Email" field="email" type="email" />
                   <FormField
@@ -443,11 +560,22 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     field="phoneNumber"
                     type="tel"
                   />
-                  <FormField
-                    label="Date of Birth"
-                    field="dateOfBirth"
-                    type="date"
-                  />
+                  {/* Show date of birth only for current user */}
+                  {!isFamilyMember && (
+                    <FormField
+                      label="Date of Birth"
+                      field="dateOfBirth"
+                      type="date"
+                    />
+                  )}
+                  {/* Show family member specific fields */}
+                  {isFamilyMember && (
+                    <>
+                      <FormField label="Relation" field="relation" />
+                      <FormField label="Age" field="age" type="number" />
+                      <FormField label="Blood Type" field="bloodType" />
+                    </>
+                  )}
                 </div>
 
                 {/* Contact & Address Information */}
@@ -457,80 +585,115 @@ const EditProfileModal = ({ isOpen, onClose }) => {
                     Contact Information
                   </h3>
 
-                  <FormField label="Address" field="address" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
-                      <div
-                        className={`text-sm ${
-                          user?.emailVerified
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        Email{" "}
-                        {user?.emailVerified ? "Verified" : "Not Verified"}
+                  {/* Show address only for current user */}
+                  {!isFamilyMember && <FormField label="Address" field="address" />}
+                  {/* ✅ NEW: Only show verification status for current user */}
+                  {!isFamilyMember && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
+                        <div
+                          className={`text-sm ${
+                            user?.emailVerified
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          Email{" "}
+                          {user?.emailVerified ? "Verified" : "Not Verified"}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
+                        <div
+                          className={`text-sm ${
+                            user?.phoneVerified
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          Phone{" "}
+                          {user?.phoneVerified ? "Verified" : "Not Verified"}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
-                      <div
-                        className={`text-sm ${
-                          user?.phoneVerified
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        Phone{" "}
-                        {user?.phoneVerified ? "Verified" : "Not Verified"}
+                  )}
+                  {/* Show prescription stats for family members */}
+                  {isFamilyMember && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
+                        <FormField 
+                          label="Active Prescriptions" 
+                          field="activePrescriptions" 
+                          type="number" 
+                        />
+                      </div>
+                      <div className="text-center p-3 bg-white/10 rounded-xl border border-white/20">
+                        <FormField 
+                          label="Total Prescriptions" 
+                          field="totalPrescriptions" 
+                          type="number" 
+                        />
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Medical Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
-                    Medical conditions
+                    Medical Information
                   </h3>
 
                   <FormField
-                    key="allergies" // ✅ Add stable key
+                    key="allergies"
                     label="Allergies"
                     field="allergies"
                     type="textarea"
                     placeholder="List any known allergies (separate with commas)..."
                   />
                   <FormField
-                    key="medicalConditions" // ✅ Add stable key
+                    key="medicalConditions"
                     label="Medical Conditions"
                     field="medicalConditions"
                     type="textarea"
                     placeholder="List any chronic conditions (separate with commas)..."
                   />
+                  {/* Show current medications for family members */}
+                  {isFamilyMember && (
+                    <FormField
+                      key="currentMedications"
+                      label="Current Medications"
+                      field="currentMedications"
+                      type="textarea"
+                      placeholder="List current medications (separate with commas)..."
+                    />
+                  )}
                 </div>
 
-                {/* Emergency & Insurance */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
-                    Emergency & Insurance
-                  </h3>
+                {/* Emergency & Insurance - Only for current user */}
+                {!isFamilyMember && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <div className="w-2 h-6 bg-red-500 rounded-full"></div>
+                      Emergency & Insurance
+                    </h3>
 
-                  <FormField
-                    label="Emergency Contact Name"
-                    field="emergencyContactName"
-                  />
-                  <FormField
-                    label="Emergency Contact Phone"
-                    field="emergencyContactPhone"
-                    type="tel"
-                  />
-                  <FormField
-                    label="Insurance Provider"
-                    field="insuranceProvider"
-                  />
-                  <FormField label="Insurance ID" field="insuranceId" />
-                </div>
+                    <FormField
+                      label="Emergency Contact Name"
+                      field="emergencyContactName"
+                    />
+                    <FormField
+                      label="Emergency Contact Phone"
+                      field="emergencyContactPhone"
+                      type="tel"
+                    />
+                    <FormField
+                      label="Insurance Provider"
+                      field="insuranceProvider"
+                    />
+                    <FormField label="Insurance ID" field="insuranceId" />
+                  </div>
+                )}
               </div>
             </ModalScrollContainer>
 

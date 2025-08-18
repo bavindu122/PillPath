@@ -21,7 +21,7 @@ import EditProfileModal from "../components/EditProfileModal";
 import { ModalScrollContainer } from "../../../components/UIs";
 
 
-const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
+const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember, onFamilyMemberUpdate }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -523,7 +523,26 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
         <EditProfileModal 
           isOpen={isEditModalOpen}
           onClose={handleCloseEditModal}
-          selectedProfile={selectedProfile}
+          familyMember={selectedProfile?.relation !== "Me" ? {
+            ...selectedProfile,
+            // Ensure we have an ID field and proper field mapping
+            id: selectedProfile.id || selectedProfile.memberId || selectedProfile.name?.replace(/\s+/g, '_').toLowerCase() || 'temp_id',
+            // Map display fields to form fields
+            fullName: selectedProfile.name,
+            name: selectedProfile.name,
+            phoneNumber: selectedProfile.phone,
+            profilePictureUrl: selectedProfile.profilePicture
+          } : null}
+          isFamilyMember={selectedProfile?.relation !== "Me"}
+          onFamilyMemberUpdate={(updatedMember) => {
+            // Update the family member data in parent component
+            console.log('Family member updated in MemberDetails:', updatedMember);
+            if (onFamilyMemberUpdate) {
+              onFamilyMemberUpdate(updatedMember);
+            }
+            // Close the edit modal
+            setIsEditModalOpen(false);
+          }}
         />
       )}
     </AnimatePresence>

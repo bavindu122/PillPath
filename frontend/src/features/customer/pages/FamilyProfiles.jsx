@@ -194,6 +194,75 @@ const FamilyProfiles = () => {
     }
   };
 
+  // Handle family member profile updates
+  const handleFamilyMemberUpdate = async (updatedMember) => {
+    try {
+      console.log('Family member updated, refreshing list...', updatedMember);
+      
+      // Refresh the family members list to get the latest data
+      await fetchFamilyMembers();
+      
+      // Update the selected profile if it's currently open
+      if (selectedProfile && updatedMember) {
+        // Find the updated member in the new list
+        const refreshedMembers = await FamilyMemberService.getFamilyMembers();
+        const userProfile = createUserProfile();
+        
+        // Transform backend data
+        const transformedMembers = Array.isArray(refreshedMembers) ? refreshedMembers.map(member => {
+          const safeJsonParse = (jsonString) => {
+            if (jsonString === null || jsonString === undefined || typeof jsonString !== 'string') {
+              return [];
+            }
+            
+            if (jsonString.trim() === '' || jsonString === 'null') {
+              return [];
+            }
+            
+            try {
+              return JSON.parse(jsonString);
+            } catch (error) {
+              console.warn('Failed to parse JSON:', jsonString, error);
+              return [];
+            }
+          };
+
+          return {
+            id: member.id,
+            name: member.name,
+            relation: member.relation,
+            age: member.age,
+            profilePicture: member.profilePicture || assets.profile_pic,
+            email: member.email || "Not provided",
+            phone: member.phone || "Not provided",
+            lastPrescriptionDate: member.lastPrescriptionDate || "Not available",
+            activePrescriptions: member.activePrescriptions || 0,
+            totalPrescriptions: member.totalPrescriptions || 0,
+            allergies: safeJsonParse(member.allergies),
+            bloodType: member.bloodType || "Unknown",
+            medicalConditions: safeJsonParse(member.medicalConditions),
+            currentMedications: safeJsonParse(member.currentMedications)
+          };
+        }) : [];
+        
+        const allMembers = userProfile ? [userProfile, ...transformedMembers] : transformedMembers;
+        
+        // Find the updated member (it might have a new ID if we used delete+add approach)
+        const updatedMemberInList = allMembers.find(member => 
+          member.name === updatedMember.name || member.id === updatedMember.id
+        );
+        
+        if (updatedMemberInList) {
+          setSelectedProfile(updatedMemberInList);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Failed to refresh family members after update:', error);
+      setError('Profile updated but failed to refresh the list. Please refresh the page.');
+    }
+  };
+
   // Filter family members based on search term
   const filteredMembers = familyMembersList.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -402,6 +471,7 @@ const FamilyProfiles = () => {
         isOpen={!!selectedProfile} 
         onClose={closeModal}
         onDeleteMember={handleDeleteMember}
+        onFamilyMemberUpdate={handleFamilyMemberUpdate}
       />
     </div>
   );
