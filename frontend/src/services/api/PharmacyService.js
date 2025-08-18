@@ -20,11 +20,17 @@ class PharmacyService {
       if (adminAuthHeaders.Authorization && !config.headers.Authorization) {
         config.headers = { ...config.headers, ...adminAuthHeaders };
       }
-    } else if (endpoint.startsWith("pharmacies/pharmacy-profile") || endpoint.startsWith("pharmacies/") && endpoint !== "pharmacies/register") {
-      // Add pharmacy admin token for pharmacy profile endpoints
+    } else if (
+      endpoint.startsWith("pharmacies/pharmacy-profile") ||
+      (endpoint.startsWith("pharmacies/") && endpoint !== "pharmacies/register")
+    ) {
+      // Add pharmacy admin token for pharmacy profile endpoints.
+      // If a dedicated pharmacy token isn't present, fall back to the regular auth token.
       const pharmacyToken = localStorage.getItem("pharmacy_auth_token");
-      if (pharmacyToken && !config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${pharmacyToken}`;
+      const fallbackToken = localStorage.getItem("auth_token");
+      const tokenToUse = pharmacyToken || fallbackToken;
+      if (tokenToUse && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${tokenToUse}`;
       }
     } else if (
       endpoint !== "pharmacies/register" &&
@@ -117,7 +123,10 @@ class PharmacyService {
         updateRequest.phoneNumber = profileData.phoneNumber.trim();
       }
 
-      if (profileData.latitude !== undefined && profileData.longitude !== undefined) {
+      if (
+        profileData.latitude !== undefined &&
+        profileData.longitude !== undefined
+      ) {
         const lat = parseFloat(profileData.latitude);
         const lng = parseFloat(profileData.longitude);
 
@@ -133,7 +142,10 @@ class PharmacyService {
         }
       }
 
-      if (profileData.operatingHours && typeof profileData.operatingHours === 'object') {
+      if (
+        profileData.operatingHours &&
+        typeof profileData.operatingHours === "object"
+      ) {
         // Clean up operating hours - remove empty strings
         const cleanOperatingHours = {};
         Object.entries(profileData.operatingHours).forEach(([day, hours]) => {
@@ -147,14 +159,21 @@ class PharmacyService {
       }
 
       if (profileData.services && Array.isArray(profileData.services)) {
-        updateRequest.services = profileData.services.filter(service => service && service.trim());
+        updateRequest.services = profileData.services.filter(
+          (service) => service && service.trim()
+        );
       }
 
       if (profileData.deliveryAvailable !== undefined) {
-        updateRequest.deliveryAvailable = Boolean(profileData.deliveryAvailable);
+        updateRequest.deliveryAvailable = Boolean(
+          profileData.deliveryAvailable
+        );
       }
 
-      if (profileData.deliveryRadius !== undefined && profileData.deliveryRadius !== null) {
+      if (
+        profileData.deliveryRadius !== undefined &&
+        profileData.deliveryRadius !== null
+      ) {
         const radius = parseInt(profileData.deliveryRadius, 10);
         if (!isNaN(radius) && radius > 0) {
           updateRequest.deliveryRadius = radius;
@@ -180,14 +199,14 @@ class PharmacyService {
         throw new Error("Image file is required");
       }
 
-      if (!['logo', 'banner'].includes(imageType)) {
+      if (!["logo", "banner"].includes(imageType)) {
         throw new Error("Image type must be 'logo' or 'banner'");
       }
 
       // Create FormData for file upload
       const formData = new FormData();
-      formData.append('image', imageFile);
-      formData.append('type', imageType);
+      formData.append("image", imageFile);
+      formData.append("type", imageType);
 
       // Don't set Content-Type for FormData, let browser set it
       const config = {
@@ -221,7 +240,9 @@ class PharmacyService {
           window.location.href = "/pharmacy/login";
           return;
         }
-        throw new Error(data.message || data.error || `Upload failed: ${response.status}`);
+        throw new Error(
+          data.message || data.error || `Upload failed: ${response.status}`
+        );
       }
 
       return data;
@@ -437,7 +458,7 @@ class PharmacyService {
     return this.getPharmaciesForMap({
       userLat: filters.latitude,
       userLng: filters.longitude,
-      radiusKm: filters.radius || 10
+      radiusKm: filters.radius || 10,
     });
   }
 

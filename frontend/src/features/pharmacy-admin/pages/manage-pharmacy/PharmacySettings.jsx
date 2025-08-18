@@ -365,7 +365,7 @@ export default function PharmacySettings() {
         {/* Main Card */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* ✅ Banner Section */}
-          <div className="relative h-48 bg-gradient-to-r from-blue-500 to-blue-600">
+          <div className="relative top-[-30px] h-48 bg-gradient-to-r from-blue-500 to-blue-600">
             {(bannerPreview || pharmacyProfile?.bannerUrl) && (
               <img
                 src={bannerPreview || pharmacyProfile.bannerUrl}
@@ -465,7 +465,7 @@ export default function PharmacySettings() {
                       </div>
                     )}
                     {pharmacyProfile?.averageRating && (
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-1 ">
                         <Star className="h-4 w-4 text-yellow-500 fill-current" />
                         <span className="text-sm font-medium text-gray-600">
                           {pharmacyProfile.averageRating} (

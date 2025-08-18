@@ -12,10 +12,10 @@ import OrderDetailPage from "./pages/orders/OrderDetailPage";
 import PaymentGatewayPage from "./pages/PaymentGateway/PaymentGatewayPage";
 
 export const PharmacyAdmin = () => {
-  const { isAuthenticated, loading, isPharmacyAdmin } = useAuth();
+  const { isAuthenticated, loading, isPharmacyAdmin, initialized } = useAuth();
 
-  // Show loading while auth status is determined
-  if (loading) {
+  // Wait for init or loading before rendering to avoid flicker
+  if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

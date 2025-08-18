@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [initialized, setInitialized] = useState(false);
 
   // ✅ Initialize authentication on app start
   useEffect(() => {
@@ -44,6 +45,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user_data");
       }
     }
+    // Mark that we've attempted to restore auth from storage so UI can avoid
+    // redirecting prematurely on first render.
+    setInitialized(true);
   }, []);
 
   const checkAuthStatus = async () => {
@@ -399,6 +403,7 @@ export const AuthProvider = ({ children }) => {
     isPharmacyAdmin: userType === "pharmacy-admin",
     isPharmacist: userType === "pharmacist",
     isAdmin: userType === "admin",
+    initialized,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

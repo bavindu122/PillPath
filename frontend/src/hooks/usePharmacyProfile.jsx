@@ -43,15 +43,18 @@ export const usePharmacyProfile = () => {
       setError(null);
 
       console.log("Updating pharmacy profile:", profileData);
-      const updatedProfile = await PharmacyService.updatePharmacyProfile(
-        profileData
-      );
-      console.log("Profile updated successfully:", updatedProfile);
+      const result = await PharmacyService.updatePharmacyProfile(profileData);
+      console.log("Profile update response:", result);
 
-      // Update local state with the response
-      setPharmacyProfile(updatedProfile);
+      // Backend may return a wrapper { success, pharmacy, message }
+      const normalizedProfile =
+        result && result.pharmacy ? result.pharmacy : result;
 
-      return updatedProfile;
+      // Update local state with the normalized profile object
+      setPharmacyProfile(normalizedProfile);
+
+      // Return the normalized profile for callers
+      return normalizedProfile;
     } catch (error) {
       console.error("Failed to update pharmacy profile:", error);
       setError(error.message);
