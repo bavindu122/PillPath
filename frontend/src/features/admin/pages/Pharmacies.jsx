@@ -1,270 +1,280 @@
-import React from 'react'
-import StatCard from '../components/StatCard';
-import PageHeader from '../components/PageHeader';
-import SearchFilterBar from '../components/SearchFilterBar';
-import PharmacyCard from '../components/PharmacyCard';
-import { Store,Activity,Ban,ClockAlert ,Eye,Trash2,UserPlus,TriangleAlert} from 'lucide-react';
-import { useState } from 'react';
-
-const initialPharmacies = [
-  {
-    id: 1,
-    name: 'MedPlus Pharmacy',
-    tradingName: 'MedPlus',
-    owner: 'John Doe',
-    email: 'contact@medplus.com',
-    phone: '+1 (555) 123-4567',
-    websiteLink: 'https://www.medplus.com',
-    location: 'New York, NY',
-    status: 'Rejected',
-    joinDate: '2023-03-15',
-    orders: 245,
-    rating: 4.8,
-    businessRegistration: '123456789',
-    rejectReason: 'Incomplete registration',
-    license: 'NY-PHARM-001234',
-    issueDate: '2020-01-01',
-    licenseExpiry: '2025-03-15',
-    pharmacist:'Jony Doe',
-    pharmacistContact: '+1 (555) 987-6543',
-    pharmacistLicense: 'CA-PHARM-005678',
-    secondaryPharmacist:'Jony Doe',
-    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=300&fit=crop&crop=center',
-  },
-  {
-    id: 2,
-    name: 'HealthCare Pharmacy',
-    tradingName: 'HealthCare',
-    owner: 'Jane Smith',
-    email: 'info@healthcare-ph.com',
-    phone: '+1 (555) 234-5678',
-    websiteLink: 'https://www.healthcare-ph.com',
-    location: 'Los Angeles, CA',
-    status: 'Active',
-    joinDate: '2023-01-22',
-    orders: 189,
-    rating: 4.6,
-    businessRegistration: '987654321',
-    license: 'CA-PHARM-005678',
-    issueDate: '2020-02-15',
-    licenseExpiry: '2024-01-22',
-    pharmacist:'Jony Doe',
-    pharmacistContact: '+1 (555) 987-6543',
-    pharmacistLicense: 'CA-PHARM-005678',
-    secondaryPharmacist:'Jony Doe',
-    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&crop=center',
-  },
-  {
-    id: 3,
-    name: 'QuickMeds',
-    tradingName: 'QuickMeds',
-    owner: 'Mike Johnson',
-    email: 'support@quickmeds.com',
-    phone: '+1 (555) 345-6789',
-    websiteLink: 'https://www.quickmeds.com',
-    location: 'Chicago, IL',
-    status: 'Pending',
-    joinDate: '2024-01-10',
-    orders: 0,
-    rating: 0,
-    license: 'IL-PHARM-009012',
-    issueDate: '2020-03-01',
-    licenseExpiry: '2025-01-10',
-    pharmacist:'Jony Doe',
-    pharmacistContact: '+1 (555) 987-6543',
-    pharmacistLicense: 'CA-PHARM-005678',
-    secondaryPharmacist:'Jony Doe',
-    // No image provided - will show building icon
-  },
-  {
-    id: 4,
-    name: 'Family Pharmacy',
-    owner: 'Emily Davis',
-    email: 'hello@familypharm.com',
-    phone: '+1 (555) 456-7890',
-    location: 'Houston, TX',
-    status: 'Active',
-    joinDate: '2023-08-07',
-    orders: 156,
-    rating: 4.9,
-    license: 'TX-PHARM-003456',
-    issueDate: '2020-05-20',
-    licenseExpiry: '2025-08-07',
-    pharmacist:'Jony Doe',
-    pharmacistContact: '+1 (555) 987-6543',
-    pharmacistLicense: 'CA-PHARM-005678',
-    image: 'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&h=300&fit=crop&crop=center',
-  },
-  {
-    id: 5,
-    name: 'Metro Pharmacy',
-    tradingName: 'Metro Pharm',
-    owner: 'Sarah Wilson',
-    email: 'contact@metro-pharm.com',
-    phone: '+1 (555) 567-8901',
-    websiteLink: 'https://www.metro-pharm.com',
-    location: 'Phoenix, AZ',
-    status: 'Suspended',
-    joinDate: '2023-06-30',
-    orders: 78,
-    rating: 4.2,
-    license: 'AZ-PHARM-007890',
-    issueDate: '2020-04-10',
-    licenseExpiry: '2025-06-30',
-    pharmacist:'Jony Doe',
-    pharmacistContact: '+1 (555) 987-6543',
-    pharmacistLicense: 'CA-PHARM-005678',
-    secondaryPharmacist:'Jony Doe',
-    // No image provided - will show building icon
-  }
-];
+import React, { useState, useEffect } from "react";
+import StatCard from "../components/StatCard";
+import PageHeader from "../components/PageHeader";
+import SearchFilterBar from "../components/SearchFilterBar";
+import PharmacyCard from "../components/PharmacyCard";
+import {
+  Store,
+  Activity,
+  Ban,
+  ClockAlert,
+  TriangleAlert,
+  RefreshCw,
+} from "lucide-react";
+import usePharmacies from "../../../hooks/usePharmacies";
 
 const Pharmacies = () => {
+  const {
+    pharmacies,
+    stats,
+    loading,
+    error,
+    pagination,
+    fetchPharmacies,
+    fetchStats,
+    getPharmacyDetails,
+    approvePharmacy,
+    rejectPharmacy,
+    suspendPharmacy,
+    activatePharmacy,
+  } = usePharmacies();
 
-    const [pharmacies, setPharmacies] = useState(initialPharmacies);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('All');
-    const [pharmacyList, setPharmacyList] = useState(pharmacies);
-    const [visibleRows, setVisibleRows] = useState(12);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [refreshing, setRefreshing] = useState(false);
 
-    const filteredPharmacies = pharmacyList.filter(pharmacy => {
-    const matchesSearch =
-      pharmacy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pharmacy.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      filterStatus === 'All' || pharmacy.status === filterStatus;
-
-    return matchesSearch && matchesStatus;
-  });
-
-    const handleSuspend = (pharmacy, suspendReason) => {
-        setPharmacyList(prev =>
-            prev.map(p =>
-                p.id === pharmacy.id ? { ...p, status: 'Suspended', suspendReason } : p
-            )
-        );
-        console.log(`Suspended pharmacy: ${pharmacy.name}, Reason: ${suspendReason}`);
+  // ✅ Initial data fetch
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await Promise.all([
+        fetchStats(),
+        fetchPharmacies({
+          search: searchTerm,
+          status: filterStatus,
+          page: 0,
+        }),
+      ]);
     };
 
-    const handleActivate = (pharmacy) => {
-        setPharmacyList(prev =>
-            prev.map(p =>
-                p.id === pharmacy.id ? { ...p, status: 'Active', suspendReason: null } : p
-            )
-        );
-        console.log(`Activated pharmacy: ${pharmacy.name}`);
-    };
+    loadInitialData();
+  }, []);
 
-    const handleAcceptRegistration = (pharmacy) => {
-        setPharmacyList(prev =>
-            prev.map(p =>
-                p.id === pharmacy.id ? { ...p, status: 'Active' } : p
-            )
-        );
-        console.log(`Accepted registration for pharmacy: ${pharmacy.name}`);
-    };
+  // ✅ Handle search and filter changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchPharmacies({
+        search: searchTerm,
+        status: filterStatus,
+        page: 0,
+      });
+    }, 500); // Debounce search
 
-    const handleRejectRegistration = (pharmacy, reason) => {
-      setPharmacyList(prev =>
-            prev.map(p =>
-                p.id === pharmacy.id ? { ...p, status: 'Rejected', suspendReason: reason } : p
-            )
-        );
-        console.log(`Rejected registration for pharmacy: ${pharmacy.name}`);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, filterStatus, fetchPharmacies]);
+
+  // ✅ Handle pharmacy actions
+  const handleSuspend = async (pharmacy, suspendReason) => {
+    try {
+      await suspendPharmacy(pharmacy.id, suspendReason);
+      console.log(
+        `Suspended pharmacy: ${pharmacy.name}, Reason: ${suspendReason}`
+      );
+    } catch (error) {
+      console.error("Failed to suspend pharmacy:", error);
     }
+  };
 
+  const handleActivate = async (pharmacy) => {
+    try {
+      await activatePharmacy(pharmacy.id);
+      console.log(`Activated pharmacy: ${pharmacy.name}`);
+    } catch (error) {
+      console.error("Failed to activate pharmacy:", error);
+    }
+  };
 
-    // Get only the visible pharmacies based on visibleRows
-    const visiblePharmacies = filteredPharmacies.slice(0, visibleRows);
-    const hasMorePharmacies = filteredPharmacies.length > visibleRows;
+  const handleAcceptRegistration = async (pharmacy) => {
+    try {
+      await approvePharmacy(pharmacy.id);
+      console.log(`Accepted registration for pharmacy: ${pharmacy.name}`);
+    } catch (error) {
+      console.error("Failed to accept pharmacy registration:", error);
+    }
+  };
 
-    // Handle "View More" button click
-    const handleViewMore = () => {
-        setVisibleRows(prev => prev + 6);
-    };
+  const handleRejectRegistration = async (pharmacy, reason) => {
+    try {
+      await rejectPharmacy(pharmacy.id, reason);
+      console.log(
+        `Rejected registration for pharmacy: ${pharmacy.name}, Reason: ${reason}`
+      );
+    } catch (error) {
+      console.error("Failed to reject pharmacy registration:", error);
+    }
+  };
 
-    // Reset visible rows when filters change
-    const handleFilterChange = (setter) => (value) => {
-        setter(value);
-        setVisibleRows(12);
-    };
+  // ✅ Handle pagination
+  const handleLoadMore = () => {
+    if (pagination.hasNext && !loading) {
+      fetchPharmacies({
+        search: searchTerm,
+        status: filterStatus,
+        page: pagination.page + 1,
+      });
+    }
+  };
 
-
+  // ✅ Handle refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchStats(),
+        fetchPharmacies({
+          search: searchTerm,
+          status: filterStatus,
+          page: 0,
+        }),
+      ]);
+    } catch (error) {
+      console.error("Failed to refresh data:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
-
-        <PageHeader 
-            icon={Store} 
-            title="Pharmacy Management" 
-            subtitle="Manage all registered pharmacies on the PillPath platform." 
+      <div className="flex items-center justify-between mb-8">
+        <PageHeader
+          icon={Store}
+          title="Pharmacy Management"
+          subtitle="Manage all registered pharmacies on the PillPath platform."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <StatCard
-                label="Active Pharmacies"
-                value={pharmacyList.filter(p => p.status === "Active").length}
-                icon={<Activity size={48} className="text-blue-500" />}
-            />
-            <StatCard
-                label="Rejected Pharmacies"
-                value={pharmacyList.filter(p => p.status === "Rejected").length}
-                icon={<TriangleAlert size={48} className="text-gray-500" />}
-            />
-            <StatCard
-                label="Pending Approval"
-                value={pharmacyList.filter(p => p.status === "Pending").length}
-                icon={<ClockAlert size={48} className="text-yellow-500" />}
-            />
-            <StatCard
-                label="Suspended Pharmacies"
-                value={pharmacyList.filter(p => p.status === "Suspended").length}
-                icon={<Ban size={48} className="text-red-500" />}
-            />
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+        >
+          <RefreshCw size={18} className={refreshing ? "animate-spin" : ""} />
+          <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
+        </button>
+      </div>
+
+      {/* ✅ Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <StatCard
+          label="Active Pharmacies"
+          value={stats.activePharmacies || 0}
+          icon={<Activity size={48} className="text-blue-500" />}
+        />
+        <StatCard
+          label="Rejected Pharmacies"
+          value={stats.rejectedPharmacies || 0}
+          icon={<TriangleAlert size={48} className="text-gray-500" />}
+        />
+        <StatCard
+          label="Pending Approval"
+          value={stats.pendingApproval || 0}
+          icon={<ClockAlert size={48} className="text-yellow-500" />}
+        />
+        <StatCard
+          label="Suspended Pharmacies"
+          value={stats.suspendedPharmacies || 0}
+          icon={<Ban size={48} className="text-red-500" />}
+        />
+      </div>
+
+      {/* ✅ Search and Filter */}
+      <SearchFilterBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterValue={filterStatus}
+        setFilterValue={setFilterStatus}
+        placeholder="Search by name, email, address, or license..."
+        filterOptions={["All", "Active", "Pending", "Suspended", "Rejected"]}
+      />
+
+      {/* ✅ Error Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg">
+          <p className="text-red-700">Error: {error}</p>
+          <button
+            onClick={handleRefresh}
+            className="mt-2 text-red-600 hover:text-red-800 underline"
+          >
+            Try again
+          </button>
         </div>
+      )}
 
-        <SearchFilterBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filterValue={filterStatus}
-            setFilterValue={setFilterStatus}
-            placeholder="Search by name or email..."
-            filterOptions={['All', 'Active', 'Pending', 'Suspended','Rejected']}
-        />
+      {/* ✅ Pharmacies Grid */}
       <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visiblePharmacies.map(pharmacy => (
-              <PharmacyCard
-                key={pharmacy.id}
-                pharmacy={pharmacy}
-                onSuspend={handleSuspend}
-                onActivate={handleActivate}
-                onAcceptRegistration={handleAcceptRegistration}
-                onRejectRegistration={handleRejectRegistration}
-                
-              />
-            ))}
-         </div>
-
-         {hasMorePharmacies && (
-            <div className="mt-6 flex justify-center">
-            <button
-                onClick={handleViewMore}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-            >
-                <span>View More ({Math.min(10, filteredPharmacies.length - visibleRows)} more)</span>
-            </button>
+        {loading && pharmacies.length === 0 ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-600">Loading pharmacies...</span>
+          </div>
+        ) : pharmacies.length === 0 ? (
+          <div className="text-center py-12">
+            <Store size={48} className="mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No pharmacies found
+            </h3>
+            <p className="text-gray-500">
+              {searchTerm || filterStatus !== "All"
+                ? "Try adjusting your search or filter criteria."
+                : "No pharmacies have been registered yet."}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* ✅ Updated grid with consistent heights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pharmacies.map((pharmacy) => (
+                <div key={pharmacy.id} className="h-full">
+                  <PharmacyCard
+                    pharmacy={pharmacy}
+                    onSuspend={handleSuspend}
+                    onActivate={handleActivate}
+                    onAcceptRegistration={handleAcceptRegistration}
+                    onRejectRegistration={handleRejectRegistration}
+                    onViewDetails={getPharmacyDetails}
+                  />
+                </div>
+              ))}
             </div>
-        )}
 
-        {/* Show total count */}
-        <div className="mt-4 text-center text-sm text-gray-500">
-            Showing {visiblePharmacies.length} of {filteredPharmacies.length} pharmacies
-        </div>
+            {/* ✅ Load More Button */}
+            {pagination.hasNext && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <span>
+                      Load More ({pagination.totalElements - pharmacies.length}{" "}
+                      remaining)
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* ✅ Pagination Info */}
+            <div className="mt-4 text-center text-sm text-gray-500">
+              Showing {pharmacies.length} of {pagination.totalElements}{" "}
+              pharmacies
+              {pagination.totalPages > 1 && (
+                <span>
+                  {" "}
+                  • Page {pagination.page + 1} of {pagination.totalPages}
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Pharmacies
+export default Pharmacies;

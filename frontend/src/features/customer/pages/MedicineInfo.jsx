@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Pill, Clock, AlertTriangle, Shield, Info, ArrowLeft, Loader2 } from "lucide-react";
-import { MedicineService } from "../../../services/api";
+import MedicineService from "../services/MedicineService";
 
 const MedicineInfo = () => {
   const [searchTerm, setSearchTerm] = useState("");

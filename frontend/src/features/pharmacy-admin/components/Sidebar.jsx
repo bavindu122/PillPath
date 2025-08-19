@@ -94,7 +94,7 @@ export default function Sidebar() {
       `}>
         <div className="p-4 flex-shrink-0">
           <div className="mb-8 mt-12 xl:mt-0">
-            <Link to="/pharmacy" className="block" onClick={closeMobileMenu}>
+            <Link to="/" className="block" onClick={closeMobileMenu}>
               <h2 className="text-xl font-bold text-gradient-primary flex items-center">
                 <img src={assets.logo2} alt="PillPath Logo" className="ml-2 h-8 w-auto" />
                 PillPath

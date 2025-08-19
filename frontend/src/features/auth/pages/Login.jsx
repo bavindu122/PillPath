@@ -8,6 +8,9 @@ import {
   LogIn,
   Mail,
   AlertCircle,
+  Building2,
+  Users,
+  Stethoscope,
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,7 +20,7 @@ import { useAuth } from "../../../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loading, error, isAuthenticated } = useAuth();
+  const { login, loading, error, isAuthenticated, userType } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -33,12 +36,31 @@ const Login = () => {
     return () => setMounted(false);
   }, []);
 
-  // Redirect if already authenticated
+  // ✅ UPDATED: Enhanced redirect logic based on backend userType
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/customer"); // Navigate to the customer route
+    if (isAuthenticated && userType) {
+      console.log("User authenticated, redirecting...", { userType });
+
+      // ✅ Route based on userType from backend
+      switch (userType) {
+        case "customer":
+          navigate("/customer");
+          break;
+        case "pharmacy-admin":
+          navigate("/pharmacy");
+          break;
+        case "pharmacist":
+          navigate("/pharmacist");
+          break;
+        case "admin":
+          navigate("/admin");
+          break;
+        default:
+          navigate("/customer");
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, userType, navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -70,6 +92,7 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ UPDATED: Simplified login handler for unified backend
   const handleSignIn = async (e) => {
     e.preventDefault();
 
@@ -77,11 +100,16 @@ const Login = () => {
 
     try {
       setSubmitError("");
-      const response = await login(formData);
 
-      // Navigation will be handled by the useEffect above
+      console.log("Attempting unified login with:", formData);
+
+      // ✅ Use unified login - backend will determine user type
+      const response = await login(formData);
       console.log("Login successful:", response);
+
+      // Navigation will be handled by the useEffect above based on response.userType
     } catch (error) {
+      console.error("Login failed:", error);
       setSubmitError(error.message || "Login failed. Please try again.");
     }
   };
@@ -89,6 +117,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-hover to-accent relative overflow-hidden px-4 py-25">
       <Navbar />
+
       {/* Animated background elements */}
       <div className="absolute top-10 left-10 w-96 h-96 bg-secondary/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-slow"></div>
       <div className="absolute top-32 right-20 w-80 h-80 bg-accent/20 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float-delay"></div>
@@ -121,9 +150,12 @@ const Login = () => {
             alt="icon"
             className="w-20 h-20 sm:w-28 sm:h-28 md:w-34 md:h-34 filter drop-shadow-lg animate-fade-in-scale"
           />
-          <p className="text-light text-sm mt-1 animate-fade-in-up delay-200">
+          <h1 className="text-2xl font-bold text-white mt-4 text-center">
+            Sign In to PillPath
+          </h1>
+          <p className="text-white/70 text-sm mt-1 text-center">
             Your <span className="text-secondary-green">health</span> journey
-            starts <span className="text-accent-purple">here</span>
+            starts here
           </p>
 
           {/* Animated rings */}
@@ -246,9 +278,8 @@ const Login = () => {
           <div className="flex-1 h-px bg-white/20"></div>
         </div>
 
-        {/* Enhanced Social login buttons */}
+        {/* Social login buttons */}
         <div className="flex gap-4 relative z-10 animate-fade-in-up delay-800">
-          {/* Google */}
           <button
             type="button"
             className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
@@ -279,45 +310,9 @@ const Login = () => {
               </svg>
             </div>
           </button>
-
-          {/* Apple */}
-          <button
-            type="button"
-            className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
-            disabled={loading}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-white relative z-10"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-            </div>
-          </button>
-
-          {/* Facebook */}
-          <button
-            type="button"
-            className="bg-white/20 hover:bg-white/30 rounded-full p-3 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-105 shadow-md group"
-            disabled={loading}
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 relative z-10"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-            </div>
-          </button>
         </div>
 
-        {/* Create account */}
+        {/* Create account link */}
         <div className="w-full mt-2 relative z-10 animate-fade-in-up delay-900">
           <p className="text-muted text-xs sm:text-sm text-center">
             Don't have an account?{" "}
