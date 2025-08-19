@@ -65,7 +65,7 @@ const staffService = {
       console.error('Error fetching all staff:', error);
       throw error;
     }
-  }
+  },
 };
 
 export default staffService;
