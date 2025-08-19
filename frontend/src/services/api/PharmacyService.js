@@ -7,7 +7,7 @@ class PharmacyService {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json', 
         ...options.headers,
       },
       ...options,
@@ -157,6 +157,31 @@ class PharmacyService {
       body: operations, // Array of PharmacyManagementDTO objects
     });
   }
+
+  // ✅ Get pharmacy documents
+  async getPharmacyDocuments(pharmacyId) {
+    return this.request(`admin/pharmacies/${pharmacyId}/documents`, {
+      method: 'GET',
+    });
+  }
+
+  // ✅ Download pharmacy document
+  async downloadPharmacyDocument(pharmacyId, documentId) {
+    return this.request(`admin/pharmacies/${pharmacyId}/documents/${documentId}/download`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/octet-stream',
+      },
+    });
+  }
+
+  // ✅ View pharmacy document (get document URL or base64)
+  async viewPharmacyDocument(pharmacyId, documentId) {
+    return this.request(`admin/pharmacies/${pharmacyId}/documents/${documentId}/view`, {
+      method: 'GET',
+    });
+  }
+
 }
 
 export default new PharmacyService();
