@@ -1,174 +1,163 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
-// Fix image import paths to be consistent
-import paracetamolImg from '../../../assets/img/meds/paracetamol.webp';
-import vitaminCImg from '../../../assets/img/meds/Vitamin_c.jpg';
-import ibuprofenImg from '../../../assets/img/meds/Ibuprofen.jpg';
-import aspirinImg from '../../../assets/img/meds/Panadol.jpg';
-import multivitaminImg from '../../../assets/img/meds/allergy_relief.jpg';
-import coughSyrupImg from '../../../assets/img/meds/cough_syrup.jpg';
-import sanitizerImg from '../../../assets/img/meds/Antacid.jpg';
+const API_BASE_URL = 'http://localhost:8080/api/otc';
 
-const DUMMY_PRODUCTS = [
-  { 
-    id: 'p1', 
-    name: 'Paracetamol 500mg Tablets', 
-    description: 'Pain relief medication', 
-    price: 12.99, 
-    addedToStore: false,
-    imageUrl: paracetamolImg
-  },
-  { 
-    id: 'p2', 
-    name: 'Vitamin D3 1000IU Capsules', 
-    description: 'Dietary supplement', 
-    price: 18.50, 
-    addedToStore: false,
-    imageUrl: vitaminCImg 
-  },
-  { 
-    id: 'p3', 
-    name: 'Ibuprofen 200mg Tablets', 
-    description: 'Anti-inflammatory', 
-    price: 8.75, 
-    addedToStore: false,
-    imageUrl: ibuprofenImg
-  },
-  { 
-    id: 'p4', 
-    name: 'Aspirin 325mg Tablets', 
-    description: 'Pain reliever', 
-    price: 9.99, 
-    stock: 45, 
-    status: 'In Stock', 
-    addedToStore: true,
-    imageUrl: aspirinImg
-  },
-  { 
-    id: 'p5', 
-    name: 'Multivitamin Tablets', 
-    description: 'Daily supplement', 
-    price: 24.99, 
-    stock: 8, 
-    status: 'Low Stock', 
-    addedToStore: true,
-    imageUrl: multivitaminImg
-  },
-  { 
-    id: 'p6', 
-    name: 'Cough Syrup 100ml', 
-    description: 'Cough suppressant', 
-    price: 14.50, 
-    stock: 0, 
-    status: 'Out of Stock', 
-    addedToStore: true,
-    imageUrl: coughSyrupImg
-  },
-  { 
-    id: 'p7', 
-    name: 'Hand Sanitizer 250ml', 
-    description: 'Antiseptic gel', 
-    price: 6.99, 
-    stock: 120, 
-    status: 'In Stock', 
-    addedToStore: true,
-    imageUrl: sanitizerImg
-  },
-];
+// This function determines the stock status based on the stock amount
+const calculateStatus = (stock) => {
+  const stockNum = parseInt(stock);
+  if (stockNum === 0) {
+    return 'Out of Stock';
+  } else if (stockNum <= 10) {
+    return 'Low Stock';
+  } else {
+    return 'In Stock';
+  }
+};
 
 export const useInventoryData = () => {
-  const [products, setProducts] = useState(DUMMY_PRODUCTS);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Add function to add new products to the main products array
-  const addNewProduct = (newProduct) => {
-    const productWithDefaults = {
-      ...newProduct,
-      addedToStore: false, // New products start as not added to store
-      id: `custom_${Date.now()}`, // Generate unique ID
+  // Fetch all products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log('Fetching products from:', API_BASE_URL);
+
+        const response = await fetch(API_BASE_URL);
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Fetched products:', data);
+
+        // Map over the fetched data to calculate and add the status for each product
+        const productsWithStatus = data.map(product => ({
+          ...product,
+          status: calculateStatus(product.stock)
+        }));
+
+        setProducts(productsWithStatus);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
     };
-    setProducts(prevProducts => [...prevProducts, productWithDefaults]);
-  };
 
-  // Add function to update existing products
-  const updateProduct = (updatedProduct) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
-        product.id === updatedProduct.id ? updatedProduct : product
-      )
-    );
-  };
+    fetchProducts();
+  }, []);
 
-  const totalProducts = products.filter(p => p.addedToStore).length;
-  const inStock = products.filter(p => p.addedToStore && p.stock > 10).length;
-  const lowStock = products.filter(p => p.addedToStore && p.stock <= 10 && p.stock > 0).length;
-  const outOfStock = products.filter(p => p.addedToStore && p.stock === 0).length;
+  // Add new product to backend and update state
+  const addNewProduct = async (newProduct) => {
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newProduct),
+      });
 
-  const inventorySummary = useMemo(() => ([
-    { type: 'Total Products', count: totalProducts },
-    { type: 'In Stock', count: inStock },
-    { type: 'Low Stock', count: lowStock },
-    { type: 'Out of Stock', count: outOfStock },
-  ]), [totalProducts, inStock, lowStock, outOfStock]);
+      if (!response.ok) {
+        throw new Error('Failed to add new product.');
+      }
 
-  const searchResults = useMemo(() => {
-    if (!searchTerm) {
-      return products.filter(p => !p.addedToStore);
+      const addedProduct = await response.json();
+      // Calculate and add the status to the new product before adding it to the state
+      setProducts(prevProducts => [...prevProducts, { ...addedProduct, status: calculateStatus(addedProduct.stock) }]);
+      return addedProduct;
+    } catch (err) {
+      console.error('Error adding new product:', err);
+      throw err;
     }
-    return products.filter(p =>
-      !p.addedToStore &&
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, products]);
+  };
 
-  const currentStorefrontProducts = useMemo(() => {
-    return products.filter(p => p.addedToStore);
-  }, [products]);
+  const updateProduct = async (updatedProduct) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${updatedProduct.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedProduct),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update product.');
+      }
+
+      const data = await response.json();
+      // Calculate and add the status to the updated product before updating the state
+      const productWithStatus = { ...data, status: calculateStatus(data.stock) };
+      setProducts(prevProducts => prevProducts.map(product => product.id === productWithStatus.id ? productWithStatus : product));
+      return productWithStatus;
+    } catch (err) {
+      console.error('Error updating product:', err);
+      throw err;
+    }
+  };
+
+  const removeProductFromStore = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product.');
+      }
+
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      throw err;
+    }
+  };
 
   const addProductToStore = (id) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
-        product.id === id ? { 
-          ...product, 
-          addedToStore: true, 
-          stock: product.stock || Math.floor(Math.random() * 50) + 1, 
-          status: product.status || 'In Stock'
-        } : product
-      )
-    );
-  };
-
-  const removeProductFromStore = (id) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
-        product.id === id ? { 
-          ...product, 
-          addedToStore: false, 
-          stock: undefined, 
-          status: undefined 
-        } : product
-      )
-    );
+    console.log(`Adding product with ID ${id} to store...`);
   };
 
   const updateProductStock = (id, newStock) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product => {
-        if (product.id === id) {
-          let newStatus = '';
-          if (newStock === 0) {
-            newStatus = 'Out of Stock';
-          } else if (newStock <= 10 && newStock > 0) {
-            newStatus = 'Low Stock';
-          } else {
-            newStatus = 'In Stock';
-          }
-          return { ...product, stock: newStock, status: newStatus };
-        }
-        return product;
-      })
-    );
+    console.log(`Updating product with ID ${id} stock to ${newStock}`);
   };
+
+  const inventorySummary = useMemo(() => {
+    const totalProducts = products.length;
+    const inStock = products.filter(p => p.stock > 10).length;
+    const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+    const outOfStock = products.filter(p => p.stock === 0).length;
+
+    return [
+      { type: 'Total Products', count: totalProducts },
+      { type: 'In Stock', count: inStock },
+      { type: 'Low Stock', count: lowStock },
+      { type: 'Out of Stock', count: outOfStock },
+    ];
+  }, [products]);
+
+  const searchResults = useMemo(() => {
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
+
+    const notInStoreProducts = products.filter(product => !product.addedToStore);
+
+    return notInStoreProducts.filter(product =>
+      product.name.toLowerCase().includes(lowercasedSearchTerm)
+    );
+  }, [searchTerm, products]);
+
+  const currentStorefrontProducts = products;
 
   return {
     inventorySummary,
@@ -180,9 +169,432 @@ export const useInventoryData = () => {
     removeProductFromStore,
     updateProductStock,
     addNewProduct,
-    updateProduct, // Export the new update function
+    updateProduct,
+    loading,
+    error,
+    products
   };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useMemo, useEffect } from 'react';
+
+// const API_BASE_URL = 'http://localhost:8080/api/otc';
+
+// export const useInventoryData = () => {
+//   const [products, setProducts] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [searchTerm, setSearchTerm] = useState('');
+
+//   // Fetch all products from backend
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       try {
+//         setLoading(true);
+//         setError(null);
+
+//         console.log('Fetching products from:', API_BASE_URL);
+
+//         const response = await fetch(API_BASE_URL);
+
+//         console.log('Response status:', response.status);
+
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+//         console.log('Fetched products:', data);
+
+//         setProducts(data);
+//       } catch (error) {
+//         console.error('Error fetching products:', error);
+//         setError(error.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, []);
+
+//   // Add new product to backend and update state
+//   const addNewProduct = async (newProduct) => {
+//     try {
+//       const response = await fetch(API_BASE_URL, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(newProduct),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to add new product.');
+//       }
+
+//       const addedProduct = await response.json();
+//       setProducts(prevProducts => [...prevProducts, addedProduct]);
+//       return addedProduct;
+//     } catch (err) {
+//       console.error('Error adding new product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const updateProduct = async (updatedProduct) => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/${updatedProduct.id}`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(updatedProduct),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to update product.');
+//       }
+
+//       const data = await response.json();
+//       setProducts(prevProducts => prevProducts.map(product => product.id === data.id ? data : product));
+//       return data;
+//     } catch (err) {
+//       console.error('Error updating product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const removeProductFromStore = async (id) => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/${id}`, {
+//         method: 'DELETE',
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to delete product.');
+//       }
+
+//       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+//     } catch (err) {
+//       console.error('Error deleting product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const addProductToStore = (id) => {
+//     // This function is for UI logic, the backend should handle adding new items
+//     // This is currently a placeholder
+//     console.log(`Adding product with ID ${id} to store...`);
+//   };
+
+//   const updateProductStock = (id, newStock) => {
+//     // This is a placeholder for direct stock updates
+//     console.log(`Updating product with ID ${id} stock to ${newStock}`);
+//   };
+
+//   const inventorySummary = useMemo(() => {
+//     const totalProducts = products.length;
+//     const inStock = products.filter(p => p.stock > 10).length;
+//     const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+//     const outOfStock = products.filter(p => p.stock === 0).length;
+
+//     return [
+//       { type: 'Total Products', count: totalProducts },
+//       { type: 'In Stock', count: inStock },
+//       { type: 'Low Stock', count: lowStock },
+//       { type: 'Out of Stock', count: outOfStock },
+//     ];
+//   }, [products]);
+  
+//   // This is the key change. We are now filtering the products array
+//   // to only include products that are not added to the store (addedToStore is false)
+//   const searchResults = useMemo(() => {
+//     const lowercasedSearchTerm = searchTerm.toLowerCase();
+    
+//     // Filter the products that are NOT yet in the store
+//     const notInStoreProducts = products.filter(product => !product.addedToStore);
+    
+//     // Now, filter those results by the search term
+//     return notInStoreProducts.filter(product =>
+//       product.name.toLowerCase().includes(lowercasedSearchTerm)
+//     );
+//   }, [searchTerm, products]);
+  
+//   // This is a placeholder for current storefront products, it should be the same as all products
+//   const currentStorefrontProducts = products;
+
+//   return {
+//     inventorySummary,
+//     searchTerm,
+//     setSearchTerm,
+//     searchResults,
+//     currentStorefrontProducts,
+//     addProductToStore,
+//     removeProductFromStore,
+//     updateProductStock,
+//     addNewProduct,
+//     updateProduct,
+//     loading,
+//     error,
+//     products
+//   };
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useMemo, useEffect } from 'react';
+
+// const API_BASE_URL = 'http://localhost:8080/api/otc';
+
+// export const useInventoryData = () => {
+//   const [products, setProducts] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [searchTerm, setSearchTerm] = useState('');
+
+//   // Fetch all products from backend
+//   useEffect(() => {
+//     const fetchProducts = async () => {
+//       try {
+//         setLoading(true);
+//         setError(null);
+        
+//         console.log('Fetching products from:', API_BASE_URL);
+        
+//         const response = await fetch(API_BASE_URL);
+        
+//         console.log('Response status:', response.status);
+        
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+        
+//         const data = await response.json();
+//         console.log('Fetched products:', data);
+        
+//         setProducts(data);
+//       } catch (error) {
+//         console.error('Error fetching products:', error);
+//         setError(error.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProducts();
+//   }, []);
+
+//   // Add new product to backend and update state
+//   const addNewProduct = async (newProduct) => {
+//     try {
+//       const response = await fetch(API_BASE_URL, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(newProduct),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to add new product.');
+//       }
+
+//       const addedProduct = await response.json();
+//       setProducts(prevProducts => [...prevProducts, addedProduct]);
+//       return addedProduct;
+//     } catch (err) {
+//       console.error('Error adding new product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const updateProduct = async (updatedProduct) => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/${updatedProduct.id}`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(updatedProduct),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to update product.');
+//       }
+      
+//       const data = await response.json();
+//       setProducts(prevProducts => prevProducts.map(product => product.id === data.id ? data : product));
+//       return data;
+//     } catch (err) {
+//       console.error('Error updating product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const removeProductFromStore = async (id) => {
+//     try {
+//       const response = await fetch(`${API_BASE_URL}/${id}`, {
+//         method: 'DELETE',
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to delete product.');
+//       }
+      
+//       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+//     } catch (err) {
+//       console.error('Error deleting product:', err);
+//       throw err;
+//     }
+//   };
+
+//   const addProductToStore = (id) => {
+//     // This function is for UI logic, the backend should handle adding new items
+//     // This is currently a placeholder
+//     console.log(`Adding product with ID ${id} to store...`);
+//   };
+
+//   const updateProductStock = (id, newStock) => {
+//     // This is a placeholder for direct stock updates
+//     console.log(`Updating product with ID ${id} stock to ${newStock}`);
+//   };
+
+//   const inventorySummary = useMemo(() => {
+//     const totalProducts = products.length;
+//     const inStock = products.filter(p => p.stock > 10).length;
+//     const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+//     const outOfStock = products.filter(p => p.stock === 0).length;
+
+//     return [
+//       { type: 'Total Products', count: totalProducts },
+//       { type: 'In Stock', count: inStock },
+//       { type: 'Low Stock', count: lowStock },
+//       { type: 'Out of Stock', count: outOfStock },
+//     ];
+//   }, [products]);
+
+//   const searchResults = useMemo(() => {
+//     const lowercasedSearchTerm = searchTerm.toLowerCase();
+//     const allProducts = [...products];
+
+//     return allProducts.filter(product =>
+//       product.name.toLowerCase().includes(lowercasedSearchTerm)
+//     );
+//   }, [searchTerm, products]);
+  
+//   // This is a placeholder for current storefront products, it should be the same as all products
+//   const currentStorefrontProducts = products;
+
+//   return {
+//     inventorySummary,
+//     searchTerm,
+//     setSearchTerm,
+//     searchResults,
+//     currentStorefrontProducts,
+//     addProductToStore,
+//     removeProductFromStore,
+//     updateProductStock,
+//     addNewProduct,
+//     updateProduct,
+//     loading,
+//     error,
+//     products
+//   };
+// };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
