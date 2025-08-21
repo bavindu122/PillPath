@@ -203,27 +203,42 @@ class PharmacyService {
         throw new Error("Image type must be 'logo' or 'banner'");
       }
 
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      formData.append("type", imageType);
+      // Enforce backend size constraints
+      const maxSize = imageType === "logo" ? 5 * 1024 * 1024 : 8 * 1024 * 1024; // 5MB or 8MB
+      if (imageFile.size > maxSize) {
+        throw new Error(
+          imageType === "logo"
+            ? "Logo must be 5MB or smaller"
+            : "Banner must be 8MB or smaller"
+        );
+      }
 
-      // Don't set Content-Type for FormData, let browser set it
+      // Prepare FormData with correct field name expected by backend
+      const formData = new FormData();
+      formData.append("file", imageFile);
+
+      // Choose endpoint according to image type
+      const endpoint =
+        imageType === "logo"
+          ? "pharmacies/pharmacy-profile/upload-logo"
+          : "pharmacies/pharmacy-profile/upload-banner";
+
+      // Build fetch config (let browser set multipart boundary)
       const config = {
         method: "POST",
         body: formData,
-        headers: {
-          // Remove Content-Type to let browser set multipart/form-data boundary
-        },
+        headers: {},
       };
 
-      // Add pharmacy admin token
+      // Add auth header (prefer pharmacy token, fallback to general auth token)
       const pharmacyToken = localStorage.getItem("pharmacy_auth_token");
-      if (pharmacyToken) {
-        config.headers.Authorization = `Bearer ${pharmacyToken}`;
+      const fallbackToken = localStorage.getItem("auth_token");
+      const tokenToUse = pharmacyToken || fallbackToken;
+      if (tokenToUse) {
+        config.headers.Authorization = `Bearer ${tokenToUse}`;
       }
 
-      const url = `${API_BASE_URL}/pharmacies/pharmacy-profile/upload-image`;
+      const url = `${API_BASE_URL}/${endpoint}`;
       const response = await fetch(url, config);
 
       let data;
@@ -241,11 +256,28 @@ class PharmacyService {
           return;
         }
         throw new Error(
-          data.message || data.error || `Upload failed: ${response.status}`
+          (data && data.message) ||
+            (data && data.error) ||
+            `Upload failed: ${response.status}`
         );
       }
 
-      return data;
+      // Normalize response to ensure imageUrl/publicId fields exist
+      const result = data || {};
+      const imageUrl =
+        result.imageUrl ||
+        result.url ||
+        result.logoUrl ||
+        result.bannerUrl ||
+        null;
+      const publicId =
+        result.publicId ||
+        result.logoPublicId ||
+        result.bannerPublicId ||
+        result.id ||
+        null;
+
+      return { ...result, imageUrl, publicId };
     } catch (error) {
       console.error("Image upload failed:", error);
       throw error;
