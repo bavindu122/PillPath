@@ -287,16 +287,15 @@ const PharmacyCard = ({
                 if (onViewDetails) {
                   try {
                     setActionLoading("details");
-                    const details = await onViewDetails(pharmacy.id);
-                    console.log("Pharmacy details:", details);
-                    setShowDetails(true);
+                    await onViewDetails(pharmacy.id);
                   } catch (error) {
                     console.error("Failed to load details:", error);
                   } finally {
                     setActionLoading(null);
                   }
                 } else {
-                  setShowDetails(true);
+                  // Navigate directly to pharmacy profile
+                  window.open(`/pharmacy/${pharmacy.id}`, '_blank');
                 }
               }}
               disabled={actionLoading === "details"}
