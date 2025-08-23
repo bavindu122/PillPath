@@ -107,7 +107,50 @@ export const staffService = {
       console.error('Error verifying staff membership:', error);
       throw error;
     }
-  }
+  },
+
+  // Upload profile picture for staff member - FIXED to handle the /api/v1 in base URL
+  uploadProfilePicture: async (staffId, file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Use fetch directly since FormData needs special handling
+      // Handle the /api/v1 in base URL by removing it for this endpoint
+      const token = localStorage.getItem('auth_token');
+      const baseUrl = import.meta.env.VITE_API_BASE_URL.replace('/api/v1', ''); // Remove /api/v1
+      const response = await fetch(`${baseUrl}/api/pharmacy-admin/staff/${staffId}/profile-picture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload profile picture');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      throw error;
+    }
+  },
+
+  // Remove profile picture for staff member
+  removeProfilePicture: async (staffId) => {
+    try {
+      const response = await ApiService.request(`pharmacy-admin/staff/${staffId}/profile-picture`, {
+        method: 'DELETE'
+      });
+      return response;
+    } catch (error) {
+      console.error('Error removing profile picture:', error);
+      throw error;
+    }
+  },
 };
 
 export default staffService;

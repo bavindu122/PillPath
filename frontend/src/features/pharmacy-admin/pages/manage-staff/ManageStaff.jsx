@@ -1,24 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { UserPlus, Trash2, Edit3, Search, Camera, Sparkles, Users, Shield, Eye, EyeOff } from 'lucide-react';
-import { staffService } from '../../services/staffService';
+import React, { useState, useEffect, useRef } from 'react';
+import { UserPlus, Trash2, Edit3, Search, Camera, Sparkles, Users, Shield, Eye, EyeOff, X } from 'lucide-react';
+import staffService from '../../services/staffService';
 import { usePharmacyAuth } from '../../../../hooks/usePharmacyAuth';
+
+// Simple ProfileImage component (since we're avoiding external dependencies)
+const ProfileImage = ({ src, alt = "Profile", size = "md", className = "" }) => {
+  const sizeClasses = {
+    sm: "w-8 h-8",
+    md: "w-12 h-12", 
+    lg: "w-16 h-16",
+    xl: "w-24 h-24"
+  };
+
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
+    if (e.target.nextSibling) {
+      e.target.nextSibling.style.display = 'flex';
+    }
+  };
+
+  return (
+    <div className={`relative ${sizeClasses[size]} ${className}`}>
+      {src ? (
+        <>
+          <img
+            src={src}
+            alt={alt}
+            onError={handleImageError}
+            className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
+          />
+          <div 
+            className={`${sizeClasses[size]} rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center hidden`}
+          >
+            <Users className={`${size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-8 h-8' : 'w-6 h-6'} text-gray-400`} />
+          </div>
+        </>
+      ) : (
+        <div className={`${sizeClasses[size]} rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center`}>
+          <Users className={`${size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-8 h-8' : 'w-6 h-6'} text-gray-400`} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function StaffManagement() {
   const { user, isAuthenticated } = usePharmacyAuth();
   const [staffMembers, setStaffMembers] = useState([]);
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
   const [newStaff, setNewStaff] = useState({
-    firstName: '',
-    lastName: '',
-    profilePictureUrl: '',
+    fullName: '',
     email: '',
     phoneNumber: '',
     password: '',
     confirmPassword: '',
+    dateOfBirth: '',
+    profilePictureUrl: '',
     licenseNumber: '',
-    position: '',
+    licenseExpiryDate: '',
+    specialization: '',
     yearsOfExperience: '',
-    shiftSchedule: ''
+    hireDate: '',
+    shiftSchedule: '',
+    certifications: []
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [editingStaffId, setEditingStaffId] = useState(null);
@@ -26,11 +70,17 @@ export default function StaffManagement() {
   const [showReenterPassword, setShowReenterPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Profile picture related states
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Get pharmacy ID from authenticated user
   const pharmacyId = user?.pharmacyId || user?.pharmacy?.id;
 
-    useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated && pharmacyId) {
         // Debug user info
         console.log('Current user:', user);
@@ -42,7 +92,7 @@ export default function StaffManagement() {
     } else if (isAuthenticated && !pharmacyId) {
         setError('Unable to determine pharmacy ID. Please contact support.');
     }
-    }, [isAuthenticated, pharmacyId]);
+  }, [isAuthenticated, pharmacyId]);
 
   const fetchStaffMembers = async () => {
     if (!pharmacyId) {
@@ -101,121 +151,197 @@ export default function StaffManagement() {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  // Handle file selection for profile picture
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, or WebP)');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview URL
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewStaff({ ...newStaff, profilePictureUrl: reader.result });
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAddStaff = async (e) => {
-    e.preventDefault();
-
-    if (!pharmacyId) {
-      setError('Pharmacy ID not found. Please log in again.');
-      return;
-    }
-
-    if (!newStaff.firstName || !newStaff.lastName || !newStaff.email || !newStaff.licenseNumber) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
-    if (!editingStaffId && newStaff.password !== newStaff.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    // Password strength requirements
-    if (
-      !editingStaffId &&
-      (
-        !newStaff.password ||
-        newStaff.password.length < 8 ||
-        !/[A-Z]/.test(newStaff.password) ||
-        !/[a-z]/.test(newStaff.password) ||
-        !/[0-9]/.test(newStaff.password) ||
-        !/[!@#$%^&*(),.?":{}|<>]/.test(newStaff.password)
-      )
-    ) {
-      setError('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.');
-      return;
-    }
-
-    if (!editingStaffId && newStaff.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-
-      if (editingStaffId) {
-        // Update existing staff member
-        const updateData = {
-          firstName: newStaff.firstName,
-          lastName: newStaff.lastName,
-          email: newStaff.email,
-          phoneNumber: newStaff.phoneNumber,
-          position: newStaff.position,
-          licenseNumber: newStaff.licenseNumber,
-        };
-
-        await staffService.updateStaffMember(editingStaffId, updateData);
-        setEditingStaffId(null);
-      } else {
-        // Add new staff member - match backend PharmacistCreateRequest DTO
-        const staffData = {
-          firstName: newStaff.firstName,
-          lastName: newStaff.lastName,
-          email: newStaff.email,
-          password: newStaff.password,
-          phoneNumber: newStaff.phoneNumber,
-          position: newStaff.position || 'PHARMACIST',
-          licenseNumber: newStaff.licenseNumber,
-          pharmacyId: parseInt(pharmacyId)
-        };
-
-        await staffService.addStaffMember(pharmacyId, staffData);
-      }
-
-      // Reset form and close modal
-      setNewStaff({
-        firstName: '',
-        lastName: '',
-        profilePictureUrl: '',
-        email: '',
-        phoneNumber: '',
-        password: '',
-        confirmPassword: '',
-        licenseNumber: '',
-        position: '',
-        yearsOfExperience: '',
-        shiftSchedule: ''
-      });
-      setShowAddStaffModal(false);
-
-      // Refresh staff list
-      await fetchStaffMembers();
-    } catch (err) {
-      console.error('Failed to add/update staff member:', err);
-      
-      if (err.response?.status === 403) {
-        setError('Access denied. You may not have permission to manage staff for this pharmacy.');
-      } else if (err.response?.status === 401) {
-        setError('Authentication expired. Please log in again.');
-      } else {
-        setError(err.message || 'Failed to save staff member');
-      }
-    } finally {
-      setLoading(false);
+  // Remove selected file and preview
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
+
+  // Upload profile picture
+  const uploadProfilePicture = async (staffId = null) => {
+    if (!selectedFile) return null;
+
+    try {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        // If updating existing staff, include their ID
+        if (staffId) {
+            formData.append('userId', staffId.toString());
+        }
+
+        // Use the general upload endpoint
+        const response = await fetch('/api/pharmacy-admin/upload-profile-picture', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to upload image');
+        }
+
+        const result = await response.json();
+        return result.secure_url || result.url;
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        setError('Failed to upload profile picture: ' + error.message);
+        return null;
+    } finally {
+        setUploadingImage(false);
+    }
+  };
+
+// Remove the entire uploadProfilePicture function (lines 192-229) and replace handleAddStaff with this:
+
+const handleAddStaff = async (e) => {
+  e.preventDefault();
+
+  if (!pharmacyId) {
+    setError('Pharmacy ID not found. Please log in again.');
+    return;
+  }
+
+  if (!newStaff.fullName || !newStaff.email || !newStaff.licenseNumber) {
+    setError('Please fill in all required fields');
+    return;
+  }
+
+  if (!editingStaffId && newStaff.password !== newStaff.confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  if (!editingStaffId && newStaff.password.length < 6) {
+    setError('Password must be at least 6 characters long');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError('');
+
+    if (editingStaffId) {
+      // Update existing staff member
+      const updateData = {
+        fullName: newStaff.fullName,
+        email: newStaff.email,
+        phoneNumber: newStaff.phoneNumber,
+        dateOfBirth: newStaff.dateOfBirth,
+        licenseNumber: newStaff.licenseNumber,
+        licenseExpiryDate: newStaff.licenseExpiryDate,
+        specialization: newStaff.specialization,
+        yearsOfExperience: newStaff.yearsOfExperience ? parseInt(newStaff.yearsOfExperience) : null,
+        shiftSchedule: newStaff.shiftSchedule,
+        certifications: newStaff.certifications
+      };
+
+      await staffService.updateStaffMember(editingStaffId, updateData);
+      
+      // Upload profile picture if selected
+      if (selectedFile) {
+        setUploadingImage(true);
+        try {
+          await staffService.uploadProfilePicture(editingStaffId, selectedFile);
+        } catch (uploadError) {
+          console.error('Failed to upload profile picture:', uploadError);
+          setError('Staff updated but failed to upload profile picture: ' + uploadError.message);
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+      
+      setEditingStaffId(null);
+    } else {
+      // Add new staff member first
+      const staffData = {
+        fullName: newStaff.fullName,
+        email: newStaff.email,
+        password: newStaff.password,
+        phoneNumber: newStaff.phoneNumber,
+        dateOfBirth: newStaff.dateOfBirth,
+        licenseNumber: newStaff.licenseNumber,
+        licenseExpiryDate: newStaff.licenseExpiryDate,
+        specialization: newStaff.specialization,
+        yearsOfExperience: newStaff.yearsOfExperience ? parseInt(newStaff.yearsOfExperience) : null,
+        hireDate: newStaff.hireDate,
+        shiftSchedule: newStaff.shiftSchedule,
+        certifications: newStaff.certifications,
+        pharmacyId: parseInt(pharmacyId)
+      };
+
+      // Create staff member and get the created staff data
+      const createdStaff = await staffService.createStaffMember(staffData);
+      
+      // Upload profile picture if selected and we have the staff ID
+      if (selectedFile && createdStaff?.id) {
+        setUploadingImage(true);
+        try {
+          await staffService.uploadProfilePicture(createdStaff.id, selectedFile);
+        } catch (uploadError) {
+          console.error('Failed to upload profile picture:', uploadError);
+          setError('Staff created but failed to upload profile picture: ' + uploadError.message);
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+    }
+
+    // Reset form and close modal
+    resetForm();
+
+    // Refresh staff list
+    await fetchStaffMembers();
+  } catch (err) {
+    console.error('Failed to add/update staff member:', err);
+    
+    if (err.response?.status === 403) {
+      setError('Access denied. You may not have permission to manage staff for this pharmacy.');
+    } else if (err.response?.status === 401) {
+      setError('Authentication expired. Please log in again.');
+    } else {
+      setError(err.message || 'Failed to save staff member');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleDeleteStaff = async (id) => {
     if (window.confirm('Are you sure you want to delete this staff member?')) {
@@ -243,23 +369,59 @@ export default function StaffManagement() {
   const handleEditStaff = (staff) => {
     setEditingStaffId(staff.id);
     setNewStaff({
-      firstName: staff.firstName || '',
-      lastName: staff.lastName || '',
-      profilePictureUrl: staff.profilePictureUrl || '',
+      fullName: staff.fullName || '',
       email: staff.email || '',
       phoneNumber: staff.phoneNumber || '',
+      dateOfBirth: staff.dateOfBirth || '',
+      profilePictureUrl: staff.profilePictureUrl || '',
       licenseNumber: staff.licenseNumber || '',
-      position: staff.position || '',
+      licenseExpiryDate: staff.licenseExpiryDate || '',
+      specialization: staff.specialization || '',
       yearsOfExperience: staff.yearsOfExperience || '',
+      hireDate: staff.hireDate || '',
       shiftSchedule: staff.shiftSchedule || '',
+      certifications: staff.certifications || [],
       password: '',
       confirmPassword: ''
     });
+    
+    // Set preview URL if staff has existing profile picture
+    if (staff.profilePictureUrl) {
+      setPreviewUrl(staff.profilePictureUrl);
+    }
+    
     setShowAddStaffModal(true);
   };
 
+  const resetForm = () => {
+    setNewStaff({
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      password: '',
+      confirmPassword: '',
+      dateOfBirth: '',
+      profilePictureUrl: '',
+      licenseNumber: '',
+      licenseExpiryDate: '',
+      specialization: '',
+      yearsOfExperience: '',
+      hireDate: '',
+      shiftSchedule: '',
+      certifications: []
+    });
+    setEditingStaffId(null);
+    setShowAddStaffModal(false);
+    setSelectedFile(null);
+    setPreviewUrl('');
+    setError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const filteredStaff = staffMembers.filter(staff => {
-    const fullName = `${staff.firstName || ''} ${staff.lastName || ''}`.toLowerCase();
+    const fullName = (staff.fullName || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     return fullName.includes(searchLower) || 
            (staff.email && staff.email.toLowerCase().includes(searchLower));
@@ -355,18 +517,23 @@ export default function StaffManagement() {
               onClick={() => {
                 setEditingStaffId(null);
                 setNewStaff({
-                  firstName: '',
-                  lastName: '',
-                  profilePictureUrl: '',
+                  fullName: '',
                   email: '',
                   phoneNumber: '',
                   password: '',
                   confirmPassword: '',
+                  dateOfBirth: '',
+                  profilePictureUrl: '',
                   licenseNumber: '',
-                  position: '',
+                  licenseExpiryDate: '',
+                  specialization: '',
                   yearsOfExperience: '',
-                  shiftSchedule: ''
+                  hireDate: '',
+                  shiftSchedule: '',
+                  certifications: []
                 });
+                setSelectedFile(null);
+                setPreviewUrl('');
                 setShowAddStaffModal(true);
               }}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200"
@@ -423,17 +590,11 @@ export default function StaffManagement() {
                     {/* Profile Picture */}
                     <div className="flex justify-center mb-4">
                       <div className="relative">
-                        {staff.profilePictureUrl ? (
-                          <img
-                            src={staff.profilePictureUrl}
-                            alt={`${staff.firstName} ${staff.lastName}'s profile`}
-                            className="w-20 h-20 rounded-full object-cover border-4 border-white shadow"
-                          />
-                        ) : (
-                          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow">
-                            {staff.firstName?.charAt(0) || '?'}{staff.lastName?.charAt(0) || '?'}
-                          </div>
-                        )}
+                        <ProfileImage
+                          src={staff.profilePictureUrl}
+                          alt={`${staff.fullName}'s profile`}
+                          size="xl"
+                        />
                         {/* Status indicator */}
                         <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-white ${
                           staff.isActive !== false ? 'bg-green-500' : 'bg-red-500'
@@ -444,15 +605,18 @@ export default function StaffManagement() {
                     {/* Staff Info */}
                     <div className="text-center mb-4">
                       <h3 className="text-xl font-bold text-gray-800 mb-2">
-                        {staff.firstName || 'N/A'} {staff.lastName || 'N/A'}
+                        {staff.fullName || 'N/A'}
                       </h3>
                       <p className="text-sm text-gray-500 mb-1">{staff.email || 'No email'}</p>
                       <p className="text-sm text-gray-500 mb-1">{staff.phoneNumber || 'No phone'}</p>
-                      {staff.position && (
-                        <p className="text-sm text-blue-600 font-medium">{staff.position}</p>
+                      {staff.specialization && (
+                        <p className="text-sm text-blue-600 font-medium">{staff.specialization}</p>
                       )}
                       {staff.licenseNumber && (
                         <p className="text-xs text-gray-400">License: {staff.licenseNumber}</p>
+                      )}
+                      {staff.yearsOfExperience && (
+                        <p className="text-xs text-gray-400">{staff.yearsOfExperience} years experience</p>
                       )}
                     </div>
 
@@ -502,54 +666,72 @@ export default function StaffManagement() {
               </div>
 
               <form onSubmit={handleAddStaff} className="space-y-4">
-                {/* First Name Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    value={newStaff.firstName}
-                    onChange={(e) => setNewStaff({ ...newStaff, firstName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
-
-                {/* Last Name Field */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    value={newStaff.lastName}
-                    onChange={(e) => setNewStaff({ ...newStaff, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    required
-                  />
-                </div>
-
-                {/* Profile Picture */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
+                {/* Profile Picture Section */}
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Profile Picture
+                  </label>
+                  
+                  {/* Current/Preview Image */}
                   <div className="flex items-center space-x-4">
-                    {newStaff.profilePictureUrl ? (
-                      <img src={newStaff.profilePictureUrl} alt="Profile Preview" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
-                        {newStaff.firstName.charAt(0)}{newStaff.lastName.charAt(0) || '?'}
-                      </div>
-                    )}
-                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                      <div className="flex items-center">
-                        <Camera className="h-4 w-4 mr-2" />
-                        <span className="text-sm font-medium">Upload Image</span>
-                      </div>
-                      <input
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={handleImageUpload}
+                    <div className="relative">
+                      <ProfileImage
+                        src={previewUrl || newStaff.profilePictureUrl}
+                        alt="Profile Preview"
+                        size="lg"
                       />
-                    </label>
+                      {(previewUrl || newStaff.profilePictureUrl) && (
+                        <button
+                          type="button"
+                          onClick={removeSelectedFile}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50"
+                      >
+                        <Camera className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                        </span>
+                      </button>
+                      <p className="text-xs text-gray-500 mt-1">
+                        PNG, JPG, WebP up to 5MB
+                      </p>
+                    </div>
                   </div>
+                </div>
+
+                {/* Full Name Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    value={newStaff.fullName}
+                    onChange={(e) => setNewStaff({ ...newStaff, fullName: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                    minLength={2}
+                    maxLength={100}
+                    pattern="^[a-zA-Z\s]+$"
+                    title="Full name should only contain letters and spaces, 2-100 characters"
+                    placeholder="Enter full name"
+                  />
                 </div>
 
                 {/* Email Field */}
@@ -561,6 +743,10 @@ export default function StaffManagement() {
                     onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
+                    maxLength={150}
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Please enter a valid email address"
+                    placeholder="Enter email address"
                   />
                 </div>
 
@@ -568,10 +754,30 @@ export default function StaffManagement() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                   <input
-                    type="text"
+                    type="tel"
                     value={newStaff.phoneNumber}
                     onChange={(e) => setNewStaff({ ...newStaff, phoneNumber: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    minLength={10}
+                    maxLength={15}
+                    pattern="^[\+]?[0-9\-\(\)\s]+$"
+                    title="Phone number should be 10-15 digits and may include +, -, (), spaces"
+                    placeholder="Enter phone number (10-15 digits)"
+                  />
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth *</label>
+                  <input
+                    type="date"
+                    value={newStaff.dateOfBirth}
+                    onChange={(e) => setNewStaff({ ...newStaff, dateOfBirth: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                    min="1950-01-01"
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                    title="Staff member must be at least 18 years old"
                   />
                 </div>
 
@@ -584,23 +790,110 @@ export default function StaffManagement() {
                     onChange={(e) => setNewStaff({ ...newStaff, licenseNumber: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     required
-                    disabled={editingStaffId} // Don't allow editing license number
+                    minLength={5}
+                    maxLength={20}
+                    pattern="^[A-Z0-9]+$"
+                    title="License number should be 5-20 characters, uppercase letters and numbers only"
+                    placeholder="Enter license number (e.g., PH123456)"
+                    disabled={editingStaffId}
                   />
                 </div>
 
-                {/* Position */}
+                {/* License Expiry Date */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">License Expiry Date</label>
+                  <input
+                    type="date"
+                    value={newStaff.licenseExpiryDate}
+                    onChange={(e) => setNewStaff({ ...newStaff, licenseExpiryDate: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    min={new Date().toISOString().split('T')[0]}
+                    title="License expiry date must be in the future"
+                  />
+                </div>
+
+                {/* Specialization */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                  <input
+                    type="text"
+                    value={newStaff.specialization}
+                    onChange={(e) => setNewStaff({ ...newStaff, specialization: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    maxLength={100}
+                    pattern="^[a-zA-Z\s,.-]*$"
+                    title="Specialization should only contain letters, spaces, commas, periods, and hyphens"
+                    placeholder="e.g., Clinical Pharmacy, Pediatric Pharmacy"
+                  />
+                </div>
+
+                {/* Years of Experience */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="1"
+                    value={newStaff.yearsOfExperience}
+                    onChange={(e) => setNewStaff({ ...newStaff, yearsOfExperience: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    required
+                    title="Years of experience must be between 0 and 50"
+                    placeholder="Enter years of experience"
+                  />
+                </div>
+
+                {/* Hire Date (only show when adding new staff) */}
+                {!editingStaffId && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
+                    <input
+                      type="date"
+                      value={newStaff.hireDate}
+                      onChange={(e) => setNewStaff({ ...newStaff, hireDate: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      min="2020-01-01"
+                      max={new Date().toISOString().split('T')[0]}
+                      title="Hire date cannot be in the future"
+                    />
+                  </div>
+                )}
+
+                {/* Shift Schedule */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Shift Schedule</label>
                   <select
-                    value={newStaff.position}
-                    onChange={(e) => setNewStaff({ ...newStaff, position: e.target.value })}
+                    value={newStaff.shiftSchedule}
+                    onChange={(e) => setNewStaff({ ...newStaff, shiftSchedule: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                   >
-                    <option value="">Select Position</option>
-                    <option value="PHARMACIST">Pharmacist</option>
-                    <option value="PHARMACY_TECHNICIAN">Pharmacy Technician</option>
-                    <option value="PHARMACY_ASSISTANT">Pharmacy Assistant</option>
+                    <option value="">Select Shift</option>
+                    <option value="MORNING">Morning (6AM - 2PM)</option>
+                    <option value="AFTERNOON">Afternoon (2PM - 10PM)</option>
+                    <option value="NIGHT">Night (10PM - 6AM)</option>
+                    <option value="FULL_TIME">Full Time (9AM - 5PM)</option>
+                    <option value="PART_TIME">Part Time</option>
+                    <option value="FLEXIBLE">Flexible</option>
                   </select>
+                </div>
+
+                {/* Certifications */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+                  <textarea
+                    value={newStaff.certifications.join(', ')}
+                    onChange={(e) => setNewStaff({ 
+                      ...newStaff, 
+                      certifications: e.target.value.split(',').map(cert => cert.trim()).filter(cert => cert.length > 0)
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    placeholder="Enter certifications separated by commas"
+                    rows="3"
+                    maxLength={500}
+                    title="Maximum 500 characters"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separate multiple certifications with commas (max 500 characters)</p>
                 </div>
 
                 {/* Password Field (only show when adding new staff) */}
@@ -615,7 +908,11 @@ export default function StaffManagement() {
                           onChange={(e) => setNewStaff({ ...newStaff, password: e.target.value })}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 pr-12"
                           required
-                          minLength={6}
+                          minLength={8}
+                          maxLength={50}
+                          pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                          title="Password must be at least 8 characters with uppercase, lowercase, number, and special character"
+                          placeholder="Enter strong password"
                         />
                         <button
                           type="button"
@@ -626,6 +923,7 @@ export default function StaffManagement() {
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      <p className="text-xs text-gray-500 mt-1">Must include uppercase, lowercase, number, and special character</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Re-enter Password *</label>
@@ -634,8 +932,15 @@ export default function StaffManagement() {
                           type={showReenterPassword ? "text" : "password"}
                           value={newStaff.confirmPassword}
                           onChange={(e) => setNewStaff({ ...newStaff, confirmPassword: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 pr-12"
+                          className={`w-full px-4 py-2 border rounded-lg text-gray-800 focus:ring-2 pr-12 ${
+                            newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword
+                              ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                          }`}
                           required
+                          minLength={8}
+                          maxLength={50}
+                          placeholder="Re-enter password"
                         />
                         <button
                           type="button"
@@ -646,6 +951,9 @@ export default function StaffManagement() {
                           {showReenterPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                       </div>
+                      {newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword && (
+                        <p className="text-sm text-red-600 mt-1">Passwords do not match</p>
+                      )}
                     </div>
                   </>
                 )}
@@ -654,7 +962,7 @@ export default function StaffManagement() {
                 <div className="flex justify-end space-x-4 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowAddStaffModal(false)}
+                    onClick={resetForm}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200"
                     disabled={loading}
                   >
@@ -663,10 +971,10 @@ export default function StaffManagement() {
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    disabled={loading}
+                    disabled={loading || uploadingImage || (newStaff.confirmPassword && newStaff.password !== newStaff.confirmPassword)}
                   >
                     <div className="flex items-center">
-                      {loading ? (
+                      {loading || uploadingImage ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       ) : (
                         <Sparkles className="h-4 w-4 mr-2" />

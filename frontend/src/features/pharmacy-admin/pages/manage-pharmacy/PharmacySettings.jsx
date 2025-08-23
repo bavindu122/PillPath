@@ -1,627 +1,825 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, MapPin, Phone, Mail, Store, Edit, Sparkles, Shield, Award } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Camera,
+  MapPin,
+  Phone,
+  Mail,
+  Store,
+  Edit,
+  Sparkles,
+  Shield,
+  Award,
+  Save,
+  X,
+  Target,
+  Clock,
+  Truck,
+  Star,
+  Upload,
+  Trash2,
+  AlertCircle,
+  CheckCircle,
+  Loader,
+} from "lucide-react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { usePharmacyProfile } from "../../../../hooks/usePharmacyProfile";
+
+// Fix for Leaflet default icon in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 export default function PharmacySettings() {
-  const [pharmacyName, setPharmacyName] = useState('PharmaCare Pharmacy');
-  const [address, setAddress] = useState('123 Main Street, Anytown, USA 12345');
-  const [contactNumber, setContactNumber] = useState('+1 (555) 123-4567');
-  const [email, setEmail] = useState('info@pharmacare.com');
-  const [pharmacyImages, setPharmacyImages] = useState([]);
+  // ✅ Use the custom hook for pharmacy profile management
+  const {
+    pharmacyProfile,
+    loading,
+    saving,
+    uploading,
+    error,
+    updateProfile,
+    uploadImage,
+    updateLocalProfile,
+    clearError,
+  } = usePharmacyProfile();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+
+  // Image handling
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [bannerFile, setBannerFile] = useState(null);
+
+  // Location handling
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
 
   // Track created object URLs for cleanup
   const objectUrlsRef = useRef([]);
 
-  const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const newImages = files.map(file => {
-      const url = URL.createObjectURL(file);
-      objectUrlsRef.current.push(url);
-      return url;
-    });
-    setPharmacyImages(prevImages => [...prevImages, ...newImages]);
+  // Success message state
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // ✅ Initialize form data when pharmacy profile loads
+  useEffect(() => {
+    if (pharmacyProfile) {
+      setFormData({
+        name: pharmacyProfile.name || "",
+        address: pharmacyProfile.address || "",
+        phoneNumber: pharmacyProfile.phoneNumber || "",
+        latitude: pharmacyProfile.latitude || 6.9271,
+        longitude: pharmacyProfile.longitude || 79.8612,
+        operatingHours: pharmacyProfile.operatingHours || {
+          monday: "",
+          tuesday: "",
+          wednesday: "",
+          thursday: "",
+          friday: "",
+          saturday: "",
+          sunday: "",
+        },
+        services: pharmacyProfile.services || [],
+        deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
+        deliveryRadius: pharmacyProfile.deliveryRadius || 10,
+      });
+    }
+  }, [pharmacyProfile]);
+
+  // ✅ Initialize map when location picker is opened
+  useEffect(() => {
+    if (
+      showLocationPicker &&
+      mapRef.current &&
+      !mapInstanceRef.current &&
+      formData.latitude &&
+      formData.longitude
+    ) {
+      mapInstanceRef.current = L.map(mapRef.current).setView(
+        [formData.latitude, formData.longitude],
+        15
+      );
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(mapInstanceRef.current);
+
+      // Add draggable marker
+      markerRef.current = L.marker([formData.latitude, formData.longitude], {
+        draggable: isEditing,
+      }).addTo(mapInstanceRef.current);
+
+      // Update coordinates when marker is dragged
+      markerRef.current.on("dragend", (event) => {
+        const newPosition = event.target.getLatLng();
+        setFormData((prev) => ({
+          ...prev,
+          latitude: newPosition.lat,
+          longitude: newPosition.lng,
+        }));
+      });
+
+      // Update coordinates when map is clicked
+      mapInstanceRef.current.on("click", (event) => {
+        if (isEditing) {
+          const { lat, lng } = event.latlng;
+          markerRef.current.setLatLng([lat, lng]);
+          setFormData((prev) => ({
+            ...prev,
+            latitude: lat,
+            longitude: lng,
+          }));
+        }
+      });
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [showLocationPicker, isEditing, formData.latitude, formData.longitude]);
+
+  // ✅ Handle logo upload
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        setLogoFile(file);
+        const url = URL.createObjectURL(file);
+        objectUrlsRef.current.push(url);
+        setLogoPreview(url);
+
+        // If not in editing mode, upload immediately
+        if (!isEditing) {
+          await uploadImage(file, "logo");
+          setSuccessMessage("Logo updated successfully!");
+          setTimeout(() => setSuccessMessage(""), 3000);
+        }
+      } catch (error) {
+        console.error("Error handling logo upload:", error);
+      }
+    }
   };
 
+  // ✅ Handle banner upload
+  const handleBannerUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        setBannerFile(file);
+        const url = URL.createObjectURL(file);
+        objectUrlsRef.current.push(url);
+        setBannerPreview(url);
+
+        // If not in editing mode, upload immediately
+        if (!isEditing) {
+          await uploadImage(file, "banner");
+          setSuccessMessage("Banner updated successfully!");
+          setTimeout(() => setSuccessMessage(""), 3000);
+        }
+      } catch (error) {
+        console.error("Error handling banner upload:", error);
+      }
+    }
+  };
+
+  // ✅ Handle input changes
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // ✅ Handle operating hours change
+  const handleOperatingHoursChange = (day, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      operatingHours: {
+        ...prev.operatingHours,
+        [day]: value,
+      },
+    }));
+  };
+
+  // ✅ Handle services change
+  const handleServicesChange = (value) => {
+    const servicesArray = value
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s);
+    setFormData((prev) => ({
+      ...prev,
+      services: servicesArray,
+    }));
+  };
+
+  // ✅ Remove image
+  const removeImage = (type) => {
+    if (type === "logo") {
+      setLogoPreview(null);
+      setLogoFile(null);
+      // You might want to add API call to remove image from server
+    } else {
+      setBannerPreview(null);
+      setBannerFile(null);
+      // You might want to add API call to remove image from server
+    }
+  };
+
+  // ✅ Save changes
+  const handleSave = async () => {
+    try {
+      clearError();
+
+      // Upload pending images first
+      if (logoFile && isEditing) {
+        await uploadImage(logoFile, "logo");
+      }
+      if (bannerFile && isEditing) {
+        await uploadImage(bannerFile, "banner");
+      }
+
+      // Update profile data
+      await updateProfile(formData);
+
+      setIsEditing(false);
+      setSuccessMessage("Pharmacy profile updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+
+      // Clear pending uploads
+      setLogoFile(null);
+      setBannerFile(null);
+      setLogoPreview(null);
+      setBannerPreview(null);
+    } catch (error) {
+      console.error("Error saving pharmacy data:", error);
+      // Error is handled by the hook
+    }
+  };
+
+  // ✅ Cancel editing
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Reset form data to original profile data
+    if (pharmacyProfile) {
+      setFormData({
+        name: pharmacyProfile.name || "",
+        address: pharmacyProfile.address || "",
+        phoneNumber: pharmacyProfile.phoneNumber || "",
+        latitude: pharmacyProfile.latitude || 6.9271,
+        longitude: pharmacyProfile.longitude || 79.8612,
+        operatingHours: pharmacyProfile.operatingHours || {},
+        services: pharmacyProfile.services || [],
+        deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
+        deliveryRadius: pharmacyProfile.deliveryRadius || 10,
+      });
+    }
+    // Clear pending uploads
+    setLogoFile(null);
+    setBannerFile(null);
+    setLogoPreview(null);
+    setBannerPreview(null);
+    clearError();
+  };
+
+  // ✅ Cleanup object URLs
   useEffect(() => {
-    // Cleanup function to revoke object URLs on unmount
     return () => {
-      objectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       objectUrlsRef.current = [];
     };
   }, []);
 
-  const handleSave = () => {
-    // In a real application, you would send this data to a backend
-    console.log('Saving pharmacy details:', { pharmacyName, address, contactNumber, email, pharmacyImages });
-    setIsEditing(false);
-  };
+  // ✅ Loading state
+  if (loading && !pharmacyProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading pharmacy profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Error state
+  if (error && !pharmacyProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error Loading Profile
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10">
-      {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4 shadow-md">
-            <Store className="h-8 w-8 text-white" />
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center">
+            <CheckCircle className="h-5 w-5 mr-2" />
+            {successMessage}
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Pharmacy Profile
-          </h1>
-          <p className="text-gray-600">Manage your pharmacy information and showcase your services</p>
-        </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            {error}
+            <button
+              onClick={clearError}
+              className="ml-auto text-red-700 hover:text-red-900"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         {/* Main Card */}
-        <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 relative">
-          {/* Content */}
-          <div>
-            {/* Header Actions */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-              <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-                <div className="flex items-center space-x-2">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-600">Verified Pharmacy</span>
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {/* ✅ Banner Section */}
+          <div className="relative top-[-30px] h-48 bg-gradient-to-r from-blue-500 to-blue-600">
+            {(bannerPreview || pharmacyProfile?.bannerUrl) && (
+              <img
+                src={bannerPreview || pharmacyProfile.bannerUrl}
+                alt="Pharmacy Banner"
+                className="w-full h-full object-cover"
+              />
+            )}
+
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <div className="flex gap-2">
+                <label className="px-4 py-2 bg-white/90 text-gray-800 rounded-lg cursor-pointer hover:bg-white transition-colors flex items-center">
+                  {uploading ? (
+                    <Loader className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Camera className="h-4 w-4 mr-2" />
+                  )}
+                  {uploading ? "Uploading..." : "Change Banner"}
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleBannerUpload}
+                    accept="image/*"
+                    disabled={uploading}
+                  />
+                </label>
+                {(bannerPreview || pharmacyProfile?.bannerUrl) && (
+                  <button
+                    onClick={() => removeImage("banner")}
+                    className="px-4 py-2 bg-red-500/90 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    disabled={uploading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8">
+            {/* Header with Logo and Actions */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 -mt-16 sm:-mt-20">
+              {/* ✅ Logo Section */}
+              <div className="flex items-end space-x-4 mb-4 sm:mb-0">
+                <div className="relative">
+                  <div className="w-24 h-24 bg-white rounded-full border-4 border-white shadow-lg overflow-hidden">
+                    {logoPreview || pharmacyProfile?.logoUrl ? (
+                      <img
+                        src={logoPreview || pharmacyProfile.logoUrl}
+                        alt="Pharmacy Logo"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Store className="h-10 w-10 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="absolute -bottom-2 -right-2 flex gap-1">
+                    <label className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
+                      {uploading ? (
+                        <Loader className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={handleLogoUpload}
+                        accept="image/*"
+                        disabled={uploading}
+                      />
+                    </label>
+                    {(logoPreview || pharmacyProfile?.logoUrl) && (
+                      <button
+                        onClick={() => removeImage("logo")}
+                        className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                        disabled={uploading}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Award className="h-6 w-6 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-600">Premium Member</span>
+
+                <div className="pt-8">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {pharmacyProfile?.name || "Pharmacy Name"}
+                  </h2>
+                  <div className="flex items-center space-x-4 mt-2">
+                    {pharmacyProfile?.isVerified && (
+                      <div className="flex items-center space-x-1">
+                        <Shield className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-600">
+                          Verified
+                        </span>
+                      </div>
+                    )}
+                    {pharmacyProfile?.averageRating && (
+                      <div className="flex items-center space-x-1 ">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        <span className="text-sm font-medium text-gray-600">
+                          {pharmacyProfile.averageRating} (
+                          {pharmacyProfile.totalReviews || 0} reviews)
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
-              >
-                <div className="flex items-center">
-                  <Edit className="h-5 w-5 mr-2" />
-                  <span className="font-medium">
-                    {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-                  </span>
-                </div>
-              </button>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      disabled={saving}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center"
+                    >
+                      {saving ? (
+                        <>
+                          <Loader className="h-4 w-4 animate-spin mr-2" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column - Form Fields */}
+              {/* Left Column - Basic Information */}
               <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                  Basic Information
+                </h3>
+
                 {/* Pharmacy Name */}
                 <div>
                   <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <Store className="h-5 w-5 text-blue-600 mr-2" />
-                    Pharmacy Name
+                    <Store className="h-4 w-4 text-blue-600 mr-2" />
+                    Pharmacy Name *
                   </label>
-                  <div>
-                    <input
-                      type="text"
-                      value={pharmacyName}
-                      onChange={(e) => setPharmacyName(e.target.value)}
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-2 border rounded-lg text-gray-800 ${
-                        isEditing 
-                          ? 'border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                      }`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={formData.name || ""}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 border rounded-lg ${
+                      isEditing
+                        ? "border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                    }`}
+                    required
+                  />
                 </div>
 
                 {/* Address */}
                 <div>
                   <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                    Address
+                    <MapPin className="h-4 w-4 text-blue-600 mr-2" />
+                    Address *
                   </label>
-                  <div>
-                    <textarea
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      rows="4"
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-2 border rounded-lg text-gray-800 resize-none ${
-                        isEditing 
-                          ? 'border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                      }`}
-                    />
+                  <textarea
+                    value={formData.address || ""}
+                    onChange={(e) =>
+                      handleInputChange("address", e.target.value)
+                    }
+                    rows="3"
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 border rounded-lg resize-none ${
+                      isEditing
+                        ? "border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                    }`}
+                    required
+                  />
+                </div>
+
+                {/* ✅ Location Coordinates */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="flex items-center text-sm font-medium text-gray-700">
+                      <Target className="h-4 w-4 text-blue-600 mr-2" />
+                      Location Coordinates
+                    </label>
+                    {isEditing && (
+                      <button
+                        onClick={() =>
+                          setShowLocationPicker(!showLocationPicker)
+                        }
+                        className="text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        {showLocationPicker ? "Hide Map" : "Pick on Map"}
+                      </button>
+                    )}
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">Latitude</label>
+                      <input
+                        type="number"
+                        value={formData.latitude || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "latitude",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        step="any"
+                        disabled={!isEditing}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                          isEditing
+                            ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                            : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Longitude</label>
+                      <input
+                        type="number"
+                        value={formData.longitude || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "longitude",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        step="any"
+                        disabled={!isEditing}
+                        className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                          isEditing
+                            ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                            : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ✅ Interactive Map */}
+                  {showLocationPicker && isEditing && (
+                    <div className="mt-4">
+                      <div
+                        ref={mapRef}
+                        className="w-full h-64 border rounded-lg"
+                      ></div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Click on the map or drag the marker to update location
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Contact Number */}
                 <div>
                   <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <Phone className="h-5 w-5 text-blue-600 mr-2" />
+                    <Phone className="h-4 w-4 text-blue-600 mr-2" />
                     Contact Number
                   </label>
-                  <div>
-                    <input
-                      type="text"
-                      value={contactNumber}
-                      onChange={(e) => setContactNumber(e.target.value)}
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-2 border rounded-lg text-gray-800 ${
-                        isEditing 
-                          ? 'border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                      }`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={formData.phoneNumber || ""}
+                    onChange={(e) =>
+                      handleInputChange("phoneNumber", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 border rounded-lg ${
+                      isEditing
+                        ? "border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                    }`}
+                  />
                 </div>
 
-                {/* Email */}
+                {/* Email (Read-only) */}
                 <div>
                   <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="h-5 w-5 text-blue-600 mr-2" />
-                    Email Address
+                    <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                    Email Address (Read-only)
                   </label>
-                  <div>
+                  <input
+                    type="email"
+                    value={pharmacyProfile?.email || ""}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed text-gray-500"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column - Additional Information */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                  Additional Information
+                </h3>
+
+                {/* ✅ Operating Hours */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                    <Clock className="h-4 w-4 text-blue-600 mr-2" />
+                    Operating Hours
+                  </label>
+                  <div className="space-y-2">
+                    {Object.entries(formData.operatingHours || {}).map(
+                      ([day, hours]) => (
+                        <div key={day} className="flex items-center space-x-3">
+                          <div className="w-20 text-sm font-medium text-gray-600 capitalize">
+                            {day}
+                          </div>
+                          <input
+                            type="text"
+                            value={hours || ""}
+                            onChange={(e) =>
+                              handleOperatingHoursChange(day, e.target.value)
+                            }
+                            placeholder="e.g. 09:00-18:00"
+                            disabled={!isEditing}
+                            className={`flex-1 px-3 py-2 border rounded-lg text-sm ${
+                              isEditing
+                                ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                                : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                            }`}
+                          />
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* ✅ Services */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                    <Sparkles className="h-4 w-4 text-blue-600 mr-2" />
+                    Services Offered
+                  </label>
+                  <textarea
+                    value={(formData.services || []).join(", ")}
+                    onChange={(e) => handleServicesChange(e.target.value)}
+                    placeholder="Enter services separated by commas"
+                    rows="3"
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 border rounded-lg resize-none ${
+                      isEditing
+                        ? "border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                    }`}
+                  />
+                </div>
+
+                {/* ✅ Delivery Settings */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                    <Truck className="h-4 w-4 text-blue-600 mr-2" />
+                    Delivery Service
+                  </label>
+
+                  <div className="space-y-3">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={formData.deliveryAvailable || false}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "deliveryAvailable",
+                            e.target.checked
+                          )
+                        }
+                        disabled={!isEditing}
+                        className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <span className="text-sm text-gray-700">
+                        Delivery service available
+                      </span>
+                    </label>
+
+                    {formData.deliveryAvailable && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">
+                          Delivery Radius (km)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.deliveryRadius || ""}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "deliveryRadius",
+                              parseInt(e.target.value)
+                            )
+                          }
+                          min="1"
+                          max="50"
+                          disabled={!isEditing}
+                          className={`w-full px-3 py-2 border rounded-lg text-sm ${
+                            isEditing
+                              ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                              : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* License Information (Read-only) */}
+                <div>
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                    <Shield className="h-4 w-4 text-gray-400 mr-2" />
+                    License Information (Read-only)
+                  </label>
+                  <div className="grid grid-cols-1 gap-3">
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={!isEditing}
-                      className={`w-full px-4 py-2 border rounded-lg text-gray-800 ${
-                        isEditing 
-                          ? 'border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                      }`}
+                      type="text"
+                      value={pharmacyProfile?.licenseNumber || ""}
+                      disabled
+                      className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm cursor-not-allowed text-gray-500"
+                      placeholder="License Number"
+                    />
+                    <input
+                      type="date"
+                      value={pharmacyProfile?.licenseExpiryDate || ""}
+                      disabled
+                      className="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm cursor-not-allowed text-gray-500"
                     />
                   </div>
                 </div>
               </div>
-
-              {/* Right Column - Image Upload */}
-              <div className="space-y-4">
-                <div className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                  <Camera className="h-5 w-5 text-blue-600 mr-2" />
-                  Pharmacy Images
-                </div>
-
-                {/* Upload Area */}
-                <div>
-                  <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                    isEditing 
-                      ? 'border-blue-300 bg-blue-50 hover:border-blue-400' 
-                      : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                  }`}>
-                    {pharmacyImages.length === 0 ? (
-                      <div className="py-4">
-                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Camera className="h-8 w-8 text-blue-600" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Upload Pharmacy Images</h3>
-                        <p className="text-gray-500 mb-4">Showcase your pharmacy with photos</p>
-                      </div>
-                    ) : (
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Your Pharmacy Gallery</h3>
-                      </div>
-                    )}
-
-                    <label className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors duration-200 ${
-                      isEditing ? '' : 'opacity-50 cursor-not-allowed'
-                    }`}>
-                      <Camera className="h-5 w-5 mr-2" />
-                      <span className="font-medium">
-                        {pharmacyImages.length === 0 ? 'Choose Photos' : 'Add More Photos'}
-                      </span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        multiple
-                        accept="image/*"
-                        disabled={!isEditing}
-                      />
-                    </label>
-                    
-                    <p className="text-sm text-gray-500 mt-2">
-                      PNG, JPG, GIF up to 10MB each
-                    </p>
-                  </div>
-                </div>
-
-                {/* Image Gallery */}
-                {pharmacyImages.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    {pharmacyImages.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <img 
-                          src={image} 
-                          alt={`Pharmacy ${index + 1}`} 
-                          className="w-full h-32 object-cover rounded-lg shadow-sm border border-gray-200"
-                        />
-                        {isEditing && (
-                          <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm">
-                            <Camera className="h-4 w-4 text-gray-600" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
-
-            {/* Save Button */}
-            {isEditing && (
-              <div className="mt-8 flex justify-end">
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-3 bg-green-600 text-white rounded-md shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-                >
-                  <div className="flex items-center">
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    <span className="font-medium">Save Changes</span>
-                  </div>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect, useRef } from 'react';
-// import { Camera, MapPin, Phone, Mail, Store, Edit, Sparkles, Shield, Award } from 'lucide-react';
-
-// export default function PharmacySettings() {
-//   const [pharmacyName, setPharmacyName] = useState('PharmaCare Pharmacy');
-//   const [address, setAddress] = useState('123 Main Street, Anytown, USA 12345');
-//   const [contactNumber, setContactNumber] = useState('+1 (555) 123-4567');
-//   const [email, setEmail] = useState('info@pharmacare.com');
-//   const [pharmacyImages, setPharmacyImages] = useState([]);
-//   const [isEditing, setIsEditing] = useState(false);
-
-//   // Track created object URLs for cleanup
-//   const objectUrlsRef = useRef([]);
-
-//   const handleImageUpload = (event) => {
-//     const files = Array.from(event.target.files);
-//     const newImages = files.map(file => {
-//       const url = URL.createObjectURL(file);
-//       objectUrlsRef.current.push(url);
-//       return url;
-//     });
-//     setPharmacyImages(prevImages => [...prevImages, ...newImages]);
-//   };
-
-//   useEffect(() => {
-//     // Cleanup function to revoke object URLs on unmount
-//     return () => {
-//       objectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
-//       objectUrlsRef.current = [];
-//     };
-//   }, []);
-
-//   const handleSave = () => {
-//     // In a real application, you would send this data to a backend
-//     console.log('Saving pharmacy details:', { pharmacyName, address, contactNumber, email, pharmacyImages });
-//     setIsEditing(false);
-//   };
-
-//   return (
-//     <div className="min-h-screen relative overflow-hidden">
-//       {/* Animated Background */}
-//       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-//         {/* Floating Elements */}
-//         <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
-//         <div className="absolute top-32 right-20 w-24 h-24 bg-purple-200 rounded-full opacity-30 animate-bounce"></div>
-//         <div className="absolute bottom-20 left-32 w-40 h-40 bg-indigo-200 rounded-full opacity-25 animate-pulse"></div>
-//         <div className="absolute bottom-40 right-10 w-28 h-28 bg-blue-300 rounded-full opacity-20 animate-bounce"></div>
-        
-//         {/* Gradient Orbs */}
-//         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-10 blur-3xl animate-pulse"></div>
-//         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full opacity-10 blur-3xl animate-pulse"></div>
-//       </div>
-
-//       {/* Main Content */}
-//       <div className="relative z-10 p-4 sm:p-6 lg:p-10">
-//         {/* Header Section */}
-//         <div className="text-center mb-10">
-//           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 shadow-lg">
-//             <Store className="h-8 w-8 text-white" />
-//           </div>
-//           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-//             Pharmacy Profile
-//           </h1>
-//           <p className="text-gray-600 text-lg">Manage your pharmacy information and showcase your services</p>
-//         </div>
-
-//         {/* Main Card with Glassmorphism */}
-//         <div className="max-w-6xl mx-auto">
-//           <div className="bg-white/70 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8 sm:p-12 relative overflow-hidden">
-//             {/* Card Background Pattern */}
-//             <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/30"></div>
-//             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-2xl"></div>
-//             <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-indigo-400/10 to-blue-400/10 rounded-full blur-2xl"></div>
-            
-//             {/* Content */}
-//             <div className="relative z-10">
-//               {/* Header Actions */}
-//               <div className="flex flex-col sm:flex-row justify-between items-center mb-12">
-//                 <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-//                   <div className="flex items-center space-x-2">
-//                     <Shield className="h-6 w-6 text-blue-600" />
-//                     <span className="text-sm font-medium text-gray-600">Verified Pharmacy</span>
-//                   </div>
-//                   <div className="flex items-center space-x-2">
-//                     <Award className="h-6 w-6 text-purple-600" />
-//                     <span className="text-sm font-medium text-gray-600">Premium Member</span>
-//                   </div>
-//                 </div>
-                
-//                 <button
-//                   onClick={() => setIsEditing(!isEditing)}
-//                   className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-//                 >
-//                   <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-//                   <div className="relative flex items-center">
-//                     <Edit className="h-5 w-5 mr-3" />
-//                     <span className="font-semibold">
-//                       {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-//                     </span>
-//                     <Sparkles className="h-4 w-4 ml-2 opacity-70" />
-//                   </div>
-//                 </button>
-//               </div>
-
-//               {/* Main Content Grid */}
-//               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-//                 {/* Left Column - Form Fields */}
-//                 <div className="space-y-8">
-//                   {/* Pharmacy Name */}
-//                   <div className="group">
-//                     <label className="flex items-center text-sm font-bold text-gray-700 mb-4">
-//                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-//                         <Store className="h-5 w-5 text-white" />
-//                       </div>
-//                       Pharmacy Name
-//                     </label>
-//                     <div className="relative">
-//                       <input
-//                         type="text"
-//                         value={pharmacyName}
-//                         onChange={(e) => setPharmacyName(e.target.value)}
-//                         disabled={!isEditing}
-//                         className={`w-full px-6 py-4 bg-white/80 backdrop-blur-sm border-2 rounded-2xl text-gray-800 font-medium transition-all duration-300 ${
-//                           isEditing 
-//                             ? 'border-blue-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 shadow-lg' 
-//                             : 'border-gray-200 cursor-not-allowed opacity-75'
-//                         }`}
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl pointer-events-none"></div>
-//                     </div>
-//                   </div>
-
-//                   {/* Address */}
-//                   <div className="group">
-//                     <label className="flex items-center text-sm font-bold text-gray-700 mb-4">
-//                       <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-//                         <MapPin className="h-5 w-5 text-white" />
-//                       </div>
-//                       Address
-//                     </label>
-//                     <div className="relative">
-//                       <textarea
-//                         value={address}
-//                         onChange={(e) => setAddress(e.target.value)}
-//                         rows="4"
-//                         disabled={!isEditing}
-//                         className={`w-full px-6 py-4 bg-white/80 backdrop-blur-sm border-2 rounded-2xl text-gray-800 font-medium transition-all duration-300 resize-none ${
-//                           isEditing 
-//                             ? 'border-green-300 focus:border-green-500 focus:ring-4 focus:ring-green-200 shadow-lg' 
-//                             : 'border-gray-200 cursor-not-allowed opacity-75'
-//                         }`}
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-blue-500/5 rounded-2xl pointer-events-none"></div>
-//                     </div>
-//                   </div>
-
-//                   {/* Contact Number */}
-//                   <div className="group">
-//                     <label className="flex items-center text-sm font-bold text-gray-700 mb-4">
-//                       <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-//                         <Phone className="h-5 w-5 text-white" />
-//                       </div>
-//                       Contact Number
-//                     </label>
-//                     <div className="relative">
-//                       <input
-//                         type="text"
-//                         value={contactNumber}
-//                         onChange={(e) => setContactNumber(e.target.value)}
-//                         disabled={!isEditing}
-//                         className={`w-full px-6 py-4 bg-white/80 backdrop-blur-sm border-2 rounded-2xl text-gray-800 font-medium transition-all duration-300 ${
-//                           isEditing 
-//                             ? 'border-purple-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-200 shadow-lg' 
-//                             : 'border-gray-200 cursor-not-allowed opacity-75'
-//                         }`}
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-2xl pointer-events-none"></div>
-//                     </div>
-//                   </div>
-
-//                   {/* Email */}
-//                   <div className="group">
-//                     <label className="flex items-center text-sm font-bold text-gray-700 mb-4">
-//                       <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-//                         <Mail className="h-5 w-5 text-white" />
-//                       </div>
-//                       Email Address
-//                     </label>
-//                     <div className="relative">
-//                       <input
-//                         type="email"
-//                         value={email}
-//                         onChange={(e) => setEmail(e.target.value)}
-//                         disabled={!isEditing}
-//                         className={`w-full px-6 py-4 bg-white/80 backdrop-blur-sm border-2 rounded-2xl text-gray-800 font-medium transition-all duration-300 ${
-//                           isEditing 
-//                             ? 'border-indigo-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 shadow-lg' 
-//                             : 'border-gray-200 cursor-not-allowed opacity-75'
-//                         }`}
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-blue-500/5 rounded-2xl pointer-events-none"></div>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 {/* Right Column - Image Upload */}
-//                 <div className="space-y-6">
-//                   <div className="flex items-center text-sm font-bold text-gray-700 mb-6">
-//                     <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
-//                       <Camera className="h-5 w-5 text-white" />
-//                     </div>
-//                     Pharmacy Images
-//                   </div>
-
-//                   {/* Upload Area */}
-//                   <div className="relative">
-//                     <div className={`relative border-3 border-dashed rounded-3xl p-8 text-center transition-all duration-300 ${
-//                       isEditing 
-//                         ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-purple-50 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-100 hover:to-purple-100' 
-//                         : 'border-gray-200 bg-gray-50 opacity-75'
-//                     }`}>
-//                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl"></div>
-                      
-//                       <div className="relative z-10">
-//                         {pharmacyImages.length === 0 ? (
-//                           <div className="py-8">
-//                             <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-//                               <Camera className="h-10 w-10 text-white" />
-//                             </div>
-//                             <h3 className="text-xl font-bold text-gray-700 mb-2">Upload Pharmacy Images</h3>
-//                             <p className="text-gray-500 mb-6">Showcase your pharmacy with beautiful photos</p>
-//                           </div>
-//                         ) : (
-//                           <div className="mb-6">
-//                             <h3 className="text-lg font-bold text-gray-700 mb-4">Your Pharmacy Gallery</h3>
-//                           </div>
-//                         )}
-
-//                         <label className={`inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer ${
-//                           isEditing ? '' : 'opacity-50 cursor-not-allowed'
-//                         }`}>
-//                           <Camera className="h-5 w-5 mr-3" />
-//                           <span className="font-semibold">
-//                             {pharmacyImages.length === 0 ? 'Choose Photos' : 'Add More Photos'}
-//                           </span>
-//                           <input
-//                             type="file"
-//                             className="hidden"
-//                             onChange={handleImageUpload}
-//                             multiple
-//                             accept="image/*"
-//                             disabled={!isEditing}
-//                           />
-//                         </label>
-                        
-//                         <p className="text-sm text-gray-500 mt-4">
-//                           PNG, JPG, GIF up to 10MB each
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Image Gallery */}
-//                   {pharmacyImages.length > 0 && (
-//                     <div className="grid grid-cols-2 gap-4">
-//                       {pharmacyImages.map((image, index) => (
-//                         <div key={index} className="relative group">
-//                           <img 
-//                             src={image} 
-//                             alt={`Pharmacy ${index + 1}`} 
-//                             className="w-full h-32 object-cover rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105"
-//                           />
-//                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-//                           <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-//                             <Camera className="h-4 w-4 text-gray-600" />
-//                           </div>
-//                         </div>
-//                       ))}
-//                     </div>
-//                   )}
-//                 </div>
-//               </div>
-
-//               {/* Save Button */}
-//               {isEditing && (
-//                 <div className="mt-16 text-center">
-//                   <button
-//                     onClick={handleSave}
-//                     className="group relative px-12 py-5 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-3xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-//                   >
-//                     <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-//                     <div className="relative flex items-center">
-//                       <Sparkles className="h-6 w-6 mr-3" />
-//                       <span className="text-xl font-bold">Save Changes</span>
-//                       <div className="ml-3 w-2 h-2 bg-white rounded-full animate-pulse"></div>
-//                     </div>
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

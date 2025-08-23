@@ -4,10 +4,11 @@ import { Clock } from "lucide-react";
 const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = false }) => {
   if (!pharmacy) return null;
 
-  // Operating hours data - ensure it's always an array
-  const operatingHours = Array.isArray(pharmacy.operatingHours) 
-    ? pharmacy.operatingHours 
-    : [
+  // Convert database operating hours object to array format
+  const getOperatingHoursArray = () => {
+    if (!pharmacy.operatingHours || typeof pharmacy.operatingHours !== 'object') {
+      // Fallback data if no operating hours in database
+      return [
         { day: "Monday", hours: "8:00 AM - 9:00 PM" },
         { day: "Tuesday", hours: "8:00 AM - 9:00 PM" },
         { day: "Wednesday", hours: "8:00 AM - 9:00 PM" },
@@ -16,6 +17,22 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
         { day: "Saturday", hours: "9:00 AM - 7:00 PM" },
         { day: "Sunday", hours: "10:00 AM - 6:00 PM" }
       ];
+    }
+
+    // Convert database object to array
+    const daysOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const dbHours = pharmacy.operatingHours;
+    
+    return daysOrder.map(day => ({
+      day: day,
+      hours: dbHours[day.toLowerCase()] || dbHours[day] || "Closed"
+    }));
+  };
+
+  // Operating hours data - ensure it's always an array
+  const operatingHours = Array.isArray(pharmacy.operatingHours) 
+    ? pharmacy.operatingHours 
+    : getOperatingHoursArray();
 
   const getCurrentDay = () => {
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -28,6 +45,24 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
 
   const currentDay = getCurrentDay();
   const currentDayIndex = getCurrentDayIndex();
+
+  // Check if pharmacy is currently open
+  const isCurrentlyOpen = () => {
+    if (pharmacy.currentStatus) {
+      return pharmacy.currentStatus.toLowerCase().includes('open');
+    }
+    
+    // Fallback logic based on operating hours
+    const todayHours = operatingHours.find(h => h.day === currentDay)?.hours;
+    if (!todayHours || todayHours.toLowerCase().includes('closed')) {
+      return false;
+    }
+    
+    // Simple check - you can enhance this with actual time parsing
+    const now = new Date();
+    const currentHour = now.getHours();
+    return currentHour >= 8 && currentHour < 21; // Basic 8AM-9PM assumption
+  };
 
   // For mini view, show only yesterday, today, and tomorrow
   const getMiniViewHours = () => {
@@ -58,6 +93,7 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
   };
 
   const displayHours = miniView ? getMiniViewHours() : operatingHours;
+  const isOpen = isCurrentlyOpen();
 
   return (
     <div className={`bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/40 shadow-xl ${className}`}>
@@ -74,13 +110,13 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
       {!miniView && (
         <div className="mt-6 mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-700 font-medium">
-              {pharmacy.isOpen ? "Currently Open" : "Currently Closed"}
+            <div className={`w-2 h-2 rounded-full animate-pulse ${isOpen ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className={`font-medium ${isOpen ? 'text-green-700' : 'text-red-700'}`}>
+              {pharmacy.currentStatus || (isOpen ? "Currently Open" : "Currently Closed")}
             </span>
           </div>
           <p className="text-sm text-gray-600 mt-1">
-            Today: {operatingHours.find(h => h.day === currentDay)?.hours}
+            Today: {operatingHours.find(h => h.day === currentDay)?.hours || "Hours not available"}
           </p>
         </div>
       )}
@@ -89,18 +125,18 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
       {miniView && (
         <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-700 font-medium text-sm">
-              {pharmacy.isOpen ? "Currently Open" : "Currently Closed"}
+            <div className={`w-2 h-2 rounded-full animate-pulse ${isOpen ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className={`font-medium text-sm ${isOpen ? 'text-green-700' : 'text-red-700'}`}>
+              {pharmacy.currentStatus || (isOpen ? "Currently Open" : "Currently Closed")}
             </span>
           </div>
         </div>
       )}
 
       <div className="space-y-2">
-        {displayHours.map((schedule) => (
+        {displayHours.map((schedule, index) => (
           <div 
-            key={schedule.day} 
+            key={schedule.day || index} 
             className={`flex justify-between items-center py-2 px-3 rounded-lg transition-colors ${
               miniView 
                 ? (schedule.label === "Today" 

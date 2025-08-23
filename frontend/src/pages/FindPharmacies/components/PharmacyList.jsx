@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { calculateDistance } from "../utils/mapHelpers";
 import { ScrollContainer } from "../../../components/UIs";
+import { useNavigate } from "react-router-dom";
 
 // ✅ Helper to format operating hours for display
 const formatOperatingHours = (operatingHours) => {
@@ -55,6 +56,8 @@ const PharmacyList = ({
   isMultiSelect = false,
   selectedPharmacies = [],
 }) => {
+  const navigate = useNavigate();
+
   const isPharmacySelected = (pharmacyId) => {
     return selectedPharmacies.some((p) => p.id === pharmacyId);
   };
@@ -265,8 +268,15 @@ const PharmacyList = ({
                       {pharmacy.phone || pharmacy.phoneNumber}
                     </a>
 
+
                     {!isMultiSelect && (
-                      <button className="text-sm text-primary hover:text-primary-hover font-medium flex items-center">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/pharmacy/${pharmacy.id}`);
+                        }}
+                        className="text-sm text-primary hover:text-primary-hover font-medium flex items-center"
+                      >
                         View Details
                         <ArrowRight size={14} className="ml-1" />
                       </button>
