@@ -35,6 +35,9 @@ const FindPharmacy = () => {
   const [selectedPharmacies, setSelectedPharmacies] = useState([]);
   const [prescriptionData, setPrescriptionData] = useState(null);
   const { isAuthenticated, userType } = useAuth();
+  // Upload animation states
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0); // kept for potential future granular progress
 
   // ✅ NEW: Location picker states
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
@@ -226,19 +229,22 @@ const FindPharmacy = () => {
     }
 
     try {
-      // Upload to each selected pharmacy sequentially to keep it simple
-      for (const pharmacy of selectedPharmacies) {
-        const meta = {
-          pharmacyId: pharmacy.id,
-          note: prescriptionData?.note || undefined,
-          source: "find-pharmacy",
-          latitude: currentLocation?.lat,
-          longitude: currentLocation?.lng,
-        };
-        await PrescriptionService.uploadPrescription(fileToUpload, meta);
-      }
+      setIsUploading(true);
+      setUploadedCount(0);
+      const pharmacyIds = selectedPharmacies.map((p) => p.id);
+      const meta = {
+        // For backward compat, include pharmacyId if only one selected
+        ...(pharmacyIds.length === 1 ? { pharmacyId: pharmacyIds[0] } : {}),
+        pharmacyIds,
+        note: prescriptionData?.note || undefined,
+        source: "find-pharmacy",
+        latitude: currentLocation?.lat,
+        longitude: currentLocation?.lng,
+      };
+      await PrescriptionService.uploadPrescription(fileToUpload, meta);
     } catch (err) {
       console.error("Prescription upload failed", err);
+      setIsUploading(false);
       alert(err?.message || "Failed to upload prescription. Please try again.");
       return;
     }
@@ -246,13 +252,11 @@ const FindPharmacy = () => {
     // Clean up session storage
     sessionStorage.removeItem("prescriptionData");
 
-    // Show success message
-    alert(
-      `Prescription uploaded successfully to ${selectedPharmacies.length} pharmacy(ies)!`
-    );
-
-    // Navigate to activities page
-    navigate("/customer/activities");
+    // Show quick success then navigate
+    setTimeout(() => {
+      setIsUploading(false);
+      navigate("/customer/activities");
+    }, 200);
   };
 
   const getBackButtonText = () => {
@@ -379,10 +383,15 @@ const FindPharmacy = () => {
                       </div>
                       <button
                         onClick={handleUploadToPharmacies}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 flex items-center space-x-2 self-center"
+                        disabled={isUploading}
+                        className={`px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 self-center ${
+                          isUploading
+                            ? "bg-green-600/60 text-white/80 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700 text-white"
+                        }`}
                       >
                         <Upload className="h-4 w-4" />
-                        <span>Upload</span>
+                        <span>{isUploading ? "Uploading…" : "Upload"}</span>
                       </button>
                     </div>
                   </div>
@@ -680,6 +689,27 @@ const FindPharmacy = () => {
           </div>
         </div>
       </div>
+      {isUploading && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm">
+          <div className="w-[340px] max-w-[90vw] p-6 rounded-2xl border border-white/20 bg-white/10 text-white shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white/70 rounded-full animate-spin"></div>
+              <div className="text-sm uppercase tracking-wider text-white/80">
+                Uploading
+              </div>
+            </div>
+            <div className="text-lg font-semibold mb-2">
+              Sending your prescription…
+            </div>
+            <div className="text-white/70 text-sm mb-1">
+              This may take a moment…
+            </div>
+            <div className="text-white/50 text-xs mb-4">
+              Do not close this window
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

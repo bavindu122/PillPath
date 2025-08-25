@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 // Payment is handled in unified Checkout page now
 import { getItemsByPrescription } from "../services/CartService";
+import PrescriptionActivityService from "../../../services/api/PrescriptionActivityService";
 
 const Activities = () => {
   const navigate = useNavigate();
@@ -24,235 +25,66 @@ const Activities = () => {
     });
   };
 
-  const handleProceedToPayment = () => {
-    // Navigate to unified checkout page
-    navigate("/customer/checkout");
-  };
-
   // No local payment modal state anymore
 
   // Payment is confirmed on the Checkout page
 
-  // Sample medications for the payment modal
-  const sampleMedications = [
-    { id: 1, name: "Amoxicillin 500mg", price: 15.99, selected: true },
-    { id: 2, name: "Ibuprofen 200mg", price: 8.5, selected: true },
-    { id: 3, name: "Vitamin D3 1000IU", price: 12.25, selected: false },
-    { id: 4, name: "Lisinopril 10mg", price: 9.75, selected: true },
-  ];
+  // Activities state and data loading
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+  const [prescriptions, setPrescriptions] = React.useState([]);
 
-  // Function to calculate total price of all available medications
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await PrescriptionActivityService.getActivities(0, 20);
+        if (!mounted) return;
+        const normalized = (data.items || []).map((item) => ({
+          id: item.code,
+          uploadedDate: item.uploadedAt,
+          prescriptionImage: item.imageUrl,
+          pharmacies: (item.pharmacies || []).map((p) => ({
+            pharmacyId: p.pharmacyId,
+            name: p.pharmacyName,
+            address: p.address,
+            status:
+              p.status === "PREVIEW_READY"
+                ? "View Order Preview"
+                : p.status === "PAYMENT_REQUIRED"
+                ? "Proceed to payment"
+                : "Pending Order Preview",
+            statusType:
+              p.status === "PREVIEW_READY"
+                ? "delivery"
+                : p.status === "PAYMENT_REQUIRED"
+                ? "payment"
+                : "pending",
+            medications: p.medications || undefined,
+            totals: p.totals || undefined,
+          })),
+        }));
+        setPrescriptions(normalized);
+      } catch (e) {
+        setError(e.message || "Failed to load activities");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const calculateTotalPrice = (medications) => {
-    return medications
-      .filter((med) => med.available)
-      .reduce((total, med) => total + med.price, 0);
+    if (!Array.isArray(medications)) return 0;
+    return medications.reduce(
+      (sum, m) =>
+        sum + (typeof m.price === "number" ? m.price : Number(m.price) || 0),
+      0
+    );
   };
-
-  const prescriptions = [
-    {
-      id: "RX-250714-01",
-      uploadedDate: "July 14, 2025 • 2:30 PM",
-      prescriptionImage: "/src/assets/img/prescription.jpeg",
-      pharmacies: [
-        {
-          name: "Rite Aid",
-          address: "9012 Pine St, Uptown",
-          status: "View Order Preview",
-          statusType: "delivery",
-          iconBg: "bg-blue-100",
-          iconColor: "text-orange-600",
-          medications: [
-            { id: 1, name: "Amoxicillin 500mg", price: 15.99, available: true },
-            { id: 2, name: "Ibuprofen 200mg", price: 8.5, available: true },
-            {
-              id: 3,
-              name: "Vitamin D3 1000IU",
-              price: 12.25,
-              available: false,
-            },
-            { id: 4, name: "Lisinopril 10mg", price: 9.75, available: true },
-          ],
-        },
-        {
-          name: "Walgreens",
-          address: "5678 Oak Ave, Midtown",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Amoxicillin 500mg", price: 16.99, available: true },
-            { id: 2, name: "Ibuprofen 200mg", price: 9.0, available: true },
-            { id: 3, name: "Vitamin D3 1000IU", price: 13.5, available: true },
-            { id: 4, name: "Lisinopril 10mg", price: 10.25, available: false },
-          ],
-        },
-        {
-          name: "CVS Pharmacy",
-          address: "1234 Main St, Downtown",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Amoxicillin 500mg", price: 14.99, available: true },
-            { id: 2, name: "Ibuprofen 200mg", price: 7.99, available: true },
-            { id: 3, name: "Vitamin D3 1000IU", price: 11.75, available: true },
-            { id: 4, name: "Lisinopril 10mg", price: 8.99, available: true },
-          ],
-        },
-      ],
-    },
-    {
-      id: "RX-250715-02",
-      uploadedDate: "July 15, 2025 • 10:15 AM",
-      prescriptionImage: "/src/assets/img/prescription.jpeg",
-      pharmacies: [
-        {
-          name: "Rite Aid",
-          address: "9012 Pine St, Uptown",
-          status: "View Order Preview",
-          statusType: "delivery",
-          iconBg: "bg-blue-100",
-          iconColor: "text-orange-600",
-          medications: [
-            { id: 1, name: "Metformin 500mg", price: 12.99, available: true },
-            { id: 2, name: "Atorvastatin 20mg", price: 18.5, available: true },
-            { id: 3, name: "Omeprazole 20mg", price: 15.75, available: true },
-          ],
-        },
-        {
-          name: "Local Health Pharmacy",
-          address: "7890 Cedar Rd, Eastside",
-          status: "View Order Preview",
-          statusType: "delivery",
-          iconBg: "bg-blue-100",
-          iconColor: "text-orange-600",
-          medications: [
-            { id: 1, name: "Metformin 500mg", price: 11.99, available: true },
-            { id: 2, name: "Atorvastatin 20mg", price: 17.25, available: true },
-            { id: 3, name: "Omeprazole 20mg", price: 14.5, available: false },
-          ],
-        },
-        {
-          name: "MedPlus Pharmacy",
-          address: "2468 Maple Ave, Northside",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Metformin 500mg", price: 13.5, available: true },
-            { id: 2, name: "Atorvastatin 20mg", price: 19.0, available: true },
-            { id: 3, name: "Omeprazole 20mg", price: 16.25, available: true },
-          ],
-        },
-      ],
-    },
-    {
-      id: "RX-250714-03",
-      uploadedDate: "July 14, 2025 • 3:45 PM",
-      prescriptionImage: "/src/assets/img/prescription.jpeg",
-      pharmacies: [
-        {
-          name: "Kroger Pharmacy",
-          address: "1357 Broadway, Central",
-          status: "Proceed to payment",
-          statusType: "payment",
-          iconBg: "bg-green-100",
-          iconColor: "text-green-600",
-          medications: [
-            {
-              id: 1,
-              name: "Levothyroxine 50mcg",
-              price: 22.99,
-              available: true,
-            },
-            { id: 2, name: "Amlodipine 5mg", price: 14.25, available: true },
-          ],
-        },
-      ],
-    },
-    {
-      id: "RX-250715-04",
-      uploadedDate: "July 15, 2025 • 8:20 AM",
-      prescriptionImage: "/src/assets/img/prescription.jpeg",
-      pharmacies: [
-        {
-          name: "Costco Pharmacy",
-          address: "8642 Valley Rd, Hillside",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-yellow-100",
-          iconColor: "text-yellow-600",
-          medications: [
-            { id: 1, name: "Aspirin 81mg", price: 6.99, available: true },
-            { id: 2, name: "Simvastatin 20mg", price: 16.5, available: true },
-            {
-              id: 3,
-              name: "Hydrochlorothiazide 25mg",
-              price: 11.25,
-              available: true,
-            },
-          ],
-        },
-        {
-          name: "Giant Pharmacy",
-          address: "4321 River St, Riverside",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Aspirin 81mg", price: 7.5, available: true },
-            { id: 2, name: "Simvastatin 20mg", price: 17.25, available: false },
-            {
-              id: 3,
-              name: "Hydrochlorothiazide 25mg",
-              price: 12.0,
-              available: true,
-            },
-          ],
-        },
-        {
-          name: "Publix Pharmacy",
-          address: "5678 Ocean Dr, Seaside",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Aspirin 81mg", price: 8.99, available: true },
-            { id: 2, name: "Simvastatin 20mg", price: 18.75, available: true },
-            {
-              id: 3,
-              name: "Hydrochlorothiazide 25mg",
-              price: 10.5,
-              available: true,
-            },
-          ],
-        },
-        {
-          name: "Walmart Pharmacy",
-          address: "9876 Mountain Ave, Highland",
-          status: "Pending Order Preview",
-          statusType: "pending",
-          iconBg: "bg-blue-100",
-          iconColor: "text-blue-600",
-          medications: [
-            { id: 1, name: "Aspirin 81mg", price: 5.99, available: true },
-            { id: 2, name: "Simvastatin 20mg", price: 15.25, available: true },
-            {
-              id: 3,
-              name: "Hydrochlorothiazide 25mg",
-              price: 9.75,
-              available: true,
-            },
-          ],
-        },
-      ],
-    },
-  ];
 
   const getStatusIcon = (statusType) => {
     switch (statusType) {
@@ -294,6 +126,12 @@ const Activities = () => {
         </div>
       </motion.div>
 
+      {error && (
+        <div className="mb-4 p-3 rounded bg-red-500/20 border border-red-500/30 text-red-200">
+          {error}
+        </div>
+      )}
+      {loading && <div className="text-white/80">Loading activities…</div>}
       <div className="space-y-8">
         {prescriptions.map((prescription, index) => (
           <motion.div

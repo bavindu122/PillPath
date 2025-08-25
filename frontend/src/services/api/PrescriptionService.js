@@ -7,7 +7,12 @@ class PrescriptionService {
   // Upload prescription image with JSON metadata
   async uploadPrescription(file, meta) {
     if (!file) throw new Error("Prescription image is required");
-    if (!meta || !meta.pharmacyId) throw new Error("pharmacyId is required");
+    if (
+      !meta ||
+      (!meta.pharmacyId &&
+        (!Array.isArray(meta.pharmacyIds) || meta.pharmacyIds.length === 0))
+    )
+      throw new Error("pharmacyId or pharmacyIds is required");
 
     const url = `${API_BASE_URL}/prescriptions/upload`;
 
