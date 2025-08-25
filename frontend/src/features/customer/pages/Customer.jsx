@@ -5,6 +5,7 @@ import MedicalRecordsDetailed from "./MedicalRecordsDetailed";
 import Activities from "./Activities";
 import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
+import Checkout from "./Checkout";
 import FamilyProfiles from "./FamilyProfiles";
 import MedicineInfo from "./MedicineInfo";
 import ChatCustomer from "./ChatCustomer";
@@ -77,6 +78,7 @@ const Customer = () => {
         <Routes>
           <Route index element={<CustomerDashboard removeBg={true} />} />
           <Route path="/activities" element={<Activities />} />
+          <Route path="/checkout/:prescriptionId" element={<Checkout />} />
           <Route path="/orders" element={<PastOrders />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
           <Route path="/medicine-info" element={<MedicineInfo />} />

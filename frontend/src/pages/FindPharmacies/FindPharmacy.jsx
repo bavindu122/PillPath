@@ -17,6 +17,8 @@ import PharmacyMap from "./components/PharmacyMap";
 import PharmacyFilters from "./components/PharmacyFilters";
 import PharmacyList from "./components/PharmacyList";
 import { usePharmacyData } from "./hooks/usePharmacyData";
+import PrescriptionService from "../../services/api/PrescriptionService";
+import { useAuth } from "../../hooks/useAuth";
 
 const FindPharmacy = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +34,7 @@ const FindPharmacy = () => {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [selectedPharmacies, setSelectedPharmacies] = useState([]);
   const [prescriptionData, setPrescriptionData] = useState(null);
+  const { isAuthenticated, userType } = useAuth();
 
   // ✅ NEW: Location picker states
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
@@ -191,14 +194,54 @@ const FindPharmacy = () => {
       return;
     }
 
-    // Simulate upload process
-    const uploadPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 2000);
-    });
+    if (!isAuthenticated || userType !== "customer") {
+      navigate(
+        `/login?redirect=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`
+      );
+      return;
+    }
 
-    await uploadPromise;
+    // Build a File from data URL if needed
+    let fileToUpload = null;
+    if (prescriptionData?.image?.startsWith("data:")) {
+      const byteString = atob(prescriptionData.image.split(",")[1]);
+      const mimeString = prescriptionData.image
+        .split(",")[0]
+        .split(":")[1]
+        .split(";")[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++)
+        ia[i] = byteString.charCodeAt(i);
+      const blob = new Blob([ab], { type: mimeString });
+      fileToUpload = new File([blob], `prescription_${Date.now()}.png`, {
+        type: mimeString,
+      });
+    } else {
+      // If image is not a data URL, we can't reconstruct the File reliably here
+      alert("Prescription image is missing or invalid. Please re-upload.");
+      return;
+    }
+
+    try {
+      // Upload to each selected pharmacy sequentially to keep it simple
+      for (const pharmacy of selectedPharmacies) {
+        const meta = {
+          pharmacyId: pharmacy.id,
+          note: prescriptionData?.note || undefined,
+          source: "find-pharmacy",
+          latitude: currentLocation?.lat,
+          longitude: currentLocation?.lng,
+        };
+        await PrescriptionService.uploadPrescription(fileToUpload, meta);
+      }
+    } catch (err) {
+      console.error("Prescription upload failed", err);
+      alert(err?.message || "Failed to upload prescription. Please try again.");
+      return;
+    }
 
     // Clean up session storage
     sessionStorage.removeItem("prescriptionData");
