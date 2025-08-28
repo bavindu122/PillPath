@@ -1,238 +1,128 @@
-import { useState, useEffect } from "react";
-
-// Mock delay constant
-const MOCK_API_DELAY_MS = 1000;
+import { useState, useEffect } from 'react';
 
 export const usePharmacyProfile = (pharmacyId) => {
   const [pharmacy, setPharmacy] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [otcProducts, setOtcProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [otcProducts, setOtcProducts] = useState([]);
 
   useEffect(() => {
     const fetchPharmacyProfile = async () => {
-      setLoading(true);
-      try {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, MOCK_API_DELAY_MS));
+      if (!pharmacyId) {
+        setError("Pharmacy ID is required");
+        setLoading(false);
+        return;
+      }
 
-        // Mock pharmacy data with enhanced details
-        const mockPharmacy = {
-          id: parseInt(pharmacyId) || 1,
-          name: "HealthFirst Pharmacy",
-          address: "123 Medical Lane, Colombo 05",
-          lat: 6.9371,
-          lng: 79.8712,
-          rating: 4.8,
-          reviewCount: 127,
-          shours: "8:00 AM",
-          hours: "10:00 PM",
-          isOpen: true,
-          phone: "+94 11 234 5678",
-          email: "info@healthfirst.lk",
-          website: "https://healthfirst.lk",
-          hasDelivery: true,
-          acceptsInsurance: true,
-          has24HourService: false,
-          hasVaccinations: true,
-          hasConsultation: true,
-          multiplePayments: true,
-          logo: null, // Will show first letter fallback
-          operatingHours: {
-            monday: "8:00 AM - 10:00 PM",
-            tuesday: "8:00 AM - 10:00 PM",
-            wednesday: "8:00 AM - 10:00 PM",
-            thursday: "8:00 AM - 10:00 PM",
-            friday: "8:00 AM - 10:00 PM",
-            saturday: "9:00 AM - 9:00 PM",
-            sunday: "10:00 AM - 8:00 PM"
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Use environment variable or fallback to localhost
+        const baseUrl =
+  typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE_URL
+    ? process.env.REACT_APP_API_BASE_URL
+    : "http://localhost:8080";
+        
+        console.log(`Fetching pharmacy profile for ID: ${pharmacyId}`);
+        
+        // Fetch pharmacy profile
+        const profileResponse = await fetch(`${baseUrl}/api/v1/pharmacies/${pharmacyId}/profile`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
-          deliveryHours: "9:00 AM - 9:00 PM",
-          consultationHours: "10:00 AM - 6:00 PM",
-          vaccinationHours: "By appointment"
+        });
+        
+        console.log('Profile response status:', profileResponse.status);
+        console.log('Profile response headers:', profileResponse.headers.get('content-type'));
+
+        if (!profileResponse.ok) {
+          const errorText = await profileResponse.text();
+          console.error('Profile response error:', errorText);
+          
+          if (profileResponse.status === 404) {
+            throw new Error("Pharmacy not found");
+          }
+          throw new Error(`Failed to fetch pharmacy profile: ${profileResponse.status} - ${errorText}`);
+        }
+
+        const contentType = profileResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const responseText = await profileResponse.text();
+          console.error('Expected JSON but received:', responseText);
+          throw new Error('Server returned non-JSON response');
+        }
+
+        const profileData = await profileResponse.json();
+        console.log('Profile data received:', profileData);
+
+        // Fetch pharmacy products
+        const productsResponse = await fetch(`${baseUrl}/api/v1/pharmacies/${pharmacyId}/products`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        });
+        
+        let productsData = [];
+        
+        if (productsResponse.ok) {
+          const productsContentType = productsResponse.headers.get('content-type');
+          if (productsContentType && productsContentType.includes('application/json')) {
+            productsData = await productsResponse.json();
+          }
+        } else {
+          console.warn('Failed to fetch products:', productsResponse.status);
+        }
+
+        // Transform the data to match the expected format
+        const transformedPharmacy = {
+          id: profileData.id,
+          name: profileData.name,
+          address: profileData.address,
+          lat: profileData.latitude,
+          lng: profileData.longitude,
+          phone: profileData.phoneNumber,
+          email: profileData.email,
+          rating: profileData.averageRating || 0,
+          totalReviews: profileData.totalReviews || 0,
+          
+          // Logo and Banner URLs from database
+          logo: profileData.logoUrl,
+          logoUrl: profileData.logoUrl,
+          bannerUrl: profileData.bannerUrl,
+          logoPublicId: profileData.logoPublicId,
+          bannerPublicId: profileData.bannerPublicId,
+          
+          operatingHours: profileData.operatingHours || {},
+          services: profileData.services || [],
+          isVerified: profileData.isVerified,
+          isActive: profileData.isActive,
+          hasDelivery: profileData.hasDelivery,
+          deliveryAvailable: profileData.deliveryAvailable,
+          deliveryRadius: profileData.deliveryRadius,
+          has24HourService: profileData.has24HourService,
+          acceptsInsurance: profileData.acceptsInsurance,
+          hasVaccinations: profileData.hasVaccinations,
+          currentStatus: profileData.currentStatus,
+          status: profileData.status,
+          licenseNumber: profileData.licenseNumber,
+          licenseExpiryDate: profileData.licenseExpiryDate,
+          createdAt: profileData.createdAt,
+          updatedAt: profileData.updatedAt
         };
 
-        // Mock reviews data
-        const mockReviews = [
-          {
-            id: 1,
-            userName: "Sarah Johnson",
-            rating: 5,
-            date: "2024-07-10",
-            comment: "Excellent service! The staff is very knowledgeable and helpful. They always have my medications in stock and the delivery service is reliable.",
-            helpfulCount: 12
-          },
-          {
-            id: 2,
-            userName: "Michael Chen",
-            rating: 4,
-            date: "2024-07-08",
-            comment: "Good pharmacy with competitive prices. The consultation service is valuable, especially for managing my diabetes medications.",
-            helpfulCount: 8
-          },
-          {
-            id: 3,
-            userName: "Priya Patel",
-            rating: 5,
-            date: "2024-07-05",
-            comment: "Best pharmacy in the area! They provide excellent customer service and their vaccination services are top-notch. Highly recommended!",
-            helpfulCount: 15
-          },
-          {
-            id: 4,
-            userName: "David Wilson",
-            rating: 3,
-            date: "2024-07-02",
-            comment: "Decent pharmacy but sometimes the wait time can be long during peak hours. Staff is friendly though.",
-            helpfulCount: 5
-          },
-          {
-            id: 5,
-            userName: "Amanda Silva",
-            rating: 5,
-            date: "2024-06-28",
-            comment: "Love their home delivery service! Very convenient and they always call to confirm before delivering. Great selection of OTC products too.",
-            helpfulCount: 10
-          },
-          {
-            id: 6,
-            userName: "Amanda Silva",
-            rating: 5,
-            date: "2024-06-28",
-            comment: "Love their home delivery service! Very convenient and they always call to confirm before delivering. Great selection of OTC products too.",
-            helpfulCount: 10
-          }
-        ];
+        setPharmacy(transformedPharmacy);
+        setReviews(profileData.recentReviews || []);
+        setOtcProducts(productsData);
 
-        // Mock OTC products data with actual medication images from meds folder
-        const mockOtcProducts = [
-          {
-            id: 1,
-            name: "Panadol Extra",
-            category: "pain-relief",
-            price: 450.00,
-            description: "Extra strength paracetamol with caffeine for fast pain relief",
-            image: "/src/assets/img/meds/Panadol.jpg",
-            inStock: true,
-            rating: 4.5,
-            reviewCount: 89,
-            brand: "GSK",
-            dosage: "500mg + 65mg Caffeine"
-          },
-          {
-            id: 2,
-            name: "Paracetamol Tablets",
-            category: "pain-relief",
-            price: 320.00,
-            description: "Standard paracetamol tablets for pain and fever relief",
-            image: "/src/assets/img/meds/paracetamol.webp",
-            inStock: true,
-            rating: 4.3,
-            reviewCount: 67,
-            brand: "Generic",
-            dosage: "500mg"
-          },
-          {
-            id: 3,
-            name: "Ibuprofen Tablets",
-            category: "pain-relief",
-            price: 380.00,
-            description: "Anti-inflammatory pain relief for headaches, muscle pain and arthritis",
-            image: "/src/assets/img/meds/Ibuprofen.jpg",
-            inStock: true,
-            rating: 4.6,
-            reviewCount: 134,
-            brand: "Advil",
-            dosage: "200mg"
-          },
-          {
-            id: 4,
-            name: "Vitamin C Tablets",
-            category: "vitamins",
-            price: 650.00,
-            description: "High strength vitamin C for immune system support",
-            image: "/src/assets/img/meds/Vitamin_c.jpg",
-            inStock: true,
-            rating: 4.8,
-            reviewCount: 203,
-            brand: "Nature's Way",
-            dosage: "1000mg"
-          },
-          {
-            id: 5,
-            name: "Cough Syrup",
-            category: "cold-flu",
-            price: 480.00,
-            description: "Effective cough suppressant syrup for dry and wet coughs",
-            image: "/src/assets/img/meds/cough_syrup.jpg",
-            inStock: false,
-            rating: 4.4,
-            reviewCount: 156,
-            brand: "Benadryl",
-            dosage: "100ml"
-          },
-          {
-            id: 6,
-            name: "Antacid Tablets",
-            category: "digestive",
-            price: 290.00,
-            description: "Fast-acting antacid tablets for heartburn and acid indigestion relief",
-            image: "/src/assets/img/meds/Antacid.jpg",
-            inStock: true,
-            rating: 4.2,
-            reviewCount: 98,
-            brand: "Tums",
-            dosage: "750mg"
-          },
-          {
-            id: 7,
-            name: "Allergy Relief Tablets",
-            category: "allergy",
-            price: 420.00,
-            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
-            image: "/src/assets/img/meds/allergy_relief.jpg",
-            inStock: true,
-            rating: 4.7,
-            reviewCount: 142,
-            brand: "Claritin",
-            dosage: "10mg"
-          },
-          {
-            id: 8,
-            name: "Allergy Relief Tablets",
-            category: "allergy",
-            price: 420.00,
-            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
-            image: "/src/assets/img/meds/allergy_relief.jpg",
-            inStock: true,
-            rating: 4.7,
-            reviewCount: 142,
-            brand: "Claritin",
-            dosage: "10mg"
-          },
-          {
-            id: 9,
-            name: "Allergy Relief Tablets",
-            category: "allergy",
-            price: 420.00,
-            description: "Antihistamine tablets for hay fever, pet allergies and skin reactions",
-            image: "/src/assets/img/meds/allergy_relief.jpg",
-            inStock: true,
-            rating: 4.7,
-            reviewCount: 142,
-            brand: "Claritin",
-            dosage: "10mg"
-          }
-        ];
-
-        setPharmacy(mockPharmacy);
-        setReviews(mockReviews);
-        setOtcProducts(mockOtcProducts);
-        setError(null);
       } catch (err) {
-        setError("Failed to load pharmacy details. Please try again later.");
         console.error("Error fetching pharmacy profile:", err);
+        setError(err.message || "Failed to load pharmacy profile");
       } finally {
         setLoading(false);
       }
@@ -243,9 +133,9 @@ export const usePharmacyProfile = (pharmacyId) => {
 
   return {
     pharmacy,
-    reviews,
-    otcProducts,
     loading,
-    error
+    error,
+    reviews,
+    otcProducts
   };
 };
