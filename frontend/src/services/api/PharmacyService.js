@@ -14,23 +14,12 @@ class PharmacyService {
       ...options,
     };
 
-    // ✅ UPDATED: Add pharmacy admin auth token for pharmacy-specific endpoints
+    // ✅ FIXED: Only add admin auth token for admin-specific operations
+    // Don't add admin token for public registration endpoints
     if (endpoint.startsWith("admin/")) {
       const adminAuthHeaders = tokenUtils.getAdminAuthHeaders();
       if (adminAuthHeaders.Authorization && !config.headers.Authorization) {
         config.headers = { ...config.headers, ...adminAuthHeaders };
-      }
-    } else if (
-      endpoint.startsWith("pharmacies/pharmacy-profile") ||
-      (endpoint.startsWith("pharmacies/") && endpoint !== "pharmacies/register")
-    ) {
-      // Add pharmacy admin token for pharmacy profile endpoints.
-      // If a dedicated pharmacy token isn't present, fall back to the regular auth token.
-      const pharmacyToken = localStorage.getItem("pharmacy_auth_token");
-      const fallbackToken = localStorage.getItem("auth_token");
-      const tokenToUse = pharmacyToken || fallbackToken;
-      if (tokenToUse && !config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${tokenToUse}`;
       }
     } else if (
       endpoint !== "pharmacies/register" &&
@@ -64,14 +53,9 @@ class PharmacyService {
       console.log("Pharmacy API response:", response.status, data);
 
       if (!response.ok) {
-        if (response.status === 401) {
-          if (endpoint.startsWith("admin/")) {
-            tokenUtils.removeAdminToken();
-            window.location.href = "/admin/login";
-          } else if (endpoint.startsWith("pharmacies/pharmacy-profile")) {
-            localStorage.removeItem("pharmacy_auth_token");
-            window.location.href = "/pharmacy/login";
-          }
+        if (response.status === 401 && endpoint.startsWith("admin/")) {
+          tokenUtils.removeAdminToken();
+          window.location.href = "/admin/login";
           return;
         }
 
@@ -92,207 +76,17 @@ class PharmacyService {
     }
   }
 
-  // ✅ NEW: Get pharmacy profile for logged-in pharmacy admin
-  async getPharmacyProfile() {
-    return this.request("pharmacies/pharmacy-profile", {
-      method: "GET",
-    });
-  }
-
-  // ✅ NEW: Update pharmacy profile
-  async updatePharmacyProfile(profileData) {
-    try {
-      console.log("Updating pharmacy profile:", profileData);
-
-      // ✅ Validate required fields
-      const requiredFields = ["name", "address"];
-      for (const field of requiredFields) {
-        if (!profileData[field] || !profileData[field].trim()) {
-          throw new Error(`${field} is required`);
-        }
-      }
-
-      // ✅ Clean and prepare the update data
-      const updateRequest = {
-        name: profileData.name.trim(),
-        address: profileData.address.trim(),
-      };
-
-      // ✅ Add optional fields if provided
-      if (profileData.phoneNumber) {
-        updateRequest.phoneNumber = profileData.phoneNumber.trim();
-      }
-
-      if (
-        profileData.latitude !== undefined &&
-        profileData.longitude !== undefined
-      ) {
-        const lat = parseFloat(profileData.latitude);
-        const lng = parseFloat(profileData.longitude);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-          if (lat < -90 || lat > 90) {
-            throw new Error("Latitude must be between -90 and 90");
-          }
-          if (lng < -180 || lng > 180) {
-            throw new Error("Longitude must be between -180 and 180");
-          }
-          updateRequest.latitude = lat;
-          updateRequest.longitude = lng;
-        }
-      }
-
-      if (
-        profileData.operatingHours &&
-        typeof profileData.operatingHours === "object"
-      ) {
-        // Clean up operating hours - remove empty strings
-        const cleanOperatingHours = {};
-        Object.entries(profileData.operatingHours).forEach(([day, hours]) => {
-          if (hours && hours.trim()) {
-            cleanOperatingHours[day] = hours.trim();
-          }
-        });
-        if (Object.keys(cleanOperatingHours).length > 0) {
-          updateRequest.operatingHours = cleanOperatingHours;
-        }
-      }
-
-      if (profileData.services && Array.isArray(profileData.services)) {
-        updateRequest.services = profileData.services.filter(
-          (service) => service && service.trim()
-        );
-      }
-
-      if (profileData.deliveryAvailable !== undefined) {
-        updateRequest.deliveryAvailable = Boolean(
-          profileData.deliveryAvailable
-        );
-      }
-
-      if (
-        profileData.deliveryRadius !== undefined &&
-        profileData.deliveryRadius !== null
-      ) {
-        const radius = parseInt(profileData.deliveryRadius, 10);
-        if (!isNaN(radius) && radius > 0) {
-          updateRequest.deliveryRadius = radius;
-        }
-      }
-
-      console.log("Sending profile update request:", updateRequest);
-
-      return this.request("pharmacies/pharmacy-profile", {
-        method: "PUT",
-        body: updateRequest,
-      });
-    } catch (error) {
-      console.error("Pharmacy profile update preparation failed:", error);
-      throw error;
-    }
-  }
-
-  // ✅ NEW: Upload pharmacy images (logo/banner)
-  async uploadPharmacyImage(imageFile, imageType) {
-    try {
-      if (!imageFile) {
-        throw new Error("Image file is required");
-      }
-
-      if (!["logo", "banner"].includes(imageType)) {
-        throw new Error("Image type must be 'logo' or 'banner'");
-      }
-
-      // Enforce backend size constraints
-      const maxSize = imageType === "logo" ? 5 * 1024 * 1024 : 8 * 1024 * 1024; // 5MB or 8MB
-      if (imageFile.size > maxSize) {
-        throw new Error(
-          imageType === "logo"
-            ? "Logo must be 5MB or smaller"
-            : "Banner must be 8MB or smaller"
-        );
-      }
-
-      // Prepare FormData with correct field name expected by backend
-      const formData = new FormData();
-      formData.append("file", imageFile);
-
-      // Choose endpoint according to image type
-      const endpoint =
-        imageType === "logo"
-          ? "pharmacies/pharmacy-profile/upload-logo"
-          : "pharmacies/pharmacy-profile/upload-banner";
-
-      // Build fetch config (let browser set multipart boundary)
-      const config = {
-        method: "POST",
-        body: formData,
-        headers: {},
-      };
-
-      // Add auth header (prefer pharmacy token, fallback to general auth token)
-      const pharmacyToken = localStorage.getItem("pharmacy_auth_token");
-      const fallbackToken = localStorage.getItem("auth_token");
-      const tokenToUse = pharmacyToken || fallbackToken;
-      if (tokenToUse) {
-        config.headers.Authorization = `Bearer ${tokenToUse}`;
-      }
-
-      const url = `${API_BASE_URL}/${endpoint}`;
-      const response = await fetch(url, config);
-
-      let data;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("pharmacy_auth_token");
-          window.location.href = "/pharmacy/login";
-          return;
-        }
-        throw new Error(
-          (data && data.message) ||
-            (data && data.error) ||
-            `Upload failed: ${response.status}`
-        );
-      }
-
-      // Normalize response to ensure imageUrl/publicId fields exist
-      const result = data || {};
-      const imageUrl =
-        result.imageUrl ||
-        result.url ||
-        result.logoUrl ||
-        result.bannerUrl ||
-        null;
-      const publicId =
-        result.publicId ||
-        result.logoPublicId ||
-        result.bannerPublicId ||
-        result.id ||
-        null;
-
-      return { ...result, imageUrl, publicId };
-    } catch (error) {
-      console.error("Image upload failed:", error);
-      throw error;
-    }
-  }
-
-  // ✅ Existing methods...
+  // ✅ NEW: Get pharmacies for map display (using the real backend endpoint)
   async getPharmaciesForMap(params = {}) {
     const searchParams = new URLSearchParams();
 
+    // Add location parameters
     if (params.userLat && params.userLng) {
       searchParams.append("userLat", params.userLat.toString());
       searchParams.append("userLng", params.userLng.toString());
     }
 
+    // Add radius parameter (default to 10km if not provided)
     const radius = params.radiusKm || 10;
     searchParams.append("radiusKm", radius.toString());
 
@@ -304,12 +98,14 @@ class PharmacyService {
     });
   }
 
+  // ✅ Get pharmacy statistics for admin dashboard
   async getPharmacyStats() {
     return this.request("admin/pharmacies/stats", {
       method: "GET",
     });
   }
 
+  // ✅ Get all pharmacies with pagination and filtering
   async getAllPharmacies(params = {}) {
     const defaultParams = {
       search: "",
@@ -334,19 +130,22 @@ class PharmacyService {
     });
   }
 
+  // ✅ Get pharmacy details by ID
   async getPharmacyById(pharmacyId) {
     return this.request(`admin/pharmacies/${pharmacyId}`, {
       method: "GET",
     });
   }
 
+  // ✅ Approve pharmacy registration (Updated to PUT)
   async approvePharmacy(pharmacyId) {
     return this.request(`admin/pharmacies/${pharmacyId}/approve`, {
       method: "PUT",
-      body: {},
+      body: {}, // Empty body as per your backend spec
     });
   }
 
+  // ✅ Reject pharmacy registration (Updated to PUT)
   async rejectPharmacy(pharmacyId, reason) {
     return this.request(`admin/pharmacies/${pharmacyId}/reject`, {
       method: "PUT",
@@ -354,6 +153,7 @@ class PharmacyService {
     });
   }
 
+  // ✅ Suspend pharmacy (Updated to PUT)
   async suspendPharmacy(pharmacyId, reason) {
     return this.request(`admin/pharmacies/${pharmacyId}/suspend`, {
       method: "PUT",
@@ -361,17 +161,19 @@ class PharmacyService {
     });
   }
 
+  // ✅ Activate pharmacy (Updated to PUT)
   async activatePharmacy(pharmacyId) {
     return this.request(`admin/pharmacies/${pharmacyId}/activate`, {
       method: "PUT",
-      body: {},
+      body: {}, // Empty body as per your backend spec
     });
   }
 
+  // ✅ Generic pharmacy management method using PharmacyManagementDTO
   async managePharmacy(pharmacyId, action, reason = null) {
     const body = {
       pharmacyId: parseInt(pharmacyId),
-      action: action,
+      action: action, // "approve", "reject", "suspend", "activate"
     };
 
     if (reason) {
@@ -384,17 +186,20 @@ class PharmacyService {
     });
   }
 
+  // ✅ Batch pharmacy operations
   async batchManagePharmacies(operations) {
     return this.request("admin/pharmacies/batch", {
       method: "PUT",
-      body: operations,
+      body: operations, // Array of PharmacyManagementDTO objects
     });
   }
 
+  // ✅ UPDATED: Register pharmacy with location validation (NO AUTH TOKEN)
   async registerPharmacy(pharmacyData) {
     try {
       console.log("Preparing pharmacy registration data with location...");
 
+      // ✅ Validate required fields including location
       const requiredFields = [
         "name",
         "address",
@@ -418,6 +223,7 @@ class PharmacyService {
         }
       }
 
+      // ✅ Validate coordinates
       const lat = parseFloat(pharmacyData.latitude);
       const lng = parseFloat(pharmacyData.longitude);
 
@@ -433,6 +239,7 @@ class PharmacyService {
         throw new Error("Longitude must be between -180 and 180");
       }
 
+      // ✅ FIXED: Clean up operating hours - remove empty strings
       const cleanOperatingHours = {};
       Object.entries(pharmacyData.operatingHours || {}).forEach(
         ([day, hours]) => {
@@ -443,6 +250,7 @@ class PharmacyService {
       );
 
       const registrationRequest = {
+        // Pharmacy details
         name: pharmacyData.name.trim(),
         address: pharmacyData.address.trim(),
         phoneNumber: pharmacyData.phoneNumber.trim(),
@@ -455,8 +263,12 @@ class PharmacyService {
         deliveryRadius: pharmacyData.deliveryRadius
           ? parseInt(pharmacyData.deliveryRadius, 10)
           : null,
+
+        // ✅ Location data
         latitude: lat,
         longitude: lng,
+
+        // Admin details
         adminFirstName: pharmacyData.adminFirstName.trim(),
         adminLastName: pharmacyData.adminLastName.trim(),
         adminEmail: pharmacyData.adminEmail.trim().toLowerCase(),
@@ -473,11 +285,13 @@ class PharmacyService {
         registrationRequest
       );
 
+      // ✅ FIXED: Call registration endpoint without any auth headers
       return this.request("pharmacies/register", {
         method: "POST",
         body: registrationRequest,
         headers: {
           "Content-Type": "application/json",
+          // No Authorization header for registration
         },
       });
     } catch (error) {
@@ -486,14 +300,20 @@ class PharmacyService {
     }
   }
 
+  // ✅ UPDATED: Get all pharmacies for customer "find pharmacy" feature (uses public endpoint)
   async getPharmaciesForCustomers(filters = {}) {
-    return this.getPharmaciesForMap({
-      userLat: filters.latitude,
-      userLng: filters.longitude,
-      radiusKm: filters.radius || 10,
+    // Use a public/customer endpoint for pharmacy search
+    return this.request("pharmacies/nearby", {
+      method: "GET",
+      params: {
+        latitude: filters.latitude,
+        longitude: filters.longitude,
+        radius: filters.radius || 10,
+      },
     });
   }
 
+  // ✅ NEW: Update pharmacy location
   async updatePharmacyLocation(pharmacyId, locationData) {
     const lat = parseFloat(locationData.latitude);
     const lng = parseFloat(locationData.longitude);

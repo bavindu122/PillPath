@@ -15,7 +15,7 @@ class ApiService {
     };
 
     // ✅ FIXED: Only add auth token for authenticated endpoints, not registration
-    if (!endpoint.includes("/register") && !endpoint.includes("/login")) {
+    if (!endpoint.includes('/register') && !endpoint.includes('/login')) {
       const token = localStorage.getItem("auth_token");
       if (token && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -96,18 +96,15 @@ class ApiService {
         throw new Error("Terms acceptance is required");
       }
 
-      console.log(
-        "Sending customer registration request:",
-        registrationRequest
-      );
+      console.log("Sending customer registration request:", registrationRequest);
 
       return this.request("customers/register", {
         method: "POST",
         body: registrationRequest,
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
           // No Authorization header for registration
-        },
+        }
       });
     } catch (error) {
       console.error("Customer registration preparation failed:", error);
@@ -118,15 +115,11 @@ class ApiService {
   // ✅ UPDATED: Pharmacy registration with location validation (NO AUTH TOKEN)
   async registerPharmacy(pharmacyData) {
     try {
-      console.log(
-        "AuthService: Preparing pharmacy registration with location..."
-      );
+      console.log("AuthService: Preparing pharmacy registration with location...");
 
       // ✅ Additional validation before calling PharmacyService
       if (!pharmacyData.latitude || !pharmacyData.longitude) {
-        throw new Error(
-          "Pharmacy location (latitude and longitude) is required"
-        );
+        throw new Error("Pharmacy location (latitude and longitude) is required");
       }
 
       // ✅ Validate coordinates format
@@ -134,14 +127,10 @@ class ApiService {
       const lng = parseFloat(pharmacyData.longitude);
 
       if (isNaN(lat) || isNaN(lng)) {
-        throw new Error(
-          "Invalid coordinate format. Please provide valid numbers for latitude and longitude"
-        );
+        throw new Error("Invalid coordinate format. Please provide valid numbers for latitude and longitude");
       }
 
-      console.log(
-        "AuthService: Location validated, calling PharmacyService..."
-      );
+      console.log("AuthService: Location validated, calling PharmacyService...");
 
       // ✅ Call PharmacyService which includes location in the request
       return PharmacyService.registerPharmacy(pharmacyData);
@@ -164,27 +153,10 @@ class ApiService {
       method: "POST",
       body: loginRequest,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
         // No Authorization header for login
-      },
+      }
     });
-  }
-
-  // ✅ Refresh access token using refresh token
-  async refreshToken(refreshToken) {
-    try {
-      if (!refreshToken) throw new Error("No refresh token provided");
-
-      console.log("Requesting token refresh...");
-      return this.request("auth/refresh", {
-        method: "POST",
-        body: { refreshToken },
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      throw error;
-    }
   }
 
   // ✅ Get user profile (works for all user types)
@@ -202,31 +174,11 @@ class ApiService {
     });
   }
 
-  // ✅ User logout - Handle potential 403 errors gracefully
+  // ✅ User logout
   async logout() {
-    try {
-      // If backend supports revoking refresh tokens, send it
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        return this.request("auth/revoke", {
-          method: "POST",
-          body: { refreshToken },
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      // Fallback to simple logout endpoint if refresh token not present
-      return this.request("users/logout", {
-        method: "POST",
-      });
-    } catch (error) {
-      // If logout fails with 403 or other auth errors, we still want to clear local data
-      console.warn(
-        "Logout API call failed, but clearing local session:",
-        error.message
-      );
-      return { success: true, message: "Local logout completed" };
-    }
+    return this.request("users/logout", {
+      method: "POST",
+    });
   }
 
   // ✅ NEW: Get pharmacies for find pharmacy feature

@@ -1,44 +1,47 @@
 export const tokenUtils = {
-  // Access token (short-lived)
-  getAuthToken: () => localStorage.getItem("auth_token"),
-  setAuthToken: (token) => localStorage.setItem("auth_token", token),
-  removeAuthToken: () => localStorage.removeItem("auth_token"),
-
-  // Refresh token (long-lived)
-  getRefreshToken: () => localStorage.getItem("refresh_token"),
-  setRefreshToken: (token) => localStorage.setItem("refresh_token", token),
-  removeRefreshToken: () => localStorage.removeItem("refresh_token"),
-
-  // Admin tokens (optional)
-  getAdminToken: () => localStorage.getItem("admin_token"),
-  setAdminToken: (token) => localStorage.setItem("admin_token", token),
+  // Get customer auth token
+  getAuthToken: () => localStorage.getItem('auth_token'),
+  
+  // Get admin auth token
+  getAdminToken: () => localStorage.getItem('admin_token'),
+  
+  // Set customer auth token
+  setAuthToken: (token) => localStorage.setItem('auth_token', token),
+  
+  // Set admin auth token
+  setAdminToken: (token) => localStorage.setItem('admin_token', token),
+  
+  // Remove customer auth token
+  removeAuthToken: () => localStorage.removeItem('auth_token'),
+  
+  // Remove admin auth token
   removeAdminToken: () => {
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_data");
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_data');
   },
-
-  // Clear all tokens and stored auth data
+  
+  // Clear all tokens
   clearAllTokens: () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_data");
-    localStorage.removeItem("user_data");
-    localStorage.removeItem("user_type");
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_data');
   },
-
-  // Check authentication state
-  isCustomerAuthenticated: () => !!localStorage.getItem("auth_token"),
-  isAdminAuthenticated: () => !!localStorage.getItem("admin_token"),
-
-  // Authorization headers
+  
+  // Check if customer is authenticated
+  isCustomerAuthenticated: () => !!localStorage.getItem('auth_token'),
+  
+  // Check if admin is authenticated
+  isAdminAuthenticated: () => !!localStorage.getItem('admin_token'),
+  
+  // Get authorization header for customer
   getAuthHeaders: () => {
     const token = tokenUtils.getAuthToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   },
-
+  
+  // Get authorization header for admin
   getAdminAuthHeaders: () => {
     const token = tokenUtils.getAdminToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  },
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
 };

@@ -1,6 +1,5 @@
 import { useState, useContext, createContext, useEffect } from "react";
 import ApiService from "../services/api/AuthService";
-import { tokenUtils } from "../utils/tokenUtils";
 
 const AuthContext = createContext();
 
@@ -18,19 +17,16 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [initialized, setInitialized] = useState(false);
 
   // ✅ Initialize authentication on app start
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     const storedUserType = localStorage.getItem("user_type");
     const storedUser = localStorage.getItem("user_data");
-    const storedRefresh = localStorage.getItem("refresh_token");
 
     if (storedToken && storedUserType && storedUser) {
       try {
         setToken(storedToken);
-        if (storedRefresh) tokenUtils.setRefreshToken(storedRefresh);
         setUserType(storedUserType);
         setUser(JSON.parse(storedUser));
         console.log("Restored authentication from localStorage:", {
@@ -45,9 +41,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user_data");
       }
     }
-    // Mark that we've attempted to restore auth from storage so UI can avoid
-    // redirecting prematurely on first render.
-    setInitialized(true);
   }, []);
 
   const checkAuthStatus = async () => {
@@ -248,15 +241,10 @@ export const AuthProvider = ({ children }) => {
 
       if (response && response.success) {
         const {
-          accessToken: authToken,
-          refreshToken,
-          token: altToken,
+          token: authToken,
           userType: backendUserType,
           userProfile,
         } = response;
-
-        // Some backends return "token" as access token or "accessToken"
-        const resolvedAuthToken = authToken || altToken;
 
         console.log("Extracted data:", {
           token: authToken,
@@ -264,7 +252,7 @@ export const AuthProvider = ({ children }) => {
           userProfile,
         });
 
-        if (resolvedAuthToken && userProfile && backendUserType) {
+        if (authToken && userProfile && backendUserType) {
           // ✅ Map backend userType to frontend userType
           let frontendUserType;
           switch (backendUserType) {
@@ -285,9 +273,7 @@ export const AuthProvider = ({ children }) => {
           }
 
           // ✅ Set state
-          setToken(resolvedAuthToken);
-          if (refreshToken) tokenUtils.setRefreshToken(refreshToken);
-          tokenUtils.setAuthToken(resolvedAuthToken);
+          setToken(authToken);
           setUser({
             ...userProfile,
             userType: frontendUserType,
@@ -295,8 +281,7 @@ export const AuthProvider = ({ children }) => {
           setUserType(frontendUserType);
 
           // ✅ Store in localStorage
-          localStorage.setItem("auth_token", resolvedAuthToken);
-          if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
+          localStorage.setItem("auth_token", authToken);
           localStorage.setItem("user_type", frontendUserType);
           localStorage.setItem(
             "user_data",
@@ -332,46 +317,21 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Try to call logout API for authenticated users
-      if (token || tokenUtils.getRefreshToken()) {
-        console.log("Attempting to logout via API (revoke refresh token)...");
+      // Only call logout API for authenticated users
+      if (token) {
         await ApiService.logout();
-        console.log("API logout/revoke attempted");
       }
     } catch (error) {
-      // Log the error but don't prevent local cleanup
-      console.warn(
-        "Logout API call failed, proceeding with local cleanup:",
-        error.message
-      );
-
-      // Check if it's a 403 error which might mean token is already invalid
-      if (
-        error.message.includes("403") ||
-        error.message.includes("Forbidden")
-      ) {
-        console.log(
-          "Token appears to be invalid/expired, clearing local session"
-        );
-      }
+      console.error("Logout API call failed:", error);
     } finally {
-      // Always clear local state and tokens regardless of API call result
-      console.log("Clearing local authentication data...");
+      // Clear all local state and tokens
       setToken(null);
       setUser(null);
       setUserType(null);
-
-      // Clear all possible auth tokens
-      tokenUtils.clearAllTokens();
-
-      // Also remove legacy keys if any
-      localStorage.removeItem("pharmacy_auth_token");
-      localStorage.removeItem("admin_auth_token");
+      localStorage.removeItem("auth_token");
       localStorage.removeItem("user_type");
       localStorage.removeItem("user_data");
-
       setError(null);
-      console.log("Local logout completed successfully");
     }
   };
 
@@ -403,7 +363,6 @@ export const AuthProvider = ({ children }) => {
     isPharmacyAdmin: userType === "pharmacy-admin",
     isPharmacist: userType === "pharmacist",
     isAdmin: userType === "admin",
-    initialized,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
