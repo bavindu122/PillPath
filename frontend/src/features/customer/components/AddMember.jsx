@@ -8,15 +8,10 @@ import {
   Phone,
   Camera,
   Save,
-  Plus,
-  Loader2
+  Plus
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
-<<<<<<< Updated upstream
 // import { addFamilyMember } from '../../services/api/CustomerService'; // adjust path as needed
-=======
-import { familyService } from "../services/FamilyService";
->>>>>>> Stashed changes
 
 const AddMember = ({ isOpen, onClose, onAddMember }) => {
   // Form state for adding new member
@@ -32,10 +27,6 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
     medicalConditions: [""],
     currentMedications: []
   });
-
-  // Loading and error states
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   // Form handlers
   const handleInputChange = (field, value) => {
@@ -66,88 +57,6 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
     }));
   };
 
-<<<<<<< Updated upstream
-=======
-  const handleSubmitNewMember = async (e) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!newMember.name || !newMember.relation || !newMember.age) {
-      setError("Please fill in all required fields (Name, Relation, Age)");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Create new member object
-      const memberToAdd = {
-        name: newMember.name,
-        relation: newMember.relation,
-        age: parseInt(newMember.age),
-        profilePicture: newMember.profilePicture,
-        email: newMember.email || null,
-        phone: newMember.phone || null,
-        lastPrescriptionDate: new Date().toISOString().split('T')[0],
-        activePrescriptions: 0,
-        totalPrescriptions: 0,
-        allergies: newMember.allergies.filter(allergy => allergy.trim() !== ""),
-        bloodType: newMember.bloodType || null,
-        medicalConditions: newMember.medicalConditions.filter(condition => condition.trim() !== ""),
-        currentMedications: [] // Empty array for new members
-      };
-
-      console.log('=== ATTEMPTING TO ADD FAMILY MEMBER ===');
-      console.log('Member data to send:', memberToAdd);
-      console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
-      console.log('Auth token exists:', !!localStorage.getItem('auth_token'));
-
-      // Call API to add member
-      const addedMember = await familyService.addFamilyMember(memberToAdd);
-      
-      console.log('=== ADD MEMBER SUCCESS ===');
-      console.log('Response from API:', addedMember);
-      
-      // Call parent handler with the response from API
-      onAddMember(addedMember);
-      
-      // Reset form and close modal
-      resetForm();
-      onClose();
-      
-    } catch (error) {
-      console.error('=== ADD MEMBER ERROR ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Full error:', error);
-      
-      // Provide more specific error messages
-      let errorMessage = 'Failed to add family member. ';
-      
-      if (error.message.includes('404')) {
-        errorMessage += 'Backend endpoint not found. Please ensure your backend API is running and has the family member endpoints.';
-      } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        errorMessage += 'Authentication failed. Please log in again.';
-      } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
-        errorMessage += 'Access denied. You may not have permission to add family members.';
-      } else if (error.message.includes('500')) {
-        errorMessage += 'Server error. Please check your backend logs.';
-      } else if (error.message.includes('CORS')) {
-        errorMessage += 'CORS error. Please check your backend CORS configuration.';
-      } else if (error.message.includes('fetch')) {
-        errorMessage += 'Network error. Please check if your backend server is running.';
-      } else {
-        errorMessage += error.message || 'Please try again.';
-      }
-      
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
->>>>>>> Stashed changes
   const resetForm = () => {
     setNewMember({
       name: "",
@@ -161,7 +70,6 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
       medicalConditions: [""],
       currentMedications: []
     });
-    setError(null);
   };
 
   const handleClose = () => {
@@ -253,13 +161,6 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
 
           {/* Modal Content */}
           <form onSubmit={handleSubmitNewMember} className="p-6 space-y-6">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-3 rounded-lg">
-                <p className="text-sm">{error}</p>
-              </div>
-            )}
-
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white mb-4">Basic Information</h3>
@@ -467,27 +368,16 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
               <button
                 type="button"
                 onClick={handleClose}
-                disabled={isLoading}
-                className="flex-1 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 border border-white/20"
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 border border-white/20"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Save size={18} />
-                    Add Member
-                  </>
-                )}
+                <Save size={18} />
+                Add Member
               </button>
             </div>
           </form>
