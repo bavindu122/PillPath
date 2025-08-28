@@ -13,13 +13,14 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import GradientButton from "../../../components/UIs/GradientButton";
 import { useAuth } from "../../../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error, isAuthenticated, userType } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -36,10 +37,22 @@ const Login = () => {
     return () => setMounted(false);
   }, []);
 
-  // ✅ UPDATED: Enhanced redirect logic based on backend userType
+  // ✅ UPDATED: Enhanced redirect logic honoring preserved redirect query first
   useEffect(() => {
     if (isAuthenticated && userType) {
       console.log("User authenticated, redirecting...", { userType });
+      const params = new URLSearchParams(location.search);
+      const redirectRaw = params.get("redirect");
+      const redirectTo = redirectRaw ? decodeURIComponent(redirectRaw) : null;
+
+      // Safety: only allow internal redirects starting with '/'
+      const isSafeInternal = redirectTo && redirectTo.startsWith("/");
+
+      // If we have a preserved redirect and the user is a customer, honor it first
+      if (isSafeInternal && userType === "customer") {
+        navigate(redirectTo, { replace: true });
+        return;
+      }
 
       // ✅ Route based on userType from backend
       switch (userType) {
@@ -59,7 +72,7 @@ const Login = () => {
           navigate("/customer");
       }
     }
-  }, [isAuthenticated, userType, navigate]);
+  }, [isAuthenticated, userType, navigate, location.search]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
