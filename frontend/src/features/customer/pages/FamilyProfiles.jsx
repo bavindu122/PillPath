@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -7,197 +7,191 @@ import {
   Search
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
+import { useAuth } from "../../../hooks/useAuth";
+import FamilyMemberService from "../services/FamilyMemberService";
 import MemberDetails from "../components/MemberDetails";
 import AddMember from "../components/AddMember";
 
-// Sample family member data - moved outside component to avoid reference issues
-const initialFamilyMembers = [
-  {
-    id: 0,
-    name: "Senuja Udugampola",
-    relation: "Me",
-    age: 42,
-    profilePicture: assets.profile_pic,
-    email: "senuja@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-07-19",
-    activePrescriptions: 3,
-    totalPrescriptions: 47,
-    allergies: ["None known"],
-    bloodType: "O+",
-    medicalConditions: ["High Blood Pressure"],
-    currentMedications: [
-      { 
-        name: "RX-250719-34", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-18",
-        prescriptionId: "RX-250719-34",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250719-35", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-15",
-        prescriptionId: "RX-250719-35",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "60 capsules"
-      },
-      { 
-        name: "RX-250719-36", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-17",
-        prescriptionId: "RX-250719-36",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "120 softgels"
-      }
-    ]
-  },
-  {
-    id: 1,
-    name: "Sanuthma Munasinghe",
-    relation: "Spouse",
-    age: 45,
-    profilePicture: assets.profile_pic,
-    email: "sanuthma@email.com",
-    phone: "+94 792674517",
-    lastPrescriptionDate: "2025-07-15",
-    activePrescriptions: 2,
-    totalPrescriptions: 24,
-    allergies: ["Penicillin", "Peanuts"],
-    bloodType: "A+",
-    medicalConditions: ["Hypertension", "Diabetes Type 2"],
-    currentMedications: [
-      { 
-        name: "RX-250710-05", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-10",
-        prescriptionId: "RX-250710-05",
-        prescribedBy: "Dr. Sarah Johnson",
-        quantity: "60 tablets"
-      },
-      { 
-        name: "RX-250712-01", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-12",
-        prescriptionId: "RX-250712-01",
-        prescribedBy: "Dr. Sarah Johnson",
-        quantity: "30 tablets"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Bavindu Shamen",
-    relation: "Son",
-    age: 16,
-    profilePicture: assets.profile_pic,
-    email: "bavindu@email.com",
-    phone: "+94 795725816",
-    lastPrescriptionDate: "2025-07-10",
-    activePrescriptions: 1,
-    totalPrescriptions: 8,
-    allergies: ["Shellfish"],
-    bloodType: "O+",
-    medicalConditions: ["Asthma"],
-    currentMedications: [
-      { 
-        name: "RX-250524-36", 
-        frequency: "As needed", 
-        lastRefill: "2025-07-05",
-        prescriptionId: "RX-250524-36",
-        prescribedBy: "Dr. Michael Chen",
-        quantity: "1 inhaler"
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Nirmi Kawmada",
-    relation: "Daughter",
-    age: 12,
-    profilePicture: assets.profile_pic,
-    email: "nirmia@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-06-28",
-    activePrescriptions: 0,
-    totalPrescriptions: 3,
-    allergies: ["None known"],
-    bloodType: "A+",
-    medicalConditions: ["None"],
-    currentMedications: []
-  },
-  {
-    id: 4,
-    name: "Tanuri Mandini",
-    relation: "Mother",
-    age: 72,
-    profilePicture: assets.profile_pic,
-    email: "tanuri@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-07-18",
-    activePrescriptions: 4,
-    totalPrescriptions: 156,
-    allergies: ["Sulfa drugs", "Latex"],
-    bloodType: "B+",
-    medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
-    currentMedications: [
-      { 
-        name: "RX-250715-25", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-15",
-        prescriptionId: "RX-250715-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250716-25", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-16",
-        prescriptionId: "RX-250716-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "60 tablets"
-      },
-      { 
-        name: "RX-250710-25", 
-        frequency: "As needed", 
-        lastRefill: "2025-07-10",
-        prescriptionId: "RX-250710-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250714-01", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-14",
-        prescriptionId: "RX-250714-01",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "90 tablets"
-      }
-    ]
-  }
-];
-
 const FamilyProfiles = () => {
+  const { user, isAuthenticated } = useAuth();
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [familyMembersList, setFamilyMembersList] = useState(initialFamilyMembers);
+  const [familyMembersList, setFamilyMembersList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleAddMember = (memberToAdd) => {
-    // Add ID to the new member
-    const newMember = {
-      ...memberToAdd,
-      id: familyMembersList.length
-    };
-    
-    // Add to family members list
-    setFamilyMembersList(prev => [...prev, newMember]);
+  // Fetch family members from backend
+  const fetchFamilyMembers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setError('No authentication token found. Please log in again.');
+        return;
+      }
+      
+      const backendMembers = await FamilyMemberService.getFamilyMembers();
+      const userProfile = createUserProfile();
+      
+      // Transform backend data to match frontend format
+      const transformedMembers = Array.isArray(backendMembers) ? backendMembers.map(member => {
+        // Helper function to safely parse JSON strings
+        const safeJsonParse = (jsonString) => {
+          if (jsonString === null || jsonString === undefined || typeof jsonString !== 'string') {
+            return [];
+          }
+          
+          if (jsonString.trim() === '' || jsonString === 'null') {
+            return [];
+          }
+          
+          try {
+            return JSON.parse(jsonString);
+          } catch (error) {
+            console.warn('Failed to parse JSON:', jsonString, error);
+            return [];
+          }
+        };
+
+        return {
+          id: member.id,
+          name: member.name,
+          relation: member.relation,
+          age: member.age,
+          profilePicture: member.profilePicture || assets.profile_pic,
+          email: member.email || "Not provided",
+          phone: member.phone || "Not provided",
+          lastPrescriptionDate: member.lastPrescriptionDate || "Not available",
+          activePrescriptions: member.activePrescriptions || 0,
+          totalPrescriptions: member.totalPrescriptions || 0,
+          allergies: safeJsonParse(member.allergies),
+          bloodType: member.bloodType || "Unknown",
+          medicalConditions: safeJsonParse(member.medicalConditions),
+          currentMedications: safeJsonParse(member.currentMedications)
+        };
+      }) : [];
+      
+      // Combine user profile with backend family members
+      const allMembers = userProfile ? [userProfile, ...transformedMembers] : transformedMembers;
+      setFamilyMembersList(allMembers);
+      
+    } catch (error) {
+      console.error('Failed to fetch family members:', error);
+      setError(`Failed to load family members: ${error.message}`);
+      
+      // Fallback to just user profile if backend fails
+      const userProfile = createUserProfile();
+      setFamilyMembersList(userProfile ? [userProfile] : []);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteMember = (memberId) => {
-    setFamilyMembersList(prev => prev.filter(member => member.id !== memberId));
-    setSelectedProfile(null);
+  // Create the logged-in user's profile data
+  const createUserProfile = () => {
+    if (!user || !isAuthenticated) {
+      return null;
+    }
+
+    return {
+      id: 0,
+      name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || "Unknown User",
+      relation: "Me",
+      age: user.age || calculateAgeFromDOB(user.dateOfBirth) || 25, // Default age if not available
+      profilePicture: user.profilePicture || assets.profile_pic,
+      email: user.email || "Not provided",
+      phone: user.phoneNumber || user.phone || "Not provided",
+      lastPrescriptionDate: user.lastPrescriptionDate || "2025-07-19", // Default or from user data
+      activePrescriptions: user.activePrescriptions || 0,
+      totalPrescriptions: user.totalPrescriptions || 0,
+      allergies: user.allergies || ["None known"],
+      bloodType: user.bloodType || "Unknown",
+      medicalConditions: user.medicalConditions || [],
+      currentMedications: user.currentMedications || []
+    };
+  };
+
+  // Helper function to calculate age from date of birth
+  const calculateAgeFromDOB = (dateOfBirth) => {
+    if (!dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Load family members when component mounts or user changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchFamilyMembers();
+    }
+  }, [isAuthenticated, user]);
+
+  const handleAddMember = async (memberToAdd) => {
+    try {
+      setLoading(true);
+      
+      // Prepare data for backend
+      const backendMemberData = {
+        name: memberToAdd.name,
+        relation: memberToAdd.relation,
+        age: memberToAdd.age,
+        profilePicture: memberToAdd.profilePicture || "",
+        email: memberToAdd.email || "",
+        phone: memberToAdd.phone || "",
+        lastPrescriptionDate: memberToAdd.lastPrescriptionDate || null,
+        activePrescriptions: memberToAdd.activePrescriptions || 0,
+        totalPrescriptions: memberToAdd.totalPrescriptions || 0,
+        allergies: JSON.stringify(memberToAdd.allergies || []),
+        bloodType: memberToAdd.bloodType || "",
+        medicalConditions: JSON.stringify(memberToAdd.medicalConditions || []),
+        currentMedications: JSON.stringify(memberToAdd.currentMedications || [])
+      };
+
+      // Add to backend
+      await FamilyMemberService.addFamilyMember(backendMemberData);
+      
+      // Refresh the family members list
+      await fetchFamilyMembers();
+      
+    } catch (error) {
+      console.error('Failed to add family member:', error);
+      setError('Failed to add family member. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMember = async (memberId) => {
+    try {
+      // Don't allow deleting the user's own profile (id = 0)
+      if (memberId === 0) {
+        setError("Cannot delete your own profile.");
+        return;
+      }
+
+      setLoading(true);
+      
+      // Delete from backend
+      await FamilyMemberService.deleteFamilyMember(memberId);
+      
+      // Refresh the family members list
+      await fetchFamilyMembers();
+      setSelectedProfile(null);
+      
+    } catch (error) {
+      console.error('Failed to delete family member:', error);
+      setError('Failed to delete family member. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Filter family members based on search term
@@ -223,6 +217,18 @@ const FamilyProfiles = () => {
     });
   };
 
+  // Show loading or login prompt if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Please log in to view family profiles</h2>
+          <p className="text-white/70">You need to be logged in to manage your family's medication profiles.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Background Elements */}
@@ -246,6 +252,34 @@ const FamilyProfiles = () => {
               Manage medication profiles and health information for your entire family in one secure place
             </p>
           </motion.div>
+
+          {/* Error Display */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-3 rounded-xl mb-6"
+            >
+              {error}
+              <button 
+                onClick={() => setError(null)}
+                className="ml-2 text-red-300 hover:text-white"
+              >
+                ×
+              </button>
+            </motion.div>
+          )}
+
+          {/* Loading Indicator */}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-blue-500/20 border border-blue-500/40 text-blue-200 px-4 py-3 rounded-xl mb-6 text-center"
+            >
+              Loading family members...
+            </motion.div>
+          )}
 
           {/* Search and Add Member Section */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
