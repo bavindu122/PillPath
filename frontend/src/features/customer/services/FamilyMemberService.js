@@ -62,10 +62,11 @@ class FamilyMemberService {
       ...options,
     };
 
-    // Add auth token if available
-    const token = localStorage.getItem("auth_token");
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Add auth token if available (use centralized token utils)
+    const { getAuthHeaders } = await import("../../../utils/tokenUtils");
+    const authHeaders = getAuthHeaders ? getAuthHeaders() : {};
+    if (authHeaders.Authorization && !config.headers.Authorization) {
+      config.headers = { ...config.headers, ...authHeaders };
     }
 
     if (config.body && typeof config.body === "object") {
