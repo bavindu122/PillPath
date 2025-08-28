@@ -19,12 +19,24 @@ const EditProfileModal = ({
   // ✅ NEW: Use family member data if provided, otherwise use current user
   const profileData = isFamilyMember && familyMember ? familyMember : user;
 
-  // Validate family member data structure
+  // Add debugging to ensure correct data is being used
   useEffect(() => {
-    if (isFamilyMember && familyMember && !familyMember.id) {
-      console.warn('Family member missing required ID field');
+    console.log('=== EDIT PROFILE MODAL DEBUG ===');
+    console.log('isFamilyMember:', isFamilyMember);
+    console.log('familyMember:', familyMember);
+    console.log('familyMember.id:', familyMember?.id);
+    console.log('user:', user);
+    console.log('profileData being used:', profileData);
+    
+    // Check if family member has required fields
+    if (isFamilyMember && familyMember) {
+      console.log('Family member fields:', Object.keys(familyMember));
+      if (!familyMember.id) {
+        console.warn('⚠️ Family member does not have an ID field! This will cause API calls to fail.');
+        console.log('Available fields:', Object.keys(familyMember));
+      }
     }
-  }, [isFamilyMember, familyMember]);
+  }, [isFamilyMember, familyMember, user, profileData]);
 
   const {
     formData,
