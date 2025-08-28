@@ -13,7 +13,11 @@ import {
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // import { addFamilyMember } from '../../services/api/CustomerService'; // adjust path as needed
+=======
+import { familyService } from "../services/FamilyService";
+>>>>>>> Stashed changes
 =======
 import { familyService } from "../services/FamilyService";
 >>>>>>> Stashed changes
@@ -67,7 +71,10 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
   };
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
   const handleSubmitNewMember = async (e) => {
     e.preventDefault();
     
