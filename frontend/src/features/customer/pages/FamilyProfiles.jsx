@@ -15,177 +15,6 @@ import MemberDetails from "../components/MemberDetails";
 import AddMember from "../components/AddMember";
 import { familyService } from "../services/FamilyService";
 import { runAllHealthChecks } from "../utils/backendHealthCheck";
-<<<<<<< Updated upstream
-=======
-
-// Sample family member data - moved outside component to avoid reference issues
-const initialFamilyMembers = [
-  {
-    id: 0,
-    name: "Senuja Udugampola",
-    relation: "Me",
-    age: 42,
-    profilePicture: assets.profile_pic,
-    email: "senuja@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-07-19",
-    activePrescriptions: 3,
-    totalPrescriptions: 47,
-    allergies: ["None known"],
-    bloodType: "O+",
-    medicalConditions: ["High Blood Pressure"],
-    currentMedications: [
-      { 
-        name: "RX-250719-34", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-18",
-        prescriptionId: "RX-250719-34",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250719-35", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-15",
-        prescriptionId: "RX-250719-35",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "60 capsules"
-      },
-      { 
-        name: "RX-250719-36", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-17",
-        prescriptionId: "RX-250719-36",
-        prescribedBy: "Dr. Jennifer Smith",
-        quantity: "120 softgels"
-      }
-    ]
-  },
-  {
-    id: 1,
-    name: "Sanuthma Munasinghe",
-    relation: "Spouse",
-    age: 45,
-    profilePicture: assets.profile_pic,
-    email: "sanuthma@email.com",
-    phone: "+94 792674517",
-    lastPrescriptionDate: "2025-07-15",
-    activePrescriptions: 2,
-    totalPrescriptions: 24,
-    allergies: ["Penicillin", "Peanuts"],
-    bloodType: "A+",
-    medicalConditions: ["Hypertension", "Diabetes Type 2"],
-    currentMedications: [
-      { 
-        name: "RX-250710-05", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-10",
-        prescriptionId: "RX-250710-05",
-        prescribedBy: "Dr. Sarah Johnson",
-        quantity: "60 tablets"
-      },
-      { 
-        name: "RX-250712-01", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-12",
-        prescriptionId: "RX-250712-01",
-        prescribedBy: "Dr. Sarah Johnson",
-        quantity: "30 tablets"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Bavindu Shamen",
-    relation: "Son",
-    age: 16,
-    profilePicture: assets.profile_pic,
-    email: "bavindu@email.com",
-    phone: "+94 795725816",
-    lastPrescriptionDate: "2025-07-10",
-    activePrescriptions: 1,
-    totalPrescriptions: 8,
-    allergies: ["Shellfish"],
-    bloodType: "O+",
-    medicalConditions: ["Asthma"],
-    currentMedications: [
-      { 
-        name: "RX-250524-36", 
-        frequency: "As needed", 
-        lastRefill: "2025-07-05",
-        prescriptionId: "RX-250524-36",
-        prescribedBy: "Dr. Michael Chen",
-        quantity: "1 inhaler"
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: "Nirmi Kawmada",
-    relation: "Daughter",
-    age: 12,
-    profilePicture: assets.profile_pic,
-    email: "nirmia@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-06-28",
-    activePrescriptions: 0,
-    totalPrescriptions: 3,
-    allergies: ["None known"],
-    bloodType: "A+",
-    medicalConditions: ["None"],
-    currentMedications: []
-  },
-  {
-    id: 4,
-    name: "Tanuri Mandini",
-    relation: "Mother",
-    age: 72,
-    profilePicture: assets.profile_pic,
-    email: "tanuri@email.com",
-    phone: "+94 703034515",
-    lastPrescriptionDate: "2025-07-18",
-    activePrescriptions: 4,
-    totalPrescriptions: 156,
-    allergies: ["Sulfa drugs", "Latex"],
-    bloodType: "B+",
-    medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
-    currentMedications: [
-      { 
-        name: "RX-250715-25", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-15",
-        prescriptionId: "RX-250715-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250716-25", 
-        frequency: "Twice daily", 
-        lastRefill: "2025-07-16",
-        prescriptionId: "RX-250716-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "60 tablets"
-      },
-      { 
-        name: "RX-250710-25", 
-        frequency: "As needed", 
-        lastRefill: "2025-07-10",
-        prescriptionId: "RX-250710-25",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "30 tablets"
-      },
-      { 
-        name: "RX-250714-01", 
-        frequency: "Once daily", 
-        lastRefill: "2025-07-14",
-        prescriptionId: "RX-250714-01",
-        prescribedBy: "Dr. David Thompson",
-        quantity: "90 tablets"
-      }
-    ]
-  }
-];
->>>>>>> Stashed changes
 
 const FamilyProfiles = () => {
   const { user, isAuthenticated } = useAuth();
@@ -193,7 +22,6 @@ const FamilyProfiles = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [familyMembersList, setFamilyMembersList] = useState([]);
-<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -370,34 +198,6 @@ const FamilyProfiles = () => {
     }
   };
 
-=======
-  
-  // Loading and error states
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Load family members on component mount
-  useEffect(() => {
-    loadFamilyMembers();
-  }, []);
-
-  const loadFamilyMembers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const members = await familyService.getFamilyMembers();
-      setFamilyMembersList(members || []);
-    } catch (error) {
-      console.error('Error loading family members:', error);
-      setError('Failed to load family members. Please try again.');
-      // Fall back to sample data for development
-      setFamilyMembersList(initialFamilyMembers);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
->>>>>>> Stashed changes
   // Debug function to check backend health
   const checkBackendHealth = async () => {
     const results = await runAllHealthChecks();
@@ -425,16 +225,12 @@ const FamilyProfiles = () => {
         id: familyMembersList.length
       };
       setFamilyMembersList(prev => [...prev, newMember]);
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
 >>>>>>> Stashed changes
     }
   };
 
   const handleDeleteMember = async (memberId) => {
     try {
-<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       // Don't allow deleting the user's own profile (id = 0)
       if (memberId === 0) {
@@ -526,17 +322,12 @@ const FamilyProfiles = () => {
       console.error('Failed to refresh family members after update:', error);
       setError('Profile updated but failed to refresh the list. Please refresh the page.');
 =======
-=======
->>>>>>> Stashed changes
       await familyService.deleteFamilyMember(memberId);
       setFamilyMembersList(prev => prev.filter(member => member.id !== memberId));
       setSelectedProfile(null);
     } catch (error) {
       console.error('Error deleting family member:', error);
       setError('Failed to delete family member. Please try again.');
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
 >>>>>>> Stashed changes
     }
   };
