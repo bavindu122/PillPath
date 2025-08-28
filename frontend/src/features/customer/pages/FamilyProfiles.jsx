@@ -4,13 +4,188 @@ import {
   Users, 
   Plus, 
   Calendar, 
-  Search
+  Search,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
 import { useAuth } from "../../../hooks/useAuth";
 import FamilyMemberService from "../services/FamilyMemberService";
 import MemberDetails from "../components/MemberDetails";
 import AddMember from "../components/AddMember";
+import { familyService } from "../services/FamilyService";
+import { runAllHealthChecks } from "../utils/backendHealthCheck";
+<<<<<<< Updated upstream
+=======
+
+// Sample family member data - moved outside component to avoid reference issues
+const initialFamilyMembers = [
+  {
+    id: 0,
+    name: "Senuja Udugampola",
+    relation: "Me",
+    age: 42,
+    profilePicture: assets.profile_pic,
+    email: "senuja@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-07-19",
+    activePrescriptions: 3,
+    totalPrescriptions: 47,
+    allergies: ["None known"],
+    bloodType: "O+",
+    medicalConditions: ["High Blood Pressure"],
+    currentMedications: [
+      { 
+        name: "RX-250719-34", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-18",
+        prescriptionId: "RX-250719-34",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250719-35", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-15",
+        prescriptionId: "RX-250719-35",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "60 capsules"
+      },
+      { 
+        name: "RX-250719-36", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-17",
+        prescriptionId: "RX-250719-36",
+        prescribedBy: "Dr. Jennifer Smith",
+        quantity: "120 softgels"
+      }
+    ]
+  },
+  {
+    id: 1,
+    name: "Sanuthma Munasinghe",
+    relation: "Spouse",
+    age: 45,
+    profilePicture: assets.profile_pic,
+    email: "sanuthma@email.com",
+    phone: "+94 792674517",
+    lastPrescriptionDate: "2025-07-15",
+    activePrescriptions: 2,
+    totalPrescriptions: 24,
+    allergies: ["Penicillin", "Peanuts"],
+    bloodType: "A+",
+    medicalConditions: ["Hypertension", "Diabetes Type 2"],
+    currentMedications: [
+      { 
+        name: "RX-250710-05", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-10",
+        prescriptionId: "RX-250710-05",
+        prescribedBy: "Dr. Sarah Johnson",
+        quantity: "60 tablets"
+      },
+      { 
+        name: "RX-250712-01", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-12",
+        prescriptionId: "RX-250712-01",
+        prescribedBy: "Dr. Sarah Johnson",
+        quantity: "30 tablets"
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Bavindu Shamen",
+    relation: "Son",
+    age: 16,
+    profilePicture: assets.profile_pic,
+    email: "bavindu@email.com",
+    phone: "+94 795725816",
+    lastPrescriptionDate: "2025-07-10",
+    activePrescriptions: 1,
+    totalPrescriptions: 8,
+    allergies: ["Shellfish"],
+    bloodType: "O+",
+    medicalConditions: ["Asthma"],
+    currentMedications: [
+      { 
+        name: "RX-250524-36", 
+        frequency: "As needed", 
+        lastRefill: "2025-07-05",
+        prescriptionId: "RX-250524-36",
+        prescribedBy: "Dr. Michael Chen",
+        quantity: "1 inhaler"
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Nirmi Kawmada",
+    relation: "Daughter",
+    age: 12,
+    profilePicture: assets.profile_pic,
+    email: "nirmia@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-06-28",
+    activePrescriptions: 0,
+    totalPrescriptions: 3,
+    allergies: ["None known"],
+    bloodType: "A+",
+    medicalConditions: ["None"],
+    currentMedications: []
+  },
+  {
+    id: 4,
+    name: "Tanuri Mandini",
+    relation: "Mother",
+    age: 72,
+    profilePicture: assets.profile_pic,
+    email: "tanuri@email.com",
+    phone: "+94 703034515",
+    lastPrescriptionDate: "2025-07-18",
+    activePrescriptions: 4,
+    totalPrescriptions: 156,
+    allergies: ["Sulfa drugs", "Latex"],
+    bloodType: "B+",
+    medicalConditions: ["Heart Disease", "Arthritis", "High Cholesterol"],
+    currentMedications: [
+      { 
+        name: "RX-250715-25", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-15",
+        prescriptionId: "RX-250715-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250716-25", 
+        frequency: "Twice daily", 
+        lastRefill: "2025-07-16",
+        prescriptionId: "RX-250716-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "60 tablets"
+      },
+      { 
+        name: "RX-250710-25", 
+        frequency: "As needed", 
+        lastRefill: "2025-07-10",
+        prescriptionId: "RX-250710-25",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "30 tablets"
+      },
+      { 
+        name: "RX-250714-01", 
+        frequency: "Once daily", 
+        lastRefill: "2025-07-14",
+        prescriptionId: "RX-250714-01",
+        prescribedBy: "Dr. David Thompson",
+        quantity: "90 tablets"
+      }
+    ]
+  }
+];
+>>>>>>> Stashed changes
 
 const FamilyProfiles = () => {
   const { user, isAuthenticated } = useAuth();
@@ -18,6 +193,8 @@ const FamilyProfiles = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [familyMembersList, setFamilyMembersList] = useState([]);
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -166,11 +343,99 @@ const FamilyProfiles = () => {
       setError('Failed to add family member. Please try again.');
     } finally {
       setLoading(false);
+=======
+  
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load family members on component mount
+  useEffect(() => {
+    loadFamilyMembers();
+  }, []);
+
+  const loadFamilyMembers = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const members = await familyService.getFamilyMembers();
+      setFamilyMembersList(members || []);
+    } catch (error) {
+      console.error('Error loading family members:', error);
+      setError('Failed to load family members. Please try again.');
+      // Fall back to sample data for development
+      setFamilyMembersList(initialFamilyMembers);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+=======
+  
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load family members on component mount
+  useEffect(() => {
+    loadFamilyMembers();
+  }, []);
+
+  const loadFamilyMembers = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const members = await familyService.getFamilyMembers();
+      setFamilyMembersList(members || []);
+    } catch (error) {
+      console.error('Error loading family members:', error);
+      setError('Failed to load family members. Please try again.');
+      // Fall back to sample data for development
+      setFamilyMembersList(initialFamilyMembers);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+>>>>>>> Stashed changes
+  // Debug function to check backend health
+  const checkBackendHealth = async () => {
+    const results = await runAllHealthChecks();
+    console.log('Backend Health Check Results:', results);
+    
+    if (!results.summary.backendReachable) {
+      setError('Backend server is not reachable. Please ensure your backend is running on the correct port.');
+    } else if (!results.summary.familyEndpointExists) {
+      setError('Family member endpoints are not available. Please check your backend controller.');
+    } else if (!results.summary.authenticated) {
+      setError('Authentication issue. Please log in again.');
+    }
+  };
+
+  const handleAddMember = async (memberToAdd) => {
+    try {
+      // The API call is already made in AddMember component
+      // Just refresh the list to get the latest data
+      await loadFamilyMembers();
+    } catch (error) {
+      console.error('Error refreshing family members after add:', error);
+      // If API fails, fall back to adding to local state
+      const newMember = {
+        ...memberToAdd,
+        id: familyMembersList.length
+      };
+      setFamilyMembersList(prev => [...prev, newMember]);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     }
   };
 
   const handleDeleteMember = async (memberId) => {
     try {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
       // Don't allow deleting the user's own profile (id = 0)
       if (memberId === 0) {
         setError("Cannot delete your own profile.");
@@ -191,6 +456,88 @@ const FamilyProfiles = () => {
       setError('Failed to delete family member. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle family member profile updates
+  const handleFamilyMemberUpdate = async (updatedMember) => {
+    try {
+      console.log('Family member updated, refreshing list...', updatedMember);
+      
+      // Refresh the family members list to get the latest data
+      await fetchFamilyMembers();
+      
+      // Update the selected profile if it's currently open
+      if (selectedProfile && updatedMember) {
+        // Find the updated member in the new list
+        const refreshedMembers = await FamilyMemberService.getFamilyMembers();
+        const userProfile = createUserProfile();
+        
+        // Transform backend data
+        const transformedMembers = Array.isArray(refreshedMembers) ? refreshedMembers.map(member => {
+          const safeJsonParse = (jsonString) => {
+            if (jsonString === null || jsonString === undefined || typeof jsonString !== 'string') {
+              return [];
+            }
+            
+            if (jsonString.trim() === '' || jsonString === 'null') {
+              return [];
+            }
+            
+            try {
+              return JSON.parse(jsonString);
+            } catch (error) {
+              console.warn('Failed to parse JSON:', jsonString, error);
+              return [];
+            }
+          };
+
+          return {
+            id: member.id,
+            name: member.name,
+            relation: member.relation,
+            age: member.age,
+            profilePicture: member.profilePicture || assets.profile_pic,
+            email: member.email || "Not provided",
+            phone: member.phone || "Not provided",
+            lastPrescriptionDate: member.lastPrescriptionDate || "Not available",
+            activePrescriptions: member.activePrescriptions || 0,
+            totalPrescriptions: member.totalPrescriptions || 0,
+            allergies: safeJsonParse(member.allergies),
+            bloodType: member.bloodType || "Unknown",
+            medicalConditions: safeJsonParse(member.medicalConditions),
+            currentMedications: safeJsonParse(member.currentMedications)
+          };
+        }) : [];
+        
+        const allMembers = userProfile ? [userProfile, ...transformedMembers] : transformedMembers;
+        
+        // Find the updated member (it might have a new ID if we used delete+add approach)
+        const updatedMemberInList = allMembers.find(member => 
+          member.name === updatedMember.name || member.id === updatedMember.id
+        );
+        
+        if (updatedMemberInList) {
+          setSelectedProfile(updatedMemberInList);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Failed to refresh family members after update:', error);
+      setError('Profile updated but failed to refresh the list. Please refresh the page.');
+=======
+=======
+>>>>>>> Stashed changes
+      await familyService.deleteFamilyMember(memberId);
+      setFamilyMembersList(prev => prev.filter(member => member.id !== memberId));
+      setSelectedProfile(null);
+    } catch (error) {
+      console.error('Error deleting family member:', error);
+      setError('Failed to delete family member. Please try again.');
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     }
   };
 
@@ -307,7 +654,31 @@ const FamilyProfiles = () => {
         </div>
 
         {/* Family Members Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 size={48} className="animate-spin text-white/60" />
+            <span className="ml-3 text-white/60 text-lg">Loading family members...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
+            <p className="text-red-300 text-lg mb-2">Error Loading Family Members</p>
+            <p className="text-white/60 text-sm mb-4">{error}</p>
+            <button
+              onClick={loadFamilyMembers}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 mr-3"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={checkBackendHealth}
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300"
+            >
+              Check Backend
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredMembers.map((member, index) => (
             <motion.div
               key={member.id}
@@ -373,10 +744,11 @@ const FamilyProfiles = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Empty State */}
-        {filteredMembers.length === 0 && (
+        {!isLoading && !error && filteredMembers.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -402,6 +774,7 @@ const FamilyProfiles = () => {
         isOpen={!!selectedProfile} 
         onClose={closeModal}
         onDeleteMember={handleDeleteMember}
+        onFamilyMemberUpdate={handleFamilyMemberUpdate}
       />
     </div>
   );

@@ -13,27 +13,42 @@ export const useProfileForm = (initialProfile = null) => {
         username: "",
         email: "",
         fullName: "",
+        name: "",
         phoneNumber: "",
+        phone: "",
         dateOfBirth: "",
         address: "",
         profilePictureUrl: "",
+        profilePicture: "",
         insuranceProvider: "",
         insuranceId: "",
         allergies: "",
         medicalConditions: "",
+        currentMedications: "",
         emergencyContactName: "",
         emergencyContactPhone: "",
+        // Family member specific fields
+        relation: "",
+        age: "",
+        bloodType: "",
+        lastPrescriptionDate: "",
+        activePrescriptions: 0,
+        totalPrescriptions: 0,
       };
     }
 
+    // Handle both user and family member data structures
     return {
       username: profile.username || "",
       email: profile.email || "",
-      fullName: profile.fullName || "",
-      phoneNumber: profile.phoneNumber || "",
+      fullName: profile.fullName || profile.name || "",
+      name: profile.name || profile.fullName || "",
+      phoneNumber: profile.phoneNumber || profile.phone || "",
+      phone: profile.phone || profile.phoneNumber || "",
       dateOfBirth: profile.dateOfBirth || "",
       address: profile.address || "",
-      profilePictureUrl: profile.profilePictureUrl || "",
+      profilePictureUrl: profile.profilePictureUrl || profile.profilePicture || "",
+      profilePicture: profile.profilePicture || profile.profilePictureUrl || "",
       insuranceProvider: profile.insuranceProvider || "",
       insuranceId: profile.insuranceId || "",
       allergies: Array.isArray(profile.allergies)
@@ -42,8 +57,18 @@ export const useProfileForm = (initialProfile = null) => {
       medicalConditions: Array.isArray(profile.medicalConditions)
         ? profile.medicalConditions.join(", ")
         : profile.medicalConditions || "",
+      currentMedications: Array.isArray(profile.currentMedications)
+        ? profile.currentMedications.join(", ")
+        : profile.currentMedications || "",
       emergencyContactName: profile.emergencyContactName || "",
       emergencyContactPhone: profile.emergencyContactPhone || "",
+      // Family member specific fields
+      relation: profile.relation || "",
+      age: profile.age || "",
+      bloodType: profile.bloodType || "",
+      lastPrescriptionDate: profile.lastPrescriptionDate || "",
+      activePrescriptions: profile.activePrescriptions || 0,
+      totalPrescriptions: profile.totalPrescriptions || 0,
     };
   };
 
