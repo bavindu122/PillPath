@@ -5,6 +5,7 @@ import MedicalRecordsDetailed from "./MedicalRecordsDetailed";
 import Activities from "./Activities";
 import OrderPreview from "./OrderPreview";
 import PastOrders from "./PastOrders";
+import Checkout from "./Checkout";
 import FamilyProfiles from "./FamilyProfiles";
 import MedicineInfo from "./MedicineInfo";
 import ChatCustomer from "./ChatCustomer";
@@ -18,9 +19,20 @@ const Customer = () => {
   const location = useLocation();
   const { isAuthenticated, loading, user } = useAuth();
 
+  // Use Vite env vars (import.meta.env). Avoid using process.env in the browser.
+  const BYPASS_AUTH =
+    import.meta &&
+    import.meta.env &&
+    (import.meta.env.VITE_BYPASS_AUTH === "true" ||
+      import.meta.env.REACT_APP_BYPASS_AUTH === "true");
+
   // Log authentication status for debugging
   useEffect(() => {
-    console.log('Customer page - Auth status:', { isAuthenticated, loading, user });
+    console.log("Customer page - Auth status:", {
+      isAuthenticated,
+      loading,
+      user,
+    });
   }, [isAuthenticated, loading, user]);
 
   // Show loading while checking authentication
@@ -36,8 +48,8 @@ const Customer = () => {
   }
 
   // Redirect to login if not authenticated and bypass is not enabled
-  if (!isAuthenticated && process.env.REACT_APP_BYPASS_AUTH !== 'true') {
-    console.log('User not authenticated, redirecting to login');
+  if (!isAuthenticated && !BYPASS_AUTH) {
+    console.log("User not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
@@ -66,11 +78,15 @@ const Customer = () => {
         <Routes>
           <Route index element={<CustomerDashboard removeBg={true} />} />
           <Route path="/activities" element={<Activities />} />
+          <Route path="/checkout/:prescriptionId" element={<Checkout />} />
           <Route path="/orders" element={<PastOrders />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
           <Route path="/medicine-info" element={<MedicineInfo />} />
           <Route path="/chats" element={<ChatCustomer />} />
-          <Route path="/order-preview/:prescriptionId" element={<OrderPreview />} />
+          <Route
+            path="/order-preview/:prescriptionId"
+            element={<OrderPreview />}
+          />
           <Route
             path="/order-preview/:prescriptionId"
             element={<OrderPreview />}
