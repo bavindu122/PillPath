@@ -1,20 +1,32 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { 
-  LogOut, 
-  Settings, 
-  User, 
-  Shield, 
+import {
+  LogOut,
+  Settings,
+  User,
+  Shield,
   Building2,
   Phone,
   Mail,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import { usePharmacyAuth } from "../../../hooks/usePharmacyAuth";
 
-const ProfileDropdown = ({ show, onClose }) => {
+const ProfileDropdown = ({ show, onClose, anchorRef }) => {
   const navigate = useNavigate();
-  const { user, logout, isPharmacyAdmin, pharmacyName, position } = usePharmacyAuth();
+  const { user, logout, isPharmacyAdmin, pharmacyName, position } =
+    usePharmacyAuth();
+  const [coords, setCoords] = useState(null);
+
+  useEffect(() => {
+    if (!show) return;
+    const el = anchorRef?.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    // Position dropdown aligned to anchor's right edge, below it
+    setCoords({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+  }, [show, anchorRef]);
 
   const handleLogout = async () => {
     try {
@@ -39,16 +51,19 @@ const ProfileDropdown = ({ show, onClose }) => {
 
   if (!show) return null;
 
-  return (
-    <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+  const dropdown = (
+    <div
+      className="fixed w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-[9999] overflow-hidden"
+      style={{ top: coords?.top ?? 64, right: coords?.right ?? 16 }}
+    >
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 text-white">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
             {user?.profilePictureUrl ? (
-              <img 
-                src={user.profilePictureUrl} 
-                alt="Profile" 
+              <img
+                src={user.profilePictureUrl}
+                alt="Profile"
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
@@ -60,12 +75,8 @@ const ProfileDropdown = ({ show, onClose }) => {
               {user?.fullName || "Pharmacy User"}
             </h3>
             <div className="flex items-center space-x-2 text-blue-100">
-              {isPharmacyAdmin && (
-                <Shield className="w-3 h-3" />
-              )}
-              <p className="text-sm truncate">
-                {position || "Staff Member"}
-              </p>
+              {isPharmacyAdmin && <Shield className="w-3 h-3" />}
+              <p className="text-sm truncate">{position || "Staff Member"}</p>
             </div>
           </div>
         </div>
@@ -110,7 +121,7 @@ const ProfileDropdown = ({ show, onClose }) => {
           <User className="w-4 h-4" />
           <span>View Profile</span>
         </button>
-        
+
         <button
           onClick={handleSettings}
           className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-3"
@@ -120,7 +131,7 @@ const ProfileDropdown = ({ show, onClose }) => {
         </button>
 
         <hr className="my-2 border-gray-100" />
-        
+
         <button
           onClick={handleLogout}
           className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors duration-200 flex items-center space-x-3"
@@ -131,6 +142,8 @@ const ProfileDropdown = ({ show, onClose }) => {
       </div>
     </div>
   );
+
+  return createPortal(dropdown, document.body);
 };
 
 export default ProfileDropdown;
