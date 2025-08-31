@@ -204,13 +204,16 @@ export default function StaffManagement() {
         }
 
         // Use the general upload endpoint
-        const response = await fetch('/api/pharmacy-admin/upload-profile-picture', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            },
-            body: formData
-        });
+        const response = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/pharmacy-admin/upload-profile-picture`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                },
+                body: formData
+            }
+        );
 
         if (!response.ok) {
             const errorData = await response.json();
