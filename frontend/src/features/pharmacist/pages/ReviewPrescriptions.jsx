@@ -7,6 +7,7 @@ import OrderPreview from "../components/OrderPreview";
 import ChatWidget from "../components/ChatWidget";
 import "./index-pharmacist.css";
 import { prescriptionService } from "../services/prescriptionService";
+import { submissionItemsService } from "../services/submissionItemsService";
 
 const ReviewPrescriptions = () => {
   const navigate = useNavigate();
@@ -23,42 +24,62 @@ const ReviewPrescriptions = () => {
     const load = async () => {
       setIsLoading(true);
       try {
-        // coerce ID to number if numeric
+        // Determine submissionId from route or fallback; do not call submissions detail endpoint
         const idForApi = /^\d+$/.test(String(prescriptionId))
           ? Number(prescriptionId)
           : prescriptionId;
-        const data = await prescriptionService.getPharmacyPrescription(
-          idForApi
-        );
-        if (!active) return;
-        // Map minimal fields for header compatibility
-        setPrescription({
-          id: data.id,
-          code: data.code,
-          customerName: data.customerName,
-          patientName: data.customerName, // reuse existing UI fields
-          status: data.status,
-          imageUrl: data.imageUrl,
-          dateUploaded: data.createdAt,
-          items: data.items || [],
-        });
-        setOrderItems([]); // start empty for new review
-        setChatMessages([]);
-      } catch (e) {
-        console.error("Failed to load prescription", e);
-        if (fallback && active) {
-          // Use fallback from queue item so the viewer still renders
+        const submissionId =
+          (typeof idForApi === "number" ? idForApi : undefined) ||
+          fallback?.submissionId ||
+          fallback?.id;
+
+        // Compose minimal prescription from fallback; if none, use a stub
+        if (active) {
           setPrescription({
-            id: fallback.id,
-            code: fallback.code,
-            customerName: fallback.customerName,
-            patientName: fallback.customerName,
-            status: fallback.status,
-            imageUrl: fallback.imageUrl,
+            id: submissionId || idForApi,
+            submissionId: submissionId || idForApi,
+            code: fallback?.code || `SUB-${submissionId || idForApi}`,
+            customerName: fallback?.customerName || "Customer",
+            patientName: fallback?.customerName || "Customer",
+            status: fallback?.status || "IN_PROGRESS",
+            imageUrl: fallback?.imageUrl || "",
             dateUploaded: "",
             items: [],
           });
         }
+
+        // Load submission items directly; don't claim on load
+        if (submissionId) {
+          try {
+            const itemsResp = await submissionItemsService.list(submissionId);
+            const raw = Array.isArray(itemsResp?.items)
+              ? itemsResp.items
+              : itemsResp;
+            const mapped = raw.map((it, idx) => {
+              const id = it.id ?? it.itemId ?? it.submissionItemId;
+              const qty = it.quantity ?? it.qty ?? it.count ?? 1;
+              const price = it.unitPrice ?? it.price ?? 0;
+              return {
+                id,
+                name: it.medicineName ?? it.name ?? it.title ?? `Item-${idx}`,
+                genericName: it.genericName ?? it.generic ?? "",
+                quantity: Number(qty),
+                dosage: it.dosage ?? it.strength ?? "",
+                price: Number(price),
+                available: (it.available ?? true) === true,
+                notes: it.notes ?? "",
+              };
+            });
+            if (active) setOrderItems(mapped);
+          } catch (e2) {
+            console.warn("Failed to load submission items", e2);
+            if (active) setOrderItems([]);
+          }
+        }
+        if (active) setChatMessages([]);
+      } catch (e) {
+        console.error("Failed to load prescription", e);
+        // In case of unexpected errors, keep minimal UI; items may remain empty
       } finally {
         if (active) setIsLoading(false);
       }
@@ -69,24 +90,117 @@ const ReviewPrescriptions = () => {
     };
   }, [prescriptionId]);
 
-  const handleAddMedicine = (medicine) => {
-    // This will be called by OrderPreview when the modal form is submitted
-    setOrderItems((prev) => [...prev, medicine]);
+  const handleAddMedicine = async (medicine) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      // If current status is pending review, claim before first add
+      const status = String(prescription?.status || "").toLowerCase();
+      if (status === "pending_review" || status === "pending") {
+        try {
+          await submissionItemsService.claim(submissionId);
+          // reflect status change locally
+          setPrescription((prev) =>
+            prev ? { ...prev, status: "IN_PROGRESS" } : prev
+          );
+        } catch (_) {
+          // ignore claim errors; proceed to add
+        }
+      }
+      const payload = {
+        medicineName: medicine.name,
+        genericName: medicine.genericName,
+        dosage: medicine.dosage || "250mg",
+        quantity: medicine.quantity || 1,
+        unitPrice: medicine.price || 0,
+        available: medicine.available !== false,
+        notes: medicine.notes || "",
+        // optional linking to master set/variant if backend supports it
+        medicineSetId: medicine.medicineSetId || medicine.setId || medicine.id,
+      };
+      await submissionItemsService.add(submissionId, payload);
+      // Refresh list to get authoritative server IDs and values
+      try {
+        const itemsResp = await submissionItemsService.list(submissionId);
+        const raw = Array.isArray(itemsResp?.items)
+          ? itemsResp.items
+          : itemsResp;
+        const mapped = raw.map((it, idx) => {
+          const id = it.id ?? it.itemId ?? it.submissionItemId;
+          const qty = it.quantity ?? it.qty ?? it.count ?? 1;
+          const price = it.unitPrice ?? it.price ?? 0;
+          return {
+            id,
+            name: it.medicineName ?? it.name ?? it.title ?? `Item-${idx}`,
+            genericName: it.genericName ?? it.generic ?? "",
+            quantity: Number(qty),
+            dosage: it.dosage ?? it.strength ?? "",
+            price: Number(price),
+            available: (it.available ?? true) === true,
+            notes: it.notes ?? "",
+          };
+        });
+        setOrderItems(mapped);
+      } catch (e) {
+        // Fallback: append a best-effort item if list fails
+        setOrderItems((prev) => [
+          ...prev,
+          {
+            id: undefined,
+            name: payload.medicineName,
+            genericName: payload.genericName,
+            quantity: Number(payload.quantity || 1),
+            dosage: payload.dosage || "",
+            price: Number(payload.unitPrice || 0),
+            available: payload.available !== false,
+            notes: payload.notes || "",
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error("Add medicine failed", e);
+    }
   };
 
-  const handleAddMedicineFromSearch = (medicine) => {
-    // This receives the complete medicine object from the modal
-    setOrderItems((prev) => [...prev, medicine]);
+  const handleAddMedicineFromSearch = async (medicine) => {
+    // Use the same backend add as OrderPreview flow
+    await handleAddMedicine(medicine);
   };
 
-  const handleRemoveMedicine = (itemId) => {
-    setOrderItems((prev) => prev.filter((item) => item.id !== itemId));
+  const handleRemoveMedicine = async (itemId) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      if (!itemId && itemId !== 0) {
+        console.warn("Skip remove: itemId is undefined");
+        return;
+      }
+      await submissionItemsService.remove(submissionId, itemId);
+      setOrderItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (e) {
+      console.error("Remove item failed", e);
+    }
   };
 
-  const handleUpdateQuantity = (itemId, quantity) => {
-    setOrderItems((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
-    );
+  const handleUpdateQuantity = async (itemId, quantity) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      const updated = await submissionItemsService.update(
+        submissionId,
+        itemId,
+        { quantity }
+      );
+      setOrderItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId
+            ? { ...item, quantity: updated.quantity ?? quantity }
+            : item
+        )
+      );
+    } catch (e) {
+      console.error("Update quantity failed", e);
+    }
   };
 
   const handleSendMessage = (message) => {

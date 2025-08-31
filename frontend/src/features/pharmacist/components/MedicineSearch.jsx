@@ -19,6 +19,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
   const [modalQuantity, setModalQuantity] = useState(1);
   const [modalDosage, setModalDosage] = useState("250mg");
   const [modalPrice, setModalPrice] = useState(0);
+  const [modalAvailable, setModalAvailable] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
   // Mock medicine database
@@ -86,6 +87,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
     setModalQuantity(1);
     setModalDosage("250mg");
     setModalPrice(medicine.price || 0);
+    setModalAvailable(medicine.available !== false);
     setShowAddModal(true);
   };
 
@@ -98,7 +100,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
         quantity: modalQuantity,
         dosage: modalDosage,
         price: modalPrice,
-        available: true,
+        available: !!modalAvailable,
       };
 
       // Call parent's add medicine function
@@ -117,6 +119,7 @@ const MedicineSearch = ({ onAddMedicine }) => {
     setModalQuantity(1);
     setModalDosage("250mg");
     setModalPrice(0);
+    setModalAvailable(true);
   };
 
   const adjustQuantity = (change) => {
@@ -380,6 +383,31 @@ const MedicineSearch = ({ onAddMedicine }) => {
                     min="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
+                </div>
+
+                {/* Availability */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Availability
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setModalAvailable(!modalAvailable)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-200 focus:ring-offset-2 ${
+                        modalAvailable ? "bg-green-500" : "bg-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                          modalAvailable ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                    <span className="text-sm text-gray-700">
+                      {modalAvailable ? "Available" : "Out of Stock"}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Quantity */}

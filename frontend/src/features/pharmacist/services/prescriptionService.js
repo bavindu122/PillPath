@@ -35,11 +35,13 @@ export const prescriptionService = {
         : "";
       const status = (item.status || "").toLowerCase(); // e.g., PENDING_REVIEW -> pending_review
       const normalizedStatus = status.replace(/\s+/g, "_");
-      // Figure out the correct ID to use for the review route. Prefer prescriptionId if present.
-      const reviewId = item.prescriptionId ?? item.id ?? item.submissionId;
+      // Figure out the correct ID to use for the review route.
+      // Prefer submissionId for review (needed for items CRUD), then fallback to id, then prescriptionId.
+      const reviewId = item.submissionId ?? item.id ?? item.prescriptionId;
 
       return {
         id: item.submissionId ?? item.id ?? reviewId,
+        submissionId: item.submissionId,
         reviewId,
         code: item.prescriptionCode,
         patientName: item.prescriptionCode, // display code in existing title slot
@@ -57,7 +59,8 @@ export const prescriptionService = {
   },
 
   async getPharmacyPrescription(id) {
-    const url = `${API_BASE_URL}/prescriptions/pharmacy/${id}`;
+    // Prefer pharmacist submission detail endpoint; fallback to legacy pharmacy endpoint if needed
+    let url = `${API_BASE_URL}/prescriptions/pharmacist/submissions/${id}`;
     const res = await fetch(url, {
       headers: {
         ...tokenUtils.getAuthHeaders(),
@@ -71,10 +74,32 @@ export const prescriptionService = {
         : await res.text();
 
     if (!res.ok) {
-      const msg =
-        (data && data.message) ||
-        (typeof data === "string" ? data : `HTTP ${res.status}`);
-      throw new Error(msg);
+      // If not found on submissions endpoint, try pharmacy endpoint as a fallback
+      if (res.status === 404) {
+        const res2 = await fetch(
+          `${API_BASE_URL}/prescriptions/pharmacy/${id}`,
+          {
+            headers: { ...tokenUtils.getAuthHeaders() },
+          }
+        );
+        const contentType2 = res2.headers.get("content-type");
+        const data2 =
+          contentType2 && contentType2.includes("application/json")
+            ? await res2.json()
+            : await res2.text();
+        if (!res2.ok) {
+          const msg2 =
+            (data2 && data2.message) ||
+            (typeof data2 === "string" ? data2 : `HTTP ${res2.status}`);
+          throw new Error(msg2);
+        }
+        return data2;
+      } else {
+        const msg =
+          (data && data.message) ||
+          (typeof data === "string" ? data : `HTTP ${res.status}`);
+        throw new Error(msg);
+      }
     }
 
     // Return DTO as-is; keys: id, code, customerName, imageUrl, status, items, etc.
