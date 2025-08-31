@@ -42,11 +42,7 @@ const RegisterForm = ({ role, onBack, onSubmit }) => {
 
   return (
     <>
-      {error && (
-        <div className="mb-4 p-4 bg-red-500/20 border border-red-500/40 rounded-lg">
-          <p className="text-red-200 text-sm">{error}</p>
-        </div>
-      )}
+      
       
       {role === "customer" ? (
         <CustomerForm 

@@ -3,6 +3,7 @@ import StatCard from "../components/StatCard";
 import PageHeader from "../components/PageHeader";
 import SearchFilterBar from "../components/SearchFilterBar";
 import PharmacyCard from "../components/PharmacyCard";
+import PharmacyDetailsModal from '../components/PharmacyDetailsModal';
 import {
   Store,
   Activity,
@@ -11,7 +12,7 @@ import {
   TriangleAlert,
   RefreshCw,
 } from "lucide-react";
-import usePharmacies from "../../../hooks/usePharmacies";
+import usePharmacies from "../../../hooks/usePharmacies"; 
 
 const Pharmacies = () => {
   const {
@@ -32,6 +33,9 @@ const Pharmacies = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   // ✅ Initial data fetch
   useEffect(() => {
@@ -133,6 +137,20 @@ const Pharmacies = () => {
     }
   };
 
+  // Update the getPharmacyDetails function
+  const handleViewDetails = async (pharmacyId) => {
+    try {
+      setLoadingDetails(true);
+      const pharmacyDetails = await getPharmacyDetails(pharmacyId);
+      setSelectedPharmacy(pharmacyDetails);
+      setIsDetailsModalOpen(true);
+    } catch (error) {
+      console.error("Failed to get pharmacy details:", error);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans">
       <div className="flex items-center justify-between mb-8">
@@ -230,7 +248,7 @@ const Pharmacies = () => {
                     onActivate={handleActivate}
                     onAcceptRegistration={handleAcceptRegistration}
                     onRejectRegistration={handleRejectRegistration}
-                    onViewDetails={getPharmacyDetails}
+                    onViewDetails={handleViewDetails} // Updated to use new handler
                   />
                 </div>
               ))}
@@ -273,6 +291,17 @@ const Pharmacies = () => {
           </>
         )}
       </div>
+
+      {/* Pharmacy Details Modal */}
+      <PharmacyDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedPharmacy(null);
+        }}
+        pharmacy={selectedPharmacy}
+        loading={loadingDetails}
+      />
     </div>
   );
 };
