@@ -27,13 +27,7 @@ const FamilyProfiles = () => {
       setLoading(true);
       setError(null);
       
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        setError('No authentication token found. Please log in again.');
-        return;
-      }
-      
-      const backendMembers = await FamilyMemberService.getFamilyMembers();
+  const backendMembers = await FamilyMemberService.getFamilyMembers();
       const userProfile = createUserProfile();
       
       // Transform backend data to match frontend format
