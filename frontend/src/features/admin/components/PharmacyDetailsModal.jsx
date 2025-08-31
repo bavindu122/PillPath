@@ -309,7 +309,7 @@ const PharmacyDetailsModal = ({
                               Phone
                             </p>
                             <p className="text-gray-900">
-                              {safeGet(pharmacy, "phoneNumber") }
+                              {safeGet(pharmacy, "phoneNumber")}
                             </p>
                           </div>
                         </div>
