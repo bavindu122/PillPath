@@ -3,14 +3,17 @@ import { tokenUtils } from '../../../utils/tokenUtils';
 
 class FamilyMemberService {
   // Get all family members for the current authenticated user
-  async getFamilyMembers() {
+  async getFamilyMembers(token) {
     try {
       console.log('Fetching family members for current user...');
-      
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
       const response = await this.makeDirectRequest('http://localhost:8080/api/members/family-members', {
-        method: 'GET'
+        method: 'GET',
+        headers
       });
-      
       console.log('Family members fetched successfully:', response);
       return response;
     } catch (error) {

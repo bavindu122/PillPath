@@ -8,9 +8,7 @@ const ChatCustomer = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Mock data for pharmacy chats - replace with actual API call
-  const [chats] = useState([
+  const [chats, setChats] = useState([
     {
       id: 1,
       pharmacyName: "CityHealth Pharmacy",
@@ -77,93 +75,100 @@ const ChatCustomer = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-transparent">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Pharmacy Chats
-              </h1>
-              <p className="text-white/70">
-                Communicate with pharmacies about your prescriptions
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                <div className="flex items-center gap-2 text-white">
-                  <MessageSquare size={20} />
-                  <span className="font-medium">{chats.length} Conversations</span>
-                </div>
+    <>
+      {/* Fixed Background Elements */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900"></div>
+        <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float-slow"></div>
+        <div className="absolute top-32 right-20 w-80 h-80 bg-indigo-400/15 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delay"></div>
+        <div className="absolute -bottom-20 left-32 w-96 h-96 bg-slate-600/20 rounded-full mix-blend-multiply filter blur-3xl opacity-35 animate-blob animation-delay-4000"></div>
+        <div className="absolute bottom-20 right-10 w-72 h-72 bg-blue-400/15 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-6000"></div>
+        <div className="medical-pattern absolute inset-0 opacity-5"></div>
+      </div>
+
+      <div className="h-screen overflow-hidden">
+        <div className="h-full flex flex-col p-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 flex-shrink-0"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  Pharmacy Chats
+                </h1>
+                <p className="text-white/70">
+                  Communicate with pharmacies about your prescriptions
+                </p>
               </div>
-              {totalUnread > 0 && (
-                <div className="bg-red-500 text-white rounded-full px-3 py-1 text-sm font-medium">
-                  {totalUnread} Unread
+              <div className="flex items-center gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-white">
+                    <MessageSquare size={20} />
+                    <span className="font-medium">{chats.length} Conversations</span>
+                  </div>
                 </div>
-              )}
+                {totalUnread > 0 && (
+                  <div className="bg-red-500 text-white rounded-full px-3 py-1 text-sm font-medium">
+                    {totalUnread} Unread
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={20} />
-              <input
-                type="text"
-                placeholder="Search pharmacies or messages..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+            {/* Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search pharmacies or messages..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+              </div>
+              
             </div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+          </motion.div>
+
+          {/* Chat Interface */}
+          <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Chat List */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-1 min-h-0 flex flex-col"
             >
-              <option value="all">All Chats</option>
-              <option value="active">Active</option>
-              <option value="waiting">Waiting</option>
-              <option value="resolved">Resolved</option>
-            </select>
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <CustomerChatList
+                  chats={filteredChats}
+                  selectedChat={selectedChat}
+                  onSelectChat={handleChatSelect}
+                />
+              </div>
+            </motion.div>
+
+            {/* Chat Window */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-2 min-h-0 flex flex-col"
+            >
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <CustomerChatWindow
+                  selectedChat={selectedChat}
+                  onClose={() => setSelectedChat(null)}
+                />
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-
-        {/* Chat Interface */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh]">
-          {/* Chat List */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
-          >
-            <CustomerChatList
-              chats={filteredChats}
-              selectedChat={selectedChat}
-              onSelectChat={handleChatSelect}
-            />
-          </motion.div>
-
-          {/* Chat Window */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-2"
-          >
-            <CustomerChatWindow
-              selectedChat={selectedChat}
-              onClose={() => setSelectedChat(null)}
-            />
-          </motion.div>
         </div>
       </div>
-    </div>
+    </>
   );
-};
+}
 
 export default ChatCustomer;

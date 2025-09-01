@@ -32,8 +32,7 @@ const FamilyProfiles = () => {
         setError('No authentication token found. Please log in again.');
         return;
       }
-      
-      const backendMembers = await FamilyMemberService.getFamilyMembers();
+      const backendMembers = await FamilyMemberService.getFamilyMembers(token);
       const userProfile = createUserProfile();
       
       // Transform backend data to match frontend format
@@ -289,7 +288,7 @@ const FamilyProfiles = () => {
   // Show loading or login prompt if user is not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="h-screen min-h-0  bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center text-white">
           <h2 className="text-2xl font-bold mb-4">Please log in to view family profiles</h2>
           <p className="text-white/70">You need to be logged in to manage your family's medication profiles.</p>
@@ -299,7 +298,7 @@ const FamilyProfiles = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <div className="h-screen min-h-0  bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float-slow"></div>
       <div className="absolute top-32 right-20 w-80 h-80 bg-indigo-400/15 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delay"></div>
