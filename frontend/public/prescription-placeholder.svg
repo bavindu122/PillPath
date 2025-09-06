@@ -1,0 +1,21 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="480" rx="24" fill="#F3F4F6"/>
+  <g opacity="0.9">
+    <rect x="140" y="130" width="360" height="260" rx="16" fill="#E5E7EB" stroke="#D1D5DB" stroke-width="2"/>
+    <path d="M170 340l80-100 70 85 40-50 110 130H170z" fill="#D1D5DB"/>
+    <circle cx="260" cy="210" r="30" fill="#D1D5DB"/>
+  </g>
+  <g transform="translate(0, 0)">
+    <rect x="230" y="60" width="180" height="36" rx="8" fill="#E5E7EB"/>
+  </g>
+  <g transform="translate(0, 0)">
+    <rect x="200" y="416" width="240" height="16" rx="8" fill="#E5E7EB"/>
+  </g>
+  <g transform="translate(0, 0)">
+    <rect x="260" y="392" width="120" height="12" rx="6" fill="#E5E7EB"/>
+  </g>
+  <g opacity="0.7">
+    <path d="M350 170h-60l-10 20h-30c-5.523 0-10 4.477-10 10v120c0 5.523 4.477 10 10 10h150c5.523 0 10-4.477 10-10V200c0-5.523-4.477-10-10-10h-30l-10-20zM320 330c-30.376 0-55-24.624-55-55s24.624-55 55-55 55 24.624 55 55-24.624 55-55 55zm0-20c19.33 0 35-15.67 35-35s-15.67-35-35-35-35 15.67-35 35 15.67 35 35 35z" fill="#CBD5E1"/>
+  </g>
+  <text x="50%" y="44" dominant-baseline="middle" text-anchor="middle" fill="#6B7280" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="16">Prescription image unavailable</text>
+</svg>
