@@ -36,4 +36,14 @@ export async function getActivities(page = 0, size = 20) {
   });
 }
 
-export default { getMyPrescriptions, getActivities };
+export async function getOrderPreview({ code, pharmacyId }, options = {}) {
+  const params = new URLSearchParams();
+  if (code) params.set("code", code);
+  if (pharmacyId != null) params.set("pharmacyId", String(pharmacyId));
+  return request(`prescriptions/order-preview?${params.toString()}`, {
+    method: "GET",
+    ...options,
+  });
+}
+
+export default { getMyPrescriptions, getActivities, getOrderPreview };

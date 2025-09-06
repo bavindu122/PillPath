@@ -38,11 +38,17 @@ const PrescriptionViewer = ({ prescription }) => {
           classes: "text-blue-700",
           bg: "rgba(59,130,246,0.1)",
         };
-      case "CLARIFICATION_REQUESTED":
+      case "CLARIFICATION_NEEDED":
         return {
           label: "Needs Clarification",
           classes: "text-yellow-700",
           bg: "rgba(234,179,8,0.12)",
+        };
+      case "CANCELLED":
+        return {
+          label: "Cancelled",
+          classes: "text-gray-700",
+          bg: "rgba(107,114,128,0.12)",
         };
       case "READY_FOR_PICKUP":
         return {
