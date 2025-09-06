@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Search, Plus, X, Minus } from "lucide-react";
 import "../pages/index-pharmacist.css";
 import { medicineService } from "../services/medicineService";
+import { appConfig } from "../../../config/appConfig";
 
-const MIN_SEARCH_LENGTH = 3; // adjustable (change to 4 if needed)
-const DISPLAY_LIMIT = 5; // number of groups to show initially
+const MIN_SEARCH_LENGTH = appConfig.minSearchLength; // configurable
+const DISPLAY_LIMIT = appConfig.searchDisplayLimit; // configurable
 
 const MedicineSearch = ({ onAddMedicine }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -164,6 +165,18 @@ const MedicineSearch = ({ onAddMedicine }) => {
                     setSearchResults([]);
                     setError(null);
                     setShowAll(false);
+                    // Abort any in-flight search request and cancel pending debounce
+                    if (abortRef.current) {
+                      try {
+                        abortRef.current.abort();
+                      } catch (_) {}
+                      abortRef.current = null;
+                    }
+                    if (debounceRef.current) {
+                      clearTimeout(debounceRef.current);
+                      debounceRef.current = null;
+                    }
+                    setIsSearching(false);
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-700"
                 >

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   Download,
@@ -16,6 +16,12 @@ const PrescriptionViewer = ({ prescription }) => {
   const [showModal, setShowModal] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Reset image state when the prescription image changes
+  useEffect(() => {
+    setImgError(false);
+    setImgLoaded(false);
+  }, [prescription?.imageUrl]);
 
   const getStatusMeta = (status) => {
     const s = (status || "").toUpperCase();

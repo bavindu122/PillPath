@@ -31,11 +31,11 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
       // Force redirect even if logout fails
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   };
 

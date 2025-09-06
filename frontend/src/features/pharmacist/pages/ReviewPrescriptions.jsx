@@ -8,6 +8,7 @@ import ChatWidget from "../components/ChatWidget";
 import "./index-pharmacist.css";
 import { prescriptionService } from "../services/prescriptionService";
 import { submissionItemsService } from "../services/submissionItemsService";
+import { parseIdForApi } from "../../../utils/idUtils";
 
 const ReviewPrescriptions = () => {
   const navigate = useNavigate();
@@ -25,9 +26,7 @@ const ReviewPrescriptions = () => {
       setIsLoading(true);
       try {
         // Determine submissionId from route or fallback; do not call submissions detail endpoint
-        const idForApi = /^\d+$/.test(String(prescriptionId))
-          ? Number(prescriptionId)
-          : prescriptionId;
+        const idForApi = parseIdForApi(prescriptionId);
         const submissionId =
           (typeof idForApi === "number" ? idForApi : undefined) ||
           fallback?.submissionId ||

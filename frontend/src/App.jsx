@@ -16,6 +16,7 @@ import Navbar from "./components/Layout/Navbar";
 import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
 import RequirePharmacist from "./features/auth/components/RequirePharmacist";
+import Loading from "./components/Loading";
 import Customer from "./features/customer/pages/Customer";
 import FindPharmacy from "./pages/FindPharmacies/FindPharmacy";
 import Admin from "./features/admin/Admin";
@@ -48,7 +49,9 @@ const App = () => {
           <Route
             path="/pharmacist/*"
             element={
-              <RequirePharmacist>
+              <RequirePharmacist
+                fallback={<Loading message="Checking access..." />}
+              >
                 <Pharmacist />
               </RequirePharmacist>
             }
