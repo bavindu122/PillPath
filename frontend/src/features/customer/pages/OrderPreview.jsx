@@ -150,7 +150,8 @@ const OrderPreview = () => {
       setItemsForPrescriptionAndPharmacy(
         prescriptionCode,
         pharmacyName || "",
-        selectedForThisPharmacy
+        selectedForThisPharmacy,
+        pharmacyId
       );
 
       return updated;
@@ -174,7 +175,8 @@ const OrderPreview = () => {
     setItemsForPrescriptionAndPharmacy(
       prescriptionCode,
       pharmacyName || "",
-      selectedForThisPharmacy
+      selectedForThisPharmacy,
+      pharmacyId
     );
     navigate(`/customer/checkout/${prescriptionCode}`);
   };

@@ -63,10 +63,12 @@ export function clearPrescription(prescriptionId) {
   saveCart(cart);
 }
 
+// Store items for a specific prescription + pharmacy. Accepts pharmacyId for order placement grouping.
 export function setItemsForPrescriptionAndPharmacy(
   prescriptionId,
   pharmacyName,
-  items
+  items,
+  pharmacyId
 ) {
   const cart = getCart();
   const normPh = (pharmacyName || "").toString();
@@ -78,6 +80,7 @@ export function setItemsForPrescriptionAndPharmacy(
     ...it,
     prescriptionId,
     pharmacyName: normPh,
+    pharmacyId: pharmacyId != null ? pharmacyId : it.pharmacyId, // preserve existing if already present
     quantity: it.quantity || 1,
   }));
   cart.items = [...rest, ...normalized];
