@@ -19,11 +19,16 @@ export default function CustomerOrderDetail() {
   const navigate = useNavigate();
   const preloaded = location.state?.order;
   // Support state and query params for deep-linking / refresh
-  const search = typeof location.search === "string" ? new URLSearchParams(location.search) : null;
+  const search =
+    typeof location.search === "string"
+      ? new URLSearchParams(location.search)
+      : null;
   const qpPharmacyId = search?.get("pharmacyId") || undefined;
   const qpLocked = search?.get("locked") || undefined;
   const filterPharmacyId = location.state?.filterPharmacyId ?? qpPharmacyId;
-  const locked = Boolean(location.state?.locked ?? (qpLocked === "1" || qpLocked === "true"));
+  const locked = Boolean(
+    location.state?.locked ?? (qpLocked === "1" || qpLocked === "true")
+  );
   const [order, setOrder] = React.useState(preloaded || null);
   const [loading, setLoading] = React.useState(!preloaded);
   const [error, setError] = React.useState("");

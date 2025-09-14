@@ -329,7 +329,9 @@ const Activities = () => {
                                 locked: "1",
                               });
                               navigate(
-                                `/customer/orders/${pharmacy.orderCode}?${q.toString()}`,
+                                `/customer/orders/${
+                                  pharmacy.orderCode
+                                }?${q.toString()}`,
                                 {
                                   state: {
                                     filterPharmacyId: pharmacy.pharmacyId,
@@ -368,7 +370,9 @@ const Activities = () => {
                                 locked: "1",
                               });
                               navigate(
-                                `/customer/orders/${pharmacy.orderCode}?${q.toString()}`,
+                                `/customer/orders/${
+                                  pharmacy.orderCode
+                                }?${q.toString()}`,
                                 {
                                   state: {
                                     filterPharmacyId: pharmacy.pharmacyId,
