@@ -29,10 +29,17 @@ const Checkout = () => {
   const [placing, setPlacing] = React.useState(false);
   const [error, setError] = React.useState("");
 
-  const items =
+  const allItems =
     Array.isArray(state.items) && state.items.length > 0
       ? state.items.filter((it) => it.prescriptionId === prescriptionId)
       : getItemsByPrescription(prescriptionId);
+  // Only keep explicitly selected items (from cart with selected flag) if any carry selected flag
+  const hasSelectionFlags = allItems.some(
+    (it) => typeof it.selected !== "undefined"
+  );
+  const items = hasSelectionFlags
+    ? allItems.filter((it) => it.selected)
+    : allItems;
   const subtotal = items.reduce(
     (sum, it) => sum + it.price * (it.quantity || 1),
     0
@@ -90,9 +97,10 @@ const Checkout = () => {
           it.pharmacyId != null
             ? String(it.pharmacyId)
             : `name:${it.pharmacyName || "unknown"}`;
-        if (!groups[key]) groups[key] = { pharmacyId: it.pharmacyId, items: [] };
+        if (!groups[key])
+          groups[key] = { pharmacyId: it.pharmacyId, items: [] };
         groups[key].items.push({
-          previewItemId: it.id,
+          submissionId: it.id, // backend now expects submissionId
           quantity: it.quantity || 1,
         });
       }
@@ -108,14 +116,11 @@ const Checkout = () => {
       }
       const dto = {
         prescriptionCode: prescriptionId,
+        paymentMethod: selectedPaymentMethod === "card" ? "CARD" : "CASH",
         pharmacies: pharmacies.map((p) => ({
           pharmacyId: p.pharmacyId,
           items: p.items,
         })),
-        payment: {
-          method: selectedPaymentMethod === "card" ? "CARD" : "CASH",
-          currency: "LKR",
-        },
       };
       const response = await OrdersService.createOrder(dto);
       // Expect response.orderCode or similar; attempt to extract robustly

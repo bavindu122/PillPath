@@ -24,12 +24,19 @@ async function request(endpoint, options = {}) {
 }
 
 /**
- * PlaceOrderRequestDTO shape (client side):
+ * New backend endpoint expects (POST /api/orders):
  * {
  *   prescriptionCode: string,
- *   pharmacies: [ { pharmacyId: number, items: [ { previewItemId: number, quantity: number } ] } ],
- *   payment: { method: 'CASH' | 'CARD', currency: 'LKR', amount?: number }
+ *   paymentMethod: 'CASH' | 'CARD',
+ *   pharmacies: [
+ *     {
+ *       pharmacyId: number,
+ *       note?: string,
+ *       items: [ { submissionId: number, quantity: number } ]
+ *     }
+ *   ]
  * }
+ * We now send exactly this structure. (Base path still uses configured API_BASE_URL + 'orders').
  */
 export async function createOrder(body) {
   return request("orders", {

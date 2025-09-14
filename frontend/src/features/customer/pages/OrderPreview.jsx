@@ -85,14 +85,14 @@ const OrderPreview = () => {
             currency: "LKR",
           }
         );
-        setUnavailableMedications(
-          Array.isArray(data.unavailableItems) ? data.unavailableItems : []
-        );
+        const initialUnavailable = Array.isArray(data.unavailableItems)
+          ? data.unavailableItems
+          : [];
 
         const savedSelections = localStorage.getItem(selectionsKey);
         const selectionMap = savedSelections ? JSON.parse(savedSelections) : {};
 
-        const mapped = (data.items || []).map((it) => ({
+        const mappedRaw = (data.items || []).map((it) => ({
           id: it.id,
           name: it.medicineName || it.name || "",
           price: Number(it.unitPrice ?? it.price ?? 0),
@@ -102,7 +102,20 @@ const OrderPreview = () => {
           strength: it.dosage || it.strength || "",
           selected: Boolean(selectionMap[it.id] ?? it.available === true),
         }));
-        setMedications(mapped);
+
+        // Filter out items that are not actually available or have zero/negative price
+        const filtered = mappedRaw.filter((m) => m.available && m.price > 0);
+        const removed = mappedRaw.filter((m) => !(m.available && m.price > 0));
+
+        // Merge removed names into unavailable list (avoid duplicates)
+        const unavailableMerged = Array.from(
+          new Set([
+            ...initialUnavailable,
+            ...removed.map((r) => r.name).filter(Boolean),
+          ])
+        );
+        setUnavailableMedications(unavailableMerged);
+        setMedications(filtered);
 
         const savedAcceptedState = localStorage.getItem(
           `order-preview:${prescriptionCode}:${pharmacyId}:accepted`
@@ -146,6 +159,7 @@ const OrderPreview = () => {
           name: m.name,
           price: m.price,
           quantity: m.quantity || 1,
+          selected: true,
         }));
       setItemsForPrescriptionAndPharmacy(
         prescriptionCode,
@@ -171,6 +185,7 @@ const OrderPreview = () => {
         name: m.name,
         price: m.price,
         quantity: m.quantity || 1,
+        selected: true,
       }));
     setItemsForPrescriptionAndPharmacy(
       prescriptionCode,
