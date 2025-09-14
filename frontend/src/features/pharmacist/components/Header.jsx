@@ -16,9 +16,14 @@ export default function Header({
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
+      // If click target is inside the anchor button container, keep dropdown
+      if (dropdownRef.current && dropdownRef.current.contains(e.target)) {
+        return;
       }
+      // If click target is inside the portal dropdown, keep it open
+      const inPortal = e.target.closest?.('[data-profile-dropdown="true"]');
+      if (inPortal) return;
+      setShowDropdown(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
