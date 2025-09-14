@@ -29,7 +29,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [mediaStream, setMediaStream] = useState(null);
-  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+  const [selectedPharmacies, setSelectedPharmacies] = useState([]);
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -52,6 +52,14 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       "prescriptionData",
       JSON.stringify(prescriptionData)
     );
+
+    // Persist any selections made in the modal so FindPharmacy can restore
+    try {
+      sessionStorage.setItem(
+        "findPharmacyState",
+        JSON.stringify({ selectedPharmacies })
+      );
+    } catch {}
 
     // Navigate to FindPharmacy with special parameter indicating it's from prescription upload
     navigate("/find-pharmacy?from=prescription-upload");
@@ -231,24 +239,47 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     setUploadMethod(null);
     setPrescriptionImage(null);
     setPrescriptionFile(null);
-    setSelectedPharmacy(null);
+    setSelectedPharmacies([]);
     setNote("");
     onClose();
   };
 
   // Handle submit
   const handleSubmit = async () => {
-    if (!prescriptionImage || !selectedPharmacy) {
-      alert("Please upload a prescription and select a pharmacy.");
+    if (!prescriptionImage || selectedPharmacies.length === 0) {
+      alert("Please upload a prescription and select at least one pharmacy.");
       return;
     }
     if (!isAuthenticated || userType !== "customer") {
-      // Redirect to login; preserve intent
-      navigate(
-        `/login?redirect=${encodeURIComponent(
-          window.location.pathname + window.location.search
-        )}`
-      );
+      // Redirect to login; preserve intent and data to resume in FindPharmacy
+      try {
+        const redirectPath = "/find-pharmacy?from=prescription-upload";
+        const intent = {
+          source: "prescription-modal",
+          path: redirectPath,
+          role: "customer",
+          ts: Date.now(),
+        };
+        sessionStorage.setItem("postAuthRedirect", JSON.stringify(intent));
+
+        const prescriptionData = {
+          image: prescriptionImage,
+          note: note,
+          uploadMethod: uploadMethod,
+        };
+        sessionStorage.setItem(
+          "prescriptionData",
+          JSON.stringify(prescriptionData)
+        );
+        sessionStorage.setItem(
+          "findPharmacyState",
+          JSON.stringify({ selectedPharmacies })
+        );
+      } catch (e) {
+        console.warn("Failed to persist pre-auth modal state", e);
+      }
+
+      navigate(`/login?redirect=${encodeURIComponent("/find-pharmacy")}`);
       return;
     }
 
@@ -272,10 +303,14 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
         });
       }
 
+      const ids = selectedPharmacies.map((p) => p.id);
       const meta = {
-        pharmacyId: selectedPharmacy.id,
+        ...(ids.length === 1 ? { pharmacyId: ids[0] } : {}),
+        pharmacyIds: ids,
         note: note || undefined,
         source: "modal",
+        latitude: currentLocation?.lat,
+        longitude: currentLocation?.lng,
       };
 
       const res = await PrescriptionService.uploadPrescription(
@@ -289,7 +324,12 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       } else {
         navigate("/customer/activities");
       }
-      alert(`Prescription sent successfully to ${selectedPharmacy.name}`);
+      if (ids.length > 1) {
+        alert(`Prescription sent successfully to ${ids.length} pharmacies`);
+      } else {
+        const only = selectedPharmacies[0];
+        alert(`Prescription sent successfully to ${only?.name || "pharmacy"}`);
+      }
       handleClose();
     } catch (err) {
       console.error("Prescription upload failed", err);
@@ -671,11 +711,22 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                             transition={{ delay: index * 0.1 }}
                             whileHover={{ scale: 1.01 }}
                             className={`border rounded-xl p-4 transition-all cursor-pointer ${
-                              selectedPharmacy?.id === pharmacy.id
+                              selectedPharmacies.some(
+                                (p) => p.id === pharmacy.id
+                              )
                                 ? "border-primary/50 bg-white/90 shadow-lg ring-2 ring-primary/20"
                                 : "border-white/50 bg-white/40 hover:border-primary/30 hover:bg-white/60 backdrop-blur-sm"
                             }`}
-                            onClick={() => setSelectedPharmacy(pharmacy)}
+                            onClick={() =>
+                              setSelectedPharmacies((prev) => {
+                                const exists = prev.some(
+                                  (p) => p.id === pharmacy.id
+                                );
+                                return exists
+                                  ? prev.filter((p) => p.id !== pharmacy.id)
+                                  : [...prev, pharmacy];
+                              })
+                            }
                           >
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
@@ -728,15 +779,17 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                               {/* Selection Indicator */}
                               <div className="flex-shrink-0 ml-4">
                                 <div
-                                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                    selectedPharmacy?.id === pharmacy.id
-                                      ? "border-primary bg-primary text-white shadow-lg"
-                                      : "border-gray-300 hover:border-primary/50"
+                                  className={`w-6 h-6 rounded flex items-center justify-center transition-all ${
+                                    selectedPharmacies.some(
+                                      (p) => p.id === pharmacy.id
+                                    )
+                                      ? "bg-primary text-white shadow-lg"
+                                      : "bg-white/60 border border-gray-300 hover:border-primary/50"
                                   }`}
                                 >
-                                  {selectedPharmacy?.id === pharmacy.id && (
-                                    <Check size={14} />
-                                  )}
+                                  {selectedPharmacies.some(
+                                    (p) => p.id === pharmacy.id
+                                  ) && <Check size={14} />}
                                 </div>
                               </div>
                             </div>
@@ -758,8 +811,8 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     </motion.button>
                   </div>
 
-                  {/* Selected Pharmacy Summary */}
-                  {selectedPharmacy && (
+                  {/* Selected Pharmacies Summary */}
+                  {selectedPharmacies.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -767,28 +820,38 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     >
                       <h5 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                         <Check size={16} className="text-primary" />
-                        Selected Pharmacy
+                        Selected{" "}
+                        {selectedPharmacies.length > 1
+                          ? "Pharmacies"
+                          : "Pharmacy"}
                       </h5>
                       <div className="text-sm text-gray-700">
-                        <div className="font-medium">
-                          {selectedPharmacy.name}
-                        </div>
-                        <div className="text-gray-600">
-                          {selectedPharmacy.address}
-                        </div>
-                        <div className="flex gap-4 mt-1 text-xs">
-                          <span>📍 {selectedPharmacy.distance} km away</span>
-                          <span>
-                            ⏱️ {selectedPharmacy.deliveryTime} min delivery
-                          </span>
-                          <span>⭐ {selectedPharmacy.rating} rating</span>
-                        </div>
+                        <ul className="list-disc pl-5 space-y-1">
+                          {selectedPharmacies.map((p) => (
+                            <li
+                              key={p.id}
+                              className="flex flex-wrap gap-2 items-center"
+                            >
+                              <span className="font-medium">{p.name}</span>
+                              <span className="text-gray-600">{p.address}</span>
+                              <span className="text-gray-600">
+                                • {p.distance} km
+                              </span>
+                              <span className="text-gray-600">
+                                • {p.deliveryTime} mins
+                              </span>
+                              <span className="text-gray-600">
+                                • ⭐ {p.rating}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     </motion.div>
                   )}
 
                   {/* Additional Notes */}
-                  {selectedPharmacy && (
+                  {selectedPharmacies.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -819,15 +882,19 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     </motion.button>
                     <motion.button
                       whileHover={
-                        !isLoading && selectedPharmacy ? { scale: 1.03 } : {}
+                        !isLoading && selectedPharmacies.length > 0
+                          ? { scale: 1.03 }
+                          : {}
                       }
                       whileTap={
-                        !isLoading && selectedPharmacy ? { scale: 0.97 } : {}
+                        !isLoading && selectedPharmacies.length > 0
+                          ? { scale: 0.97 }
+                          : {}
                       }
                       onClick={handleSubmit}
-                      disabled={!selectedPharmacy || isLoading}
+                      disabled={selectedPharmacies.length === 0 || isLoading}
                       className={`px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg shadow-md hover:shadow-lg flex items-center justify-center gap-2 order-1 sm:order-2 ${
-                        !selectedPharmacy || isLoading
+                        selectedPharmacies.length === 0 || isLoading
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}

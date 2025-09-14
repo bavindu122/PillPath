@@ -63,6 +63,17 @@ const FindPharmacy = () => {
       if (storedData) {
         setPrescriptionData(JSON.parse(storedData));
       }
+
+      // Restore selected pharmacies if saved pre-auth
+      const savedSel = sessionStorage.getItem("findPharmacyState");
+      if (savedSel) {
+        try {
+          const parsed = JSON.parse(savedSel);
+          if (Array.isArray(parsed?.selectedPharmacies)) {
+            setSelectedPharmacies(parsed.selectedPharmacies);
+          }
+        } catch {}
+      }
     }
   }, [isFromPrescriptionUpload]);
 
@@ -198,6 +209,24 @@ const FindPharmacy = () => {
     }
 
     if (!isAuthenticated || userType !== "customer") {
+      try {
+        // Persist minimal state so we can restore after login
+        const redirectPath = window.location.pathname + window.location.search;
+        const payload = {
+          source: "find-pharmacy",
+          path: redirectPath,
+          ts: Date.now(),
+          role: "customer",
+        };
+        sessionStorage.setItem("postAuthRedirect", JSON.stringify(payload));
+        sessionStorage.setItem(
+          "findPharmacyState",
+          JSON.stringify({ selectedPharmacies })
+        );
+      } catch (e) {
+        console.warn("Failed to persist pre-auth state", e);
+      }
+
       navigate(
         `/login?redirect=${encodeURIComponent(
           window.location.pathname + window.location.search
@@ -251,6 +280,7 @@ const FindPharmacy = () => {
 
     // Clean up session storage
     sessionStorage.removeItem("prescriptionData");
+    sessionStorage.removeItem("findPharmacyState");
 
     // Show quick success then navigate
     setTimeout(() => {

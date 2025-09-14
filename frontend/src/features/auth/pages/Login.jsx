@@ -45,6 +45,15 @@ const Login = () => {
       const redirectRaw = params.get("redirect");
       const redirectTo = redirectRaw ? decodeURIComponent(redirectRaw) : null;
 
+      // Try restoring a saved pre-auth intent (e.g., upload flow)
+      const savedIntentRaw = sessionStorage.getItem("postAuthRedirect");
+      let savedIntent = null;
+      if (savedIntentRaw) {
+        try {
+          savedIntent = JSON.parse(savedIntentRaw);
+        } catch {}
+      }
+
       // Safety: only allow internal redirects starting with '/'
       const isSafeInternal = redirectTo && redirectTo.startsWith("/");
 
@@ -62,6 +71,20 @@ const Login = () => {
 
       if (isSafeInternal && roleRoot && redirectTo.startsWith(roleRoot)) {
         navigate(redirectTo, { replace: true });
+        return;
+      }
+
+      // If a post-auth intent exists and matches user role, prefer it
+      if (
+        savedIntent &&
+        savedIntent.role === userType &&
+        typeof savedIntent.path === "string" &&
+        savedIntent.path.startsWith("/")
+      ) {
+        // Clear saved intent and any auxiliary state
+        sessionStorage.removeItem("postAuthRedirect");
+        // Keep findPharmacyState for the destination page to read
+        navigate(savedIntent.path, { replace: true });
         return;
       }
 

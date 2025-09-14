@@ -44,7 +44,9 @@ export const prescriptionService = {
         submissionId: item.submissionId,
         reviewId,
         code: item.prescriptionCode,
-        patientName: item.prescriptionCode, // display code in existing title slot
+        // Prefer the actual customer name; fallback to code if name is absent
+        patientName: item.customerName || item.prescriptionCode,
+        customerName: item.customerName || item.prescriptionCode,
         priority: "Medium Priority", // default until backend provides priority
         time,
         date,
