@@ -80,7 +80,7 @@ export function setItemsForPrescriptionAndPharmacy(
     ...it,
     prescriptionId,
     pharmacyName: normPh,
-    pharmacyId: pharmacyId != null ? pharmacyId : it.pharmacyId, // preserve existing if already present
+    pharmacyId: (pharmacyId !== null && pharmacyId !== undefined) ? pharmacyId : it.pharmacyId, // preserve existing if already present
     quantity: it.quantity || 1,
   }));
   cart.items = [...rest, ...normalized];
