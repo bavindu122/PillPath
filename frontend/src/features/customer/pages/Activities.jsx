@@ -18,10 +18,12 @@ const Activities = () => {
   const navigate = useNavigate();
   // Aggregated payment moved to /customer/checkout
 
-  const handleViewOrderPreview = (prescriptionId, pharmacyName) => {
-    // Navigate to a new page with prescription and pharmacy details
-    navigate(`/customer/order-preview/${prescriptionId}`, {
-      state: { pharmacyName },
+  const handleViewOrderPreview = (prescriptionId, pharmacyId, pharmacyName) => {
+    // Navigate to order preview including pharmacyId in both query and state for robustness
+    const query = new URLSearchParams({ pharmacyId: String(pharmacyId) });
+    navigate(`/customer/order-preview/${prescriptionId}?${query.toString()}`, {
+      state: { pharmacyId, pharmacyName },
+      replace: false,
     });
   };
 
@@ -45,25 +47,69 @@ const Activities = () => {
           id: item.code,
           uploadedDate: item.uploadedAt,
           prescriptionImage: item.imageUrl,
-          pharmacies: (item.pharmacies || []).map((p) => ({
-            pharmacyId: p.pharmacyId,
-            name: p.pharmacyName,
-            address: p.address,
-            status:
-              p.status === "PREVIEW_READY"
-                ? "View Order Preview"
-                : p.status === "PAYMENT_REQUIRED"
-                ? "Proceed to payment"
-                : "Pending Order Preview",
-            statusType:
-              p.status === "PREVIEW_READY"
-                ? "delivery"
-                : p.status === "PAYMENT_REQUIRED"
-                ? "payment"
-                : "pending",
-            medications: p.medications || undefined,
-            totals: p.totals || undefined,
-          })),
+          prescriptionStatus: item.prescriptionStatus,
+          pharmacies: (item.pharmacies || []).map((p) => {
+            const canView = !!p.actions?.canViewOrderPreview;
+            // Only allow payment label when backend marks this slice as accepted
+            const canPay =
+              !!p.actions?.canProceedToPayment && p.accepted === true;
+            let statusLabel = "Pending Review";
+            let statusType = "pending";
+            const st = (p.status || "").toUpperCase();
+            if (st.includes("PREPARING") || st.includes("READY")) {
+              statusLabel = st.includes("PREPARING")
+                ? "Preparing order"
+                : "Ready for pickup";
+              statusType = "delivery";
+            } else if (canPay) {
+              statusLabel = "Proceed to payment";
+              statusType = "payment";
+            } else if (canView) {
+              statusLabel = "View Order Preview";
+              statusType = "delivery";
+            } else {
+              switch (st) {
+                case "IN_PROGRESS":
+                  statusLabel = "In Progress";
+                  statusType = "pending";
+                  break;
+                case "CLARIFICATION_NEEDED":
+                  statusLabel = "Needs Clarification";
+                  statusType = "pending";
+                  break;
+                case "READY_FOR_PICKUP":
+                  statusLabel = "Ready for pickup";
+                  statusType = "delivery";
+                  break;
+                case "REJECTED":
+                  statusLabel = "Rejected";
+                  statusType = "pending";
+                  break;
+                case "COMPLETED":
+                  statusLabel = "Completed";
+                  statusType = "delivery";
+                  break;
+                case "CANCELLED":
+                  statusLabel = "Cancelled";
+                  statusType = "pending";
+                  break;
+                default:
+                  statusLabel = "Pending Review";
+                  statusType = "pending";
+              }
+            }
+
+            return {
+              pharmacyId: p.pharmacyId,
+              name: p.pharmacyName,
+              address: p.address,
+              orderCode: p.orderCode || item.orderCode || undefined,
+              status: statusLabel,
+              statusType,
+              medications: p.medications || undefined,
+              totals: p.totals || undefined,
+            };
+          }),
         }));
         setPrescriptions(normalized);
       } catch (e) {
@@ -171,7 +217,13 @@ const Activities = () => {
                 </div>
                 {/* Per-prescription checkout entry */}
                 <div className="flex-shrink-0">
-                  {getItemsByPrescription(prescription.id).length > 0 && (
+                  {String(prescription.prescriptionStatus || "")
+                    .toUpperCase()
+                    .includes("ORDER_PLACED") ? (
+                    <span className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-medium border bg-green-500/20 text-green-300 border-green-300/30">
+                      Order placed
+                    </span>
+                  ) : getItemsByPrescription(prescription.id).length > 0 ? (
                     <button
                       onClick={() =>
                         navigate(`/customer/checkout/${prescription.id}`)
@@ -182,7 +234,7 @@ const Activities = () => {
                       Checkout ({getItemsByPrescription(prescription.id).length}
                       )
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -246,15 +298,46 @@ const Activities = () => {
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
                             pharmacy.statusType
                           )} ${
-                            pharmacy.status === "View Order Preview"
+                            pharmacy.status === "View Order Preview" ||
+                            ((String(pharmacy.status || "")
+                              .toUpperCase()
+                              .includes("PREPARING") ||
+                              String(pharmacy.status || "")
+                                .toUpperCase()
+                                .includes("READY")) &&
+                              pharmacy.orderCode)
                               ? "cursor-pointer hover:opacity-80 transition-opacity"
                               : ""
                           }`}
                           onClick={() => {
+                            const upper = String(
+                              pharmacy.status || ""
+                            ).toUpperCase();
                             if (pharmacy.status === "View Order Preview") {
                               handleViewOrderPreview(
                                 prescription.id,
+                                pharmacy.pharmacyId,
                                 pharmacy.name
+                              );
+                            } else if (
+                              (upper.includes("PREPARING") ||
+                                upper.includes("READY")) &&
+                              pharmacy.orderCode
+                            ) {
+                              const q = new URLSearchParams({
+                                pharmacyId: String(pharmacy.pharmacyId),
+                                locked: "1",
+                              });
+                              navigate(
+                                `/customer/orders/${
+                                  pharmacy.orderCode
+                                }?${q.toString()}`,
+                                {
+                                  state: {
+                                    filterPharmacyId: pharmacy.pharmacyId,
+                                    locked: true,
+                                  },
+                                }
                               );
                             }
                           }}
@@ -268,10 +351,34 @@ const Activities = () => {
                           whileHover={{ x: 5 }}
                           className="text-white/60 hover:text-white transition-colors cursor-pointer"
                           onClick={() => {
+                            const upper = String(
+                              pharmacy.status || ""
+                            ).toUpperCase();
                             if (pharmacy.status === "View Order Preview") {
                               handleViewOrderPreview(
                                 prescription.id,
+                                pharmacy.pharmacyId,
                                 pharmacy.name
+                              );
+                            } else if (
+                              (upper.includes("PREPARING") ||
+                                upper.includes("READY")) &&
+                              pharmacy.orderCode
+                            ) {
+                              const q = new URLSearchParams({
+                                pharmacyId: String(pharmacy.pharmacyId),
+                                locked: "1",
+                              });
+                              navigate(
+                                `/customer/orders/${
+                                  pharmacy.orderCode
+                                }?${q.toString()}`,
+                                {
+                                  state: {
+                                    filterPharmacyId: pharmacy.pharmacyId,
+                                    locked: true,
+                                  },
+                                }
                               );
                             }
                           }}

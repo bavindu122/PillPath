@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import "../pages/index-pharmacist.css";
+import { PRESCRIPTION_PLACEHOLDER } from "../../../constants/media";
 
 const PrescriptionViewer = ({ prescription }) => {
   const [isZoomed, setIsZoomed] = useState(false);
@@ -38,11 +39,17 @@ const PrescriptionViewer = ({ prescription }) => {
           classes: "text-blue-700",
           bg: "rgba(59,130,246,0.1)",
         };
-      case "CLARIFICATION_REQUESTED":
+      case "CLARIFICATION_NEEDED":
         return {
           label: "Needs Clarification",
           classes: "text-yellow-700",
           bg: "rgba(234,179,8,0.12)",
+        };
+      case "CANCELLED":
+        return {
+          label: "Cancelled",
+          classes: "text-gray-700",
+          bg: "rgba(107,114,128,0.12)",
         };
       case "READY_FOR_PICKUP":
         return {
@@ -156,7 +163,7 @@ const PrescriptionViewer = ({ prescription }) => {
                     src={
                       !imgError && prescription?.imageUrl
                         ? prescription.imageUrl
-                        : "/prescription-placeholder.svg"
+                        : PRESCRIPTION_PLACEHOLDER
                     }
                     alt={prescription?.code || "Prescription Image"}
                     className="object-contain transition-all duration-300 ease-in-out"
@@ -242,7 +249,7 @@ const PrescriptionViewer = ({ prescription }) => {
                     src={
                       !imgError && prescription?.imageUrl
                         ? prescription.imageUrl
-                        : "/prescription-placeholder.svg"
+                        : PRESCRIPTION_PLACEHOLDER
                     }
                     alt={prescription?.code || "Zoomed Prescription"}
                     className="w-full h-auto max-w-none"
