@@ -101,7 +101,7 @@ const OrderPreview = () => {
           available: it.available === true,
           notes: it.notes || "",
           strength: it.dosage || it.strength || "",
-          selected: Boolean(selectionMap[it.id] ?? it.available === true),
+          selected: Boolean(selectionMap[it.id] ?? false),
         }));
 
         // Filter out items that are not actually available or have zero/negative price
