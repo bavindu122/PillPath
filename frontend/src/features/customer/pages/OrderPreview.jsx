@@ -9,6 +9,7 @@ import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 // Payment handled on unified Checkout page
 import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
+import { PRESCRIPTION_PLACEHOLDER } from "../../../constants/media";
 import PrescriptionActivityService from "../../../services/api/PrescriptionActivityService";
 
 const OrderPreview = () => {
@@ -437,11 +438,11 @@ const OrderPreview = () => {
                 </h3>
                 <div className="w-100 h-120 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 flex items-center justify-center overflow-hidden">
                   <img
-                    src={imageUrl || "/prescription-placeholder.svg"}
+                    src={imageUrl || PRESCRIPTION_PLACEHOLDER}
                     alt="Prescription"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = "/prescription-placeholder.svg";
+                      e.currentTarget.src = PRESCRIPTION_PLACEHOLDER;
                     }}
                   />
                 </div>
