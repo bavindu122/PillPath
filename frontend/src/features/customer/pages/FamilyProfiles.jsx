@@ -27,12 +27,7 @@ const FamilyProfiles = () => {
       setLoading(true);
       setError(null);
       
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        setError('No authentication token found. Please log in again.');
-        return;
-      }
-      const backendMembers = await FamilyMemberService.getFamilyMembers(token);
+  const backendMembers = await FamilyMemberService.getFamilyMembers();
       const userProfile = createUserProfile();
       
       // Transform backend data to match frontend format
@@ -193,75 +188,6 @@ const FamilyProfiles = () => {
     }
   };
 
-  // Handle family member profile updates
-  const handleFamilyMemberUpdate = async (updatedMember) => {
-    try {
-      console.log('Family member updated, refreshing list...', updatedMember);
-      
-      // Refresh the family members list to get the latest data
-      await fetchFamilyMembers();
-      
-      // Update the selected profile if it's currently open
-      if (selectedProfile && updatedMember) {
-        // Find the updated member in the new list
-        const refreshedMembers = await FamilyMemberService.getFamilyMembers();
-        const userProfile = createUserProfile();
-        
-        // Transform backend data
-        const transformedMembers = Array.isArray(refreshedMembers) ? refreshedMembers.map(member => {
-          const safeJsonParse = (jsonString) => {
-            if (jsonString === null || jsonString === undefined || typeof jsonString !== 'string') {
-              return [];
-            }
-            
-            if (jsonString.trim() === '' || jsonString === 'null') {
-              return [];
-            }
-            
-            try {
-              return JSON.parse(jsonString);
-            } catch (error) {
-              console.warn('Failed to parse JSON:', jsonString, error);
-              return [];
-            }
-          };
-
-          return {
-            id: member.id,
-            name: member.name,
-            relation: member.relation,
-            age: member.age,
-            profilePicture: member.profilePicture || assets.profile_pic,
-            email: member.email || "Not provided",
-            phone: member.phone || "Not provided",
-            lastPrescriptionDate: member.lastPrescriptionDate || "Not available",
-            activePrescriptions: member.activePrescriptions || 0,
-            totalPrescriptions: member.totalPrescriptions || 0,
-            allergies: safeJsonParse(member.allergies),
-            bloodType: member.bloodType || "Unknown",
-            medicalConditions: safeJsonParse(member.medicalConditions),
-            currentMedications: safeJsonParse(member.currentMedications)
-          };
-        }) : [];
-        
-        const allMembers = userProfile ? [userProfile, ...transformedMembers] : transformedMembers;
-        
-        // Find the updated member (it might have a new ID if we used delete+add approach)
-        const updatedMemberInList = allMembers.find(member => 
-          member.name === updatedMember.name || member.id === updatedMember.id
-        );
-        
-        if (updatedMemberInList) {
-          setSelectedProfile(updatedMemberInList);
-        }
-      }
-      
-    } catch (error) {
-      console.error('Failed to refresh family members after update:', error);
-      setError('Profile updated but failed to refresh the list. Please refresh the page.');
-    }
-  };
-
   // Filter family members based on search term
   const filteredMembers = familyMembersList.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -288,7 +214,7 @@ const FamilyProfiles = () => {
   // Show loading or login prompt if user is not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="h-screen min-h-0  bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center text-white">
           <h2 className="text-2xl font-bold mb-4">Please log in to view family profiles</h2>
           <p className="text-white/70">You need to be logged in to manage your family's medication profiles.</p>
@@ -298,7 +224,7 @@ const FamilyProfiles = () => {
   }
 
   return (
-    <div className="h-screen min-h-0  bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float-slow"></div>
       <div className="absolute top-32 right-20 w-80 h-80 bg-indigo-400/15 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-float-delay"></div>
@@ -470,7 +396,6 @@ const FamilyProfiles = () => {
         isOpen={!!selectedProfile} 
         onClose={closeModal}
         onDeleteMember={handleDeleteMember}
-        onFamilyMemberUpdate={handleFamilyMemberUpdate}
       />
     </div>
   );
