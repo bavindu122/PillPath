@@ -19,9 +19,16 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+      // If click target is inside the anchor button container, keep dropdown
+      if (dropdownRef.current && dropdownRef.current.contains(event.target)) {
+        return;
       }
+      // If click target is inside the portal dropdown, keep it open
+      const inPortal = event.target.closest?.('[data-profile-dropdown="true"]');
+      if (inPortal) {
+        return;
+      }
+      setShowDropdown(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -132,6 +139,7 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
           <ProfileDropdown 
             show={showDropdown} 
             onClose={() => setShowDropdown(false)}
+            anchorRef={dropdownRef}
           />
         </div>
       </div>
