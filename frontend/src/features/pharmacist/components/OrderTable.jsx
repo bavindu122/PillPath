@@ -1,28 +1,32 @@
-import React from 'react';
-import { Eye, Printer, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import '../pages/index-pharmacist.css';
+import React from "react";
+import { Eye, Printer, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import "../pages/index-pharmacist.css";
 
 const OrderTable = ({ orders, onPrintOrder }) => {
   const getTypeIcon = (type) => {
     switch (type.toLowerCase()) {
-      case 'prescription':
+      case "prescription":
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+          <span
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
             style={{
-              backgroundColor: 'var(--pharma-blue-100)', // #bfdbfe
-              color: 'var(--pharma-blue-800)' // dark blue text
-            }}>
+              backgroundColor: "var(--pharma-blue-100)", // #bfdbfe
+              color: "var(--pharma-blue-800)", // dark blue text
+            }}
+          >
             📋 Prescription
           </span>
         );
-      case 'otc':
+      case "otc":
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+          <span
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
             style={{
-              backgroundColor: 'var(--pharma-red-100)', // light red
-              color: 'var(--pharma-red-800)' // dark red text
-            }}>
+              backgroundColor: "var(--pharma-red-100)", // light red
+              color: "var(--pharma-red-800)", // dark red text
+            }}
+          >
             💊 OTC
           </span>
         );
@@ -33,24 +37,28 @@ const OrderTable = ({ orders, onPrintOrder }) => {
 
   const getPaymentMethodIcon = (paymentMethod) => {
     switch (paymentMethod.toLowerCase()) {
-      case 'cash':
+      case "cash":
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+          <span
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
             style={{
-              backgroundColor: 'var(--pharma-green-100)', // light green
-              color: 'var(--pharma-green-600)' // dark green text
-            }}>
+              backgroundColor: "var(--pharma-green-100)", // light green
+              color: "var(--pharma-green-600)", // dark green text
+            }}
+          >
             💵 Cash
           </span>
         );
-      case 'credit card':
-      case 'card':
+      case "credit card":
+      case "card":
         return (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+          <span
+            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
             style={{
-              backgroundColor: 'var(--pharma-purple-100)', // light purple
-              color: 'var(--pharma-purple-600)' // dark purple text
-            }}>
+              backgroundColor: "var(--pharma-purple-100)", // light purple
+              color: "var(--pharma-purple-600)", // dark purple text
+            }}
+          >
             💳 Card
           </span>
         );
@@ -64,10 +72,10 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -79,7 +87,9 @@ const OrderTable = ({ orders, onPrintOrder }) => {
             <Eye className="h-8 w-8 text-gray-400" />
           </div>
           <p className="text-lg font-medium text-gray-700">No orders found</p>
-          <p className="text-sm">Try adjusting your search or filter criteria</p>
+          <p className="text-sm">
+            Try adjusting your search or filter criteria
+          </p>
         </div>
       </div>
     );
@@ -88,7 +98,9 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl font-semibold pharma-text-dark">Processed Orders</h3>
+        <h3 className="text-xl font-semibold pharma-text-dark">
+          Processed Orders
+        </h3>
         <div className="text-sm pharma-text-muted">
           Showing 1 to {Math.min(10, orders.length)} of {orders.length} results
         </div>
@@ -101,12 +113,11 @@ const OrderTable = ({ orders, onPrintOrder }) => {
               key={order.id}
               className="border pharma-border rounded-xl p-6 pharma-bg-card hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group animate-fade-in-left backdrop-blur-sm"
               style={{
-                animationDelay: `${index * 100}ms`
+                animationDelay: `${index * 100}ms`,
               }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 flex-1">
-
                   {/* Order Details */}
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
@@ -115,10 +126,14 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                           <h4 className="font-semibold pharma-text-dark group-hover:pharma-text-primary transition-colors duration-200">
                             {order.id}
                           </h4>
-                          <p className="text-sm pharma-text-gray-600">{order.patient.name}</p>
-                          <p className="text-xs pharma-text-muted">{order.patient.email}</p>
+                          <p className="text-sm pharma-text-gray-600">
+                            {order.patient.name}
+                          </p>
+                          <p className="text-xs pharma-text-muted">
+                            {order.patient.email}
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center space-x-3">
                           {getTypeIcon(order.type)}
                           {getPaymentMethodIcon(order.paymentMethod)}
@@ -129,19 +144,27 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                     <div className="grid grid-cols-4 gap-4 text-xs pharma-text-muted mt-3">
                       <span className="flex flex-col">
                         <span className="text-gray-400">Items</span>
-                        <span className="text-gray-700 font-medium">{order.items} items</span>
+                        <span className="text-gray-700 font-medium">
+                          {order.items} items
+                        </span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Total</span>
-                        <span className="text-gray-700 font-medium">Rs.{order.total.toFixed(2)}</span>
+                        <span className="text-gray-700 font-medium">
+                          Rs.{order.total.toFixed(2)}
+                        </span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Date</span>
-                        <span className="text-gray-700 font-medium">{formatDate(order.date)}</span>
+                        <span className="text-gray-700 font-medium">
+                          {formatDate(order.date)}
+                        </span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Time</span>
-                        <span className="text-gray-700 font-medium">{order.time}</span>
+                        <span className="text-gray-700 font-medium">
+                          {order.time}
+                        </span>
                       </span>
                     </div>
 
@@ -163,13 +186,14 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                 <div className="flex items-center space-x-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
                   <Link
                     to={`/pharmacist/orders/${order.id}`}
+                    state={{ activeOverride: "orders" }}
                     className="flex items-center space-x-1 px-4 py-2 bg-blue-200 text-blue-700 text-xs font-medium rounded-lg hover:bg-blue-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
                   >
                     <Eye className="h-3 w-3" />
                     <span>View</span>
                   </Link>
-                  
-                  {order.actions.includes('print') && (
+
+                  {order.actions.includes("print") && (
                     <button
                       onClick={() => onPrintOrder(order.id)}
                       className="flex items-center space-x-1 px-4 py-2 bg-green-200 text-green-700 text-xs font-medium rounded-lg hover:bg-green-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"
@@ -187,7 +211,8 @@ const OrderTable = ({ orders, onPrintOrder }) => {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
           <div className="text-sm text-gray-500">
-            Showing 1 to {Math.min(10, orders.length)} of {orders.length} results
+            Showing 1 to {Math.min(10, orders.length)} of {orders.length}{" "}
+            results
           </div>
           <div className="flex items-center space-x-2">
             <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-200">

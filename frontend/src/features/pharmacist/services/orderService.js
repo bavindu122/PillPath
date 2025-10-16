@@ -1,185 +1,172 @@
-// Mock data service for orders
+import { tokenUtils } from "../../../utils/tokenUtils";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
+
+// Real data service for pharmacist orders
 export const orderService = {
-  async loadOrders() {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return [
-      {
-        id: 'ORD-250713-01',
-        patient: {
-          name: 'Randika Wasana',
-          email: 'rwasana@gmail.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 123 4567'
-        },
-        type: 'Prescription',
-        items: 3,
-        itemDetails: [
-          { name: 'Amoxicillin 500mg', quantity: 21, price: 1599.00 },
-          { name: 'Ibuprofen 200mg', quantity: 30, price: 850.00 },
-          { name: 'Vitamin D3 1000IU', quantity: 60, price: 1299.00 }
-        ],
-        total: 1750.00,
-        date: '2025-07-10',
-        time: '10:30 AM',
-        paymentMethod: 'Cash',
-        notes: 'None',
-        actions: ['view', 'print']
+  // GET /api/v1/orders/pharmacy?status=RECEIVED
+  async listOrders(status) {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+    const url = `${API_BASE_URL}/orders/pharmacy${qs}`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        ...tokenUtils.getAuthHeaders(),
       },
-      {
-        id: 'ORD-250713-02',
-        patient: {
-          name: 'Shakila Udara',
-          email: 'sakau@email.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 234 5678'
-        },
-        type: 'Prescription',
-        items: 4,
-        itemDetails: [
-          { name: 'Metformin 500mg', quantity: 90, price: 3500.00 },
-          { name: 'Lisinopril 10mg', quantity: 30, price: 1880.00 },
-          { name: 'Atorvastatin 20mg', quantity: 30, price: 2599.00 },
-          { name: 'Aspirin 81mg', quantity: 90, price: 946.00 }
-        ],
-        total: 895.00,
-        date: '2025-06-27',
-        time: '02:15 PM',
-        paymentMethod: 'Credit Card',
-        notes: 'Regular monthly medication refill',
-        actions: ['view', 'print']
-      },
-      {
-        id: 'ORD-250713-01',
-        patient: {
-          name: 'Nadun Dharshana',
-          email: 'naddar@email.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 345 6789'
-        },
-        type: 'OTC',
-        items: 2,
-        itemDetails: [
-          { name: 'Sertraline 50mg', quantity: 30, price: 4599.00 },
-          { name: 'Alprazolam 0.5mg', quantity: 15, price: 2500.00 }
-        ],
-        total: 2450.00,
-        date: '2024-12-26',
-        time: '11:45 AM',
-        paymentMethod: 'Cash',
-        notes: 'Mental health medications - patient counseled',
-        actions: ['view', 'print']
-      },
-      {
-        id: 'ORD-250713-04',
-        patient: {
-          name: 'Sarangi Perera',
-          email: 'saranap@email.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 456 7890'
-        },
-        type: 'Prescription',
-        items: 3,
-        itemDetails: [
-          { name: 'Albuterol Inhaler', quantity: 2, price: 6500.00 },
-          { name: 'Fluticasone Nasal Spray', quantity: 1, price: 2899.00 },
-          { name: 'Montelukast 10mg', quantity: 30, price: 4250.00 }
-        ],
-        total: 1563.00,
-        date: '2024-12-25',
-        time: '09:20 AM',
-        paymentMethod: 'Credit Card',
-        notes: 'Asthma medications - inhaler technique demonstrated',
-        actions: ['view', 'print']
-      },
-      {
-        id: 'ORD-250713-05',
-        patient: {
-          name: 'Chathurani Silva',
-          email: 'chasilva@email.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 567 8901'
-        },
-        type: 'Prescription',
-        items: 1,
-        itemDetails: [
-          { name: 'Insulin Glargine (Lantus)', quantity: 3, price: 20345.00 }
-        ],
-        total: 2034.00,
-        date: '2024-12-24',
-        time: '03:30 PM',
-        paymentMethod: 'Cash',
-        notes: 'Diabetes medication - refrigeration required',
-        actions: ['view', 'print']
-      },
-      {
-        id: 'ORD-250713-06',
-        patient: {
-          name: 'Saman Perera',
-          email: 'samanp@email.com',
-          avatar: '/api/placeholder/40/40',
-          phone: '+94 77 678 9012'
-        },
-        type: 'Prescription',
-        items: 2,
-        itemDetails: [
-          { name: 'Warfarin 5mg', quantity: 30, price: 2899.00 },
-          { name: 'Furosemide 40mg', quantity: 30, price: 1599.00 }
-        ],
-        total: 2850.00,
-        date: '2024-12-23',
-        time: '01:00 PM',
-        paymentMethod: 'Credit Card',
-        notes: 'Cardiovascular medications - follow-up required',
-        actions: ['view', 'print']
-      }
-    ];
+    });
+
+    const contentType = res.headers.get("content-type");
+    const data =
+      contentType && contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+    if (!res.ok) {
+      const msg =
+        (data && data.message) ||
+        (typeof data === "string" ? data : `HTTP ${res.status}`);
+      throw new Error(msg);
+    }
+
+    const list = Array.isArray(data) ? data : [];
+    return list.map(mapOrderSummaryFromDTO);
   },
 
-  // Filter configurations for orders
-  getFilterConfig() {
-    return {
-      defaultSort: 'date',
-      searchFields: ['patient.name', 'patient.email', 'id'],
-      customFilters: {
-        dateRange: (item, value) => {
-          if (value === 'all') return true;
-          
-          const itemDate = new Date(item.date);
-          const today = new Date();
-          
-          switch (value) {
-            case 'last7days':
-              const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-              return itemDate >= weekAgo;
-            case 'last30days':
-              const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-              return itemDate >= monthAgo;
-            case 'last90days':
-              const threeMonthsAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
-              return itemDate >= threeMonthsAgo;
-            default:
-              return true;
-          }
-        },
-        orderType: (item, value) => {
-          if (value === 'all') return true;
-          return item.type.toLowerCase() === value.toLowerCase();
-        },
-        paymentMethod: (item, value) => {
-          if (value === 'all') return true;
-          if (value === 'cash') return item.paymentMethod.toLowerCase() === 'cash';
-          if (value === 'credit') return item.paymentMethod.toLowerCase().includes('credit');
-          return item.paymentMethod.toLowerCase() === value.toLowerCase();
-        }
+  // GET /api/v1/orders/pharmacy/{id}
+  async getOrder(id) {
+    const url = `${API_BASE_URL}/orders/pharmacy/${id}`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        ...tokenUtils.getAuthHeaders(),
       },
-      sortFunctions: {
-        date: (a, b) => new Date(b.date) - new Date(a.date),
-        patient: (a, b) => a.patient.name.localeCompare(b.patient.name),
-        total: (a, b) => b.total - a.total,
-        type: (a, b) => a.type.localeCompare(b.type)
-      }
-    };
-  }
+    });
+
+    const contentType = res.headers.get("content-type");
+    const data =
+      contentType && contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+    if (!res.ok) {
+      const msg =
+        (data && data.message) ||
+        (typeof data === "string" ? data : `HTTP ${res.status}`);
+      throw new Error(msg);
+    }
+
+    return mapOrderDetailFromDTO(data);
+  },
+
+  // PATCH /api/v1/orders/pharmacy/{id}/status
+  async updateStatus(id, status) {
+    const url = `${API_BASE_URL}/orders/pharmacy/${id}/status`;
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...tokenUtils.getAuthHeaders(),
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    const contentType = res.headers.get("content-type");
+    const data =
+      contentType && contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+    if (!res.ok) {
+      const msg =
+        (data && data.message) ||
+        (typeof data === "string" ? data : `HTTP ${res.status}`);
+      throw new Error(msg);
+    }
+    // Backend returns updated PharmacyOrderDTO
+    return mapOrderDetailFromDTO(data);
+  },
 };
+
+// Mappers from backend DTOs to UI-friendly shapes used by components
+function mapOrderSummaryFromDTO(dto) {
+  // dto from list endpoint (items omitted)
+  const dateObj = dto.createdAt ? new Date(dto.createdAt) : null;
+  const date = dateObj ? dateObj.toISOString().slice(0, 10) : "";
+  const time = dateObj
+    ? dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "";
+  return {
+    id: dto.pharmacyOrderId,
+    orderCode: dto.orderCode,
+    patient: {
+      name: dto.customerName,
+      email: dto.patientEmail || dto.customerEmail,
+      phone: dto.patientPhone || dto.customerPhone,
+      avatar: undefined,
+    },
+    type: "Prescription",
+    items: undefined,
+    itemDetails: undefined,
+    total: dto.totals?.total,
+    currency: dto.totals?.currency,
+    date,
+    time,
+    paymentMethod: dto.payment?.method,
+    paymentStatus: dto.payment?.status,
+    notes: dto.customerNote ?? null,
+    status: (dto.status || "").toString(),
+    prescriptionCode: dto.prescriptionCode,
+  };
+}
+
+function mapOrderDetailFromDTO(dto) {
+  const createdAt = dto.createdAt ? new Date(dto.createdAt) : null;
+  const updatedAt = dto.updatedAt ? new Date(dto.updatedAt) : null;
+  const dateCreated = createdAt ? createdAt.toISOString().slice(0, 10) : "";
+  const dateCompleted = dto.completedDate
+    ? new Date(dto.completedDate).toISOString().slice(0, 10)
+    : dto.status === "HANDED_OVER" && updatedAt
+    ? updatedAt.toISOString().slice(0, 10)
+    : null;
+
+  return {
+    orderNumber: dto.orderCode || String(dto.pharmacyOrderId),
+    orderId: dto.pharmacyOrderId,
+    patientName: dto.customerName,
+    patientEmail: dto.patientEmail || dto.customerEmail,
+    patientPhone: dto.patientPhone || dto.customerPhone,
+    patientAddress: dto.patientAddress,
+    pharmacistName: dto.pharmacyName,
+    dateCreated,
+    dateCompleted,
+    totalAmount: dto.totals?.total,
+    currency: dto.totals?.currency,
+    paymentMethod: dto.payment?.method,
+    paymentStatus: dto.payment?.status,
+    paymentReference: dto.payment?.reference,
+    status: dto.status,
+    prescriptionCode: dto.prescriptionCode,
+    prescriptionImageUrl: dto.prescriptionImageUrl || undefined,
+    notes: dto.pharmacistNote || dto.customerNote || null,
+    pickup: {
+      code: dto.pickupCode,
+      location: dto.pickupLocation,
+      lat: dto.pickupLat ?? null,
+      lng: dto.pickupLng ?? null,
+    },
+    items: (dto.items || []).map((it) => ({
+      id: it.itemId,
+      name: it.medicineName,
+      genericName: it.genericName,
+      dosage: it.dosage,
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      totalPrice: it.totalPrice,
+      notes: it.notes || null,
+      available: true,
+      historicalNote: undefined,
+    })),
+  };
+}
