@@ -1,4 +1,5 @@
 import PharmacyService from "./PharmacyService";
+import { tokenUtils } from "../../utils/tokenUtils";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
@@ -16,9 +17,9 @@ class ApiService {
 
     // ✅ FIXED: Only add auth token for authenticated endpoints, not registration
     if (!endpoint.includes("/register") && !endpoint.includes("/login")) {
-      const token = localStorage.getItem("auth_token");
-      if (token && !config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${token}`;
+      const authHeaders = tokenUtils.getAuthHeaders();
+      if (authHeaders.Authorization && !config.headers.Authorization) {
+        config.headers = { ...config.headers, ...authHeaders };
       }
     }
 
@@ -205,15 +206,15 @@ class ApiService {
   // ✅ User logout - Handle potential 403 errors gracefully
   async logout() {
     try {
-      // If backend supports revoking refresh tokens, send it
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        return this.request("auth/revoke", {
-          method: "POST",
-          body: { refreshToken },
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+      // // If backend supports revoking refresh tokens, send it
+      // const refreshToken = localStorage.getItem("refresh_token");
+      // if (refreshToken) {
+      //   return this.request("auth/revoke", {
+      //     method: "POST",
+      //     body: { refreshToken },
+      //     headers: { "Content-Type": "application/json" },
+      //   });
+      // }
 
       // Fallback to simple logout endpoint if refresh token not present
       return this.request("users/logout", {

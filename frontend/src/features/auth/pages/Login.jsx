@@ -13,13 +13,14 @@ import {
   Stethoscope,
 } from "lucide-react";
 import { assets } from "../../../assets/assets";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import GradientButton from "../../../components/UIs/GradientButton";
 import { useAuth } from "../../../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error, isAuthenticated, userType } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -36,30 +37,53 @@ const Login = () => {
     return () => setMounted(false);
   }, []);
 
-  // ✅ UPDATED: Enhanced redirect logic based on backend userType
+  // ✅ UPDATED: Enhanced redirect logic honoring preserved redirect only for role-appropriate targets
   useEffect(() => {
     if (isAuthenticated && userType) {
       console.log("User authenticated, redirecting...", { userType });
+      const params = new URLSearchParams(location.search);
+      const redirectRaw = params.get("redirect");
+      const redirectTo = redirectRaw ? decodeURIComponent(redirectRaw) : null;
+
+      // Safety: only allow internal redirects starting with '/'
+      const isSafeInternal = redirectTo && redirectTo.startsWith("/");
+
+      // Only honor redirect if it matches the user's role scope
+      const roleRoot =
+        userType === "customer"
+          ? "/customer"
+          : userType === "pharmacy-admin"
+          ? "/pharmacy"
+          : userType === "pharmacist"
+          ? "/pharmacist"
+          : userType === "admin"
+          ? "/admin"
+          : null;
+
+      if (isSafeInternal && roleRoot && redirectTo.startsWith(roleRoot)) {
+        navigate(redirectTo, { replace: true });
+        return;
+      }
 
       // ✅ Route based on userType from backend
       switch (userType) {
         case "customer":
-          navigate("/customer");
+          navigate("/customer", { replace: true });
           break;
         case "pharmacy-admin":
-          navigate("/pharmacy");
+          navigate("/pharmacy", { replace: true });
           break;
         case "pharmacist":
-          navigate("/pharmacist");
+          navigate("/pharmacist", { replace: true });
           break;
         case "admin":
-          navigate("/admin");
+          navigate("/admin", { replace: true });
           break;
         default:
-          navigate("/customer");
+          navigate("/customer", { replace: true });
       }
     }
-  }, [isAuthenticated, userType, navigate]);
+  }, [isAuthenticated, userType, navigate, location.search]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

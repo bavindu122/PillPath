@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
-import { Trash2, Send, Save, X, Plus, Minus, CreditCard } from 'lucide-react';
-import '../pages/index-pharmacist.css';
+import React, { useState } from "react";
+import { Trash2, Send, Save, CreditCard } from "lucide-react";
+import "../pages/index-pharmacist.css";
 
-const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSaveDraft, onAddMedicine }) => {
-  const [notes, setNotes] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedMedicine, setSelectedMedicine] = useState(null);
-  const [modalQuantity, setModalQuantity] = useState(1);
-  const [modalDosage, setModalDosage] = useState('');
-  const [modalPrice, setModalPrice] = useState(0);
+const OrderPreview = ({
+  items,
+  onRemoveItem,
+  onUpdateQuantity,
+  onSendOrder,
+  onSaveDraft,
+}) => {
+  const [notes, setNotes] = useState("");
   const [cardPaymentEnabled, setCardPaymentEnabled] = useState(false);
 
   const calculateTotal = () => {
-    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
   const handleQuantityChange = (itemId, newQuantity) => {
@@ -21,96 +22,68 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
     }
   };
 
-  const handleAddMedicine = (medicine) => {
-    setSelectedMedicine(medicine);
-    setModalQuantity(1);
-    setModalDosage('250mg');
-    setModalPrice(medicine.price || 10.00);
-    setShowAddModal(true);
-  };
-
-  const handleModalAddMedicine = () => {
-    if (selectedMedicine) {
-      const newItem = {
-        id: Date.now(),
-        name: selectedMedicine.name,
-        genericName: selectedMedicine.genericName,
-        quantity: modalQuantity,
-        dosage: modalDosage,
-        price: modalPrice,
-        available: true
-      };
-      
-      // Call parent's add medicine function
-      if (onAddMedicine) {
-        onAddMedicine(newItem);
-      }
-      
-      setShowAddModal(false);
-      setSelectedMedicine(null);
-    }
-  };
-
-  const handleModalCancel = () => {
-    setShowAddModal(false);
-    setSelectedMedicine(null);
-    setModalQuantity(1);
-    setModalDosage('');
-    setModalPrice(0);
-  };
-
-  const adjustQuantity = (change) => {
-    const newQuantity = modalQuantity + change;
-    if (newQuantity > 0) {
-      setModalQuantity(newQuantity);
-    }
-  };
-
-  const calculateModalTotal = () => {
-    return (modalPrice * modalQuantity).toFixed(2);
-  };
+  // Add/modify items via MedicineSearch on the left; this component focuses on preview and actions.
 
   return (
     <>
       <div className="bg-white rounded-xl shadow-lg border border-gray-200">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">Order Preview</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Order Preview
+            </h3>
           </div>
-          
+
           {items.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No medicines added to order yet
             </div>
           ) : (
             <div className="space-y-4">
-              {items.map((item) => (
+              {items.map((item, idx) => (
                 <div
-                  key={item.id}
+                  key={item.id ?? `${item.name}-${idx}`}
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
                 >
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{item.name}</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {item.name || "Medicine"}
+                    </h4>
                     <p className="text-sm text-gray-600">
-                      Qty: {item.quantity} tablets {item.dosage && `• ${item.dosage}`}
+                      Qty: {Number(item.quantity) || 0}{" "}
+                      {item.dosage && `• ${item.dosage}`}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-sm text-gray-500">Availability :</span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        item.available 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {item.available ? 'Available' : 'Out of Stock'}
+                      <span className="text-sm text-gray-500">
+                        Availability :
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          item.available === true
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {item.available === true ? "Available" : "Out of Stock"}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-900">Rs.{(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      Rs.
+                      {(
+                        Number(item.price || 0) * Number(item.quantity || 0)
+                      ).toFixed(2)}
+                    </span>
                     <button
-                      onClick={() => onRemoveItem(item.id)}
-                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200"
+                      onClick={() => item.id != null && onRemoveItem(item.id)}
+                      disabled={item.id == null}
+                      className={`p-2 rounded transition-colors duration-200 ${
+                        item.id == null
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-red-600 hover:text-red-800 hover:bg-red-50"
+                      }`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -122,7 +95,10 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
 
           {/* Additional Notes */}
           <div className="mt-6">
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="notes"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Additional Notes
             </label>
             <textarea
@@ -136,46 +112,52 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
           </div>
 
           {/* Payment Settings Toggle */}
-            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <CreditCard className="h-4 w-4 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-yellow-800">Card Payment Settings</h5>
-                    <p className="text-sm text-yellow-700">
-                      {cardPaymentEnabled ? 'Card payments are restricted for customers' : 'Card payments are enabled for customers'}
-                    </p>
-                  </div>
+          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <CreditCard className="h-4 w-4 text-yellow-600" />
                 </div>
-
-                <div className="flex items-center">
-                  <button
-                    onClick={() => setCardPaymentEnabled(!cardPaymentEnabled)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 ${
-                      cardPaymentEnabled ? 'bg-red-500' : 'bg-gray-300'
-                    }`}
-                  >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                      cardPaymentEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                  </button>
-                  <span className="ml-3 text-sm font-medium text-gray-700">
-                    {cardPaymentEnabled ? 'Disabled' : 'Enabled'}
-                  </span>
+                <div>
+                  <h5 className="font-medium text-yellow-800">
+                    Card Payment Settings
+                  </h5>
+                  <p className="text-sm text-yellow-700">
+                    {cardPaymentEnabled
+                      ? "Card payments are restricted for customers"
+                      : "Card payments are enabled for customers"}
+                  </p>
                 </div>
               </div>
-            </div>          
+
+              <div className="flex items-center">
+                <button
+                  onClick={() => setCardPaymentEnabled(!cardPaymentEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 ${
+                    cardPaymentEnabled ? "bg-red-500" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                      cardPaymentEnabled ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span className="ml-3 text-sm font-medium text-gray-700">
+                  {cardPaymentEnabled ? "Disabled" : "Enabled"}
+                </span>
+              </div>
+            </div>
+          </div>
 
           {/* Total and Actions */}
           {items.length > 0 && (
             <>
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
+                  <span className="text-lg font-semibold text-gray-900">
+                    Total Amount:
+                  </span>
                   <span className="text-2xl font-bold text-blue-600">
                     Rs.{calculateTotal().toFixed(2)}
                   </span>
@@ -190,7 +172,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
                   <Send className="h-5 w-5" />
                   <span>Send Order Preview</span>
                 </button>
-                
+
                 <button
                   onClick={onSaveDraft}
                   className="flex items-center space-x-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
@@ -204,127 +186,7 @@ const OrderPreview = ({ items, onRemoveItem, onUpdateQuantity, onSendOrder, onSa
         </div>
       </div>
 
-      {/* Add Medicine Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Add Medicine</h3>
-                <button
-                  onClick={handleModalCancel}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {/* Medicine Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Medicine Name
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedMedicine?.name || ''}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
-                </div>
-
-                {/* Dosage */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dosage
-                  </label>
-                  <select
-                    value={modalDosage}
-                    onChange={(e) => setModalDosage(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  >
-                    <option value="250mg">250mg</option>
-                    <option value="500mg">500mg</option>
-                    <option value="750mg">750mg</option>
-                    <option value="1000mg">1000mg</option>
-                    <option value="100mg">100mg</option>
-                    <option value="200mg">200mg</option>
-                  </select>
-                </div>
-
-                {/* Unit Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Unit Price (Rs.)
-                  </label>
-                  <input
-                    type="number"
-                    value={modalPrice}
-                    onChange={(e) => setModalPrice(parseFloat(e.target.value) || 0)}
-                    step="0.01"
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                {/* Quantity */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quantity
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => adjustQuantity(-1)}
-                      className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <input
-                      type="number"
-                      value={modalQuantity}
-                      onChange={(e) => setModalQuantity(parseInt(e.target.value) || 1)}
-                      min="1"
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                    <button
-                      onClick={() => adjustQuantity(1)}
-                      className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Total Price */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">Total Price:</span>
-                    <span className="text-lg font-bold text-blue-600">
-                      Rs.{calculateModalTotal()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-6 flex space-x-4">
-                <button
-                  onClick={handleModalCancel}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleModalAddMedicine}
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                >
-                  Add to Order
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add medicine handled by MedicineSearch component to avoid duplication */}
     </>
   );
 };

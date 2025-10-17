@@ -15,11 +15,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Star from "./Star";
 import { ScrollContainer } from "../../components/UIs";
+import { useAuth } from "../../hooks/useAuth";
+import PrescriptionService from "../../services/api/PrescriptionService";
+import PharmacyService from "../../services/api/PharmacyService";
 
 const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [uploadMethod, setUploadMethod] = useState(null);
   const [prescriptionImage, setPrescriptionImage] = useState(null);
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -29,58 +33,122 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated, userType } = useAuth();
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [nearbyPharmacies, setNearbyPharmacies] = useState([]);
+  const [pharmLoading, setPharmLoading] = useState(false);
+  const [pharmError, setPharmError] = useState(null);
 
   const handleFindPharmacy = () => {
     // Pass prescription data and modal state to FindPharmacy page
     const prescriptionData = {
       image: prescriptionImage,
       note: note,
-      uploadMethod: uploadMethod
+      uploadMethod: uploadMethod,
     };
-    
+
     // Store prescription data in sessionStorage for retrieval
-    sessionStorage.setItem('prescriptionData', JSON.stringify(prescriptionData));
-    
+    sessionStorage.setItem(
+      "prescriptionData",
+      JSON.stringify(prescriptionData)
+    );
+
     // Navigate to FindPharmacy with special parameter indicating it's from prescription upload
     navigate("/find-pharmacy?from=prescription-upload");
     handleClose();
   };
 
-  // Example pharmacy data - would be fetched from API in real application
-  const nearbyPharmacies = [
-    {
-      id: 1,
-      name: "HealthFirst Pharmacy",
-      address: "123 Medical Lane, Colombo",
-      distance: "0.8",
-      rating: 4.8,
-      deliveryTime: "30-45",
-    },
-    {
-      id: 2,
-      name: "MediCare Plus",
-      address: "45 Wellness Road, Colombo",
-      distance: "1.2",
-      rating: 4.7,
-      deliveryTime: "20-30",
-    },
-    {
-      id: 3,
-      name: "Family Care Pharmacy",
-      address: "78 Health Street, Colombo",
-      distance: "1.5",
-      rating: 4.5,
-      deliveryTime: "40-55",
-    },
-    {
-      id: 4,
-      name: "City Health Pharmacy",
-      address: "120 Main Street, Colombo",
-      distance: "2.2",
-      rating: 4.3,
-      deliveryTime: "35-50",
-    },
-  ];
+  // Helper to compute distance between two lat/lng points in km
+  const computeDistanceKm = (lat1, lon1, lat2, lon2) => {
+    if ([lat1, lon1, lat2, lon2].some((v) => v === null || v === undefined))
+      return null;
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Estimate delivery time label by distance (simple heuristic)
+  const estimateDeliveryTime = (km) => {
+    if (km == null) return "--";
+    if (km <= 1) return "20-30";
+    if (km <= 2) return "30-45";
+    if (km <= 5) return "35-60";
+    return "45-75";
+  };
+
+  // Get user location and load nearby pharmacies when modal opens
+  useEffect(() => {
+    const ensureLocationAndLoad = async () => {
+      if (!isOpen) return;
+      // Get current location (or fallback to Colombo)
+      const fallback = {
+        lat: 6.9271,
+        lng: 79.8612,
+        name: "Colombo, Sri Lanka",
+      };
+      const getLocation = () =>
+        new Promise((resolve) => {
+          if (!navigator.geolocation) return resolve(fallback);
+          navigator.geolocation.getCurrentPosition(
+            (pos) =>
+              resolve({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                name: "Your Current Location",
+              }),
+            () => resolve(fallback),
+            { enableHighAccuracy: true, timeout: 8000 }
+          );
+        });
+
+      const loc = await getLocation();
+      setCurrentLocation(loc);
+
+      // Load pharmacies
+      try {
+        setPharmLoading(true);
+        setPharmError(null);
+        const resp = await PharmacyService.getPharmaciesForMap({
+          userLat: loc.lat,
+          userLng: loc.lng,
+          radiusKm: 10,
+        });
+        const mapped = (resp || []).map((p) => {
+          const lat = parseFloat(p.latitude ?? p.lat);
+          const lng = parseFloat(p.longitude ?? p.lng);
+          const dist = computeDistanceKm(loc.lat, loc.lng, lat, lng);
+          return {
+            id: p.id,
+            name: p.name,
+            address: p.address,
+            distance: dist != null ? Number(dist.toFixed(1)) : null,
+            rating: p.averageRating || p.rating || 0,
+            deliveryTime: estimateDeliveryTime(dist),
+          };
+        });
+        // Sort by distance
+        mapped.sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
+        setNearbyPharmacies(mapped);
+      } catch (e) {
+        console.error("Failed to load nearby pharmacies for modal", e);
+        setPharmError("Unable to load nearby pharmacies.");
+        setNearbyPharmacies([]);
+      } finally {
+        setPharmLoading(false);
+      }
+    };
+
+    ensureLocationAndLoad();
+  }, [isOpen]);
 
   // Rest of state management and handlers remain the same...
   // Handle file upload, camera functions, close modal, etc.
@@ -88,6 +156,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setPrescriptionFile(file);
       const reader = new FileReader();
       reader.onload = (event) => {
         setPrescriptionImage(event.target.result);
@@ -108,7 +177,9 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       setCameraActive(true);
     } catch (err) {
       console.error("Error accessing camera:", err);
-      alert("Unable to access camera. Please check permissions or use file upload instead.");
+      alert(
+        "Unable to access camera. Please check permissions or use file upload instead."
+      );
       setUploadMethod("device");
     }
   };
@@ -126,6 +197,19 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
 
       const imageDataUrl = canvas.toDataURL("image/png");
       setPrescriptionImage(imageDataUrl);
+      // Convert dataURL to File for upload
+      const byteString = atob(imageDataUrl.split(",")[1]);
+      const mimeString = imageDataUrl.split(",")[0].split(":")[1].split(";")[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+      const file = new File([blob], `prescription_${Date.now()}.png`, {
+        type: mimeString,
+      });
+      setPrescriptionFile(file);
       stopCamera();
       setStep(2); // Move to preview step
     }
@@ -146,6 +230,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     setStep(1);
     setUploadMethod(null);
     setPrescriptionImage(null);
+    setPrescriptionFile(null);
     setSelectedPharmacy(null);
     setNote("");
     onClose();
@@ -157,16 +242,61 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
       alert("Please upload a prescription and select a pharmacy.");
       return;
     }
-    
-    setIsLoading(true);
+    if (!isAuthenticated || userType !== "customer") {
+      // Redirect to login; preserve intent
+      navigate(
+        `/login?redirect=${encodeURIComponent(
+          window.location.pathname + window.location.search
+        )}`
+      );
+      return;
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      alert("Prescription sent successfully to " + selectedPharmacy.name);
-      navigate("/customer/activities");
+    try {
+      setIsLoading(true);
+      // Ensure we have a File to upload. If missing (e.g., pasted data URL), convert
+      let fileToUpload = prescriptionFile;
+      if (!fileToUpload && prescriptionImage?.startsWith("data:")) {
+        const byteString = atob(prescriptionImage.split(",")[1]);
+        const mimeString = prescriptionImage
+          .split(",")[0]
+          .split(":")[1]
+          .split(";")[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++)
+          ia[i] = byteString.charCodeAt(i);
+        const blob = new Blob([ab], { type: mimeString });
+        fileToUpload = new File([blob], `prescription_${Date.now()}.png`, {
+          type: mimeString,
+        });
+      }
+
+      const meta = {
+        pharmacyId: selectedPharmacy.id,
+        note: note || undefined,
+        source: "modal",
+      };
+
+      const res = await PrescriptionService.uploadPrescription(
+        fileToUpload,
+        meta
+      );
+      // Optional: if backend returns prescription id
+      if (res?.prescription?.id) {
+        // Navigate to order preview or activities
+        navigate(`/order-preview/${res.prescription.id}`);
+      } else {
+        navigate("/customer/activities");
+      }
+      alert(`Prescription sent successfully to ${selectedPharmacy.name}`);
       handleClose();
-    }, 1500);
+    } catch (err) {
+      console.error("Prescription upload failed", err);
+      alert(err?.message || "Failed to upload prescription. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Close modal when clicking outside
@@ -175,7 +305,8 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     const handleClickOutside = (event) => {
       if (
         modalContentRef.current &&
-        !modalContentRef.current.contains(event.target)
+        !modalContentRef.current.contains(event.target) &&
+        !isLoading // don't allow closing while uploading
       ) {
         handleClose();
       }
@@ -188,7 +319,7 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, isLoading]);
 
   // Don't render anything if the modal is not open
   if (!isOpen) return null;
@@ -212,6 +343,17 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
           className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden"
           ref={modalContentRef}
         >
+          {isLoading && (
+            <div className="absolute inset-0 z-40 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center">
+              <div className="w-14 h-14 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+              <div className="text-gray-700 font-medium">
+                Uploading your prescription…
+              </div>
+              <div className="mt-2 text-gray-500 text-sm">
+                Please wait, this may take a few seconds.
+              </div>
+            </div>
+          )}
           {/* Header - Kept outside scrollable area */}
           <div className="bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900 p-5 flex justify-between items-center sticky top-0 z-30">
             <h3 className="text-xl font-bold text-white">
@@ -495,91 +637,111 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Pharmacy List */}
-                    <ScrollContainer 
-                      maxHeight="320px" 
+                    <ScrollContainer
+                      maxHeight="320px"
                       scrollbarTheme="default"
                       scrollbarWidth="6px"
                       className="space-y-3"
                     >
-                      {nearbyPharmacies.map((pharmacy, index) => (
-                        <motion.div
-                          key={pharmacy.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          whileHover={{ scale: 1.01 }}
-                          className={`border rounded-xl p-4 transition-all cursor-pointer ${
-                            selectedPharmacy?.id === pharmacy.id
-                              ? "border-primary/50 bg-white/90 shadow-lg ring-2 ring-primary/20"
-                              : "border-white/50 bg-white/40 hover:border-primary/30 hover:bg-white/60 backdrop-blur-sm"
-                          }`}
-                          onClick={() => setSelectedPharmacy(pharmacy)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-lg text-gray-800">
-                                  {pharmacy.name}
-                                </h4>
-                                {pharmacy.distance <= 1 && (
-                                  <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                                    Nearby
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-600 mb-3">
-                                {pharmacy.address}
-                              </p>
-
-                              {/* Pharmacy Info Grid */}
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
-                                  <MapPin
-                                    size={14}
-                                    className="text-blue-500 mr-2"
-                                  />
-                                  <span className="text-gray-700">
-                                    {pharmacy.distance} km
-                                  </span>
-                                </div>
-                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
-                                  <Clock
-                                    size={14}
-                                    className="text-orange-500 mr-2"
-                                  />
-                                  <span className="text-gray-700">
-                                    {pharmacy.deliveryTime} mins
-                                  </span>
-                                </div>
-                                <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
-                                  <Star
-                                    size={14}
-                                    className="text-yellow-500 mr-2 fill-yellow-500"
-                                  />
-                                  <span className="text-gray-700">
-                                    {pharmacy.rating}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Selection Indicator */}
-                            <div className="flex-shrink-0 ml-4">
-                              <div
-                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                  selectedPharmacy?.id === pharmacy.id
-                                    ? "border-primary bg-primary text-white shadow-lg"
-                                    : "border-gray-300 hover:border-primary/50"
-                                }`}
-                              >
-                                {selectedPharmacy?.id === pharmacy.id && (
-                                  <Check size={14} />
-                                )}
-                              </div>
-                            </div>
+                      {pharmLoading && (
+                        <div className="flex items-center justify-center py-8 text-gray-600">
+                          <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-3"></div>
+                          Loading nearby pharmacies…
+                        </div>
+                      )}
+                      {!pharmLoading && pharmError && (
+                        <div className="text-center py-6 text-red-600 text-sm">
+                          {pharmError}
+                        </div>
+                      )}
+                      {!pharmLoading &&
+                        !pharmError &&
+                        nearbyPharmacies.length === 0 && (
+                          <div className="text-center py-6 text-gray-600 text-sm">
+                            No nearby pharmacies found.
                           </div>
-                        </motion.div>
-                      ))}
+                        )}
+                      {!pharmLoading &&
+                        !pharmError &&
+                        nearbyPharmacies.map((pharmacy, index) => (
+                          <motion.div
+                            key={pharmacy.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            whileHover={{ scale: 1.01 }}
+                            className={`border rounded-xl p-4 transition-all cursor-pointer ${
+                              selectedPharmacy?.id === pharmacy.id
+                                ? "border-primary/50 bg-white/90 shadow-lg ring-2 ring-primary/20"
+                                : "border-white/50 bg-white/40 hover:border-primary/30 hover:bg-white/60 backdrop-blur-sm"
+                            }`}
+                            onClick={() => setSelectedPharmacy(pharmacy)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-semibold text-lg text-gray-800">
+                                    {pharmacy.name}
+                                  </h4>
+                                  {pharmacy.distance <= 1 && (
+                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                      Nearby
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600 mb-3">
+                                  {pharmacy.address}
+                                </p>
+
+                                {/* Pharmacy Info Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                  <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                    <MapPin
+                                      size={14}
+                                      className="text-blue-500 mr-2"
+                                    />
+                                    <span className="text-gray-700">
+                                      {pharmacy.distance} km
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                    <Clock
+                                      size={14}
+                                      className="text-orange-500 mr-2"
+                                    />
+                                    <span className="text-gray-700">
+                                      {pharmacy.deliveryTime} mins
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center text-sm bg-white/50 rounded-lg px-2 py-1">
+                                    <Star
+                                      size={14}
+                                      className="text-yellow-500 mr-2 fill-yellow-500"
+                                    />
+                                    <span className="text-gray-700">
+                                      {pharmacy.rating}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Selection Indicator */}
+                              <div className="flex-shrink-0 ml-4">
+                                <div
+                                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                    selectedPharmacy?.id === pharmacy.id
+                                      ? "border-primary bg-primary text-white shadow-lg"
+                                      : "border-gray-300 hover:border-primary/50"
+                                  }`}
+                                >
+                                  {selectedPharmacy?.id === pharmacy.id && (
+                                    <Check size={14} />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
                     </ScrollContainer>
 
                     {/* View More Option */}
