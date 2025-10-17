@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import OrderPreviewModal from "./PastOrderPreviewModal";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -7,20 +6,15 @@ import {
   Star,
   Eye,
   Repeat,
-  MoreVertical,
-  User,
-  Mail,
-  Package,
   CreditCard,
   DollarSign,
   MapPin,
-  FileText
 } from "lucide-react";
 
 const OrderCard = ({ order, onView }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const getPaymentMethodIcon = (method) => {
+  const getPaymentMethodIcon = (method = "") => {
     switch (method.toLowerCase()) {
       case "cash":
         return <DollarSign size={14} />;
@@ -32,15 +26,13 @@ const OrderCard = ({ order, onView }) => {
     }
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating = 0) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
         size={14}
         className={`${
-          index < rating
-            ? "text-yellow-400 fill-yellow-400"
-            : "text-gray-400"
+          index < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-400"
         }`}
       />
     ));
@@ -52,40 +44,27 @@ const OrderCard = ({ order, onView }) => {
       whileTap={{ scale: 0.99 }}
       className="glass-card rounded-2xl border border-white/30 shadow-2xl hover:shadow-3xl overflow-hidden transition-all duration-300"
       style={{
-        background: 'linear-gradient(135deg, rgba(185,147,255,0.18) 0%, rgba(91,78,219,0.16) 100%)',
-        backdropFilter: 'blur(18px)',
-        WebkitBackdropFilter: 'blur(18px)',
-        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)',
-        border: '1.5px solid rgba(255,255,255,0.18)',
+        background:
+          "linear-gradient(135deg, rgba(185,147,255,0.18) 0%, rgba(91,78,219,0.16) 100%)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.18)",
+        border: "1.5px solid rgba(255,255,255,0.18)",
       }}
     >
       <div className="p-6">
-        <div className="flex items-center justify-between gap-6">
-          {/* Left Section - Order Info */}
-          <div className="flex items-center gap-4 flex-1">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#5B4EDB]">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="#B993FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="9" cy="7" r="4" stroke="#B993FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" stroke="#B993FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#B993FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="space-y-1">
+        <div className="flex items-stretch gap-4">
+          {/* Left: Stacked content */}
+          <div className="flex-1 space-y-4">
+            {/* Top: Order Code */}
+            <div>
               <h3 className="text-white font-semibold text-lg">
                 {order.orderNumber}
               </h3>
-              <div className="flex items-center gap-2">
-                
-                <div className="flex gap-1">
-                  {renderStars(order.rating)}
-                </div>
-              </div>
+              <div className="mt-1 flex gap-1">{renderStars(order.rating)}</div>
             </div>
-          </div>
 
-          {/* Center Section - Order Details */}
-          <div className="flex-1 space-y-3">
+            {/* Date & Time */}
             <div className="flex items-center gap-4 text-sm text-white/60">
               <div className="flex items-center gap-1">
                 <Calendar size={14} />
@@ -96,49 +75,68 @@ const OrderCard = ({ order, onView }) => {
                 <span>{order.time}</span>
               </div>
             </div>
-          </div>
 
-          {/* Center-Right Section - Pharmacy & Payment */}
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <MapPin size={14} />
-              <span className="truncate">{order.pharmacy}</span>
+            {/* Pharmacy & Payment */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-white/60 text-sm">
+                <MapPin size={14} />
+                <span className="truncate">{order.pharmacy}</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/60 text-sm">
+                {getPaymentMethodIcon(order.paymentMethod)}
+                <span>{order.paymentMethod}</span>
+              </div>
+              {order.itemCount != null ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-white/60 text-sm">Items:</span>
+                  <div className="bg-white/20 rounded-full h-7 w-7 flex items-center justify-center text-white text-sm font-medium ml-2">
+                    {order.itemCount}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-white/60 text-sm">Pharmacies:</span>
+                  <div className="bg-white/20 rounded-full h-7 w-7 flex items-center justify-center text-white text-sm font-medium ml-2">
+                    {order.pharmacyCount || 0}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              {getPaymentMethodIcon(order.paymentMethod)}
-              <span>{order.paymentMethod}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white/60 text-sm">Items:</span>
-              <div className="bg-white/20 rounded-full h-7 w-7 flex items-center justify-center text-white text-sm font-medium ml-2">
-                {order.itemCount}
+
+            {/* Total & Actions */}
+            <div className="flex items-center justify-between gap-4 pt-2">
+              <div>
+                <div className="text-white font-bold text-xl">
+                  {order.total}
+                </div>
+                <div className="text-white/60 text-xs">Total Amount</div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={onView}
+                  className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <Eye size={14} />
+                  View
+                </button>
+                <button className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                  <Repeat size={14} />
+                  Reorder
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Total & Actions */}
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-white font-bold text-xl">{order.total}</div>
-              <div className="text-white/60 text-xs">Total Amount</div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={onView}
-                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <Eye size={14} />
-                View
-              </button>
-              <button className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                <Repeat size={14} />
-                Reorder
-              </button>
-            </div>
-           
+          {/* Right: Prescription image */}
+          <div className="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/10">
+            <img
+              src={order.prescriptionImg || "/src/assets/img/prescription.jpeg"}
+              alt="Prescription"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
         </div>
-
       </div>
     </motion.div>
   );

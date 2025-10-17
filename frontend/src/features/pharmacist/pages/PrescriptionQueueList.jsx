@@ -10,16 +10,19 @@ import {
   MessageCircle,
   SortDesc,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PharmaPageLayout from "../components/PharmaPageLayout";
 import useListData from "../hooks/useListData";
 import { prescriptionService } from "../services/prescriptionService";
+import { orderService } from "../services/orderService";
 import "./index-pharmacist.css";
 
 const PrescriptionQueue = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
 
   // Use the new list data hook with prescription service
   const {
@@ -61,6 +64,10 @@ const PrescriptionQueue = () => {
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "ready_for_pickup":
         return "bg-green-100 text-green-800 border-green-200";
+      case "order_placed":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "preparing_order":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -76,30 +83,89 @@ const PrescriptionQueue = () => {
         return "Needs Clarification";
       case "ready_for_pickup":
         return "Ready for Pickup";
+      case "order_placed":
+        return "Order Placed";
+      case "preparing_order":
+        return "Preparing Order";
       default:
         return "Unknown";
     }
   };
 
-  const handleApprove = (id) => {
-    console.log("Approve prescription:", id);
+  const handleApprove = async (id) => {
+    setApprovingId(id);
+    // Optimistic update to in_progress; rollback on failure
     updateData((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: "in_progress" } : p))
     );
+    try {
+      await prescriptionService.updateStatus(id, "IN_PROGRESS");
+    } catch (err) {
+      console.error("Failed to approve:", err);
+      // Rollback by reloading list; simplest path
+      try {
+        const refreshed = await prescriptionService.loadPrescriptions();
+        updateData(() => refreshed);
+      } catch {
+        // As a fallback, notify the user
+      }
+      alert(
+        err?.message ||
+          "Could not approve this submission. It may be locked or not editable."
+      );
+    } finally {
+      setApprovingId(null);
+    }
   };
 
-  const handleReject = (id) => {
-    console.log("Reject prescription:", id);
-    updateData((prev) => prev.filter((p) => p.id !== id));
+  const handleReject = async (id) => {
+    // Optimistic remove; capture snapshot before update for rollback
+    let snapshot = null;
+    updateData((prev) => {
+      // capture a shallow copy of the current list before mutating
+      snapshot = [...prev];
+      return prev.filter((p) => p.id !== id);
+    });
+    try {
+      await prescriptionService.deleteSubmission(id);
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      // Rollback using snapshot if available; fallback to server reload
+      if (snapshot) {
+        updateData(() => snapshot);
+      } else {
+        try {
+          const refreshed = await prescriptionService.loadPrescriptions();
+          updateData(() => refreshed);
+        } catch {}
+      }
+      alert(
+        err?.message ||
+          "Could not delete this submission. It may be part of an active order."
+      );
+    }
   };
 
-  const handleClarify = (id) => {
-    console.log("Request clarification:", id);
-    updateData((prev) =>
-      prev.map((p) =>
+  const handleClarify = async (id) => {
+    // Optimistic set clarification_needed; rollback on failure by reloading
+    updateData((list) =>
+      list.map((p) =>
         p.id === id ? { ...p, status: "clarification_needed" } : p
       )
     );
+    try {
+      await prescriptionService.updateStatus(id, "CLARIFICATION_NEEDED");
+    } catch (err) {
+      console.error("Failed to set clarification:", err);
+      try {
+        const refreshed = await prescriptionService.loadPrescriptions();
+        updateData(() => refreshed);
+      } catch {}
+      alert(
+        err?.message ||
+          "Could not update status. It may be locked or not editable."
+      );
+    }
   };
 
   const headerActions = (
@@ -298,31 +364,73 @@ const PrescriptionQueue = () => {
                       </div>
 
                       <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
-                        <Link
-                          to={`/pharmacist/review/${
-                            prescription.reviewId || prescription.id
-                          }`}
-                          state={{
-                            fallback: {
-                              id: prescription.reviewId || prescription.id,
-                              code: prescription.code,
-                              customerName: prescription.patientName,
-                              imageUrl: prescription.imageUrl,
-                              status: (prescription.status || "").toUpperCase(),
-                            },
+                        <button
+                          onClick={async () => {
+                            // Try to navigate to an existing pharmacy order that matches this prescription
+                            try {
+                              const orders = await orderService.listOrders();
+                              const match = orders.find(
+                                (o) => o.prescriptionCode === prescription.code
+                              );
+                              if (match?.id) {
+                                navigate(`/pharmacist/orders/${match.id}`, {
+                                  state: { activeOverride: "prescriptions" },
+                                });
+                                return;
+                              }
+                            } catch (e) {
+                              // Fall through to default review route if listing fails
+                              console.warn("Could not list orders:", e);
+                            }
+                            // Fallback: go to the existing review page
+                            navigate(
+                              `/pharmacist/review/${
+                                prescription.reviewId || prescription.id
+                              }`,
+                              {
+                                state: {
+                                  activeOverride: "prescriptions",
+                                  fallback: {
+                                    id:
+                                      prescription.reviewId || prescription.id,
+                                    code: prescription.code,
+                                    customerName: prescription.patientName,
+                                    imageUrl: prescription.imageUrl,
+                                    status: (
+                                      prescription.status || ""
+                                    ).toUpperCase(),
+                                  },
+                                },
+                              }
+                            );
                           }}
                           className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <Eye className="h-3 w-3" />
                           <span>Review</span>
-                        </Link>
+                        </button>
                         <button
                           onClick={() => handleApprove(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-green-200 text-green-800 text-xs font-medium rounded-lg hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          disabled={approvingId === prescription.id}
+                          className={`flex items-center space-x-1 px-3 sm:px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
+                            approvingId === prescription.id
+                              ? "bg-green-100 text-green-500 cursor-not-allowed"
+                              : "bg-green-200 text-green-800 hover:to-green-300 hover:shadow-md transform hover:scale-105"
+                          }`}
                         >
-                          <CheckCircle className="h-3 w-3" />
-                          <span className="hidden sm:inline">Approve</span>
-                          <span className="sm:hidden">✓</span>
+                          {approvingId === prescription.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-3 w-3" />
+                          )}
+                          <span className="hidden sm:inline">
+                            {approvingId === prescription.id
+                              ? "Approving..."
+                              : "Approve"}
+                          </span>
+                          <span className="sm:hidden">
+                            {approvingId === prescription.id ? "..." : "✓"}
+                          </span>
                         </button>
                         <button
                           onClick={() => handleClarify(prescription.id)}
