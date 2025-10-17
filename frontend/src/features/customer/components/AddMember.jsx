@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { addFamilyMember } from '../services/AddFamilyMemberService';
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   X,
@@ -27,6 +26,9 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
     medicalConditions: [""],
     currentMedications: []
   });
+
+  // Loading state to prevent double submissions
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
   const handleInputChange = (field, value) => {
@@ -79,11 +81,18 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
 
   const handleSubmitNewMember = async (e) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting) return;
+    
     // Basic validation
     if (!newMember.name || !newMember.relation || !newMember.age) {
       alert("Please fill in all required fields (Name, Relation, Age)");
       return;
     }
+
+    setIsSubmitting(true); // Set loading state
+
     // Prepare member data for API
     const memberData = {
       ...newMember,
@@ -95,16 +104,19 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
       activePrescriptions: 0,
       totalPrescriptions: 0
     };
+
     console.log('Submitting member data:', memberData);
+    
     try {
-      const result = await addFamilyMember(memberData);
-      console.log('Member added successfully:', result);
-      if (onAddMember) onAddMember(result);
+      // Use the parent component's onAddMember function instead of calling API directly
+      await onAddMember(memberData);
       resetForm();
       onClose();
     } catch (error) {
       console.error('Failed to add family member:', error);
       alert(`Failed to add family member: ${error.message}`);
+    } finally {
+      setIsSubmitting(false); // Reset loading state
     }
   };
   if (!isOpen) return null;
@@ -374,10 +386,11 @@ const AddMember = ({ isOpen, onClose, onAddMember }) => {
               </button>
               <button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <Save size={18} />
-                Add Member
+                {isSubmitting ? 'Adding...' : 'Add Member'}
               </button>
             </div>
           </form>

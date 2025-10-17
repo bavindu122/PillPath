@@ -30,7 +30,7 @@ const StatsCards = ({ stats }) => {
           key={index}
           className={`${getCardColor(stat.color)} border rounded-xl p-6 hover:shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer group`}
           style={{
-          animationDelay: `${index * 100}ms`,
+            animationDelay: `${index * 100}ms`,
             animation: 'slideInUp 0.6s ease-out forwards'
           }}
         >
