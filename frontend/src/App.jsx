@@ -12,6 +12,8 @@ import Login from "./features/auth/pages/Login";
 import Footer from "./components/Layout/Footer";
 import Register from "./features/auth/pages/Register";
 import Navbar from "./components/Layout/Navbar";
+import ForgotPassword from "./features/auth/pages/ForgotPassword";
+import ResetPassword from "./features/auth/pages/ResetPassword";
 
 import PharmacyAdmin from "./features/pharmacy-admin/PharmacyAdmin";
 import Pharmacist from "./features/pharmacist/pages/Pharmacist";
@@ -45,6 +47,8 @@ const App = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
           <Route
             path="/pharmacist/*"

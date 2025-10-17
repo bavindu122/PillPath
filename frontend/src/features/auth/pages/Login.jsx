@@ -293,12 +293,12 @@ const Login = () => {
 
           {/* Forgot password */}
           <div className="w-full text-right relative z-10 animate-fade-in-up delay-500">
-            <button
-              type="button"
+            <Link
+              to="/forgot-password"
               className="text-info text-sm hover:text-primary-blue hover:underline transition-all duration-200"
             >
               Forgot Password?
-            </button>
+            </Link>
           </div>
 
           {/* Sign in button */}

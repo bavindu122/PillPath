@@ -247,6 +247,49 @@ class ApiService {
   async getProfile(userType = "customer") {
     return this.getUserProfile();
   }
+
+  // ✅ Password Reset Methods
+  
+  /**
+   * Request a password reset link to be sent to the user's email
+   * @param {string} email - The user's email address
+   * @returns {Promise} Response from the server
+   */
+  async requestPasswordReset(email) {
+    return this.request("password-reset/request", {
+      method: "POST",
+      body: { email: email.trim().toLowerCase() },
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  /**
+   * Verify if a password reset token is valid
+   * @param {string} token - The reset token from the email link
+   * @returns {Promise} Response indicating token validity
+   */
+  async verifyResetToken(token) {
+    return this.request(`password-reset/verify?token=${encodeURIComponent(token)}`, {
+      method: "GET",
+    });
+  }
+
+  /**
+   * Reset the password using a valid token
+   * @param {Object} resetData - Object containing token, newPassword, and confirmPassword
+   * @returns {Promise} Response from the server
+   */
+  async resetPassword(resetData) {
+    return this.request("password-reset/reset", {
+      method: "POST",
+      body: {
+        token: resetData.token,
+        newPassword: resetData.newPassword,
+        confirmPassword: resetData.confirmPassword,
+      },
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
 
 export default new ApiService();
