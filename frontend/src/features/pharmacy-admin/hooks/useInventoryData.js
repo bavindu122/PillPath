@@ -24,7 +24,10 @@ export const useInventoryData = (pharmacyId) => {
   // Fetch all products for a specific pharmacy
   useEffect(() => {
     const fetchProducts = async () => {
+      console.log('useInventoryData - pharmacyId received:', pharmacyId, 'Type:', typeof pharmacyId);
+      
       if (!pharmacyId) {
+          console.error('useInventoryData - No pharmacy ID provided!');
           setError("No pharmacy ID provided.");
           setLoading(false);
           return;

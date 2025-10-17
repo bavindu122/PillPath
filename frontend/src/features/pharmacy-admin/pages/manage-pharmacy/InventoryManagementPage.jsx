@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useInventoryData } from "../../hooks/useInventoryData";
+import { useAuth } from "../../../../hooks/useAuth";
 import InventorySummaryCard from "../../components/InventorySettings/InventorySummaryCard";
 import SearchBar from "../../components/InventorySettings/SearchBar";
 import SearchProductCard from "../../components/InventorySettings/SearchProductCard";
@@ -7,6 +8,12 @@ import CurrentStorefrontProductCard from "../../components/InventorySettings/Cur
 import AddItem from "../../components/InventorySettings/AddItem";
 
 const InventoryManagementPage = () => {
+  const { user } = useAuth();
+  const pharmacyId = user?.pharmacyId;
+
+  console.log('InventoryManagementPage - User:', user);
+  console.log('InventoryManagementPage - Pharmacy ID:', pharmacyId);
+
   const {
     inventorySummary,
     searchTerm,
@@ -20,7 +27,7 @@ const InventoryManagementPage = () => {
     loading,
     error,
     products
-  } = useInventoryData();
+  } = useInventoryData(pharmacyId);
 
   // The searchResults are explicitly set to an empty array to prevent
   // any products from the main database from being displayed in the search section.
@@ -60,6 +67,18 @@ const InventoryManagementPage = () => {
       showNotification('Failed to update product.', 'error');
     }
   };
+
+  // Show loading state
+  if (!pharmacyId) {
+    return (
+      <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
+        <div className="text-center text-red-600">
+          <p className="text-lg font-semibold">No pharmacy ID found.</p>
+          <p className="text-sm">Please make sure you are logged in as a pharmacy admin.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
