@@ -5,7 +5,8 @@ import "../pages/index-pharmacist.css";
 
 const OrderTable = ({ orders, onPrintOrder }) => {
   const getTypeIcon = (type) => {
-    switch (type.toLowerCase()) {
+    const t = (type || "").toLowerCase();
+    switch (t) {
       case "prescription":
         return (
           <span
@@ -36,7 +37,8 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   };
 
   const getPaymentMethodIcon = (paymentMethod) => {
-    switch (paymentMethod.toLowerCase()) {
+    const pm = (paymentMethod || "").toLowerCase();
+    switch (pm) {
       case "cash":
         return (
           <span
@@ -72,6 +74,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -145,13 +148,13 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       <span className="flex flex-col">
                         <span className="text-gray-400">Items</span>
                         <span className="text-gray-700 font-medium">
-                          {order.items} items
+                          {order.items != null ? `${order.items} items` : "—"}
                         </span>
                       </span>
                       <span className="flex flex-col">
                         <span className="text-gray-400">Total</span>
                         <span className="text-gray-700 font-medium">
-                          Rs.{order.total.toFixed(2)}
+                          Rs.{Number(order.total ?? 0).toFixed(2)}
                         </span>
                       </span>
                       <span className="flex flex-col">
@@ -163,7 +166,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       <span className="flex flex-col">
                         <span className="text-gray-400">Time</span>
                         <span className="text-gray-700 font-medium">
-                          {order.time}
+                          {order.time || "-"}
                         </span>
                       </span>
                     </div>
@@ -193,7 +196,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                     <span>View</span>
                   </Link>
 
-                  {order.actions.includes("print") && (
+                  {(order.actions || []).includes("print") && (
                     <button
                       onClick={() => onPrintOrder(order.id)}
                       className="flex items-center space-x-1 px-4 py-2 bg-green-200 text-green-700 text-xs font-medium rounded-lg hover:bg-green-200 hover:shadow-md transform hover:scale-105 transition-all duration-200"

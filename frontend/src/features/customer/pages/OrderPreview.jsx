@@ -133,10 +133,12 @@ const OrderPreview = () => {
     return () => abort.abort();
   }, [prescriptionCode, pharmacyId, selectionsKey, statePharmacyName]);
 
-  const totalPrice = medications.reduce(
-    (sum, med) => sum + (med.selected ? Number(med.price || 0) : 0),
-    0
-  );
+  const totalPrice = medications.reduce((sum, med) => {
+    if (!med.selected) return sum;
+    const unit = Number(med.price || 0);
+    const qty = Number(med.quantity || 1);
+    return sum + unit * qty;
+  }, 0);
   const hasSelectedMedications = medications.some((med) => med.selected);
 
   const handleMedicationToggle = (id) => {
@@ -364,18 +366,34 @@ const OrderPreview = () => {
                             {medication.name}
                           </h4>
                           <p className="text-white/60 text-sm">
-                            {medication.quantity}
+                            {medication.strength}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <span
-                          className={`font-semibold text-lg ${
+                        <div
+                          className={`font-semibold text-sm ${
                             medication.selected ? "text-white" : "text-white/50"
                           }`}
                         >
-                          Rs. {medication.price.toFixed(2)}
-                        </span>
+                          Unit: Rs. {Number(medication.price || 0).toFixed(2)}
+                        </div>
+                        <div className="text-xs text-white/60">
+                          x {Number(medication.quantity || 1)}
+                        </div>
+                        <div
+                          className={`font-semibold text-lg ${
+                            medication.selected
+                              ? "text-emerald-300"
+                              : "text-white/50"
+                          }`}
+                        >
+                          Rs.{" "}
+                          {(
+                            Number(medication.price || 0) *
+                            Number(medication.quantity || 1)
+                          ).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}

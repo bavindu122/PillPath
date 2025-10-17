@@ -104,6 +104,7 @@ const Activities = () => {
               name: p.pharmacyName,
               address: p.address,
               orderCode: p.orderCode || item.orderCode || undefined,
+              orderStatus: p.orderStatus || null,
               status: statusLabel,
               statusType,
               medications: p.medications || undefined,
@@ -310,20 +311,8 @@ const Activities = () => {
                               : ""
                           }`}
                           onClick={() => {
-                            const upper = String(
-                              pharmacy.status || ""
-                            ).toUpperCase();
-                            if (pharmacy.status === "View Order Preview") {
-                              handleViewOrderPreview(
-                                prescription.id,
-                                pharmacy.pharmacyId,
-                                pharmacy.name
-                              );
-                            } else if (
-                              (upper.includes("PREPARING") ||
-                                upper.includes("READY")) &&
-                              pharmacy.orderCode
-                            ) {
+                            const hasOrder = pharmacy.orderStatus != null;
+                            if (hasOrder && pharmacy.orderCode) {
                               const q = new URLSearchParams({
                                 pharmacyId: String(pharmacy.pharmacyId),
                                 locked: "1",
@@ -338,6 +327,12 @@ const Activities = () => {
                                     locked: true,
                                   },
                                 }
+                              );
+                            } else if (!hasOrder) {
+                              handleViewOrderPreview(
+                                prescription.id,
+                                pharmacy.pharmacyId,
+                                pharmacy.name
                               );
                             }
                           }}
@@ -351,20 +346,8 @@ const Activities = () => {
                           whileHover={{ x: 5 }}
                           className="text-white/60 hover:text-white transition-colors cursor-pointer"
                           onClick={() => {
-                            const upper = String(
-                              pharmacy.status || ""
-                            ).toUpperCase();
-                            if (pharmacy.status === "View Order Preview") {
-                              handleViewOrderPreview(
-                                prescription.id,
-                                pharmacy.pharmacyId,
-                                pharmacy.name
-                              );
-                            } else if (
-                              (upper.includes("PREPARING") ||
-                                upper.includes("READY")) &&
-                              pharmacy.orderCode
-                            ) {
+                            const hasOrder = pharmacy.orderStatus != null;
+                            if (hasOrder && pharmacy.orderCode) {
                               const q = new URLSearchParams({
                                 pharmacyId: String(pharmacy.pharmacyId),
                                 locked: "1",
@@ -379,6 +362,12 @@ const Activities = () => {
                                     locked: true,
                                   },
                                 }
+                              );
+                            } else if (!hasOrder) {
+                              handleViewOrderPreview(
+                                prescription.id,
+                                pharmacy.pharmacyId,
+                                pharmacy.name
                               );
                             }
                           }}
