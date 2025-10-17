@@ -58,7 +58,9 @@ const OrderCard = ({ order, onView }) => {
           <div className="flex-1 space-y-4">
             {/* Top: Order Code */}
             <div>
-              <h3 className="text-white font-semibold text-lg">{order.orderNumber}</h3>
+              <h3 className="text-white font-semibold text-lg">
+                {order.orderNumber}
+              </h3>
               <div className="mt-1 flex gap-1">{renderStars(order.rating)}</div>
             </div>
 
@@ -104,7 +106,9 @@ const OrderCard = ({ order, onView }) => {
             {/* Total & Actions */}
             <div className="flex items-center justify-between gap-4 pt-2">
               <div>
-                <div className="text-white font-bold text-xl">{order.total}</div>
+                <div className="text-white font-bold text-xl">
+                  {order.total}
+                </div>
                 <div className="text-white/60 text-xs">Total Amount</div>
               </div>
               <div className="flex gap-2">
