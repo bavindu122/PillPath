@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Search, 
-  Filter, 
+import {
+  Search,
+  Filter,
   Calendar,
   Package,
   Star,
   ChevronDown,
   Eye,
   Repeat,
-  MoreVertical
+  MoreVertical,
 } from "lucide-react";
 import OrderCard from "../components/OrderCard";
 import OrderPreviewModal from "../components/PastOrderPreviewModal";
+import OrdersService from "../../../services/api/OrdersService";
 
 const PastOrders = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,133 +22,124 @@ const PastOrders = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Sample past orders data based on the screenshot structure
-  const pastOrders = [
-    {
-      id: "RX-250117-01",
-      orderNumber: "RX-250117-01",
-      total: "Rs. 127.50",
-      date: "Dec 28, 2024",
-      time: "10:30 AM",
-      status: "Completed",
-      notes: "Patient allergic to penicillin - verified safe alternative",
-      pharmacy: "Central Pharmacy",
-      itemCount: 3,
-      prescriptionType: "Prescription",
-      paymentMethod: "Cash",
-      rating: 5,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    },
-    {
-      id: "RX-250117-02", 
-      orderNumber: "RX-250117-02",
-      total: "Rs.89.25",
-      date: "Dec 25, 2024",
-      time: "2:15 PM",
-      status: "Completed",
-      notes: "Regular customer - no allergies",
-      pharmacy: "HealthPlus Pharmacy",
-      itemCount: 2,
-      prescriptionType: "OTC",
-      paymentMethod: "Credit Card",
-      rating: 4,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    },
-    {
-      id: "RX-250117-03",
-      orderNumber: "RX-250117-03", 
-      total: "Rs. 45.00",
-      date: "Dec 22, 2024",
-      time: "11:45 AM",
-      status: "Completed",
-      notes: "Insurance coverage applied",
-      pharmacy: "Community Pharmacy",
-      itemCount: 1,
-      prescriptionType: "Prescription",
-      paymentMethod: "Insurance",
-      rating: 5,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    },
-    {
-      id: "RX-250117-04",
-      orderNumber: "RX-250117-04",
-      total: "Rs. 156.75",
-      date: "Dec 20, 2024",
-      time: "9:20 AM",
-      status: "Completed",
-      notes: "Chronic medication refill",
-      pharmacy: "MediCare Pharmacy",
-      itemCount: 4,
-      prescriptionType: "Prescription", 
-      paymentMethod: "Debit Card",
-      rating: 5,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    },
-    {
-      id: "RX-250117-05",
-      orderNumber: "RX-250117-05",
-      total: "Rs. 32.80",
-      date: "Dec 18, 2024", 
-      time: "4:30 PM",
-      status: "Completed",
-      notes: "Vitamins and supplements",
-      pharmacy: "Wellness Pharmacy",
-      itemCount: 3,
-      prescriptionType: "OTC",
-      paymentMethod: "Cash",
-      rating: 4,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    },
-    {
-      id: "RX-250117-06",
-      orderNumber: "RX-250117-06",
-      total: "Rs. 203.40",
-      date: "Dec 15, 2024",
-      time: "1:10 PM", 
-      status: "Completed",
-      notes: "Multiple prescriptions - diabetes management",
-      pharmacy: "Family Pharmacy",
-      itemCount: 5,
-      prescriptionType: "Prescription",
-      paymentMethod: "Credit Card",
-      rating: 5,
-      prescriptionImg: "/src/assets/img/prescription.jpeg"
-    }
-  ];
+  const [pastOrders, setPastOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoadingOrders(true);
+        const data = await OrdersService.listMyOrders(false);
+        if (!mounted) return;
+        // Group: one card per customer order (ORD), aggregate pharmacy orders
+        const cards = (data || []).map((co) => {
+          const created = co.createdAt ? new Date(co.createdAt) : null;
+          const date = created
+            ? created.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "—";
+          const time = created
+            ? created.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "—";
+          const currency = co.totals?.currency || co.currency || "LKR";
+          const pharmacies = Array.isArray(co.pharmacyOrders)
+            ? co.pharmacyOrders
+            : [];
+          const firstPharmacyName = pharmacies[0]?.pharmacyName;
+          const pharmacyLabel =
+            pharmacies.length > 1
+              ? `${
+                  firstPharmacyName ||
+                  `Pharmacy #${pharmacies[0]?.pharmacyId || 1}`
+                } +${pharmacies.length - 1} more`
+              : firstPharmacyName ||
+                (pharmacies[0]
+                  ? `Pharmacy #${pharmacies[0]?.pharmacyId}`
+                  : "—");
+
+          return {
+            id: co.orderCode,
+            orderNumber: co.orderCode,
+            total: `${currency} ${Number(co.totals?.total ?? 0).toFixed(2)}`,
+            date,
+            time,
+            status: (co.status || "").replace(/_/g, " "),
+            notes: co.customerNote || "",
+            pharmacy: pharmacyLabel,
+            pharmacyCount: pharmacies.length,
+            // itemCount left undefined (can be computed in detail if needed)
+            prescriptionType: "Prescription",
+            paymentMethod: (co.payment?.method || "-").replace(/_/g, " "),
+            rating: undefined,
+            prescriptionImg:
+              pharmacies[0]?.prescriptionImageUrl ||
+              "/src/assets/img/prescription.jpeg",
+            // pass through for modal usage
+            raw: co,
+          };
+        });
+        setPastOrders(cards);
+      } catch (e) {
+        setLoadError(e.message || "Failed to load orders");
+        setPastOrders([]);
+      } finally {
+        if (mounted) setLoadingOrders(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const filterOptions = [
     "All Orders",
-    "Prescription Orders", 
+    "Prescription Orders",
     "OTC Orders",
     "This Month",
     "Last 3 Months",
-    "This Year"
+    "This Year",
   ];
 
-  const filteredOrders = pastOrders.filter(order => {
-    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const filteredOrders = pastOrders.filter((order) => {
+    const matchesSearch = order.orderNumber
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
     if (selectedFilter === "All Orders") return matchesSearch;
-    if (selectedFilter === "Prescription Orders") return matchesSearch && order.prescriptionType === "Prescription";
-    if (selectedFilter === "OTC Orders") return matchesSearch && order.prescriptionType === "OTC";
-    
+    if (selectedFilter === "Prescription Orders")
+      return matchesSearch && order.prescriptionType === "Prescription";
+    if (selectedFilter === "OTC Orders")
+      return matchesSearch && order.prescriptionType === "OTC";
+
     return matchesSearch;
   });
 
   return (
     <div className="min-h-screen p-6 relative">
       {/* Header */}
-      
-      <motion.div 
+
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="text-center mb-8"
       >
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Past Orders</h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">View and manage your order history</p>
-          
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Past Orders
+          </h1>
+          <p className="text-white/70 text-lg max-w-2xl mx-auto">
+            View and manage your order history
+          </p>
+
           <div className="flex items-center gap-3">
             <span className="text-white/60 text-sm">
               {filteredOrders.length} orders found
@@ -157,7 +149,7 @@ const PastOrders = () => {
       </motion.div>
 
       {/* Search and Filter Bar */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
@@ -166,7 +158,10 @@ const PastOrders = () => {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Bar */}
           <div className="relative flex-1">
-            <Search size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 z-10" />
+            <Search
+              size={20}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/70 z-10"
+            />
             <input
               type="text"
               placeholder="Search orders by family member name or order ID..."
@@ -184,7 +179,12 @@ const PastOrders = () => {
             >
               <Filter size={18} />
               <span>{selectedFilter}</span>
-              <ChevronDown size={16} className={`transform transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                size={16}
+                className={`transform transition-transform ${
+                  filterOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
 
             {filterOpen && (
@@ -202,7 +202,9 @@ const PastOrders = () => {
                       setFilterOpen(false);
                     }}
                     className={`w-full text-left px-4 py-2 hover:bg-white/10 transition-colors first:rounded-t-xl last:rounded-b-xl ${
-                      selectedFilter === option ? 'text-blue-300 bg-white/10' : 'text-white'
+                      selectedFilter === option
+                        ? "text-blue-300 bg-white/10"
+                        : "text-white"
                     }`}
                   >
                     {option}
@@ -215,7 +217,7 @@ const PastOrders = () => {
       </motion.div>
 
       {/* Orders List */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -228,9 +230,12 @@ const PastOrders = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <OrderCard 
-              order={order} 
-              onView={() => { setSelectedOrder(order); setShowModal(true); }}
+            <OrderCard
+              order={order}
+              onView={() => {
+                setSelectedOrder(order);
+                setShowModal(true);
+              }}
             />
           </motion.div>
         ))}
@@ -238,19 +243,27 @@ const PastOrders = () => {
 
       {/* Empty State */}
       {filteredOrders.length === 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center py-12"
         >
           <Package size={64} className="mx-auto text-white/30 mb-4" />
-          <h3 className="text-xl font-semibold text-white mb-2">No orders found</h3>
-          <p className="text-white/60">Try adjusting your search or filter criteria</p>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            No orders found
+          </h3>
+          <p className="text-white/60">
+            Try adjusting your search or filter criteria
+          </p>
         </motion.div>
       )}
 
       {/* Order Preview Modal at page level */}
-      <OrderPreviewModal isOpen={showModal} onClose={() => setShowModal(false)} order={selectedOrder} />
+      <OrderPreviewModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        order={selectedOrder}
+      />
     </div>
   );
 };

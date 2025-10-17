@@ -80,8 +80,8 @@ const Customer = () => {
           <Route index element={<CustomerDashboard removeBg={true} />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/checkout/:prescriptionId" element={<Checkout />} />
-          <Route path="/orders" element={<PastOrders />} />
-          <Route path="/orders/:orderCode" element={<CustomerOrderDetail />} />
+          <Route path="orders" element={<PastOrders />} />
+          <Route path="orders/:orderCode" element={<CustomerOrderDetail />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
           <Route path="/medicine-info" element={<MedicineInfo />} />
           <Route path="/chats" element={<ChatCustomer />} />
