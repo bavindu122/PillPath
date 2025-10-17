@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import notificationService from '../services/api/notificationService';
 
 /**
@@ -12,6 +13,7 @@ const NotificationsContext = createContext(null);
  * Manages notification state and provides it to the app
  */
 export const NotificationsProvider = ({ children }) => {
+  const { user, userType, isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -21,11 +23,24 @@ export const NotificationsProvider = ({ children }) => {
    * Fetch notifications from API
    */
   const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated || !user || !userType) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
-      const data = await notificationService.getNotifications();
+      // Get user ID based on user type
+      const userId = user.customerId || user.id;
+      const apiUserType = userType === 'pharmacy-admin' ? 'PHARMACIST' : 
+                          userType === 'pharmacist' ? 'PHARMACIST' : 
+                          'CUSTOMER';
+      
+      const data = await notificationService.getNotifications(userId, apiUserType);
       
       setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
@@ -39,7 +54,7 @@ export const NotificationsProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated, user, userType]);
 
   /**
    * Mark a single notification as read
@@ -65,8 +80,15 @@ export const NotificationsProvider = ({ children }) => {
    * Mark all notifications as read
    */
   const markAllAsRead = useCallback(async () => {
+    if (!isAuthenticated || !user || !userType) return;
+
     try {
-      await notificationService.markAllAsRead();
+      const userId = user.customerId || user.id;
+      const apiUserType = userType === 'pharmacy-admin' ? 'PHARMACIST' : 
+                          userType === 'pharmacist' ? 'PHARMACIST' : 
+                          'CUSTOMER';
+      
+      await notificationService.markAllAsRead(userId, apiUserType);
       
       // Update local state
       setNotifications((prev) =>
@@ -77,7 +99,7 @@ export const NotificationsProvider = ({ children }) => {
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
     }
-  }, []);
+  }, [isAuthenticated, user, userType]);
 
   /**
    * Delete a notification

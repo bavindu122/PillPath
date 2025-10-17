@@ -7,23 +7,16 @@ import api from '../api';
 const notificationService = {
   /**
    * Get all notifications for the current user
+   * @param {number} userId - The user ID
+   * @param {string} userType - The user type (CUSTOMER, PHARMACIST, PHARMACY)
    * @returns {Promise<Object>} { notifications: Array, unreadCount: Number }
    */
-  async getNotifications() {
+  async getNotifications(userId, userType) {
     try {
-      const response = await api.get('/notifications');
+      const response = await api.get(`/notifications?userId=${userId}&userType=${userType}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      
-      // Return fallback data for development/testing
-      if (process.env.NODE_ENV === 'development') {
-        return {
-          notifications: this.getMockNotifications(),
-          unreadCount: 3,
-        };
-      }
-      
       throw error;
     }
   },
@@ -39,32 +32,22 @@ const notificationService = {
       return response.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      
-      // Silent fail in development
-      if (process.env.NODE_ENV === 'development') {
-        return { success: true };
-      }
-      
       throw error;
     }
   },
 
   /**
    * Mark all notifications as read
+   * @param {number} userId - The user ID
+   * @param {string} userType - The user type (CUSTOMER, PHARMACIST, PHARMACY)
    * @returns {Promise<Object>}
    */
-  async markAllAsRead() {
+  async markAllAsRead(userId, userType) {
     try {
-      const response = await api.put('/notifications/read-all');
+      const response = await api.put(`/notifications/read-all?userId=${userId}&userType=${userType}`);
       return response.data;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      
-      // Silent fail in development
-      if (process.env.NODE_ENV === 'development') {
-        return { success: true };
-      }
-      
       throw error;
     }
   },
@@ -80,12 +63,6 @@ const notificationService = {
       return response.data;
     } catch (error) {
       console.error('Error deleting notification:', error);
-      
-      // Silent fail in development
-      if (process.env.NODE_ENV === 'development') {
-        return { success: true };
-      }
-      
       throw error;
     }
   },
@@ -100,68 +77,8 @@ const notificationService = {
       return response.data.count || 0;
     } catch (error) {
       console.error('Error fetching unread count:', error);
-      
-      // Return fallback count for development
-      if (process.env.NODE_ENV === 'development') {
-        return 3;
-      }
-      
       throw error;
     }
-  },
-
-  /**
-   * Mock notifications for development/testing
-   * @private
-   */
-  getMockNotifications() {
-    return [
-      {
-        id: 1,
-        type: 'success',
-        title: 'Prescription Ready',
-        message: 'Your prescription is ready for pickup at Main Street Pharmacy.',
-        link: '/customer/prescriptions/123',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
-      },
-      {
-        id: 2,
-        type: 'info',
-        title: 'New Pharmacy Added',
-        message: 'A new pharmacy has been added near your location.',
-        link: '/customer/find-pharmacy',
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-      },
-      {
-        id: 3,
-        type: 'warning',
-        title: 'Medication Reminder',
-        message: 'Remember to take your evening medication at 8:00 PM.',
-        link: null,
-        read: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-      },
-      {
-        id: 4,
-        type: 'success',
-        title: 'Order Confirmed',
-        message: 'Your order #12345 has been confirmed and is being processed.',
-        link: '/customer/orders/12345',
-        read: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-      },
-      {
-        id: 5,
-        type: 'info',
-        title: 'Account Update',
-        message: 'Your profile has been successfully updated.',
-        link: '/customer/profile',
-        read: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
-      },
-    ];
   },
 };
 
