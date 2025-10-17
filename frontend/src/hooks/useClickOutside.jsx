@@ -1,6 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useRef } from 'react';
-
+import { useEffect } from 'react';
 /**
  * Custom hook for managing click outside behavior
  * @param {Array<RefObject>} refs - Array of refs to check against
