@@ -9,6 +9,7 @@ import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 // Payment handled on unified Checkout page
 import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
+import { PRESCRIPTION_PLACEHOLDER } from "../../../constants/media";
 import PrescriptionActivityService from "../../../services/api/PrescriptionActivityService";
 
 const OrderPreview = () => {
@@ -85,14 +86,14 @@ const OrderPreview = () => {
             currency: "LKR",
           }
         );
-        setUnavailableMedications(
-          Array.isArray(data.unavailableItems) ? data.unavailableItems : []
-        );
+        const initialUnavailable = Array.isArray(data.unavailableItems)
+          ? data.unavailableItems
+          : [];
 
         const savedSelections = localStorage.getItem(selectionsKey);
         const selectionMap = savedSelections ? JSON.parse(savedSelections) : {};
 
-        const mapped = (data.items || []).map((it) => ({
+        const mappedRaw = (data.items || []).map((it) => ({
           id: it.id,
           name: it.medicineName || it.name || "",
           price: Number(it.unitPrice ?? it.price ?? 0),
@@ -100,9 +101,22 @@ const OrderPreview = () => {
           available: it.available === true,
           notes: it.notes || "",
           strength: it.dosage || it.strength || "",
-          selected: Boolean(selectionMap[it.id] ?? it.available === true),
+          selected: Boolean(selectionMap[it.id] ?? false),
         }));
-        setMedications(mapped);
+
+        // Filter out items that are not actually available or have zero/negative price
+        const filtered = mappedRaw.filter((m) => m.available && m.price > 0);
+        const removed = mappedRaw.filter((m) => !(m.available && m.price > 0));
+
+        // Merge removed names into unavailable list (avoid duplicates)
+        const unavailableMerged = Array.from(
+          new Set([
+            ...initialUnavailable,
+            ...removed.map((r) => r.name).filter(Boolean),
+          ])
+        );
+        setUnavailableMedications(unavailableMerged);
+        setMedications(filtered);
 
         const savedAcceptedState = localStorage.getItem(
           `order-preview:${prescriptionCode}:${pharmacyId}:accepted`
@@ -146,11 +160,13 @@ const OrderPreview = () => {
           name: m.name,
           price: m.price,
           quantity: m.quantity || 1,
+          selected: true,
         }));
       setItemsForPrescriptionAndPharmacy(
         prescriptionCode,
         pharmacyName || "",
-        selectedForThisPharmacy
+        selectedForThisPharmacy,
+        pharmacyId
       );
 
       return updated;
@@ -170,11 +186,13 @@ const OrderPreview = () => {
         name: m.name,
         price: m.price,
         quantity: m.quantity || 1,
+        selected: true,
       }));
     setItemsForPrescriptionAndPharmacy(
       prescriptionCode,
       pharmacyName || "",
-      selectedForThisPharmacy
+      selectedForThisPharmacy,
+      pharmacyId
     );
     navigate(`/customer/checkout/${prescriptionCode}`);
   };
@@ -420,11 +438,11 @@ const OrderPreview = () => {
                 </h3>
                 <div className="w-100 h-120 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 flex items-center justify-center overflow-hidden">
                   <img
-                    src={imageUrl || "/prescription-placeholder.svg"}
+                    src={imageUrl || PRESCRIPTION_PLACEHOLDER}
                     alt="Prescription"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = "/prescription-placeholder.svg";
+                      e.currentTarget.src = PRESCRIPTION_PLACEHOLDER;
                     }}
                   />
                 </div>

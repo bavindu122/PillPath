@@ -133,7 +133,7 @@ const PrescriptionQueue = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search patients, medications..."
+                placeholder="Search code, customer..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-8 sm:pl-10 pr-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
@@ -238,9 +238,9 @@ const PrescriptionQueue = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 truncate">
-                              {prescription.patientName}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 truncate font-mono">
+                              {prescription.code}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                               <span
@@ -260,9 +260,20 @@ const PrescriptionQueue = () => {
                             </div>
                           </div>
 
-                          <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">
-                            {prescription.medication}
-                          </p>
+                          {/* Customer name as secondary line */}
+                          <div className="text-xs sm:text-sm text-gray-600 flex items-center gap-1 mb-2">
+                            <User className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">
+                              {prescription.patientName}
+                            </span>
+                          </div>
+
+                          {/* Optional subtitle (kept for future additional info) */}
+                          {prescription.medication && (
+                            <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">
+                              {prescription.medication}
+                            </p>
+                          )}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
                             <span className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 flex-shrink-0" />

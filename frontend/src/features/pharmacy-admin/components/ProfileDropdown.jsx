@@ -53,6 +53,7 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
 
   const dropdown = (
     <div
+      data-profile-dropdown="true"
       className="fixed w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-[9999] overflow-hidden"
       style={{ top: coords?.top ?? 64, right: coords?.right ?? 16 }}
     >
