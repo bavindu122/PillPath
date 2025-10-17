@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Mail, ArrowLeft, Send, CheckCircle, AlertCircle } from "lucide-react";
-import { assets } from "../../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import GradientButton from "../../../components/UIs/GradientButton";
