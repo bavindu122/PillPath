@@ -13,7 +13,7 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
+    const load = async () => {
       if (!isOpen || !order) return;
       setError("");
       // prefer raw order if present from caller
@@ -30,7 +30,7 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }
+    };
     load();
     return () => {
       cancelled = true;

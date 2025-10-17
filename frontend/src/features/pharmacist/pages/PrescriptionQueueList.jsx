@@ -10,6 +10,7 @@ import {
   MessageCircle,
   SortDesc,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PharmaPageLayout from "../components/PharmaPageLayout";
@@ -21,6 +22,7 @@ import "./index-pharmacist.css";
 const PrescriptionQueue = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
 
   // Use the new list data hook with prescription service
   const {
@@ -91,12 +93,11 @@ const PrescriptionQueue = () => {
   };
 
   const handleApprove = async (id) => {
+    setApprovingId(id);
     // Optimistic update to in_progress; rollback on failure
-    const prevState = updateData((prev) => {
-      return prev.map((p) =>
-        p.id === id ? { ...p, status: "in_progress" } : p
-      );
-    });
+    updateData((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: "in_progress" } : p))
+    );
     try {
       await prescriptionService.updateStatus(id, "IN_PROGRESS");
     } catch (err) {
@@ -112,23 +113,32 @@ const PrescriptionQueue = () => {
         err?.message ||
           "Could not approve this submission. It may be locked or not editable."
       );
+    } finally {
+      setApprovingId(null);
     }
   };
 
   const handleReject = async (id) => {
-    // Optimistic remove; rollback on failure
-    const current = await Promise.resolve();
-    const snapshot = [];
+    // Optimistic remove; capture snapshot before update for rollback
+    let snapshot = null;
     updateData((prev) => {
-      snapshot.push(...prev);
+      // capture a shallow copy of the current list before mutating
+      snapshot = [...prev];
       return prev.filter((p) => p.id !== id);
     });
     try {
       await prescriptionService.deleteSubmission(id);
     } catch (err) {
       console.error("Failed to delete:", err);
-      // Rollback to snapshot
-      updateData(() => snapshot);
+      // Rollback using snapshot if available; fallback to server reload
+      if (snapshot) {
+        updateData(() => snapshot);
+      } else {
+        try {
+          const refreshed = await prescriptionService.loadPrescriptions();
+          updateData(() => refreshed);
+        } catch {}
+      }
       alert(
         err?.message ||
           "Could not delete this submission. It may be part of an active order."
@@ -137,19 +147,20 @@ const PrescriptionQueue = () => {
   };
 
   const handleClarify = async (id) => {
-    // Optimistic set clarification_needed; rollback on failure
-    const prev = [];
-    updateData((list) => {
-      prev.push(...list);
-      return list.map((p) =>
+    // Optimistic set clarification_needed; rollback on failure by reloading
+    updateData((list) =>
+      list.map((p) =>
         p.id === id ? { ...p, status: "clarification_needed" } : p
-      );
-    });
+      )
+    );
     try {
       await prescriptionService.updateStatus(id, "CLARIFICATION_NEEDED");
     } catch (err) {
       console.error("Failed to set clarification:", err);
-      updateData(() => prev);
+      try {
+        const refreshed = await prescriptionService.loadPrescriptions();
+        updateData(() => refreshed);
+      } catch {}
       alert(
         err?.message ||
           "Could not update status. It may be locked or not editable."
@@ -400,11 +411,26 @@ const PrescriptionQueue = () => {
                         </button>
                         <button
                           onClick={() => handleApprove(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-green-200 text-green-800 text-xs font-medium rounded-lg hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          disabled={approvingId === prescription.id}
+                          className={`flex items-center space-x-1 px-3 sm:px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
+                            approvingId === prescription.id
+                              ? "bg-green-100 text-green-500 cursor-not-allowed"
+                              : "bg-green-200 text-green-800 hover:to-green-300 hover:shadow-md transform hover:scale-105"
+                          }`}
                         >
-                          <CheckCircle className="h-3 w-3" />
-                          <span className="hidden sm:inline">Approve</span>
-                          <span className="sm:hidden">✓</span>
+                          {approvingId === prescription.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-3 w-3" />
+                          )}
+                          <span className="hidden sm:inline">
+                            {approvingId === prescription.id
+                              ? "Approving..."
+                              : "Approve"}
+                          </span>
+                          <span className="sm:hidden">
+                            {approvingId === prescription.id ? "..." : "✓"}
+                          </span>
                         </button>
                         <button
                           onClick={() => handleClarify(prescription.id)}
