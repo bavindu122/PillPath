@@ -15,8 +15,10 @@ class ApiService {
       ...options,
     };
 
-    // ✅ FIXED: Only add auth token for authenticated endpoints, not registration
-    if (!endpoint.includes("/register") && !endpoint.includes("/login")) {
+    // ✅ FIXED: Only add auth token for authenticated endpoints, not registration or password reset
+    if (!endpoint.includes("/register") && 
+        !endpoint.includes("/login") && 
+        !endpoint.includes("/password-reset")) {
       const authHeaders = tokenUtils.getAuthHeaders();
       if (authHeaders.Authorization && !config.headers.Authorization) {
         config.headers = { ...config.headers, ...authHeaders };
