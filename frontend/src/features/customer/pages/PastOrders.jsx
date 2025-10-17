@@ -33,9 +33,8 @@ const PastOrders = () => {
         setLoadingOrders(true);
         const data = await OrdersService.listMyOrders(false);
         if (!mounted) return;
-        // Map each CustomerOrderDTO and flatten per-pharmacy entries to cards
-        const cards = [];
-        (data || []).forEach((co) => {
+        // Group: one card per customer order (ORD), aggregate pharmacy orders
+        const cards = (data || []).map((co) => {
           const created = co.createdAt ? new Date(co.createdAt) : null;
           const date = created
             ? created.toLocaleDateString(undefined, {
@@ -51,26 +50,41 @@ const PastOrders = () => {
               })
             : "—";
           const currency = co.totals?.currency || co.currency || "LKR";
-          (co.pharmacyOrders || []).forEach((po, idx) => {
-            cards.push({
-              id: `${co.orderCode}-${po.pharmacyId}-${idx}`,
-              orderNumber: co.orderCode,
-              total: `${currency} ${Number(
-                po.totals?.total ?? co.totals?.total ?? 0
-              ).toFixed(2)}`,
-              date,
-              time,
-              status: (po.status || co.status || "").replace(/_/g, " "),
-              notes: po.pharmacistNote || po.customerNote || "",
-              pharmacy: po.pharmacyName || `Pharmacy #${po.pharmacyId}`,
-              itemCount: po.items?.length ?? undefined,
-              prescriptionType: "Prescription",
-              paymentMethod: (co.payment?.method || "-").replace(/_/g, " "),
-              rating: undefined,
-              prescriptionImg:
-                po.prescriptionImageUrl || "/src/assets/img/prescription.jpeg",
-            });
-          });
+          const pharmacies = Array.isArray(co.pharmacyOrders)
+            ? co.pharmacyOrders
+            : [];
+          const firstPharmacyName = pharmacies[0]?.pharmacyName;
+          const pharmacyLabel =
+            pharmacies.length > 1
+              ? `${
+                  firstPharmacyName ||
+                  `Pharmacy #${pharmacies[0]?.pharmacyId || 1}`
+                } +${pharmacies.length - 1} more`
+              : firstPharmacyName ||
+                (pharmacies[0]
+                  ? `Pharmacy #${pharmacies[0]?.pharmacyId}`
+                  : "—");
+
+          return {
+            id: co.orderCode,
+            orderNumber: co.orderCode,
+            total: `${currency} ${Number(co.totals?.total ?? 0).toFixed(2)}`,
+            date,
+            time,
+            status: (co.status || "").replace(/_/g, " "),
+            notes: co.customerNote || "",
+            pharmacy: pharmacyLabel,
+            pharmacyCount: pharmacies.length,
+            // itemCount left undefined (can be computed in detail if needed)
+            prescriptionType: "Prescription",
+            paymentMethod: (co.payment?.method || "-").replace(/_/g, " "),
+            rating: undefined,
+            prescriptionImg:
+              pharmacies[0]?.prescriptionImageUrl ||
+              "/src/assets/img/prescription.jpeg",
+            // pass through for modal usage
+            raw: co,
+          };
         });
         setPastOrders(cards);
       } catch (e) {
