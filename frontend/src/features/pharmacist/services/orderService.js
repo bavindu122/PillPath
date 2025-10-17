@@ -165,7 +165,7 @@ function mapOrderDetailFromDTO(dto) {
       unitPrice: it.unitPrice,
       totalPrice: it.totalPrice,
       notes: it.notes || null,
-      available: true,
+      available: typeof it.available !== "undefined" ? it.available : true,
       historicalNote: undefined,
     })),
   };
