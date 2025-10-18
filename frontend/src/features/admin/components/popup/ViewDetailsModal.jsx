@@ -2,6 +2,22 @@ import React from "react";
 import { User } from "lucide-react";
 import ModalWrapper from "./ModalWrapper";
 
+// Helper function to format datetime
+const formatDateTime = (dateTimeString) => {
+  if (!dateTimeString) return "";
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  } catch (error) {
+    return dateTimeString; // Return original if parsing fails
+  }
+};
+
 const ViewDetailsModal = ({ user, onClose }) => {
   const isSuspended = user?.status === "Suspended" || user?.isActive === false;
 
@@ -54,23 +70,21 @@ const ViewDetailsModal = ({ user, onClose }) => {
             <strong>Email:</strong> {user?.email || ""}
           </p>
           <p>
-            <strong>Role:</strong> {user?.role || ""}
+            <strong>Role:</strong> {user?.role || "Customer"}
           </p>
           <p>
             <strong>Status:</strong>{" "}
             {user?.status || (user?.isActive ? "Active" : "Suspended")}
           </p>
           <p>
-            <strong>Joined:</strong> {user?.joinDate || ""}
+            <strong>Joined:</strong> {formatDateTime(user?.createdAt) || ""}
+          </p>
+
+          <p>
+            <strong>Prescriptions:</strong> {user?.prescriptionCount ?? 0}
           </p>
           <p>
-            <strong>Last Login:</strong> {user?.lastLogin || ""}
-          </p>
-          <p>
-            <strong>Prescriptions:</strong> {user?.prescriptions ?? 0}
-          </p>
-          <p>
-            <strong>Orders:</strong> {user?.orders ?? 0}
+            <strong>Orders:</strong> {user?.orderCount ?? 0}
           </p>
           {user?.status === "Loyalty" && (
             <p>
