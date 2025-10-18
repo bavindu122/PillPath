@@ -5,6 +5,7 @@ import {
   getItemsByPrescription,
   clearPrescription,
 } from "../services/CartService";
+import OrdersService from "../../../services/api/OrdersService";
 import {
   DollarSign,
   Percent,
@@ -25,11 +26,20 @@ const Checkout = () => {
     cvv: "",
     cardholderName: "",
   });
+  const [placing, setPlacing] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-  const items =
+  const allItems =
     Array.isArray(state.items) && state.items.length > 0
       ? state.items.filter((it) => it.prescriptionId === prescriptionId)
       : getItemsByPrescription(prescriptionId);
+  // Only keep explicitly selected items (from cart with selected flag) if any carry selected flag
+  const hasSelectionFlags = allItems.some(
+    (it) => typeof it.selected !== "undefined"
+  );
+  const items = hasSelectionFlags
+    ? allItems.filter((it) => it.selected)
+    : allItems;
   const subtotal = items.reduce(
     (sum, it) => sum + it.price * (it.quantity || 1),
     0
@@ -57,7 +67,7 @@ const Checkout = () => {
     return v.length >= 2 ? v.substring(0, 2) + "/" + v.substring(2, 4) : v;
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (items.length === 0) {
       alert("No items selected to pay.");
       return;
@@ -77,17 +87,61 @@ const Checkout = () => {
         return;
       }
     }
-    // TODO: call aggregated payment API
-    console.log("Confirm aggregated payment", {
-      source: state.source,
-      prescriptionId: state.prescriptionId,
-      items,
-      paymentMethod: selectedPaymentMethod,
-      total,
-    });
-    // clear only this prescription’s items on success (placeholder)
-    clearPrescription(prescriptionId);
-    navigate(-1);
+    setError("");
+    setPlacing(true);
+    try {
+      // Group items by pharmacyId (fallback to pharmacyName hash if missing)
+      const groups = {};
+      for (const it of items) {
+        const key =
+          it.pharmacyId != null
+            ? String(it.pharmacyId)
+            : `name:${it.pharmacyName || "unknown"}`;
+        if (!groups[key])
+          groups[key] = { pharmacyId: it.pharmacyId, items: [] };
+        groups[key].items.push({
+          submissionId: it.id, // backend now expects submissionId
+          quantity: it.quantity || 1,
+        });
+      }
+      const pharmacies = Object.values(groups).filter(
+        (g) => g.items.length > 0
+      );
+      // Basic validation: require a pharmacyId for each group to satisfy backend; if missing warn user
+      const missingPharmacyId = pharmacies.some((p) => p.pharmacyId == null);
+      if (missingPharmacyId) {
+        console.warn(
+          "Some cart items lack pharmacyId; order payload may be rejected."
+        );
+      }
+      const dto = {
+        prescriptionCode: prescriptionId,
+        paymentMethod: selectedPaymentMethod === "card" ? "CARD" : "CASH",
+        pharmacies: pharmacies.map((p) => ({
+          pharmacyId: p.pharmacyId,
+          items: p.items,
+        })),
+      };
+      const response = await OrdersService.createOrder(dto);
+      // Expect response.orderCode or similar; attempt to extract robustly
+      const orderCode =
+        response.orderCode || response.code || response.id || null;
+      // Clear cart for this prescription
+      clearPrescription(prescriptionId);
+      if (orderCode) {
+        navigate(`/customer/orders/${orderCode}`, {
+          state: { justPlaced: true, order: response },
+          replace: true,
+        });
+      } else {
+        navigate(-1);
+      }
+    } catch (e) {
+      console.error("Failed to place order", e);
+      setError(e.message || "Failed to place order");
+    } finally {
+      setPlacing(false);
+    }
   };
 
   return (
@@ -113,6 +167,11 @@ const Checkout = () => {
         {/* Items */}
         <div className="lg:col-span-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6">
           <h3 className="text-xl font-semibold text-white mb-4">Items</h3>
+          {error && (
+            <div className="mb-4 bg-red-500/20 border border-red-500/40 text-red-200 px-3 py-2 rounded">
+              {error}
+            </div>
+          )}
           {items.length === 0 ? (
             <p className="text-white/70">
               No items to pay. Go back and select items.
@@ -291,14 +350,14 @@ const Checkout = () => {
             </button>
             <button
               onClick={handleConfirmPayment}
-              disabled={!selectedPaymentMethod}
+              disabled={!selectedPaymentMethod || placing}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                selectedPaymentMethod
+                selectedPaymentMethod && !placing
                   ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
                   : "bg-gray-500/20 text-gray-400 cursor-not-allowed"
               }`}
             >
-              Confirm Order
+              {placing ? "Placing..." : "Confirm Order"}
             </button>
           </div>
         </div>

@@ -1,116 +1,205 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import PharmaPageLayout from '../components/PharmaPageLayout';
-import PrescriptionViewer from '../components/PrescriptionViewer';
-import MedicineSearch from '../components/MedicineSearch';
-import OrderPreview from '../components/OrderPreview';
-import ChatWidget from '../components/ChatWidget';
-import './index-pharmacist.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import PharmaPageLayout from "../components/PharmaPageLayout";
+import PrescriptionViewer from "../components/PrescriptionViewer";
+import MedicineSearch from "../components/MedicineSearch";
+import OrderPreview from "../components/OrderPreview";
+import ChatWidget from "../components/ChatWidget";
+import "./index-pharmacist.css";
+import { prescriptionService } from "../services/prescriptionService";
+import { submissionItemsService } from "../services/submissionItemsService";
+import { parseIdForApi } from "../../../utils/idUtils";
 
 const ReviewPrescriptions = () => {
   const navigate = useNavigate();
   const { prescriptionId } = useParams();
+  const location = useLocation();
+  const fallback = location.state?.fallback;
   const [prescription, setPrescription] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      loadPrescriptionData();
-    }, 300);
+    let active = true;
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        // Determine submissionId from route or fallback; do not call submissions detail endpoint
+        const idForApi = parseIdForApi(prescriptionId);
+        const submissionId =
+          (typeof idForApi === "number" ? idForApi : undefined) ||
+          fallback?.submissionId ||
+          fallback?.id;
+
+        // Compose minimal prescription from fallback; if none, use a stub
+        if (active) {
+          setPrescription({
+            id: submissionId || idForApi,
+            submissionId: submissionId || idForApi,
+            code: fallback?.code || `SUB-${submissionId || idForApi}`,
+            customerName: fallback?.customerName || "Customer",
+            patientName: fallback?.customerName || "Customer",
+            status: fallback?.status || "IN_PROGRESS",
+            imageUrl: fallback?.imageUrl || "",
+            dateUploaded: "",
+            items: [],
+          });
+        }
+
+        // Load submission items directly; don't claim on load
+        if (submissionId) {
+          try {
+            const itemsResp = await submissionItemsService.list(submissionId);
+            const raw = Array.isArray(itemsResp?.items)
+              ? itemsResp.items
+              : itemsResp;
+            const mapped = raw.map((it, idx) => {
+              const id = it.id ?? it.itemId ?? it.submissionItemId;
+              const qty = it.quantity ?? it.qty ?? it.count ?? 1;
+              const price = it.unitPrice ?? it.price ?? 0;
+              return {
+                id,
+                name: it.medicineName ?? it.name ?? it.title ?? `Item-${idx}`,
+                genericName: it.genericName ?? it.generic ?? "",
+                quantity: Number(qty),
+                dosage: it.dosage ?? it.strength ?? "",
+                price: Number(price),
+                available: (it.available ?? true) === true,
+                notes: it.notes ?? "",
+              };
+            });
+            if (active) setOrderItems(mapped);
+          } catch (e2) {
+            console.warn("Failed to load submission items", e2);
+            if (active) setOrderItems([]);
+          }
+        }
+        if (active) setChatMessages([]);
+      } catch (e) {
+        console.error("Failed to load prescription", e);
+        // In case of unexpected errors, keep minimal UI; items may remain empty
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [prescriptionId]);
 
-  const loadPrescriptionData = () => {
-    // Mock data - replace with actual API call
-    setTimeout(() => {
-      setPrescription({
-        id: "RX-250714-02",
-        patientName: "Mrs. Perera",
-        doctorName: "B.J. Wilks (Chemist)",
-        dateUploaded: "17.12.25",
-        status: "pending_review",
-        imageUrl: "/api/placeholder/600/800", // Replace with actual prescription image
-        prescriptionText: `Historical Prescription from 1925`
-      });
-
-      // Update order items to reflect historical medications with modern equivalents
-      setOrderItems([
-        {
-          id: 1,
-          name: "Salicylic Acid",
-          dosage: "150mg",
-          genericName: "Modern equivalent of Ac. Salicyl",
-          quantity: 30,
-          price: 150.00, // Converted to Rs
-          available: true,
-          historicalNote: "Equivalent to gr 120 Ac. Salicyl from prescription"
-        },
-        {
-          id: 2,
-          name: "Topical Pain Relief Cream",
-          genericName: "Modern equivalent of Collod Flexile",
-          quantity: 1,
-          price: 2450.00, // Converted to Rs
-          available: true,
-          historicalNote: "Modern substitute for historical Collod Flexile"
+  const handleAddMedicine = async (medicine) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      // If current status is pending review, claim before first add
+      const status = String(prescription?.status || "").toLowerCase();
+      if (status === "pending_review" || status === "pending") {
+        try {
+          await submissionItemsService.claim(submissionId);
+          // reflect status change locally
+          setPrescription((prev) =>
+            prev ? { ...prev, status: "IN_PROGRESS" } : prev
+          );
+        } catch (_) {
+          // ignore claim errors; proceed to add
         }
-      ]);
-
-      setChatMessages([
-        {
-          id: 1,
-          sender: "patient",
-          message: "I found this old prescription from 1925 in my grandfather's belongings. Can you help identify what these medications were used for?",
-          timestamp: "10:30 AM",
-          avatar: "/api/placeholder/32/32"
-        },
-        {
-          id: 2,
-          sender: "pharmacist",
-          message: "This is a fascinating historical prescription! I can see medications like Salicylic Acid and Cannabis Tincture that were commonly used in the 1920s. Let me research modern equivalents for you.",
-          timestamp: "10:32 AM",
-          isSystem: true
-        },
-        {
-          id: 3,
-          sender: "patient",
-          message: "That would be amazing! I'm particularly curious about what conditions these might have been treating.",
-          timestamp: "10:35 AM"
-        },
-        {
-          id: 4,
-          sender: "pharmacist",
-          message: "Based on the formulation, this appears to be for pain relief and possibly respiratory issues. Salicylic Acid is an early form of aspirin, and the cherry syrup was likely used as a cough suppressant base.",
-          timestamp: "10:37 AM",
-          isSystem: true
-        }
-      ]);
-
-      setIsLoading(false);
-    }, 1000);
+      }
+      const payload = {
+        medicineName: medicine.name,
+        genericName: medicine.genericName,
+        dosage: medicine.dosage || "250mg",
+        quantity: medicine.quantity || 1,
+        unitPrice: medicine.price || 0,
+        available: medicine.available !== false,
+        notes: medicine.notes || "",
+        // optional linking to master set/variant if backend supports it
+        medicineSetId: medicine.medicineSetId || medicine.setId || medicine.id,
+      };
+      await submissionItemsService.add(submissionId, payload);
+      // Refresh list to get authoritative server IDs and values
+      try {
+        const itemsResp = await submissionItemsService.list(submissionId);
+        const raw = Array.isArray(itemsResp?.items)
+          ? itemsResp.items
+          : itemsResp;
+        const mapped = raw.map((it, idx) => {
+          const id = it.id ?? it.itemId ?? it.submissionItemId;
+          const qty = it.quantity ?? it.qty ?? it.count ?? 1;
+          const price = it.unitPrice ?? it.price ?? 0;
+          return {
+            id,
+            name: it.medicineName ?? it.name ?? it.title ?? `Item-${idx}`,
+            genericName: it.genericName ?? it.generic ?? "",
+            quantity: Number(qty),
+            dosage: it.dosage ?? it.strength ?? "",
+            price: Number(price),
+            available: (it.available ?? true) === true,
+            notes: it.notes ?? "",
+          };
+        });
+        setOrderItems(mapped);
+      } catch (e) {
+        // Fallback: append a best-effort item if list fails
+        setOrderItems((prev) => [
+          ...prev,
+          {
+            id: undefined,
+            name: payload.medicineName,
+            genericName: payload.genericName,
+            quantity: Number(payload.quantity || 1),
+            dosage: payload.dosage || "",
+            price: Number(payload.unitPrice || 0),
+            available: payload.available !== false,
+            notes: payload.notes || "",
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error("Add medicine failed", e);
+    }
   };
 
-  const handleAddMedicine = (medicine) => {
-    // This will be called by OrderPreview when the modal form is submitted
-    setOrderItems(prev => [...prev, medicine]);
+  const handleAddMedicineFromSearch = async (medicine) => {
+    // Use the same backend add as OrderPreview flow
+    await handleAddMedicine(medicine);
   };
 
-  const handleAddMedicineFromSearch = (medicine) => {
-    // This receives the complete medicine object from the modal
-    setOrderItems(prev => [...prev, medicine]);
+  const handleRemoveMedicine = async (itemId) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      if (!itemId && itemId !== 0) {
+        console.warn("Skip remove: itemId is undefined");
+        return;
+      }
+      await submissionItemsService.remove(submissionId, itemId);
+      setOrderItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (e) {
+      console.error("Remove item failed", e);
+    }
   };
 
-  const handleRemoveMedicine = (itemId) => {
-    setOrderItems(prev => prev.filter(item => item.id !== itemId));
-  };
-
-  const handleUpdateQuantity = (itemId, quantity) => {
-    setOrderItems(prev => 
-      prev.map(item => 
-        item.id === itemId ? { ...item, quantity } : item
-      )
-    );
+  const handleUpdateQuantity = async (itemId, quantity) => {
+    try {
+      const submissionId = prescription?.submissionId || prescription?.id;
+      if (!submissionId) return;
+      const updated = await submissionItemsService.update(
+        submissionId,
+        itemId,
+        { quantity }
+      );
+      setOrderItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId
+            ? { ...item, quantity: updated.quantity ?? quantity }
+            : item
+        )
+      );
+    } catch (e) {
+      console.error("Update quantity failed", e);
+    }
   };
 
   const handleSendMessage = (message) => {
@@ -118,20 +207,23 @@ const ReviewPrescriptions = () => {
       id: Date.now(),
       sender: "pharmacist",
       message: message,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isSystem: true
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isSystem: true,
     };
-    setChatMessages(prev => [...prev, newMessage]);
+    setChatMessages((prev) => [...prev, newMessage]);
   };
 
   const handleSendOrder = () => {
-    console.log('Sending order:', orderItems);
+    console.log("Sending order:", orderItems);
     // Navigate back to dashboard or show success message
-    navigate('/pharmacist/dashboard');
+    navigate("/pharmacist/dashboard");
   };
 
   const handleSaveDraft = () => {
-    console.log('Saving draft:', orderItems);
+    console.log("Saving draft:", orderItems);
   };
 
   const headerActions = prescription && (
@@ -148,11 +240,15 @@ const ReviewPrescriptions = () => {
   return (
     <PharmaPageLayout
       title="Review Prescription"
-      subtitle={prescription ? `Patient: ${prescription.patientName}` : "Loading prescription details..."}
+      subtitle={
+        prescription
+          ? `Patient: ${prescription.patientName}`
+          : "Loading prescription details..."
+      }
       isLoading={isLoading}
       loadingMessage="Loading prescription..."
       showBackButton={true}
-      onBack={() => navigate('/pharmacist/queue')}
+      onBack={() => navigate("/pharmacist/queue")}
       headerActions={headerActions}
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
@@ -169,7 +265,7 @@ const ReviewPrescriptions = () => {
         <div className="lg:col-span-2 xl:col-span-1 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-              <ChatWidget 
+              <ChatWidget
                 messages={chatMessages}
                 onSendMessage={handleSendMessage}
                 patientName={prescription?.patientName}
@@ -191,7 +287,7 @@ const ReviewPrescriptions = () => {
         <div className="lg:col-span-1 xl:col-span-2 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
-              <OrderPreview 
+              <OrderPreview
                 items={orderItems}
                 onRemoveItem={handleRemoveMedicine}
                 onUpdateQuantity={handleUpdateQuantity}

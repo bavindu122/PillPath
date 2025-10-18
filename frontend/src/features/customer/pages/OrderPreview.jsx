@@ -9,19 +9,41 @@ import { ArrowLeft, Calendar, Clock, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 // Payment handled on unified Checkout page
 import OrderFromAnotherPharmacyModal from "../components/OrderFromAnotherPharmacyModal";
+import { PRESCRIPTION_PLACEHOLDER } from "../../../constants/media";
+import PrescriptionActivityService from "../../../services/api/PrescriptionActivityService";
 
 const OrderPreview = () => {
-  const { prescriptionId } = useParams();
+  const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { pharmacyName } = location.state || {};
+  const query = new URLSearchParams(location.search);
+  const routeCode = params.code || params.prescriptionId; // support both
+  const statePharmacyId = location.state?.pharmacyId;
+  const statePharmacyName = location.state?.pharmacyName;
+  const queryPharmacyId = query.get("pharmacyId");
+  const prescriptionCode = routeCode;
+  const pharmacyId =
+    statePharmacyId ?? (queryPharmacyId ? Number(queryPharmacyId) : undefined);
+  const [pharmacyName, setPharmacyName] = React.useState(
+    statePharmacyName || ""
+  );
 
-  const [medications, setMedications] = React.useState([
-    { id: 1, name: "Amoxicillin 500mg", price: 450.5, selected: false },
-    { id: 2, name: "Ibuprofen 200mg", price: 2900.0, selected: false },
-    { id: 3, name: "Vitamin D3 1000IU", price: 1225.0, selected: false },
-    { id: 4, name: "Lisinopril 10mg", price: 975.0, selected: false },
-  ]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+  const [uploadedAt, setUploadedAt] = React.useState("");
+  const [imageUrl, setImageUrl] = React.useState("");
+  const [medications, setMedications] = React.useState([]);
+  const [totals, setTotals] = React.useState({
+    subtotal: 0,
+    discount: 0,
+    tax: 0,
+    shipping: 0,
+    total: 0,
+    currency: "LKR",
+  });
+  const [unavailableMedications, setUnavailableMedications] = React.useState(
+    []
+  );
 
   // Payment modal removed; navigate to Checkout instead
   const [
@@ -30,34 +52,93 @@ const OrderPreview = () => {
   ] = React.useState(false);
   const [isAccepted, setIsAccepted] = React.useState(false);
 
-  // Load saved selections on component mount
+  const selectionsKey = React.useMemo(() => {
+    return pharmacyId
+      ? `order-preview:${prescriptionCode}:${pharmacyId}:selections`
+      : `order-preview:${prescriptionCode}:selections`;
+  }, [prescriptionCode, pharmacyId]);
+
+  // Load from backend
   React.useEffect(() => {
-    const savedSelections = localStorage.getItem(
-      `prescription-${prescriptionId}-selections`
-    );
-    const savedAcceptedState = localStorage.getItem(
-      `prescription-${prescriptionId}-accepted`
-    );
-
-    if (savedSelections) {
-      const selections = JSON.parse(savedSelections);
-      setMedications((prev) =>
-        prev.map((med) => ({
-          ...med,
-          selected: selections[med.id] || false,
-        }))
-      );
+    if (!prescriptionCode || !pharmacyId) {
+      setError("Missing prescription code or pharmacyId");
+      setLoading(false);
+      return;
     }
+    let abort = new AbortController();
+    setLoading(true);
+    setError("");
+    PrescriptionActivityService.getOrderPreview(
+      { code: prescriptionCode, pharmacyId },
+      { signal: abort.signal }
+    )
+      .then((data) => {
+        setUploadedAt(data.uploadedAt || "");
+        setImageUrl(data.imageUrl || "");
+        setPharmacyName(statePharmacyName || data.pharmacyName || "");
+        setTotals(
+          data.totals || {
+            subtotal: 0,
+            discount: 0,
+            tax: 0,
+            shipping: 0,
+            total: 0,
+            currency: "LKR",
+          }
+        );
+        const initialUnavailable = Array.isArray(data.unavailableItems)
+          ? data.unavailableItems
+          : [];
 
-    if (savedAcceptedState) {
-      setIsAccepted(JSON.parse(savedAcceptedState));
-    }
-  }, [prescriptionId]);
+        const savedSelections = localStorage.getItem(selectionsKey);
+        const selectionMap = savedSelections ? JSON.parse(savedSelections) : {};
 
-  const totalPrice = medications.reduce(
-    (sum, med) => sum + (med.selected ? med.price : 0),
-    0
-  );
+        const mappedRaw = (data.items || []).map((it) => ({
+          id: it.id,
+          name: it.medicineName || it.name || "",
+          price: Number(it.unitPrice ?? it.price ?? 0),
+          quantity: Number(it.quantity ?? 1),
+          available: it.available === true,
+          notes: it.notes || "",
+          strength: it.dosage || it.strength || "",
+          selected: Boolean(selectionMap[it.id] ?? false),
+        }));
+
+        // Filter out items that are not actually available or have zero/negative price
+        const filtered = mappedRaw.filter((m) => m.available && m.price > 0);
+        const removed = mappedRaw.filter((m) => !(m.available && m.price > 0));
+
+        // Merge removed names into unavailable list (avoid duplicates)
+        const unavailableMerged = Array.from(
+          new Set([
+            ...initialUnavailable,
+            ...removed.map((r) => r.name).filter(Boolean),
+          ])
+        );
+        setUnavailableMedications(unavailableMerged);
+        setMedications(filtered);
+
+        const savedAcceptedState = localStorage.getItem(
+          `order-preview:${prescriptionCode}:${pharmacyId}:accepted`
+        );
+        if (savedAcceptedState) setIsAccepted(JSON.parse(savedAcceptedState));
+        else setIsAccepted(false);
+      })
+      .catch((e) => {
+        if (e.name !== "AbortError")
+          setError(e.message || "Failed to load order preview");
+      })
+      .finally(() => setLoading(false));
+
+    return () => abort.abort();
+  }, [prescriptionCode, pharmacyId, selectionsKey, statePharmacyName]);
+
+  const totalPrice = medications.reduce((sum, med) => {
+    if (!med.selected) return sum;
+    const unit = Number(med.price || 0);
+    const qty = Number(med.quantity || 1);
+    return sum + unit * qty;
+  }, 0);
   const hasSelectedMedications = medications.some((med) => med.selected);
 
   const handleMedicationToggle = (id) => {
@@ -71,10 +152,7 @@ const OrderPreview = () => {
       updated.forEach((med) => {
         selections[med.id] = med.selected;
       });
-      localStorage.setItem(
-        `prescription-${prescriptionId}-selections`,
-        JSON.stringify(selections)
-      );
+      localStorage.setItem(selectionsKey, JSON.stringify(selections));
 
       // Sync aggregated cart for this prescription + pharmacy: keep only selected
       const selectedForThisPharmacy = updated
@@ -84,11 +162,13 @@ const OrderPreview = () => {
           name: m.name,
           price: m.price,
           quantity: m.quantity || 1,
+          selected: true,
         }));
       setItemsForPrescriptionAndPharmacy(
-        prescriptionId,
+        prescriptionCode,
         pharmacyName || "",
-        selectedForThisPharmacy
+        selectedForThisPharmacy,
+        pharmacyId
       );
 
       return updated;
@@ -108,13 +188,15 @@ const OrderPreview = () => {
         name: m.name,
         price: m.price,
         quantity: m.quantity || 1,
+        selected: true,
       }));
     setItemsForPrescriptionAndPharmacy(
-      prescriptionId,
+      prescriptionCode,
       pharmacyName || "",
-      selectedForThisPharmacy
+      selectedForThisPharmacy,
+      pharmacyId
     );
-    navigate(`/customer/checkout/${prescriptionId}`);
+    navigate(`/customer/checkout/${prescriptionCode}`);
   };
 
   // No-op: modal removed
@@ -124,7 +206,7 @@ const OrderPreview = () => {
     if (hasSelectedMedications) {
       setIsAccepted(true);
       localStorage.setItem(
-        `prescription-${prescriptionId}-accepted`,
+        `order-preview:${prescriptionCode}:${pharmacyId}:accepted`,
         JSON.stringify(true)
       );
       console.log(
@@ -152,15 +234,28 @@ const OrderPreview = () => {
     // Add your order placement logic here
   };
 
-  const unavailableMedications = [
-    "Metformin 500mg",
-    "Atorvastatin 20mg",
-    "Omeprazole 40mg",
-    "Levothyroxine 75mcg",
-  ];
+  const formattedDate = uploadedAt ? new Date(uploadedAt) : null;
+  const dateStr = formattedDate ? formattedDate.toLocaleDateString() : "—";
+  const timeStr = formattedDate
+    ? formattedDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
+  // Use backend-provided unavailable items
 
   return (
     <div className="min-h-screen p-6 relative overflow-hidden">
+      {loading && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded border border-white/20">
+          Loading order preview…
+        </div>
+      )}
+      {error && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-red-500/20 text-red-100 px-4 py-2 rounded border border-red-500/30">
+          {error}
+        </div>
+      )}
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-blue-900 to-indigo-900"></div>
       <div className="absolute top-20 left-[10%] w-96 h-96 bg-blue-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-float-slow"></div>
@@ -197,20 +292,20 @@ const OrderPreview = () => {
             {/* Order Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-white mb-2">
-                Prescription Order #{prescriptionId}
+                Prescription Order #{prescriptionCode}
               </h2>
               <div className="space-y-2">
                 <div className="flex items-center text-white/70">
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span>Uploaded: January 15, 2024</span>
+                  <span>Uploaded: {dateStr}</span>
                 </div>
                 <div className="flex items-center text-white/70">
                   <Clock className="h-4 w-4 mr-2" />
-                  <span>Time: 2:30 PM</span>
+                  <span>Time: {timeStr}</span>
                 </div>
                 <div className="flex items-center text-white/70">
                   <FileText className="h-4 w-4 mr-2" />
-                  <span>Pharmacy: {pharmacyName || "Rite Aid"}</span>
+                  <span>Pharmacy: {pharmacyName || "—"}</span>
                 </div>
               </div>
             </div>
@@ -271,18 +366,34 @@ const OrderPreview = () => {
                             {medication.name}
                           </h4>
                           <p className="text-white/60 text-sm">
-                            {medication.quantity}
+                            {medication.strength}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <span
-                          className={`font-semibold text-lg ${
+                        <div
+                          className={`font-semibold text-sm ${
                             medication.selected ? "text-white" : "text-white/50"
                           }`}
                         >
-                          Rs. {medication.price.toFixed(2)}
-                        </span>
+                          Unit: Rs. {Number(medication.price || 0).toFixed(2)}
+                        </div>
+                        <div className="text-xs text-white/60">
+                          x {Number(medication.quantity || 1)}
+                        </div>
+                        <div
+                          className={`font-semibold text-lg ${
+                            medication.selected
+                              ? "text-emerald-300"
+                              : "text-white/50"
+                          }`}
+                        >
+                          Rs.{" "}
+                          {(
+                            Number(medication.price || 0) *
+                            Number(medication.quantity || 1)
+                          ).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -304,7 +415,7 @@ const OrderPreview = () => {
                 <div className="pt-4 flex justify-between">
                   <div className="text-white/70 self-center">
                     In checkout for this prescription:{" "}
-                    {getItemsByPrescription(prescriptionId).length} item(s)
+                    {getItemsByPrescription(prescriptionCode).length} item(s)
                   </div>
                   <button
                     onClick={handleProceedToPayment}
@@ -345,9 +456,12 @@ const OrderPreview = () => {
                 </h3>
                 <div className="w-100 h-120 bg-white/5 backdrop-blur-sm rounded-lg border border-white/20 flex items-center justify-center overflow-hidden">
                   <img
-                    src="/src/assets/img/prescription.jpeg"
+                    src={imageUrl || PRESCRIPTION_PLACEHOLDER}
                     alt="Prescription"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = PRESCRIPTION_PLACEHOLDER;
+                    }}
                   />
                 </div>
               </div>
@@ -391,7 +505,7 @@ const OrderPreview = () => {
         <OrderFromAnotherPharmacyModal
           isOpen={showOrderFromAnotherPharmacyModal}
           onClose={handleCloseOrderFromAnotherPharmacyModal}
-          prescriptionId={prescriptionId}
+          prescriptionId={prescriptionCode}
           unavailableMedications={unavailableMedications}
           onOrderPlaced={handleOrderPlaced}
         />

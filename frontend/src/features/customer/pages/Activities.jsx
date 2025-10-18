@@ -18,10 +18,12 @@ const Activities = () => {
   const navigate = useNavigate();
   // Aggregated payment moved to /customer/checkout
 
-  const handleViewOrderPreview = (prescriptionId, pharmacyName) => {
-    // Navigate to a new page with prescription and pharmacy details
-    navigate(`/customer/order-preview/${prescriptionId}`, {
-      state: { pharmacyName },
+  const handleViewOrderPreview = (prescriptionId, pharmacyId, pharmacyName) => {
+    // Navigate to order preview including pharmacyId in both query and state for robustness
+    const query = new URLSearchParams({ pharmacyId: String(pharmacyId) });
+    navigate(`/customer/order-preview/${prescriptionId}?${query.toString()}`, {
+      state: { pharmacyId, pharmacyName },
+      replace: false,
     });
   };
 
@@ -45,25 +47,91 @@ const Activities = () => {
           id: item.code,
           uploadedDate: item.uploadedAt,
           prescriptionImage: item.imageUrl,
-          pharmacies: (item.pharmacies || []).map((p) => ({
-            pharmacyId: p.pharmacyId,
-            name: p.pharmacyName,
-            address: p.address,
-            status:
-              p.status === "PREVIEW_READY"
-                ? "View Order Preview"
-                : p.status === "PAYMENT_REQUIRED"
-                ? "Proceed to payment"
-                : "Pending Order Preview",
-            statusType:
-              p.status === "PREVIEW_READY"
-                ? "delivery"
-                : p.status === "PAYMENT_REQUIRED"
-                ? "payment"
-                : "pending",
-            medications: p.medications || undefined,
-            totals: p.totals || undefined,
-          })),
+          prescriptionStatus: item.prescriptionStatus,
+          pharmacies: (item.pharmacies || []).map((p) => {
+            const canView = !!p.actions?.canViewOrderPreview;
+            // Only allow payment label when backend marks this slice as accepted
+            const canPay =
+              !!p.actions?.canProceedToPayment && p.accepted === true;
+            const st = String(p.status || "").toUpperCase();
+            const hasOrder = p.orderStatus != null && !!p.pharmacyOrderCode;
+
+            // Derive a friendly label/type
+            let statusLabel = "Pending Review";
+            let statusType = "pending";
+            if (hasOrder) {
+              // When an order exists, prioritize delivery-type statuses
+              const ost = String(p.orderStatus || "").toUpperCase();
+              if (ost.includes("PREPARING")) {
+                statusLabel = "Preparing order";
+                statusType = "delivery";
+              } else if (ost.includes("READY") || ost.includes("RECEIVED")) {
+                statusLabel = ost.includes("READY")
+                  ? "Ready for pickup"
+                  : "Order received";
+                statusType = "delivery";
+              } else if (ost.includes("COMPLETED") || st === "COMPLETED") {
+                statusLabel = "Completed";
+                statusType = "delivery";
+              } else if (ost.includes("CANCELLED")) {
+                statusLabel = "Cancelled";
+                statusType = "pending";
+              } else {
+                statusLabel = "Order placed";
+                statusType = "delivery";
+              }
+            } else if (canPay) {
+              statusLabel = "Proceed to payment";
+              statusType = "payment";
+            } else if (canView) {
+              statusLabel = "View Order Preview";
+              statusType = "delivery";
+            } else {
+              switch (st) {
+                case "IN_PROGRESS":
+                  statusLabel = "In Progress";
+                  statusType = "pending";
+                  break;
+                case "CLARIFICATION_NEEDED":
+                  statusLabel = "Needs Clarification";
+                  statusType = "pending";
+                  break;
+                case "READY_FOR_PICKUP":
+                  statusLabel = "Ready for pickup";
+                  statusType = "delivery";
+                  break;
+                case "REJECTED":
+                  statusLabel = "Rejected";
+                  statusType = "pending";
+                  break;
+                case "COMPLETED":
+                  statusLabel = "Completed";
+                  statusType = "delivery";
+                  break;
+                case "CANCELLED":
+                  statusLabel = "Cancelled";
+                  statusType = "pending";
+                  break;
+                default:
+                  statusLabel = "Pending Review";
+                  statusType = "pending";
+              }
+            }
+
+            return {
+              pharmacyId: p.pharmacyId,
+              name: p.pharmacyName,
+              address: p.address,
+              // Use new field from API for per-pharmacy order code
+              orderCode: p.pharmacyOrderCode || undefined,
+              orderStatus: p.orderStatus || null,
+              status: statusLabel,
+              statusType,
+              medications: p.medications || undefined,
+              totals: p.totals || undefined,
+              canViewPreview: canView,
+            };
+          }),
         }));
         setPrescriptions(normalized);
       } catch (e) {
@@ -106,6 +174,24 @@ const Activities = () => {
       case "payment":
         return "bg-green-500/20 text-green-300 border-green-300/30";
     }
+  };
+
+  // Helper to navigate to order detail with all needed params
+  const gotoOrderDetail = (prescriptionId, pharmacy) => {
+    const q = new URLSearchParams({
+      pharmacyId: String(pharmacy.pharmacyId),
+      locked: "1",
+      prescriptionId: String(prescriptionId || ""),
+      pharmacyOrderCode: String(pharmacy.orderCode || ""),
+    });
+    navigate(`/customer/orders/${pharmacy.orderCode}?${q.toString()}`, {
+      state: {
+        filterPharmacyId: pharmacy.pharmacyId,
+        locked: true,
+        prescriptionId,
+        pharmacyOrderCode: pharmacy.orderCode,
+      },
+    });
   };
 
   return (
@@ -171,7 +257,13 @@ const Activities = () => {
                 </div>
                 {/* Per-prescription checkout entry */}
                 <div className="flex-shrink-0">
-                  {getItemsByPrescription(prescription.id).length > 0 && (
+                  {String(prescription.prescriptionStatus || "")
+                    .toUpperCase()
+                    .includes("ORDER_PLACED") ? (
+                    <span className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-medium border bg-green-500/20 text-green-300 border-green-300/30">
+                      Order placed
+                    </span>
+                  ) : getItemsByPrescription(prescription.id).length > 0 ? (
                     <button
                       onClick={() =>
                         navigate(`/customer/checkout/${prescription.id}`)
@@ -182,7 +274,7 @@ const Activities = () => {
                       Checkout ({getItemsByPrescription(prescription.id).length}
                       )
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -223,22 +315,22 @@ const Activities = () => {
                       </div>
 
                       {/* Total Price Display - Absolutely centered */}
-                      {pharmacy.status === "View Order Preview" &&
-                        pharmacy.medications && (
-                          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <div className="text-center">
-                              <div className="text-white/60 text-xs mb-1">
-                                Total:
-                              </div>
-                              <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
-                                Rs.{" "}
-                                {calculateTotalPrice(
-                                  pharmacy.medications
-                                ).toFixed(2)}
-                              </div>
+                      {(pharmacy?.totals || pharmacy?.medications) && (
+                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="text-center">
+                            <div className="text-white/60 text-xs mb-1">
+                              Total:
+                            </div>
+                            <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
+                              Rs.{" "}
+                              {(
+                                pharmacy?.totals?.total ??
+                                calculateTotalPrice(pharmacy?.medications || [])
+                              ).toFixed(2)}
                             </div>
                           </div>
-                        )}
+                        </div>
+                      )}
 
                       {/* Status Badge */}
                       <div className="flex items-center space-x-3">
@@ -246,14 +338,30 @@ const Activities = () => {
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
                             pharmacy.statusType
                           )} ${
-                            pharmacy.status === "View Order Preview"
+                            pharmacy.status === "View Order Preview" ||
+                            ((String(pharmacy.status || "")
+                              .toUpperCase()
+                              .includes("PREPARING") ||
+                              String(pharmacy.status || "")
+                                .toUpperCase()
+                                .includes("READY")) &&
+                              pharmacy.orderCode)
                               ? "cursor-pointer hover:opacity-80 transition-opacity"
                               : ""
                           }`}
                           onClick={() => {
-                            if (pharmacy.status === "View Order Preview") {
+                            const hasOrder =
+                              pharmacy.orderStatus != null &&
+                              !!pharmacy.orderCode;
+                            if (hasOrder) {
+                              gotoOrderDetail(prescription.id, pharmacy);
+                            } else if (
+                              pharmacy.canViewPreview ||
+                              pharmacy.medications
+                            ) {
                               handleViewOrderPreview(
                                 prescription.id,
+                                pharmacy.pharmacyId,
                                 pharmacy.name
                               );
                             }
@@ -268,9 +376,18 @@ const Activities = () => {
                           whileHover={{ x: 5 }}
                           className="text-white/60 hover:text-white transition-colors cursor-pointer"
                           onClick={() => {
-                            if (pharmacy.status === "View Order Preview") {
+                            const hasOrder =
+                              pharmacy.orderStatus != null &&
+                              !!pharmacy.orderCode;
+                            if (hasOrder) {
+                              gotoOrderDetail(prescription.id, pharmacy);
+                            } else if (
+                              pharmacy.canViewPreview ||
+                              pharmacy.medications
+                            ) {
                               handleViewOrderPreview(
                                 prescription.id,
+                                pharmacy.pharmacyId,
                                 pharmacy.name
                               );
                             }

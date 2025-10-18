@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Filter, 
-  Search, 
+import React, { useState, useEffect } from "react";
+import {
+  Filter,
+  Search,
   Calendar,
   Clock,
   User,
@@ -9,17 +9,20 @@ import {
   XCircle,
   MessageCircle,
   SortDesc,
-  Eye
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import PharmaPageLayout from '../components/PharmaPageLayout';
-import useListData from '../hooks/useListData';
-import { prescriptionService } from '../services/prescriptionService';
-import './index-pharmacist.css';
+  Eye,
+  Loader2,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import PharmaPageLayout from "../components/PharmaPageLayout";
+import useListData from "../hooks/useListData";
+import { prescriptionService } from "../services/prescriptionService";
+import { orderService } from "../services/orderService";
+import "./index-pharmacist.css";
 
 const PrescriptionQueue = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
 
   // Use the new list data hook with prescription service
   const {
@@ -32,7 +35,7 @@ const PrescriptionQueue = () => {
     sortBy,
     setSortBy,
     updateData,
-    filteredCount
+    filteredCount,
   } = useListData(
     prescriptionService.loadPrescriptions,
     prescriptionService.getFilterConfig()
@@ -40,64 +43,129 @@ const PrescriptionQueue = () => {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'High Priority':
-        return 'bg-gradient-to-r from-red-50 to-red-100 text-red-800 border-red-200 priority-high';
-      case 'Medium Priority':
-        return 'bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Low Priority':
-        return 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200';
+      case "High Priority":
+        return "bg-gradient-to-r from-red-50 to-red-100 text-red-800 border-red-200 priority-high";
+      case "Medium Priority":
+        return "bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-800 border-yellow-200";
+      case "Low Priority":
+        return "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border-blue-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending_review':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'clarification_needed':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'ready_for_pickup':
-        return 'bg-green-100 text-green-800 border-green-200';
+      case "pending_review":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "clarification_needed":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "ready_for_pickup":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "order_placed":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      case "preparing_order":
+        return "bg-purple-100 text-purple-800 border-purple-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending_review':
-        return 'Pending Review';
-      case 'in_progress':
-        return 'In Progress';
-      case 'clarification_needed':
-        return 'Needs Clarification';
-      case 'ready_for_pickup':
-        return 'Ready for Pickup';
+      case "pending_review":
+        return "Pending Review";
+      case "in_progress":
+        return "In Progress";
+      case "clarification_needed":
+        return "Needs Clarification";
+      case "ready_for_pickup":
+        return "Ready for Pickup";
+      case "order_placed":
+        return "Order Placed";
+      case "preparing_order":
+        return "Preparing Order";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
-  const handleApprove = (id) => {
-    console.log('Approve prescription:', id);
-    updateData(prev => 
-      prev.map(p => p.id === id ? { ...p, status: 'in_progress' } : p)
+  const handleApprove = async (id) => {
+    setApprovingId(id);
+    // Optimistic update to in_progress; rollback on failure
+    updateData((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: "in_progress" } : p))
     );
+    try {
+      await prescriptionService.updateStatus(id, "IN_PROGRESS");
+    } catch (err) {
+      console.error("Failed to approve:", err);
+      // Rollback by reloading list; simplest path
+      try {
+        const refreshed = await prescriptionService.loadPrescriptions();
+        updateData(() => refreshed);
+      } catch {
+        // As a fallback, notify the user
+      }
+      alert(
+        err?.message ||
+          "Could not approve this submission. It may be locked or not editable."
+      );
+    } finally {
+      setApprovingId(null);
+    }
   };
 
-  const handleReject = (id) => {
-    console.log('Reject prescription:', id);
-    updateData(prev => prev.filter(p => p.id !== id));
+  const handleReject = async (id) => {
+    // Optimistic remove; capture snapshot before update for rollback
+    let snapshot = null;
+    updateData((prev) => {
+      // capture a shallow copy of the current list before mutating
+      snapshot = [...prev];
+      return prev.filter((p) => p.id !== id);
+    });
+    try {
+      await prescriptionService.deleteSubmission(id);
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      // Rollback using snapshot if available; fallback to server reload
+      if (snapshot) {
+        updateData(() => snapshot);
+      } else {
+        try {
+          const refreshed = await prescriptionService.loadPrescriptions();
+          updateData(() => refreshed);
+        } catch {}
+      }
+      alert(
+        err?.message ||
+          "Could not delete this submission. It may be part of an active order."
+      );
+    }
   };
 
-  const handleClarify = (id) => {
-    console.log('Request clarification:', id);
-    updateData(prev => 
-      prev.map(p => p.id === id ? { ...p, status: 'clarification_needed' } : p)
+  const handleClarify = async (id) => {
+    // Optimistic set clarification_needed; rollback on failure by reloading
+    updateData((list) =>
+      list.map((p) =>
+        p.id === id ? { ...p, status: "clarification_needed" } : p
+      )
     );
+    try {
+      await prescriptionService.updateStatus(id, "CLARIFICATION_NEEDED");
+    } catch (err) {
+      console.error("Failed to set clarification:", err);
+      try {
+        const refreshed = await prescriptionService.loadPrescriptions();
+        updateData(() => refreshed);
+      } catch {}
+      alert(
+        err?.message ||
+          "Could not update status. It may be locked or not editable."
+      );
+    }
   };
 
   const headerActions = (
@@ -106,7 +174,7 @@ const PrescriptionQueue = () => {
         <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
       </div>
       <p className="text-sm font-semibold text-purple-700">
-        {filteredCount} prescription{filteredCount !== 1 ? 's' : ''} in queue
+        {filteredCount} prescription{filteredCount !== 1 ? "s" : ""} in queue
       </p>
     </div>
   );
@@ -131,7 +199,7 @@ const PrescriptionQueue = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search patients, medications..."
+                placeholder="Search code, customer..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-8 sm:pl-10 pr-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
@@ -142,8 +210,8 @@ const PrescriptionQueue = () => {
           {/* Priority Filter */}
           <div>
             <select
-              value={filters.priority || 'all'}
-              onChange={(e) => updateFilter('priority', e.target.value)}
+              value={filters.priority || "all"}
+              onChange={(e) => updateFilter("priority", e.target.value)}
               className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors duration-200"
             >
               <option value="all">All Priorities</option>
@@ -156,8 +224,8 @@ const PrescriptionQueue = () => {
           {/* Status Filter */}
           <div>
             <select
-              value={filters.status || 'all'}
-              onChange={(e) => updateFilter('status', e.target.value)}
+              value={filters.status || "all"}
+              onChange={(e) => updateFilter("status", e.target.value)}
               className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors duration-200"
             >
               <option value="all">All Statuses</option>
@@ -199,7 +267,9 @@ const PrescriptionQueue = () => {
                 </button>
                 <button className="flex items-center space-x-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 group nav-item whitespace-nowrap">
                   <Filter className="h-3 w-3 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform duration-200" />
-                  <span className="text-xs sm:text-sm font-medium">Filters</span>
+                  <span className="text-xs sm:text-sm font-medium">
+                    Filters
+                  </span>
                 </button>
               </div>
             </div>
@@ -210,8 +280,12 @@ const PrescriptionQueue = () => {
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                   </div>
-                  <p className="text-base sm:text-lg font-medium">No prescriptions found</p>
-                  <p className="text-xs sm:text-sm">Try adjusting your search or filter criteria</p>
+                  <p className="text-base sm:text-lg font-medium">
+                    No prescriptions found
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    Try adjusting your search or filter criteria
+                  </p>
                 </div>
               ) : (
                 filteredPrescriptions.map((prescription, index) => (
@@ -228,55 +302,135 @@ const PrescriptionQueue = () => {
                           </div>
                           <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full border-2 border-white status-indicator"></div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 truncate">
-                              {prescription.patientName}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 truncate font-mono">
+                              {prescription.code}
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                              <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(prescription.priority)} transition-all duration-200 hover:shadow-sm`}>
+                              <span
+                                className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(
+                                  prescription.priority
+                                )} transition-all duration-200 hover:shadow-sm`}
+                              >
                                 {prescription.priority}
                               </span>
-                              <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(prescription.status)} transition-all duration-200 hover:shadow-sm`}>
+                              <span
+                                className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                                  prescription.status
+                                )} transition-all duration-200 hover:shadow-sm`}
+                              >
                                 {getStatusText(prescription.status)}
                               </span>
                             </div>
                           </div>
-                          
-                          <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">{prescription.medication}</p>                          
+
+                          {/* Customer name as secondary line */}
+                          <div className="text-xs sm:text-sm text-gray-600 flex items-center gap-1 mb-2">
+                            <User className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">
+                              {prescription.patientName}
+                            </span>
+                          </div>
+
+                          {/* Optional subtitle (kept for future additional info) */}
+                          {prescription.medication && (
+                            <p className="text-sm sm:text-base text-gray-800 font-medium mb-2 truncate">
+                              {prescription.medication}
+                            </p>
+                          )}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
                             <span className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{prescription.time}</span>
+                              <span className="truncate">
+                                {prescription.time}
+                              </span>
                             </span>
                             <span className="flex items-center space-x-1">
                               <Calendar className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{prescription.date}</span>
+                              <span className="truncate">
+                                {prescription.date}
+                              </span>
                             </span>
                             <span className="flex items-center space-x-1">
                               <Clock className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">Est. {prescription.estimatedTime}</span>
+                              <span className="truncate">
+                                Est. {prescription.estimatedTime}
+                              </span>
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
-                        <Link
-                          to={`/pharmacist/review/${prescription.id}`}
+                        <button
+                          onClick={async () => {
+                            // Try to navigate to an existing pharmacy order that matches this prescription
+                            try {
+                              const orders = await orderService.listOrders();
+                              const match = orders.find(
+                                (o) => o.prescriptionCode === prescription.code
+                              );
+                              if (match?.id) {
+                                navigate(`/pharmacist/orders/${match.id}`, {
+                                  state: { activeOverride: "prescriptions" },
+                                });
+                                return;
+                              }
+                            } catch (e) {
+                              // Fall through to default review route if listing fails
+                              console.warn("Could not list orders:", e);
+                            }
+                            // Fallback: go to the existing review page
+                            navigate(
+                              `/pharmacist/review/${
+                                prescription.reviewId || prescription.id
+                              }`,
+                              {
+                                state: {
+                                  activeOverride: "prescriptions",
+                                  fallback: {
+                                    id:
+                                      prescription.reviewId || prescription.id,
+                                    code: prescription.code,
+                                    customerName: prescription.patientName,
+                                    imageUrl: prescription.imageUrl,
+                                    status: (
+                                      prescription.status || ""
+                                    ).toUpperCase(),
+                                  },
+                                },
+                              }
+                            );
+                          }}
                           className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-blue-200 text-blue-800 text-xs font-medium rounded-lg hover:to-blue-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
                         >
                           <Eye className="h-3 w-3" />
                           <span>Review</span>
-                        </Link>
+                        </button>
                         <button
                           onClick={() => handleApprove(prescription.id)}
-                          className="flex items-center space-x-1 px-3 sm:px-4 py-2 bg-green-200 text-green-800 text-xs font-medium rounded-lg hover:to-green-300 hover:shadow-md transform hover:scale-105 transition-all duration-200 whitespace-nowrap"
+                          disabled={approvingId === prescription.id}
+                          className={`flex items-center space-x-1 px-3 sm:px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 whitespace-nowrap ${
+                            approvingId === prescription.id
+                              ? "bg-green-100 text-green-500 cursor-not-allowed"
+                              : "bg-green-200 text-green-800 hover:to-green-300 hover:shadow-md transform hover:scale-105"
+                          }`}
                         >
-                          <CheckCircle className="h-3 w-3" />
-                          <span className="hidden sm:inline">Approve</span>
-                          <span className="sm:hidden">✓</span>
+                          {approvingId === prescription.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-3 w-3" />
+                          )}
+                          <span className="hidden sm:inline">
+                            {approvingId === prescription.id
+                              ? "Approving..."
+                              : "Approve"}
+                          </span>
+                          <span className="sm:hidden">
+                            {approvingId === prescription.id ? "..." : "✓"}
+                          </span>
                         </button>
                         <button
                           onClick={() => handleClarify(prescription.id)}
