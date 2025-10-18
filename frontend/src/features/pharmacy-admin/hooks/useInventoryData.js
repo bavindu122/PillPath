@@ -74,16 +74,46 @@ export const useInventoryData = (pharmacyId) => {
   const addNewProduct = async (newProduct) => {
     try {
       const url = `${API_BASE_URL}/pharmacy/${pharmacyId}`;
+      
+      // Get auth token from localStorage
+      const token = localStorage.getItem('auth_token');
+      
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      
+      // Append all required fields
+      formData.append('name', newProduct.name);
+      formData.append('description', newProduct.description || '');
+      formData.append('price', newProduct.price.toString());
+      formData.append('stock', newProduct.stock.toString());
+      
+      // Append image if exists (should be a File object)
+      if (newProduct.image && newProduct.image instanceof File) {
+        formData.append('image', newProduct.image);
+      }
+
+      console.log('Sending product data to:', url);
+      console.log('Product data:', {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: newProduct.price,
+        stock: newProduct.stock,
+        hasImage: !!newProduct.image
+      });
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          // DO NOT set Content-Type - browser will set it automatically with boundary
         },
-        body: JSON.stringify(newProduct),
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add new product.');
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to add new product: ${response.status} ${errorText}`);
       }
 
       const addedProduct = await response.json();
@@ -97,39 +127,158 @@ export const useInventoryData = (pharmacyId) => {
   };
 
 
+  // const updateProduct = async (updatedProduct) => {
+  //   try {
+  //     // Get auth token from localStorage
+  //     const token = localStorage.getItem('auth_token');
+      
+  //     // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
+  //     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${updatedProduct.id}`;
+      
+  //     console.log('=== UPDATE PRODUCT DEBUG ===');
+  //     console.log('URL:', url);
+  //     console.log('Product data:', updatedProduct);
+  //     console.log('Token exists:', !!token);
+  //     console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+  //     console.log('Pharmacy ID:', pharmacyId);
+      
+  //     if (!token) {
+  //       throw new Error('No authentication token found. Please log in again.');
+  //     }
+      
+  //     const response = await fetch(url, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify(updatedProduct),
+  //     });
+
+  //     if (!response.ok) {
+  //       let errorText = '';
+  //       try {
+  //         errorText = await response.text();
+  //       } catch (e) {
+  //         errorText = 'Could not read error response';
+  //       }
+        
+  //       console.error('=== UPDATE FAILED ===');
+  //       console.error('Status:', response.status);
+  //       console.error('Status Text:', response.statusText);
+  //       console.error('Error Response:', errorText);
+  //       console.error('Response Headers:', Object.fromEntries(response.headers.entries()));
+        
+  //       throw new Error(`Failed to update product: ${response.status} - ${errorText}`);
+  //     }
+
+  //     const data = await response.json();
+  //     // Calculate and add the status to the updated product before updating the state
+  //     const productWithStatus = { ...data, status: calculateStatus(data.stock) };
+  //     setProducts(prevProducts => prevProducts.map(product => product.id === productWithStatus.id ? productWithStatus : product));
+  //     return productWithStatus;
+  //   } catch (err) {
+  //     console.error('Error updating product:', err);
+  //     throw err;
+  //   }
+  // };
+
+
   const updateProduct = async (updatedProduct) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${updatedProduct.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedProduct),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update product.');
-      }
-
-      const data = await response.json();
-      // Calculate and add the status to the updated product before updating the state
-      const productWithStatus = { ...data, status: calculateStatus(data.stock) };
-      setProducts(prevProducts => prevProducts.map(product => product.id === productWithStatus.id ? productWithStatus : product));
-      return productWithStatus;
-    } catch (err) {
-      console.error('Error updating product:', err);
-      throw err;
+  try {
+    // Get auth token from localStorage
+    const token = localStorage.getItem('auth_token');
+    
+    // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
+    const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${updatedProduct.id}`;
+    
+    console.log('=== UPDATE PRODUCT DEBUG ===');
+    console.log('URL:', url);
+    console.log('Product data:', updatedProduct);
+    
+    if (!token) {
+      throw new Error('No authentication token found. Please log in again.');
     }
-  };
+    
+    // Create FormData instead of JSON
+    const formData = new FormData();
+    formData.append('name', updatedProduct.name);
+    formData.append('description', updatedProduct.description);
+    formData.append('price', updatedProduct.price.toString());
+    formData.append('stock', updatedProduct.stock.toString());
+    
+    // Add existing image info if no new image
+    if (updatedProduct.imageUrl) {
+      formData.append('existingImageUrl', updatedProduct.imageUrl);
+    }
+    if (updatedProduct.imagePublicId) {
+      formData.append('existingImagePublicId', updatedProduct.imagePublicId);
+    }
+    
+    // Add new image if user uploaded one
+    if (updatedProduct.newImage && updatedProduct.newImage instanceof File) {
+      formData.append('image', updatedProduct.newImage);
+    }
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        // DO NOT set Content-Type - browser sets it automatically with boundary for FormData
+      },
+      body: formData, // Send FormData, not JSON
+    });
+
+    if (!response.ok) {
+      let errorText = '';
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = 'Could not read error response';
+      }
+      
+      console.error('=== UPDATE FAILED ===');
+      console.error('Status:', response.status);
+      console.error('Error Response:', errorText);
+      
+      throw new Error(`Failed to update product: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    const productWithStatus = { ...data, status: calculateStatus(data.stock) };
+    setProducts(prevProducts => 
+      prevProducts.map(product => 
+        product.id === productWithStatus.id ? productWithStatus : product
+      )
+    );
+    return productWithStatus;
+  } catch (err) {
+    console.error('Error updating product:', err);
+    throw err;
+  }
+};
 
   const removeProductFromStore = async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/${id}`, {
+      // Get auth token from localStorage
+      const token = localStorage.getItem('auth_token');
+      
+      // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
+      const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${id}`;
+      
+      console.log('Deleting product at:', url);
+      
+      const response = await fetch(url, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete product.');
+        const errorText = await response.text();
+        console.error('Delete error:', errorText);
+        throw new Error(`Failed to delete product: ${response.status}`);
       }
 
       setProducts(prevProducts => prevProducts.filter(product => product.id !== id));

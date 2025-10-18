@@ -34,8 +34,15 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
         description: description.trim(),
         price: parseFloat(price),
         stock: parseInt(stock, 10),
-        imageUrl: image ? await convertImageToBase64(image) : ""
+        image: image // Pass the File object directly, not base64
       };
+
+      console.log('Submitting product:', {
+        name: newItem.name,
+        price: newItem.price,
+        stock: newItem.stock,
+        hasImage: !!newItem.image
+      });
 
       // Call the onSave function which should handle the API call
       await onSave(newItem);
@@ -56,16 +63,6 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
     }
   };
 
-  // Convert image to base64 string (or you can upload to a file server)
-  const convertImageToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -73,6 +70,13 @@ const AddItem = ({ isOpen, onClose, onSave }) => {
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('File size must be less than 5MB');
+        return;
+      }
+      
+      // Validate file type
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validImageTypes.includes(file.type)) {
+        alert('Please upload a valid image file (jpg, png, gif, webp).');
         return;
       }
       
