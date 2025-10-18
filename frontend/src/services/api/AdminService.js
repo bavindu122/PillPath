@@ -164,6 +164,29 @@ class AdminService {
     );
   }
 
+  // Get single customer details
+  async getCustomerById(customerId) {
+    return this.request(`admin/customers/${customerId}`, {
+      method: "GET",
+    });
+  }
+
+  // Suspend a customer
+  async suspendCustomer(customerId, reason) {
+    return this.request(`admin/customers/${customerId}/suspend`, {
+      method: "PATCH",
+      body: { reason },
+    });
+  }
+
+  // Activate a customer
+  async activateCustomer(customerId) {
+    return this.request(`admin/customers/${customerId}/activate`, {
+      method: "PATCH",
+      body: {},
+    });
+  }
+
   // ✅ Get all orders
   async getOrders(params = {}) {
     const queryParams = new URLSearchParams(params).toString();
@@ -216,12 +239,10 @@ class AdminService {
         headers: {
           "Content-Type": "application/json",
           // Don't include Authorization header for public endpoints
-        }
+        },
       }
     );
   }
 }
-
-
 
 export default new AdminService();
