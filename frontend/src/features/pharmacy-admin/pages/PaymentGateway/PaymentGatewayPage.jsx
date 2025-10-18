@@ -1,21 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import usePaymentGateway from '../../hooks/usePaymentGateway';
-import PaymentGatewayHeader from '../../components/PaymentGateway/PaymentGatewayHeader';
-import PaymentForm from '../../components/PaymentGateway/PaymentForm';
-import SavedCards from '../../components/PaymentGateway/SavedCards';
-import TransactionHistory from '../../components/PaymentGateway/TransactionHistory';
-import PaymentStatusModal from '../../components/PaymentGateway/PaymentStatusModal';
-import AddFundsModal from '../../components/PaymentGateway/AddFundsModal';
+import React, { useState, useEffect, useMemo } from "react";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import usePaymentGateway from "../../hooks/usePaymentGateway";
+import usePharmacyWallet from "../../hooks/usePharmacyWallet";
+import { useAuth } from "../../../../hooks/useAuth";
+import PaymentGatewayHeader from "../../components/PaymentGateway/PaymentGatewayHeader";
+import PaymentForm from "../../components/PaymentGateway/PaymentForm";
+import SavedCards from "../../components/PaymentGateway/SavedCards";
+import TransactionHistory from "../../components/PaymentGateway/TransactionHistory";
+import PaymentStatusModal from "../../components/PaymentGateway/PaymentStatusModal";
+import AddFundsModal from "../../components/PaymentGateway/AddFundsModal";
 
 const PaymentGatewayPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [fadeIn, setFadeIn] = useState(false);
   const [showAddFundsModal, setShowAddFundsModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('payment'); // 'payment', 'cards', 'history'
+  const [activeTab, setActiveTab] = useState("payment"); // 'payment', 'cards', 'history'
   const [selectedCard, setSelectedCard] = useState(null);
-  
+
   const {
     balance,
     transactions,
@@ -27,92 +30,141 @@ const PaymentGatewayPage = () => {
     addFunds,
     saveCard,
     deleteCard,
-    resetPaymentStatus
+    resetPaymentStatus,
   } = usePaymentGateway();
-  
+
+  // Load real wallet data for display: balance and money in/out
+  const pharmacyId = user?.pharmacyId || user?.pharmacy?.id || user?.id;
+  const {
+    balance: walletBalance,
+    transactions: walletTx,
+    moneyIn,
+    moneyOut,
+    loading: walletLoading,
+    error: walletError,
+  } = usePharmacyWallet({ page: 0, size: 10, pharmacyId });
+
+  const headerBalance = walletBalance || {
+    currency: "LKR",
+    available: 0,
+    pending: 0,
+  };
+
+  // Map wallet transactions to TransactionHistory shape (id/date/type/amount/balance/category/recipient)
+  const mappedWalletTx = useMemo(() => {
+    return (walletTx || []).map((t) => {
+      const amt = Number(t.amount || 0);
+      // TransactionHistory semantics: type='credit' => money out (red), 'debit' => money in (green)
+      const type = t.direction === "DEBIT" || amt < 0 ? "credit" : "debit";
+      return {
+        id: t.transactionId,
+        date: t.createdAt,
+        type,
+        amount: Math.abs(amt),
+        balance: Number(t.balanceAfter ?? 0),
+        category: t.type || "Wallet",
+        recipient: t.description || t.orderCode || "—",
+        status: "completed",
+      };
+    });
+  }, [walletTx]);
+
   useEffect(() => {
     setTimeout(() => setFadeIn(true), 100);
   }, []);
-  
+
   const handleCardSelect = (card) => {
     setSelectedCard(card);
-    setActiveTab('payment');
+    setActiveTab("payment");
   };
-  
+
   const handleCardDelete = (cardId) => {
     deleteCard(cardId);
     if (selectedCard && selectedCard.id === cardId) {
       setSelectedCard(null);
     }
   };
-  
+
   const handleSaveCard = (cardData) => {
     const success = saveCard(cardData);
     return success;
   };
-  
+
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center">
         <button
-          onClick={() => navigate('/pharmacy')}
+          onClick={() => navigate("/pharmacy")}
           className="mr-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Payment Gateway</h1>
-          <p className="text-gray-500 mt-1">Manage your pharmacy's financial transactions</p>
+          <p className="text-gray-500 mt-1">
+            Manage your pharmacy's financial transactions
+          </p>
         </div>
       </div>
-      
-      <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-        <PaymentGatewayHeader 
-          balance={balance} 
-          onAddFunds={() => setShowAddFundsModal(true)} 
+
+      <div
+        className={`transition-opacity duration-500 ${
+          fadeIn ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {/* Wallet summary */}
+        <PaymentGatewayHeader
+          balanceSummary={headerBalance}
+          moneyIn={moneyIn}
+          moneyOut={moneyOut}
         />
-        
+        {walletError && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+            {walletError}
+          </div>
+        )}
+
         {/* Tab Navigation */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200 mb-6">
           <div className="grid grid-cols-3 divide-x divide-gray-200">
             <button
-              onClick={() => setActiveTab('payment')}
+              onClick={() => setActiveTab("payment")}
               className={`py-4 text-sm font-medium transition-colors ${
-                activeTab === 'payment' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                activeTab === "payment"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
               Make a Payment
             </button>
             <button
-              onClick={() => setActiveTab('cards')}
+              onClick={() => setActiveTab("cards")}
               className={`py-4 text-sm font-medium transition-colors ${
-                activeTab === 'cards' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                activeTab === "cards"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
               Saved Cards ({savedCards.length})
             </button>
             <button
-              onClick={() => setActiveTab('history')}
+              onClick={() => setActiveTab("history")}
               className={`py-4 text-sm font-medium transition-colors ${
-                activeTab === 'history' 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                activeTab === "history"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
               Transaction History
             </button>
           </div>
         </div>
-        
+
         {/* Tab Content */}
         <div>
-          {activeTab === 'payment' && (
-            <PaymentForm 
-              processPayment={processPayment} 
+          {activeTab === "payment" && (
+            <PaymentForm
+              processPayment={processPayment}
               isProcessing={processingPayment}
               balance={balance}
               savedCards={savedCards}
@@ -121,32 +173,29 @@ const PaymentGatewayPage = () => {
               onSelectCard={setSelectedCard}
             />
           )}
-          
-          {activeTab === 'cards' && (
-            <SavedCards 
+
+          {activeTab === "cards" && (
+            <SavedCards
               cards={savedCards}
               onDelete={handleCardDelete}
               onSelect={handleCardSelect}
               selectedCardId={selectedCard?.id}
             />
           )}
-          
-          {activeTab === 'history' && (
-            <TransactionHistory 
-              transactions={transactions} 
-              isLoading={isLoading} 
+
+          {activeTab === "history" && (
+            <TransactionHistory
+              transactions={mappedWalletTx}
+              isLoading={walletLoading}
             />
           )}
         </div>
       </div>
-      
+
       {/* Modals */}
-      <PaymentStatusModal 
-        status={paymentStatus} 
-        onClose={resetPaymentStatus} 
-      />
-      
-      <AddFundsModal 
+      <PaymentStatusModal status={paymentStatus} onClose={resetPaymentStatus} />
+
+      <AddFundsModal
         isOpen={showAddFundsModal}
         onClose={() => setShowAddFundsModal(false)}
         onAddFunds={addFunds}
@@ -156,28 +205,6 @@ const PaymentGatewayPage = () => {
 };
 
 export default PaymentGatewayPage;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from 'react';
 // import { ArrowLeft } from 'lucide-react';
@@ -193,7 +220,7 @@ export default PaymentGatewayPage;
 //   const navigate = useNavigate();
 //   const [fadeIn, setFadeIn] = useState(false);
 //   const [showAddFundsModal, setShowAddFundsModal] = useState(false);
-  
+
 //   const {
 //     balance,
 //     transactions,
@@ -204,11 +231,11 @@ export default PaymentGatewayPage;
 //     addFunds,
 //     resetPaymentStatus
 //   } = usePaymentGateway();
-  
+
 //   useEffect(() => {
 //     setTimeout(() => setFadeIn(true), 100);
 //   }, []);
-  
+
 //   return (
 //     <div className="p-6">
 //       <div className="mb-6 flex items-center">
@@ -223,38 +250,38 @@ export default PaymentGatewayPage;
 //           <p className="text-gray-500 mt-1">Manage your pharmacy's financial transactions</p>
 //         </div>
 //       </div>
-      
+
 //       <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-//         <PaymentGatewayHeader 
-//           balance={balance} 
-//           onAddFunds={() => setShowAddFundsModal(true)} 
+//         <PaymentGatewayHeader
+//           balance={balance}
+//           onAddFunds={() => setShowAddFundsModal(true)}
 //         />
-        
+
 //         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 //           <div className="lg:col-span-1">
-//             <PaymentForm 
-//               processPayment={processPayment} 
+//             <PaymentForm
+//               processPayment={processPayment}
 //               isProcessing={processingPayment}
 //               balance={balance}
 //             />
 //           </div>
-          
+
 //           {/* <div className="lg:col-span-2">
-//             <TransactionHistory 
-//               transactions={transactions} 
-//               isLoading={isLoading} 
+//             <TransactionHistory
+//               transactions={transactions}
+//               isLoading={isLoading}
 //             />
 //           </div> */}
 //         </div>
 //       </div>
-      
+
 //       {/* Modals */}
-//       <PaymentStatusModal 
-//         status={paymentStatus} 
-//         onClose={resetPaymentStatus} 
+//       <PaymentStatusModal
+//         status={paymentStatus}
+//         onClose={resetPaymentStatus}
 //       />
-      
-//       {/* <AddFundsModal 
+
+//       {/* <AddFundsModal
 //         isOpen={showAddFundsModal}
 //         onClose={() => setShowAddFundsModal(false)}
 //         onAddFunds={addFunds}

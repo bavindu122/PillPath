@@ -55,4 +55,12 @@ export async function listMyOrders(includeItems = false) {
   return request(`orders/my${qs}`, { method: "GET" });
 }
 
-export default { createOrder, getOrder, listMyOrders };
+export async function pay(orderCode, body) {
+  if (!orderCode) throw new Error("orderCode required");
+  return request(`orders/${encodeURIComponent(orderCode)}/pay`, {
+    method: "POST",
+    body: JSON.stringify(body || {}),
+  });
+}
+
+export default { createOrder, getOrder, listMyOrders, pay };
