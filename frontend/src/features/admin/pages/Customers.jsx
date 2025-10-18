@@ -12,6 +12,22 @@ import ActivateUserModal from "../components/popup/ActivateUserModal";
 
 // Removed dummy/sample customers - page will load real data from the backend
 
+// Helper function to format datetime
+const formatDateTime = (dateTimeString) => {
+  if (!dateTimeString) return "";
+  try {
+    const date = new Date(dateTimeString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
+  } catch (error) {
+    return dateTimeString; // Return original if parsing fails
+  }
+};
+
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -139,7 +155,7 @@ const Customers = () => {
         subtitle="Manage registered customers and their account details"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <StatCard
           label="Active Customers"
           value={
@@ -148,11 +164,6 @@ const Customers = () => {
             ).length
           }
           icon={<Activity size={48} className="text-blue-500" />}
-        />
-        <StatCard
-          label="Loyalty Members"
-          value={customers.filter((c) => c.status === "Loyalty").length}
-          icon={<Star size={48} className="text-yellow-500" />}
         />
         <StatCard
           label="Suspended Accounts"
@@ -171,7 +182,7 @@ const Customers = () => {
         filterValue={filterStatus}
         setFilterValue={setFilterStatus}
         placeholder="Search by name or email..."
-        filterOptions={["All", "Active", "Loyalty", "Suspended"]}
+        filterOptions={["All", "Active", "Suspended"]}
       />
 
       <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
@@ -195,9 +206,6 @@ const Customers = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">
                 Created At
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">
-                Last Login
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider">
                 Actions
@@ -258,10 +266,7 @@ const Customers = () => {
                   {user.orders}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.joinDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.lastLogin}
+                  {formatDateTime(user.createdAt)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
