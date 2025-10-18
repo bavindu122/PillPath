@@ -98,8 +98,10 @@ export const usePharmacyProfile = (pharmacyId) => {
           logoPublicId: profileData.logoPublicId,
           bannerPublicId: profileData.bannerPublicId,
           
+          // Ensure operatingHours is always an object, never null
           operatingHours: profileData.operatingHours || {},
-          services: profileData.services || [],
+          // Ensure services is always an array, never null
+          services: Array.isArray(profileData.services) ? profileData.services : [],
           isVerified: profileData.isVerified,
           isActive: profileData.isActive,
           hasDelivery: profileData.hasDelivery,

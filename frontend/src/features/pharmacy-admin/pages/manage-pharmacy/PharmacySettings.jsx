@@ -74,22 +74,36 @@ export default function PharmacySettings() {
   // ✅ Initialize form data when pharmacy profile loads
   useEffect(() => {
     if (pharmacyProfile) {
+      // Ensure operatingHours is always an object with all days
+      const defaultOperatingHours = {
+        monday: "",
+        tuesday: "",
+        wednesday: "",
+        thursday: "",
+        friday: "",
+        saturday: "",
+        sunday: "",
+      };
+
+      // Merge existing operating hours with defaults (case-insensitive)
+      const normalizedOperatingHours = { ...defaultOperatingHours };
+      if (pharmacyProfile.operatingHours && typeof pharmacyProfile.operatingHours === 'object') {
+        Object.entries(pharmacyProfile.operatingHours).forEach(([day, hours]) => {
+          const normalizedDay = day.toLowerCase();
+          if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
+            normalizedOperatingHours[normalizedDay] = hours || "";
+          }
+        });
+      }
+
       setFormData({
         name: pharmacyProfile.name || "",
         address: pharmacyProfile.address || "",
         phoneNumber: pharmacyProfile.phoneNumber || "",
         latitude: pharmacyProfile.latitude || 6.9271,
         longitude: pharmacyProfile.longitude || 79.8612,
-        operatingHours: pharmacyProfile.operatingHours || {
-          monday: "",
-          tuesday: "",
-          wednesday: "",
-          thursday: "",
-          friday: "",
-          saturday: "",
-          sunday: "",
-        },
-        services: pharmacyProfile.services || [],
+        operatingHours: normalizedOperatingHours,
+        services: Array.isArray(pharmacyProfile.services) ? pharmacyProfile.services : [],
         deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
         deliveryRadius: pharmacyProfile.deliveryRadius || 10,
       });
@@ -276,14 +290,36 @@ export default function PharmacySettings() {
     setIsEditing(false);
     // Reset form data to original profile data
     if (pharmacyProfile) {
+      // Ensure operatingHours is always an object with all days
+      const defaultOperatingHours = {
+        monday: "",
+        tuesday: "",
+        wednesday: "",
+        thursday: "",
+        friday: "",
+        saturday: "",
+        sunday: "",
+      };
+
+      // Merge existing operating hours with defaults (case-insensitive)
+      const normalizedOperatingHours = { ...defaultOperatingHours };
+      if (pharmacyProfile.operatingHours && typeof pharmacyProfile.operatingHours === 'object') {
+        Object.entries(pharmacyProfile.operatingHours).forEach(([day, hours]) => {
+          const normalizedDay = day.toLowerCase();
+          if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
+            normalizedOperatingHours[normalizedDay] = hours || "";
+          }
+        });
+      }
+
       setFormData({
         name: pharmacyProfile.name || "",
         address: pharmacyProfile.address || "",
         phoneNumber: pharmacyProfile.phoneNumber || "",
         latitude: pharmacyProfile.latitude || 6.9271,
         longitude: pharmacyProfile.longitude || 79.8612,
-        operatingHours: pharmacyProfile.operatingHours || {},
-        services: pharmacyProfile.services || [],
+        operatingHours: normalizedOperatingHours,
+        services: Array.isArray(pharmacyProfile.services) ? pharmacyProfile.services : [],
         deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
         deliveryRadius: pharmacyProfile.deliveryRadius || 10,
       });
@@ -693,7 +729,7 @@ export default function PharmacySettings() {
                     Operating Hours
                   </label>
                   <div className="space-y-2">
-                    {Object.entries(formData.operatingHours || {}).map(
+                    {formData.operatingHours && Object.entries(formData.operatingHours).map(
                       ([day, hours]) => (
                         <div key={day} className="flex items-center space-x-3">
                           <div className="w-20 text-sm font-medium text-gray-600 capitalize">
