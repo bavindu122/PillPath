@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import chatService from '../services/chatService';
 import PharmacyService from '../services/api/PharmacyService';
 import webSocketService from '../services/websocketService';
+import { normalizeChatsList, normalizeMessage, normalizeChat } from '../utils/chatNormalize';
 
 // Chat Context
 const ChatContext = createContext();
@@ -77,28 +78,41 @@ const chatReducer = (state, action) => {
     
     case CHAT_ACTIONS.ADD_MESSAGE:
       const { chatId, message } = action.payload;
+      const currentMessages = state.messages[chatId] || [];
+      const updatedMessages = [...currentMessages, message];
+      // Sort messages by timestamp to maintain proper order
+      const sortedMessages = updatedMessages.sort((a, b) => {
+        const timeA = new Date(a.timestamp || a.time || 0).getTime();
+        const timeB = new Date(b.timestamp || b.time || 0).getTime();
+        return timeA - timeB; // ascending order (oldest first, newest last)
+      });
       return {
         ...state,
         messages: {
           ...state.messages,
-          [chatId]: [...(state.messages[chatId] || []), message]
+          [chatId]: sortedMessages
         }
       };
     
-    case CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE:
-      return {
-        ...state,
-        chats: state.chats.map(chat =>
-          chat.id === action.payload.chatId
-            ? { 
-                ...chat, 
-                lastMessage: action.payload.message,
-                lastMessageTime: action.payload.message.timestamp,
-                unreadCount: chat.id === state.activeChat?.id ? 0 : (chat.unreadCount || 0) + 1
-              }
-            : chat
-        )
-      };
+    case CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE: {
+      const updated = state.chats.map(chat =>
+        chat.id === action.payload.chatId
+          ? {
+              ...chat,
+              lastMessage: action.payload.message,
+              lastMessageTime: action.payload.message.timestamp,
+              unreadCount: chat.id === state.activeChat?.id ? 0 : (chat.unreadCount || 0) + 1,
+            }
+          : chat
+      );
+      // Move updated chat to top to reflect recency
+      const idx = updated.findIndex(c => c.id === action.payload.chatId);
+      if (idx > -1) {
+        const [item] = updated.splice(idx, 1);
+        return { ...state, chats: [item, ...updated] };
+      }
+      return { ...state, chats: updated };
+    }
     
     case CHAT_ACTIONS.SET_ERROR:
       return { ...state, error: action.payload };
@@ -149,8 +163,9 @@ export const ChatProvider = ({ children }) => {
     dispatch({ type: CHAT_ACTIONS.SET_LOADING, payload: true });
     
     try {
-      const chatsData = await chatService.getChats();
-      dispatch({ type: CHAT_ACTIONS.SET_CHATS, payload: chatsData || [] });
+  const chatsData = await chatService.getChats();
+  const normalized = normalizeChatsList(chatsData || [], { sort: true });
+  dispatch({ type: CHAT_ACTIONS.SET_CHATS, payload: normalized });
       
       // Also fetch unread count
       const unreadData = await chatService.getUnreadCount();
@@ -170,17 +185,27 @@ export const ChatProvider = ({ children }) => {
     
     try {
       const messagesData = await chatService.getMessages(chatId, page);
-      dispatch({
-        type: CHAT_ACTIONS.SET_MESSAGES,
-        payload: { chatId, messages: messagesData?.messages || [] }
+      const list = Array.isArray(messagesData?.messages) ? messagesData.messages : (messagesData || []);
+      const normalized = list.map(normalizeMessage);
+      // Merge with existing based on page: page 0 replace; page>0 prepend older
+      const existing = state.messages[chatId] || [];
+      const existingIds = new Set(existing.map(m => m.id));
+      const deduped = normalized.filter(m => !existingIds.has(m.id));
+      const merged = page > 0 ? [...deduped, ...existing] : [...deduped];
+      // Sort all messages by timestamp to ensure proper order
+      const sortedMerged = merged.sort((a, b) => {
+        const timeA = new Date(a.timestamp || a.time || 0).getTime();
+        const timeB = new Date(b.timestamp || b.time || 0).getTime();
+        return timeA - timeB; // ascending order (oldest first, newest last)
       });
-      return messagesData?.messages || [];
+      dispatch({ type: CHAT_ACTIONS.SET_MESSAGES, payload: { chatId, messages: sortedMerged } });
+      return deduped;
     } catch (error) {
       console.error('Error fetching messages:', error);
       dispatch({ type: CHAT_ACTIONS.SET_ERROR, payload: 'Failed to load messages' });
       return [];
     }
-  }, []);
+  }, [state.messages]);
 
   // Send message to backend
   const sendMessage = useCallback(async (chatId, content, messageType = 'text', metadata = {}) => {
@@ -195,7 +220,7 @@ export const ChatProvider = ({ children }) => {
       };
 
       // Add optimistic message immediately
-      const optimisticMessage = {
+      const optimisticMessage = normalizeMessage({
         id: `temp-${Date.now()}`,
         chatId,
         content: messageData.content,
@@ -204,8 +229,8 @@ export const ChatProvider = ({ children }) => {
         senderName: user?.name || user?.firstName || 'You',
         timestamp,
         status: 'sending',
-        ...metadata
-      };
+        metadata,
+      });
 
       dispatch({
         type: CHAT_ACTIONS.ADD_MESSAGE,
@@ -217,7 +242,8 @@ export const ChatProvider = ({ children }) => {
         // Start with minimal schema most backends accept
         content: messageData.content
       };
-      const sentMessage = await chatService.sendMessage(chatId, apiPayload);
+  const sentRaw = await chatService.sendMessage(chatId, apiPayload);
+  const sentMessage = normalizeMessage({ ...sentRaw, chatId });
 
       // Also send via WebSocket if connected for realtime delivery
       try {
@@ -226,6 +252,7 @@ export const ChatProvider = ({ children }) => {
           // Compatibility payload for admin dashboard implementation
           webSocketService.send({
             type: 'message',
+            chatId,
             customerId: user?.id,
             sender: 'customer',
             text: messageData.content,
@@ -247,10 +274,7 @@ export const ChatProvider = ({ children }) => {
         });
 
         // Update chat last message
-        dispatch({
-          type: CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE,
-          payload: { chatId, message: sentMessage }
-        });
+        dispatch({ type: CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE, payload: { chatId, message: sentMessage } });
       }
 
       return sentMessage;
@@ -455,17 +479,7 @@ export const ChatProvider = ({ children }) => {
       
       const handleNewMessage = (data) => {
         // Normalize different payloads
-        const message = {
-          id: data.id || `ws-${Date.now()}`,
-          chatId: data.chatId,
-          content: data.content || data.text,
-          messageType: data.messageType || 'text',
-          senderId: data.senderId || data.sender,
-          senderName: data.senderName,
-          timestamp: data.timestamp || data.time || new Date().toISOString(),
-          status: 'delivered',
-          ...(data.metadata || {})
-        };
+        const message = normalizeMessage(data);
         if (!message.chatId) return;
         dispatch({
           type: CHAT_ACTIONS.ADD_MESSAGE,

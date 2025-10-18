@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Search, Clock, User } from 'lucide-react';
+import { MessageSquare, Search, Clock, User, Users } from 'lucide-react';
 import api from '../../../../services/api';
+import { normalizeChatsList } from '../../../../utils/chatNormalize';
 
 const ChatList = () => {
   const [threads, setThreads] = useState([]);
@@ -20,11 +21,12 @@ const ChatList = () => {
       setError(null);
       // Use axios client with baseURL (http://localhost:8080/api) and target /v1
       const { data } = await api.get('/v1/chats/threads');
-      // Normalize possible response shapes
+      // Normalize possible response shapes and sort by recency
       const threadsData = Array.isArray(data)
         ? data
         : (data?.threads || data?.content || data?.items || []);
-      setThreads(threadsData || []);
+      const normalized = normalizeChatsList(threadsData || [], { sort: true });
+      setThreads(normalized || []);
     } catch (err) {
       // If backend returned HTML (e.g., 404 page), show a clear message
       const raw = err?.response?.data;
@@ -55,17 +57,17 @@ const ChatList = () => {
   };
 
   const filteredThreads = threads.filter(thread => {
-    const name = thread.customerName || thread.customer || `Customer ${thread.customerId}`;
-    const last = thread.lastMessage || thread.content || '';
+    const name = thread.customer?.name || thread.customerName || `Customer ${thread.customerId}`;
+    const last = thread.lastMessage?.content || '';
     const q = searchTerm.toLowerCase();
     return name?.toLowerCase().includes(q) || last?.toLowerCase().includes(q);
   });
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm p-8">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-lg shadow-sm border border-blue-100 p-8">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               <span className="ml-3 text-gray-600">Loading chats...</span>
@@ -77,8 +79,8 @@ const ChatList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -89,7 +91,7 @@ const ChatList = () => {
         </div>
 
         {/* Search and Refresh */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 p-6 mb-6">
           <div className="flex space-x-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -98,13 +100,13 @@ const ChatList = () => {
                 placeholder="Search conversations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white/80 backdrop-blur-sm"
               />
             </div>
             <button
               onClick={fetchThreads}
               disabled={loading}
-              className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-md"
             >
               {loading ? 'Loading...' : 'Refresh'}
             </button>
@@ -131,10 +133,12 @@ const ChatList = () => {
         )}
 
         {/* Chat List */}
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-sm border border-blue-100">
           {filteredThreads.length === 0 ? (
             <div className="p-12 text-center">
-              <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-gray-400" />
+              </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchTerm ? 'No matching conversations' : 'No conversations yet'}
               </h3>
@@ -146,19 +150,21 @@ const ChatList = () => {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-blue-100">
               {filteredThreads.map((thread) => (
                 <div
-                  key={thread.customerId}
+                  key={thread.customerId || thread.id}
                   onClick={() => handleThreadClick(thread.customerId)}
-                  className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="p-4 hover:bg-blue-50/50 cursor-pointer transition-all duration-200 hover:shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-6 w-6 text-blue-600" />
+                      <div className="flex-shrink-0 relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                          <User className="h-6 w-6 text-white" />
                         </div>
+                        {/* Online indicator - you can add logic here */}
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full shadow-sm"></div>
                       </div>
                       
                       <div className="flex-1 min-w-0">
@@ -168,18 +174,18 @@ const ChatList = () => {
                           </p>
                           <div className="flex items-center space-x-2">
                             {thread.unreadCount > 0 && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white shadow-sm">
                                 {thread.unreadCount}
                               </span>
                             )}
-                            <div className="flex items-center text-xs text-gray-500">
+                            <div className="flex items-center text-xs text-gray-500 font-medium">
                               <Clock className="h-3 w-3 mr-1" />
                               {formatTime(thread.lastMessageTime)}
                             </div>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-500 truncate mt-1">
-                          {thread.lastMessage || thread.content || 'No messages yet'}
+                        <p className="text-sm text-gray-600 truncate mt-1 leading-relaxed">
+                          {thread.lastMessage?.content || 'No messages yet'}
                         </p>
                       </div>
                     </div>

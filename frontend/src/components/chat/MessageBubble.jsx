@@ -5,8 +5,10 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   
-  const isOwnMessage = message.senderId === currentUser?.id;
-  const timestamp = new Date(message.timestamp);
+  const isOwnMessage = String(message.senderId) === String(currentUser?.id);
+  const rawTs = message.timestamp || message.time;
+  const parsedTs = rawTs ? new Date(rawTs) : new Date();
+  const timestamp = isNaN(parsedTs.getTime()) ? new Date() : parsedTs;
   
   // Format timestamp
   const formatTime = (date) => {
@@ -159,7 +161,7 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
         );
 
       default:
-        return <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>;
+        return <p className="text-sm whitespace-pre-wrap break-words">{message.content || message.text}</p>;
     }
   };
 

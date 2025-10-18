@@ -17,21 +17,13 @@ const MessageInput = ({ chatId, disabled = false }) => {
   
   const { sendMessage, sendTypingIndicator } = useChat();
 
-  // Auto-resize textarea
-  const adjustTextareaHeight = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
-    }
-  }, []);
-
   // Handle input change
   const handleInputChange = (e) => {
     setMessage(e.target.value);
-    adjustTextareaHeight();
     
     // Handle typing indicator
+    if (!chatId) return;
+    
     if (!typing) {
       setTyping(true);
       sendTypingIndicator(chatId, true);
@@ -54,7 +46,7 @@ const MessageInput = ({ chatId, disabled = false }) => {
     e.preventDefault();
     
     if (!message.trim() && attachments.length === 0) return;
-    if (disabled) return;
+    if (disabled || !chatId) return;
 
     try {
       // Stop typing indicator
@@ -76,7 +68,6 @@ const MessageInput = ({ chatId, disabled = false }) => {
       // Clear form
       setMessage('');
       setAttachments([]);
-      adjustTextareaHeight();
       
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -206,7 +197,7 @@ const MessageInput = ({ chatId, disabled = false }) => {
   const commonEmojis = ['😊', '😂', '❤️', '👍', '👎', '😢', '😮', '😡', '👏', '🙏'];
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="message-input customer-message-input bg-white/90 backdrop-blur-sm p-4">
       {/* Attachments Preview */}
       {attachments.length > 0 && (
         <div className="mb-3 space-y-2">
@@ -242,13 +233,13 @@ const MessageInput = ({ chatId, disabled = false }) => {
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="flex items-end space-x-2">
+      <form onSubmit={handleSubmit} className="flex items-end space-x-3 bg-white rounded-2xl p-2 shadow-sm border border-blue-100">
         {/* Attachment Button */}
         <div className="relative">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-all duration-200 transform hover:scale-110"
             title="Attach file"
           >
             <Paperclip className="w-5 h-5" />
@@ -276,7 +267,7 @@ const MessageInput = ({ chatId, disabled = false }) => {
         <button
           type="button"
           onClick={() => imageInputRef.current?.click()}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-all duration-200 transform hover:scale-110"
           title="Send image"
         >
           <Image className="w-5 h-5" />
@@ -289,9 +280,8 @@ const MessageInput = ({ chatId, disabled = false }) => {
             value={message}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            style={{ minHeight: '40px', maxHeight: '100px' }}
+            placeholder="Type your message here..."
+            className="w-full px-4 py-3 border-0 bg-transparent focus:outline-none resize-none h-10 text-gray-800 placeholder-gray-500"
             disabled={disabled}
           />
         </div>
@@ -300,7 +290,7 @@ const MessageInput = ({ chatId, disabled = false }) => {
         <button
           type="button"
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-all duration-200 transform hover:scale-110"
           title="Add emoji"
         >
           <Smile className="w-5 h-5" />
@@ -312,10 +302,10 @@ const MessageInput = ({ chatId, disabled = false }) => {
           onMouseDown={startRecording}
           onMouseUp={stopRecording}
           onMouseLeave={stopRecording}
-          className={`p-2 rounded-full transition-colors ${
+          className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${
             isRecording
-              ? 'bg-red-500 text-white'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              ? 'bg-red-500 text-white shadow-lg animate-pulse'
+              : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50'
           }`}
           title="Hold to record voice message"
         >
@@ -326,10 +316,10 @@ const MessageInput = ({ chatId, disabled = false }) => {
         <button
           type="submit"
           disabled={disabled || (!message.trim() && attachments.length === 0)}
-          className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full hover:from-blue-700 hover:to-blue-800 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-110 shadow-md disabled:shadow-none"
           title="Send message"
         >
-          <Send className="w-5 h-5" />
+          <Send className="w-4 h-4" />
         </button>
       </form>
     </div>

@@ -10,7 +10,7 @@ import SalesAnalyticsPage from "./pages/sales-analytics/SalesAnalyticsPage";
 import OrdersPage from "./pages/orders/OrdersPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
 import PaymentGatewayPage from "./pages/PaymentGateway/PaymentGatewayPage";
-import { ChatList, ChatWindow } from "./pages/chats";
+import Chat from "./pages/chats/Chat";
 
 export const PharmacyAdmin = () => {
   const { isAuthenticated, loading, isPharmacyAdmin, initialized } = useAuth();
@@ -47,8 +47,8 @@ export const PharmacyAdmin = () => {
         <Route path="pharmacyorders" element={<OrdersPage />} />
         <Route path="pharmacyorders/:orderId" element={<OrderDetailPage />} />
         <Route path="paymentgateway" element={<PaymentGatewayPage />} />
-        <Route path="chats" element={<ChatList />} />
-        <Route path="chats/:customerId" element={<ChatWindow />} />
+        <Route path="chats" element={<Chat />} />
+        <Route path="chats/:customerId" element={<Chat />} />
       </Routes>
     </PharmacyAdminLayout>
   );

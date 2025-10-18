@@ -134,6 +134,7 @@ const Chat = () => {
               conversation={currentConversation}
               sendingMessage={sendingMessage}
               onSendMessage={sendMessage}
+              className="h-full"
             />
           </div>
         </div>

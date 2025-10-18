@@ -120,28 +120,7 @@ const ChatCustomer = () => {
             </div>
           )}
 
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50" size={20} />
-              <input
-                type="text"
-                placeholder="Search pharmacies or messages..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="all">All Chats</option>
-              <option value="active">Active</option>
-              <option value="unread">Unread</option>
-            </select>
-          </div>
+         
         </motion.div>
 
         {/* Loading State */}
@@ -153,18 +132,16 @@ const ChatCustomer = () => {
 
         {/* Chat Interface */}
         {!loading && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[70vh]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: '600px' }}>
             {/* Desktop Chat List - Always visible on desktop */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className={`lg:col-span-1 ${showMobileChat ? 'hidden lg:block' : 'block'}`}
             >
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 h-full">
-                <div className="p-4 border-b border-white/20">
-                  <h3 className="text-lg font-semibold text-white">Conversations</h3>
-                </div>
-                <div className="h-full overflow-hidden">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 h-full flex flex-col">
+                
+                <div className="h-full overflow-hidden flex flex-col">
                   <StyledChatList chats={filteredChats} />
                 </div>
               </div>
@@ -176,7 +153,7 @@ const ChatCustomer = () => {
               animate={{ opacity: 1, x: 0 }}
               className={`lg:col-span-2 ${!showMobileChat ? 'hidden lg:block' : 'block'}`}
             >
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 h-full">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 h-full flex flex-col">
                 {activeChat ? (
                   <StyledChatWindow onBack={handleBackToChats} />
                 ) : (
