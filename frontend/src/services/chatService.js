@@ -36,7 +36,24 @@ export const chatService = {
       const response = await api.post(`/chats/${chatId}/messages`, messageData);
       return response.data;
     } catch (error) {
-      console.error('Error sending message:', error);
+      // If 400, try alternative payload shapes
+      if (error?.response?.status === 400) {
+        try {
+          // Try using 'text' field
+          const alt1 = await api.post(`/chats/${chatId}/messages`, {
+            text: messageData.content || messageData.text
+          });
+          return alt1.data;
+        } catch (_) {}
+        try {
+          // Try using 'message' field
+          const alt2 = await api.post(`/chats/${chatId}/messages`, {
+            message: messageData.content || messageData.text || messageData.message
+          });
+          return alt2.data;
+        } catch (_) {}
+      }
+      console.error('Error sending message:', error?.response?.status, error?.response?.data || error?.message);
       throw error;
     }
   },

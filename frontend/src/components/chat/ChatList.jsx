@@ -13,13 +13,19 @@ const ChatList = ({ className = '' }) => {
   // Filter chats based on search query
   const filteredChats = chats.filter(chat => {
     if (!searchQuery) return true;
-    
     const searchTerm = searchQuery.toLowerCase();
-    const otherParticipant = getOtherParticipant(chat, user);
-    
+    const otherParticipant = getOtherParticipant(chat, user) || {};
+    const nameCandidates = [
+      otherParticipant.name,
+      otherParticipant.pharmacyName,
+      otherParticipant.displayName,
+      otherParticipant.title,
+      chat.pharmacyName,
+    ].filter(Boolean);
+    const lastContent = chat.lastMessage?.content || chat.lastMessage?.text || '';
     return (
-      otherParticipant?.name?.toLowerCase().includes(searchTerm) ||
-      chat.lastMessage?.content?.toLowerCase().includes(searchTerm)
+      nameCandidates.some(n => n?.toLowerCase().includes(searchTerm)) ||
+      lastContent.toLowerCase().includes(searchTerm)
     );
   });
 
@@ -140,7 +146,13 @@ const ChatItem = ({ chat, currentUser, isActive, isOnline, onClick, formatTimest
     ? (chat.pharmacy || chat.pharmacist)
     : chat.customer;
 
-  const displayName = otherParticipant?.name || 'Unknown User';
+  const displayName =
+    otherParticipant?.name ||
+    otherParticipant?.pharmacyName ||
+    otherParticipant?.displayName ||
+    otherParticipant?.title ||
+    chat.pharmacyName ||
+    'Unknown User';
   const avatar = otherParticipant?.avatar || otherParticipant?.profileImage;
   const lastMessage = chat.lastMessage;
   const unreadCount = chat.unreadCount || 0;

@@ -187,6 +187,7 @@ export const ChatProvider = ({ children }) => {
     if (!chatId || !content.trim()) return;
 
     try {
+      const timestamp = new Date().toISOString();
       const messageData = {
         content: content.trim(),
         messageType,
@@ -201,7 +202,7 @@ export const ChatProvider = ({ children }) => {
         messageType,
         senderId: user?.id,
         senderName: user?.name || user?.firstName || 'You',
-        timestamp: new Date().toISOString(),
+        timestamp,
         status: 'sending',
         ...metadata
       };
@@ -211,8 +212,27 @@ export const ChatProvider = ({ children }) => {
         payload: { chatId, message: optimisticMessage }
       });
 
-      // Send to backend
-      const sentMessage = await chatService.sendMessage(chatId, messageData);
+      // Send to backend (include required fields for API)
+      const apiPayload = {
+        // Start with minimal schema most backends accept
+        content: messageData.content
+      };
+      const sentMessage = await chatService.sendMessage(chatId, apiPayload);
+
+      // Also send via WebSocket if connected for realtime delivery
+      try {
+        if (webSocketService.isConnected()) {
+          webSocketService.sendMessage(chatId, messageData.content, messageType, metadata);
+          // Compatibility payload for admin dashboard implementation
+          webSocketService.send({
+            type: 'message',
+            customerId: user?.id,
+            sender: 'customer',
+            text: messageData.content,
+            time: new Date().toISOString()
+          });
+        }
+      } catch (_) {}
       
       // Update with real message data
       if (sentMessage) {
@@ -263,13 +283,35 @@ export const ChatProvider = ({ children }) => {
       console.log('Calling chatService.startChat with pharmacyId:', pharmacyId);
       const newChat = await chatService.startChat(pharmacyId);
       console.log('Chat service response:', newChat);
-      
-      if (newChat) {
-        dispatch({ type: CHAT_ACTIONS.ADD_CHAT, payload: newChat });
-        dispatch({ type: CHAT_ACTIONS.SET_ACTIVE_CHAT, payload: newChat });
+
+      // Try to enrich chat with pharmacy details so UI can display names/avatars
+      let enrichedChat = newChat;
+      try {
+        if (pharmacyId && (!newChat?.pharmacy && !newChat?.pharmacist)) {
+          const details = await chatService.getPharmacyDetails(pharmacyId);
+          const pharmacyName = details?.name || details?.pharmacyName || details?.displayName;
+          const avatar = details?.logo || details?.avatar || details?.profileImageUrl;
+          enrichedChat = {
+            ...newChat,
+            pharmacyId,
+            pharmacyName,
+            pharmacy: {
+              id: pharmacyId,
+              name: pharmacyName,
+              avatar
+            }
+          };
+        }
+      } catch (e) {
+        // Non-fatal if details fetch fails
+      }
+
+      if (enrichedChat) {
+        dispatch({ type: CHAT_ACTIONS.ADD_CHAT, payload: enrichedChat });
+        dispatch({ type: CHAT_ACTIONS.SET_ACTIVE_CHAT, payload: enrichedChat });
         
         // Fetch initial messages if any
-        await fetchMessages(newChat.id);
+        await fetchMessages(enrichedChat.id);
       }
       
       return newChat;
@@ -322,6 +364,8 @@ export const ChatProvider = ({ children }) => {
     dispatch({ type: CHAT_ACTIONS.SET_ACTIVE_CHAT, payload: chat });
     
     if (chat) {
+      // Join the chat room for realtime updates
+      try { webSocketService.joinChat(chat.id); } catch (_) {}
       // Mark messages as read
       if (chat.unreadCount > 0) {
         try {
@@ -395,8 +439,8 @@ export const ChatProvider = ({ children }) => {
     if (user && token) {
       console.log('🚀 Initializing chat system with WebSocket');
       
-      // Connect to WebSocket
-      webSocketService.connect(token);
+  // Connect to WebSocket with user id and token
+  webSocketService.connect(user.id, token);
       
       // Set up WebSocket event listeners
       const handleConnect = () => {
@@ -409,8 +453,20 @@ export const ChatProvider = ({ children }) => {
         dispatch({ type: CHAT_ACTIONS.SET_CONNECTED, payload: false });
       };
       
-      const handleNewMessage = (message) => {
-        console.log('📨 New message received:', message);
+      const handleNewMessage = (data) => {
+        // Normalize different payloads
+        const message = {
+          id: data.id || `ws-${Date.now()}`,
+          chatId: data.chatId,
+          content: data.content || data.text,
+          messageType: data.messageType || 'text',
+          senderId: data.senderId || data.sender,
+          senderName: data.senderName,
+          timestamp: data.timestamp || data.time || new Date().toISOString(),
+          status: 'delivered',
+          ...(data.metadata || {})
+        };
+        if (!message.chatId) return;
         dispatch({
           type: CHAT_ACTIONS.ADD_MESSAGE,
           payload: { chatId: message.chatId, message }
@@ -428,6 +484,8 @@ export const ChatProvider = ({ children }) => {
           payload: { chatId, userId, isTyping }
         });
       };
+      const handleTypingStart = ({ chatId, userId }) => handleTypingStatus({ chatId, userId, isTyping: true });
+      const handleTypingStop = ({ chatId, userId }) => handleTypingStatus({ chatId, userId, isTyping: false });
       
       const handleUserOnlineStatus = ({ userId, isOnline }) => {
         dispatch({
@@ -436,25 +494,27 @@ export const ChatProvider = ({ children }) => {
         });
       };
 
-      // Register event listeners
-      webSocketService.on('connect', handleConnect);
-      webSocketService.on('disconnect', handleDisconnect);
-      webSocketService.on('newMessage', handleNewMessage);
-      webSocketService.on('typing', handleTypingStatus);
-      webSocketService.on('userOnline', handleUserOnlineStatus);
-      webSocketService.on('userOffline', handleUserOnlineStatus);
+  // Register event listeners with correct event names
+  webSocketService.on('connected', handleConnect);
+  webSocketService.on('disconnected', handleDisconnect);
+  webSocketService.on('new_message', handleNewMessage);
+  webSocketService.on('typing_start', handleTypingStart);
+  webSocketService.on('typing_stop', handleTypingStop);
+  webSocketService.on('user_online', handleUserOnlineStatus);
+  webSocketService.on('user_offline', handleUserOnlineStatus);
 
       // Fetch initial data
       fetchChats();
 
       // Cleanup function
       return () => {
-        webSocketService.off('connect', handleConnect);
-        webSocketService.off('disconnect', handleDisconnect);
-        webSocketService.off('newMessage', handleNewMessage);
-        webSocketService.off('typing', handleTypingStatus);
-        webSocketService.off('userOnline', handleUserOnlineStatus);
-        webSocketService.off('userOffline', handleUserOnlineStatus);
+        webSocketService.off('connected', handleConnect);
+        webSocketService.off('disconnected', handleDisconnect);
+        webSocketService.off('new_message', handleNewMessage);
+        webSocketService.off('typing_start', handleTypingStart);
+        webSocketService.off('typing_stop', handleTypingStop);
+        webSocketService.off('user_online', handleUserOnlineStatus);
+        webSocketService.off('user_offline', handleUserOnlineStatus);
         webSocketService.disconnect();
       };
     }

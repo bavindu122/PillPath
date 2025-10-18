@@ -120,9 +120,9 @@ const ChatWindow = () => {
       id: Date.now() + Math.random(),
       customerId: messageData.customerId,
       sender: messageData.sender,
-      text: messageData.text,
-      time: messageData.time,
-      timestamp: messageData.time
+      text: messageData.text || messageData.content,
+      time: messageData.time || messageData.timestamp || new Date().toISOString(),
+      timestamp: messageData.time || messageData.timestamp || new Date().toISOString()
     };
 
     setMessages(prev => [...prev, newMsg]);

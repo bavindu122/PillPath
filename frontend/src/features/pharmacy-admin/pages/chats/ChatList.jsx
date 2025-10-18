@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Search, Clock, User } from 'lucide-react';
+import api from '../../../../services/api';
 
 const ChatList = () => {
   const [threads, setThreads] = useState([]);
@@ -16,14 +17,22 @@ const ChatList = () => {
   const fetchThreads = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/chat/threads');
-      if (!response.ok) {
-        throw new Error('Failed to fetch threads');
-      }
-      const data = await response.json();
-      setThreads(data || []);
+      setError(null);
+      // Use axios client with baseURL (http://localhost:8080/api) and target /v1
+      const { data } = await api.get('/v1/chats/threads');
+      // Normalize possible response shapes
+      const threadsData = Array.isArray(data)
+        ? data
+        : (data?.threads || data?.content || data?.items || []);
+      setThreads(threadsData || []);
     } catch (err) {
-      setError(err.message);
+      // If backend returned HTML (e.g., 404 page), show a clear message
+      const raw = err?.response?.data;
+      if (typeof raw === 'string' && raw.startsWith('<!doctype')) {
+        setError('Received HTML instead of JSON. Check API URL (/v1/chats/threads) and backend routing.');
+      } else {
+        setError(err?.response?.data?.message || err.message || 'Failed to load chats');
+      }
     } finally {
       setLoading(false);
     }
@@ -45,10 +54,12 @@ const ChatList = () => {
     return date.toLocaleDateString();
   };
 
-  const filteredThreads = threads.filter(thread =>
-    thread.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    thread.lastMessage?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredThreads = threads.filter(thread => {
+    const name = thread.customerName || thread.customer || `Customer ${thread.customerId}`;
+    const last = thread.lastMessage || thread.content || '';
+    const q = searchTerm.toLowerCase();
+    return name?.toLowerCase().includes(q) || last?.toLowerCase().includes(q);
+  });
 
   if (loading) {
     return (
@@ -168,7 +179,7 @@ const ChatList = () => {
                           </div>
                         </div>
                         <p className="text-sm text-gray-500 truncate mt-1">
-                          {thread.lastMessage || 'No messages yet'}
+                          {thread.lastMessage || thread.content || 'No messages yet'}
                         </p>
                       </div>
                     </div>
