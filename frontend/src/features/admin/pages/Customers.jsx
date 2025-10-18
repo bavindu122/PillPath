@@ -50,97 +50,76 @@ const Customers = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleSuspend = (user) => {
-    // Optimistic UI update, then call backend
-    const prevState = customers;
-    setCustomers((prev) =>
-      prev.map((c) =>
-        c.id === user.id ? { ...c, status: "Suspended", suspendReason } : c
-      )
-    );
-    setSuspendPopup(null);
-    setSuspendReason("");
+  const handleSuspend = async (user) => {
+    try {
+      await AdminService.suspendCustomer(user.id, suspendReason);
+      setSuspendPopup(null);
+      setSuspendReason("");
 
-    (async () => {
-      try {
-        await AdminService.suspendCustomer(user.id, suspendReason);
-      } catch (err) {
-        console.error("Failed to suspend customer:", err);
-        setError(err.message || "Failed to suspend user");
-        // revert
-        setCustomers(prevState);
-      }
-    })();
+      // Refresh customer data from backend
+      await fetchCustomers();
+    } catch (err) {
+      console.error("Failed to suspend customer:", err);
+      setError(err.message || "Failed to suspend user");
+    }
   };
 
-  const handleActivate = (user) => {
-    const prevState = customers;
-    setCustomers((prev) =>
-      prev.map((c) =>
-        c.id === user.id ? { ...c, status: "Active", suspendReason: null } : c
-      )
-    );
-    setActivatePopup(null);
+  const handleActivate = async (user) => {
+    try {
+      await AdminService.activateCustomer(user.id);
+      setActivatePopup(null);
 
-    (async () => {
-      try {
-        await AdminService.activateCustomer(user.id);
-      } catch (err) {
-        console.error("Failed to activate customer:", err);
-        setError(err.message || "Failed to activate user");
-        // revert
-        setCustomers(prevState);
-      }
-    })();
+      // Refresh customer data from backend
+      await fetchCustomers();
+    } catch (err) {
+      console.error("Failed to activate customer:", err);
+      setError(err.message || "Failed to activate user");
+    }
+  };
+
+  // Fetch customers from backend
+  const fetchCustomers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await AdminService.getCustomers({
+        page: 0,
+        size: 1000,
+      });
+      // Support paginated and non-paginated responses
+      const data =
+        response && response.content
+          ? response.content
+          : Array.isArray(response)
+          ? response
+          : [];
+
+      // Preserve backend fields as-is (keep empty/null values) but normalize types to avoid runtime errors
+      const sanitizeCustomer = (b) => {
+        const merged = { ...b };
+
+        // Ensure fields exist so UI won't crash; keep "empty" values when provided by backend
+        if (merged.name === undefined) merged.name = "";
+        if (merged.email === undefined) merged.email = "";
+        if (merged.prescriptions === undefined) merged.prescriptions = 0;
+        if (merged.orders === undefined) merged.orders = 0;
+
+        return merged;
+      };
+
+      const sanitized = data.map(sanitizeCustomer);
+      setCustomers(sanitized);
+    } catch (err) {
+      console.error("Failed to load customers:", err);
+      setError(err.message || "Failed to load customers");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Fetch customers from backend on mount
   useEffect(() => {
-    let mounted = true;
-    const fetchCustomers = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await AdminService.getCustomers({
-          page: 0,
-          size: 1000,
-        });
-        // Support paginated and non-paginated responses
-        const data =
-          response && response.content
-            ? response.content
-            : Array.isArray(response)
-            ? response
-            : [];
-
-        // Preserve backend fields as-is (keep empty/null values) but normalize types to avoid runtime errors
-        const sanitizeCustomer = (b) => {
-          const merged = { ...b };
-
-          // Ensure fields exist so UI won't crash; keep "empty" values when provided by backend
-          if (merged.name === undefined) merged.name = "";
-          if (merged.email === undefined) merged.email = "";
-          if (merged.prescriptions === undefined) merged.prescriptions = 0;
-          if (merged.orders === undefined) merged.orders = 0;
-
-          return merged;
-        };
-
-        const sanitized = data.map(sanitizeCustomer);
-
-        if (mounted) setCustomers(sanitized);
-      } catch (err) {
-        console.error("Failed to load customers:", err);
-        if (mounted) setError(err.message || "Failed to load customers");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
     fetchCustomers();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   return (
