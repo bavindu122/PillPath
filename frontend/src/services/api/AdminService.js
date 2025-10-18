@@ -243,6 +243,43 @@ class AdminService {
       }
     );
   }
+
+  // ✅ Get all prescriptions
+  async getPrescriptions(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/prescriptions${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // ✅ Get prescription statistics
+  async getPrescriptionStatistics() {
+    return this.request("admin/prescriptions/statistics", {
+      method: "GET",
+    });
+  }
+
+  // ✅ Get single prescription details
+  async getPrescriptionById(prescriptionId) {
+    return this.request(`admin/prescriptions/${prescriptionId}`, {
+      method: "GET",
+    });
+  }
+
+  // ✅ Update prescription status
+  async updatePrescriptionStatus(prescriptionId, status, reason = null, adminNotes = null) {
+    return this.request(`admin/prescriptions/${prescriptionId}/status`, {
+      method: "PATCH",
+      body: {
+        status,
+        reason,
+        adminNotes,
+      },
+    });
+  }
 }
 
 export default new AdminService();
