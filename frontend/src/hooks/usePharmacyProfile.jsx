@@ -18,7 +18,14 @@ export const usePharmacyProfile = () => {
       const profile = await PharmacyService.getPharmacyProfile();
       console.log("Pharmacy profile received:", profile);
 
-      setPharmacyProfile(profile);
+      // Normalize the profile data to ensure operatingHours is always an object
+      const normalizedProfile = {
+        ...profile,
+        operatingHours: profile.operatingHours || {},
+        services: Array.isArray(profile.services) ? profile.services : [],
+      };
+
+      setPharmacyProfile(normalizedProfile);
     } catch (error) {
       console.error("Failed to fetch pharmacy profile:", error);
       setError(error.message);
@@ -50,11 +57,18 @@ export const usePharmacyProfile = () => {
       const normalizedProfile =
         result && result.pharmacy ? result.pharmacy : result;
 
+      // Normalize the profile data to ensure operatingHours is always an object
+      const finalProfile = {
+        ...normalizedProfile,
+        operatingHours: normalizedProfile.operatingHours || {},
+        services: Array.isArray(normalizedProfile.services) ? normalizedProfile.services : [],
+      };
+
       // Update local state with the normalized profile object
-      setPharmacyProfile(normalizedProfile);
+      setPharmacyProfile(finalProfile);
 
       // Return the normalized profile for callers
-      return normalizedProfile;
+      return finalProfile;
     } catch (error) {
       console.error("Failed to update pharmacy profile:", error);
       setError(error.message);

@@ -6,16 +6,17 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
 
   // Convert database operating hours object to array format
   const getOperatingHoursArray = () => {
-    if (!pharmacy.operatingHours || typeof pharmacy.operatingHours !== 'object') {
-      // Fallback data if no operating hours in database
+    // If operating hours is null, undefined, or empty object
+    if (!pharmacy.operatingHours || typeof pharmacy.operatingHours !== 'object' || Object.keys(pharmacy.operatingHours).length === 0) {
+      // Return empty data if no operating hours available
       return [
-        { day: "Monday", hours: "8:00 AM - 9:00 PM" },
-        { day: "Tuesday", hours: "8:00 AM - 9:00 PM" },
-        { day: "Wednesday", hours: "8:00 AM - 9:00 PM" },
-        { day: "Thursday", hours: "8:00 AM - 9:00 PM" },
-        { day: "Friday", hours: "8:00 AM - 9:00 PM" },
-        { day: "Saturday", hours: "9:00 AM - 7:00 PM" },
-        { day: "Sunday", hours: "10:00 AM - 6:00 PM" }
+        { day: "Monday", hours: "Not specified" },
+        { day: "Tuesday", hours: "Not specified" },
+        { day: "Wednesday", hours: "Not specified" },
+        { day: "Thursday", hours: "Not specified" },
+        { day: "Friday", hours: "Not specified" },
+        { day: "Saturday", hours: "Not specified" },
+        { day: "Sunday", hours: "Not specified" }
       ];
     }
 
@@ -23,10 +24,14 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
     const daysOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const dbHours = pharmacy.operatingHours;
     
-    return daysOrder.map(day => ({
-      day: day,
-      hours: dbHours[day.toLowerCase()] || dbHours[day] || "Closed"
-    }));
+    return daysOrder.map(day => {
+      const dayLower = day.toLowerCase();
+      const hours = dbHours[dayLower] || dbHours[day] || "";
+      return {
+        day: day,
+        hours: hours.trim() || "Not specified"
+      };
+    });
   };
 
   // Operating hours data - ensure it's always an array
@@ -54,7 +59,7 @@ const OpeningHours = ({ pharmacy, showTitle = true, className = "", miniView = f
     
     // Fallback logic based on operating hours
     const todayHours = operatingHours.find(h => h.day === currentDay)?.hours;
-    if (!todayHours || todayHours.toLowerCase().includes('closed')) {
+    if (!todayHours || todayHours.toLowerCase().includes('closed') || todayHours.toLowerCase().includes('not specified')) {
       return false;
     }
     
