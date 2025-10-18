@@ -71,125 +71,276 @@ export const useInventoryData = (pharmacyId) => {
 
   // ... (rest of the code is unchanged)
 
-  const addNewProduct = async (newProduct) => {
-    try {
-      const url = `${API_BASE_URL}/pharmacy/${pharmacyId}`;
-      
-      // Get auth token from localStorage
-      const token = localStorage.getItem('auth_token');
-      
-      // Create FormData for multipart/form-data
-      const formData = new FormData();
-      
-      // Append all required fields
-      formData.append('name', newProduct.name);
-      formData.append('description', newProduct.description || '');
-      formData.append('price', newProduct.price.toString());
-      formData.append('stock', newProduct.stock.toString());
-      
-      // Append image if exists (should be a File object)
-      if (newProduct.image && newProduct.image instanceof File) {
-        formData.append('image', newProduct.image);
-      }
-
-      console.log('Sending product data to:', url);
-      console.log('Product data:', {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: newProduct.price,
-        stock: newProduct.stock,
-        hasImage: !!newProduct.image
-      });
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          // DO NOT set Content-Type - browser will set it automatically with boundary
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
-        throw new Error(`Failed to add new product: ${response.status} ${errorText}`);
-      }
-
-      const addedProduct = await response.json();
-      // Calculate and add the status to the new product before adding it to the state
-      setProducts(prevProducts => [...prevProducts, { ...addedProduct, status: calculateStatus(addedProduct.stock) }]);
-      return addedProduct;
-    } catch (err) {
-      console.error('Error adding new product:', err);
-      throw err;
-    }
-  };
-
-
-  // const updateProduct = async (updatedProduct) => {
+  // const addNewProduct = async (newProduct) => {
   //   try {
+  //     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}`;
+      
   //     // Get auth token from localStorage
   //     const token = localStorage.getItem('auth_token');
       
-  //     // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
-  //     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${updatedProduct.id}`;
+  //     // Create FormData for multipart/form-data
+  //     const formData = new FormData();
       
-  //     console.log('=== UPDATE PRODUCT DEBUG ===');
-  //     console.log('URL:', url);
-  //     console.log('Product data:', updatedProduct);
-  //     console.log('Token exists:', !!token);
-  //     console.log('Token preview:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
-  //     console.log('Pharmacy ID:', pharmacyId);
+  //     // Append all required fields
+  //     formData.append('name', newProduct.name);
+  //     formData.append('description', newProduct.description || '');
+  //     formData.append('price', newProduct.price.toString());
+  //     formData.append('stock', newProduct.stock.toString());
       
-  //     if (!token) {
-  //       throw new Error('No authentication token found. Please log in again.');
+  //     // Append image if exists (should be a File object)
+  //     if (newProduct.image && newProduct.image instanceof File) {
+  //       formData.append('image', newProduct.image);
   //     }
-      
+
+  //     console.log('Sending product data to:', url);
+  //     console.log('Product data:', {
+  //       name: newProduct.name,
+  //       description: newProduct.description,
+  //       price: newProduct.price,
+  //       stock: newProduct.stock,
+  //       hasImage: !!newProduct.image
+  //     });
+
   //     const response = await fetch(url, {
-  //       method: 'PUT',
+  //       method: 'POST',
   //       headers: {
-  //         'Content-Type': 'application/json',
   //         'Authorization': `Bearer ${token}`,
+  //         // DO NOT set Content-Type - browser will set it automatically with boundary
   //       },
-  //       body: JSON.stringify(updatedProduct),
+  //       body: formData,
   //     });
 
   //     if (!response.ok) {
-  //       let errorText = '';
-  //       try {
-  //         errorText = await response.text();
-  //       } catch (e) {
-  //         errorText = 'Could not read error response';
-  //       }
-        
-  //       console.error('=== UPDATE FAILED ===');
-  //       console.error('Status:', response.status);
-  //       console.error('Status Text:', response.statusText);
-  //       console.error('Error Response:', errorText);
-  //       console.error('Response Headers:', Object.fromEntries(response.headers.entries()));
-        
-  //       throw new Error(`Failed to update product: ${response.status} - ${errorText}`);
+  //       const errorText = await response.text();
+  //       console.error('Server response:', errorText);
+  //       throw new Error(`Failed to add new product: ${response.status} ${errorText}`);
   //     }
 
-  //     const data = await response.json();
-  //     // Calculate and add the status to the updated product before updating the state
-  //     const productWithStatus = { ...data, status: calculateStatus(data.stock) };
-  //     setProducts(prevProducts => prevProducts.map(product => product.id === productWithStatus.id ? productWithStatus : product));
-  //     return productWithStatus;
+  //     const addedProduct = await response.json();
+  //     // Calculate and add the status to the new product before adding it to the state
+  //     setProducts(prevProducts => [...prevProducts, { ...addedProduct, status: calculateStatus(addedProduct.stock) }]);
+  //     return addedProduct;
   //   } catch (err) {
-  //     console.error('Error updating product:', err);
+  //     console.error('Error adding new product:', err);
   //     throw err;
   //   }
   // };
 
+  // ...existing code...
 
-  const updateProduct = async (updatedProduct) => {
+// const addNewProduct = async (newProduct) => {
+//   try {
+//     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}`;
+    
+//     const token = localStorage.getItem('auth_token');
+    
+//     const formData = new FormData();
+    
+//     // Append all required fields
+//     formData.append('name', newProduct.name);
+//     formData.append('description', newProduct.description || '');
+//     formData.append('price', newProduct.price.toString());
+//     formData.append('stock', newProduct.stock.toString());
+    
+//     // Append new optional fields
+//     if (newProduct.category) {
+//       formData.append('category', newProduct.category);
+//     }
+//     if (newProduct.dosage) {
+//       formData.append('dosage', newProduct.dosage);
+//     }
+//     if (newProduct.manufacturer) {
+//       formData.append('manufacturer', newProduct.manufacturer);
+//     }
+//     if (newProduct.packSize) {
+//       formData.append('packSize', newProduct.packSize);
+//     }
+    
+//     // Append image if exists
+//     if (newProduct.image && newProduct.image instanceof File) {
+//       formData.append('image', newProduct.image);
+//     }
+
+//     console.log('Sending product data to:', url);
+//     console.log('Product data:', {
+//       name: newProduct.name,
+//       description: newProduct.description,
+//       price: newProduct.price,
+//       stock: newProduct.stock,
+//       category: newProduct.category,
+//       dosage: newProduct.dosage,
+//       manufacturer: newProduct.manufacturer,
+//       packSize: newProduct.packSize,
+//       hasImage: !!newProduct.image
+//     });
+
+//     const response = await fetch(url, {
+//       method: 'POST',
+//       headers: {
+//         'Authorization': `Bearer ${token}`,
+//       },
+//       body: formData,
+//     });
+
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//       console.error('Server response:', errorText);
+//       throw new Error(`Failed to add new product: ${response.status} ${errorText}`);
+//     }
+
+//     const addedProduct = await response.json();
+//     setProducts(prevProducts => [...prevProducts, { ...addedProduct, status: calculateStatus(addedProduct.stock) }]);
+//     return addedProduct;
+//   } catch (err) {
+//     console.error('Error adding new product:', err);
+//     throw err;
+//   }
+// };
+
+// // ...existing code...
+
+
+// ...existing code...
+
+const addNewProduct = async (newProduct) => {
   try {
-    // Get auth token from localStorage
+    const url = `${API_BASE_URL}/pharmacy/${pharmacyId}`;
+    
     const token = localStorage.getItem('auth_token');
     
-    // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
+    const formData = new FormData();
+    
+    // Append all required fields
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price.toString());
+    formData.append('stock', newProduct.stock.toString());
+    formData.append('category', newProduct.category);
+    formData.append('dosage', newProduct.dosage);
+    formData.append('manufacturer', newProduct.manufacturer);
+    formData.append('packSize', newProduct.packSize);
+    
+    // Append image if exists
+    if (newProduct.image && newProduct.image instanceof File) {
+      formData.append('image', newProduct.image);
+    }
+
+    console.log('Sending product data to:', url);
+    console.log('Product data:', {
+      name: newProduct.name,
+      description: newProduct.description,
+      price: newProduct.price,
+      stock: newProduct.stock,
+      category: newProduct.category,
+      dosage: newProduct.dosage,
+      manufacturer: newProduct.manufacturer,
+      packSize: newProduct.packSize,
+      hasImage: !!newProduct.image
+    });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server response:', errorText);
+      throw new Error(`Failed to add new product: ${response.status} ${errorText}`);
+    }
+
+    const addedProduct = await response.json();
+    setProducts(prevProducts => [...prevProducts, { ...addedProduct, status: calculateStatus(addedProduct.stock) }]);
+    return addedProduct;
+  } catch (err) {
+    console.error('Error adding new product:', err);
+    throw err;
+  }
+};
+
+// ...existing code...
+
+//   const updateProduct = async (updatedProduct) => {
+//   try {
+//     // Get auth token from localStorage
+//     const token = localStorage.getItem('auth_token');
+    
+//     // Correct URL format: /api/otc/pharmacy/{pharmacyId}/{productId}
+//     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${updatedProduct.id}`;
+    
+//     console.log('=== UPDATE PRODUCT DEBUG ===');
+//     console.log('URL:', url);
+//     console.log('Product data:', updatedProduct);
+    
+//     if (!token) {
+//       throw new Error('No authentication token found. Please log in again.');
+//     }
+    
+//     // Create FormData instead of JSON
+//     const formData = new FormData();
+//     formData.append('name', updatedProduct.name);
+//     formData.append('description', updatedProduct.description);
+//     formData.append('price', updatedProduct.price.toString());
+//     formData.append('stock', updatedProduct.stock.toString());
+    
+//     // Add existing image info if no new image
+//     if (updatedProduct.imageUrl) {
+//       formData.append('existingImageUrl', updatedProduct.imageUrl);
+//     }
+//     if (updatedProduct.imagePublicId) {
+//       formData.append('existingImagePublicId', updatedProduct.imagePublicId);
+//     }
+    
+//     // Add new image if user uploaded one
+//     if (updatedProduct.newImage && updatedProduct.newImage instanceof File) {
+//       formData.append('image', updatedProduct.newImage);
+//     }
+    
+//     const response = await fetch(url, {
+//       method: 'PUT',
+//       headers: {
+//         'Authorization': `Bearer ${token}`,
+//         // DO NOT set Content-Type - browser sets it automatically with boundary for FormData
+//       },
+//       body: formData, // Send FormData, not JSON
+//     });
+
+//     if (!response.ok) {
+//       let errorText = '';
+//       try {
+//         errorText = await response.text();
+//       } catch (e) {
+//         errorText = 'Could not read error response';
+//       }
+      
+//       console.error('=== UPDATE FAILED ===');
+//       console.error('Status:', response.status);
+//       console.error('Error Response:', errorText);
+      
+//       throw new Error(`Failed to update product: ${response.status} - ${errorText}`);
+//     }
+
+//     const data = await response.json();
+//     const productWithStatus = { ...data, status: calculateStatus(data.stock) };
+//     setProducts(prevProducts => 
+//       prevProducts.map(product => 
+//         product.id === productWithStatus.id ? productWithStatus : product
+//       )
+//     );
+//     return productWithStatus;
+//   } catch (err) {
+//     console.error('Error updating product:', err);
+//     throw err;
+//   }
+// };
+
+
+const updateProduct = async (updatedProduct) => {
+  try {
+    const token = localStorage.getItem('auth_token');
     const url = `${API_BASE_URL}/pharmacy/${pharmacyId}/${updatedProduct.id}`;
     
     console.log('=== UPDATE PRODUCT DEBUG ===');
@@ -200,12 +351,18 @@ export const useInventoryData = (pharmacyId) => {
       throw new Error('No authentication token found. Please log in again.');
     }
     
-    // Create FormData instead of JSON
+    // Create FormData
     const formData = new FormData();
     formData.append('name', updatedProduct.name);
     formData.append('description', updatedProduct.description);
     formData.append('price', updatedProduct.price.toString());
     formData.append('stock', updatedProduct.stock.toString());
+    
+    // ✅ ADD THE NEW REQUIRED FIELDS
+    formData.append('category', updatedProduct.category || 'Uncategorized');
+    formData.append('dosage', updatedProduct.dosage || 'Not specified');
+    formData.append('manufacturer', updatedProduct.manufacturer || 'Not specified');
+    formData.append('packSize', updatedProduct.packSize || 'Not specified');
     
     // Add existing image info if no new image
     if (updatedProduct.imageUrl) {
@@ -224,9 +381,8 @@ export const useInventoryData = (pharmacyId) => {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // DO NOT set Content-Type - browser sets it automatically with boundary for FormData
       },
-      body: formData, // Send FormData, not JSON
+      body: formData,
     });
 
     if (!response.ok) {
