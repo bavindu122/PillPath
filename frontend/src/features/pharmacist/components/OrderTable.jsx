@@ -123,11 +123,11 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                 <div className="flex items-center space-x-4 flex-1">
                   {/* Order Details */}
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-4">
                         <div>
                           <h4 className="font-semibold pharma-text-dark group-hover:pharma-text-primary transition-colors duration-200">
-                            {order.id}
+                            {order.orderCode || `Order #${order.id}`}
                           </h4>
                           <p className="text-sm pharma-text-gray-600">
                             {order.patient.name}
@@ -135,9 +135,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                           <p className="text-xs pharma-text-muted">
                             {order.patient.email}
                           </p>
-                        </div>
-
-                        <div className="flex items-center space-x-3">
+                        </div>                        <div className="flex items-center space-x-3">
                           {getTypeIcon(order.type)}
                           {getPaymentMethodIcon(order.paymentMethod)}
                         </div>
@@ -148,7 +146,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
                       <span className="flex flex-col">
                         <span className="text-gray-400">Items</span>
                         <span className="text-gray-700 font-medium">
-                          {order.items != null ? `${order.items} items` : "—"}
+                          {order.items != null && order.items > 0 ? `${order.items} items` : "0 items"}
                         </span>
                       </span>
                       <span className="flex flex-col">

@@ -107,7 +107,7 @@ function mapOrderSummaryFromDTO(dto) {
       avatar: undefined,
     },
     type: "Prescription",
-    items: undefined,
+    items: dto.itemCount || 0, // Use itemCount from backend
     itemDetails: undefined,
     total: dto.totals?.total,
     currency: dto.totals?.currency,
@@ -168,5 +168,6 @@ function mapOrderDetailFromDTO(dto) {
       available: typeof it.available !== "undefined" ? it.available : true,
       historicalNote: undefined,
     })),
+    itemCount: dto.itemCount || (dto.items || []).length, // Use itemCount from backend
   };
 }
