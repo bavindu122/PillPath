@@ -79,6 +79,8 @@ const SalesAnalyticsPage = () => {
     // salesByCategory, // No longer directly used here for breakdown
     paymentDistribution, // New prop for payment type breakdown
     categories, // Updated categories for dropdown
+    loading,
+    error,
   } = useSalesData();
 
   // Wallet transactions for pharmacy admin
@@ -140,29 +142,30 @@ const SalesAnalyticsPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <SalesSummaryCard
           title="Total Sales"
-          value={salesSummary.totalSales.toLocaleString()}
+          value={Number(salesSummary.totalSales || 0).toLocaleString()}
           prefix="Rs."
-          change={salesSummary.salesGrowth}
+          change={Number(salesSummary.salesGrowth || 0).toFixed(1)}
           icon={DollarIcon}
         />
         <SalesSummaryCard
           title="Total Orders"
-          value={salesSummary.totalOrders.toLocaleString()}
-          change={salesSummary.ordersGrowth}
+          value={Number(salesSummary.totalOrders || 0).toLocaleString()}
+          change={Number(salesSummary.ordersGrowth || 0).toFixed(1)}
           icon={CartIcon}
         />
         <SalesSummaryCard
           title="Average Order Value"
-          value={salesSummary.averageOrderValue.toFixed(2)}
+          value={Number(salesSummary.averageOrderValue || 0).toFixed(2)}
           prefix="Rs."
           change={(
-            salesSummary.salesGrowth - salesSummary.ordersGrowth
+            Number(salesSummary.salesGrowth || 0) -
+            Number(salesSummary.ordersGrowth || 0)
           ).toFixed(1)}
           icon={ReceiptIcon}
         />
         <SalesSummaryCard
           title="Customer Purchase Rate"
-          value={salesSummary.conversionRate}
+          value={Number(salesSummary.conversionRate || 0).toFixed(1)}
           suffix="%"
           change="2.5"
           icon={PercentIcon}
@@ -172,11 +175,21 @@ const SalesAnalyticsPage = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
-          <SalesChart
-            data={chartData}
-            timeRange={timeRange}
-            comparisonEnabled={comparisonEnabled}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+            </div>
+          ) : error ? (
+            <div className="p-6 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+              {error}
+            </div>
+          ) : (
+            <SalesChart
+              data={chartData}
+              timeRange={timeRange}
+              comparisonEnabled={comparisonEnabled}
+            />
+          )}
         </div>
         <div>
           {/* CategoryBreakdown now receives paymentDistribution */}
