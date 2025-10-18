@@ -58,10 +58,11 @@ const App = () => {
           />
           <Route path="/customer/*" element={<Customer />} />
           <Route path="/find-pharmacy" element={<FindPharmacy />} />
-          <Route
+          {/* <Route
             path="/product-stores/:productId"
             element={<ProductStores />}
-          />
+          /> */}
+          <Route path="/product-stores/:productName" element={<ProductStores />} />
           <Route
             path="/admin/*"
             element={
