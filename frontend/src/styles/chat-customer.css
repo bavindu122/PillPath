@@ -1,0 +1,66 @@
+/* Custom styles for chat components to blend with the existing design */
+
+/* Chat List Styling */
+.chat-list-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chat-list-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.chat-list-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.chat-list-item.active {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Chat Window Styling */
+.chat-window-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.chat-message-bubble.sent {
+  background: rgba(59, 130, 246, 0.8);
+}
+
+.chat-message-bubble.received {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+/* Search Modal Styling */
+.pharmacy-search-modal {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.pharmacy-search-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+/* Input Styling */
+.chat-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.chat-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.chat-input:focus {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}

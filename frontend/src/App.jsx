@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { AdminAuthProvider } from "./hooks/useAdminAuth"; // ✅ Import AdminAuthProvider
+import { ChatProvider } from "./contexts/ChatContextLive"; // ✅ Using Live Chat with Backend Integration
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -22,6 +23,7 @@ import FindPharmacy from "./pages/FindPharmacies/FindPharmacy";
 import Admin from "./features/admin/Admin";
 import PharmacyProfile from "./pages/FindPharmacies/PharmacyProfile";
 import ProductStores from "./pages/ProductStores";
+import ChatDemo from "./pages/ChatDemo";
 
 const App = () => {
   const location = useLocation();
@@ -32,12 +34,13 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <div>
-        {!isAdminPath &&
-          !isPharmacistPath &&
-          !isCustomerPath &&
-          !isPharmacyAdminPath && <Navbar />}
-        <Routes>
+      <ChatProvider>
+        <div>
+          {!isAdminPath &&
+            !isPharmacistPath &&
+            !isCustomerPath &&
+            !isPharmacyAdminPath && <Navbar />}
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/otc" element={<Otc />} />
@@ -76,13 +79,15 @@ const App = () => {
             element={<PharmacyProfile />}
           />
           <Route path="/pharma-profile" element={<PharmacyProfile />} />
+          <Route path="/chat-demo" element={<ChatDemo />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
         {!isAdminPath &&
           !isPharmacistPath &&
           !isCustomerPath &&
           !isPharmacyAdminPath && <Footer />}
-      </div>
+        </div>
+      </ChatProvider>
     </AuthProvider>
   );
 };
