@@ -2,8 +2,10 @@ import { forwardRef, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Check, Trash2, Bell, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationsContext';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * NotificationsDropdown Component
@@ -28,6 +30,8 @@ const NotificationsDropdown = forwardRef(
       refresh,
     } = useNotifications();
 
+    const { userType } = useAuth();
+    const navigate = useNavigate();
     const firstFocusableRef = useRef(null);
     const lastFocusableRef = useRef(null);
 
@@ -157,12 +161,183 @@ const NotificationsDropdown = forwardRef(
     };
 
     const handleNotificationClick = (notification) => {
+      // Mark as read first
       if (!notification.read) {
         markAsRead(notification.id);
       }
-      // Optional: Navigate to notification link
+
+      // Navigate if notification has a link
       if (notification.link) {
-        window.location.href = notification.link;
+        try {
+          let destinationPath = notification.link;
+          
+          // Transform old notification links to match current frontend routes
+          // This handles notifications created before the route update
+          
+          // 1. Old prescription link: /pharmacist/prescriptions/{id} → /pharmacist/review/{id}
+          if (destinationPath.match(/^\/pharmacist\/prescriptions\/\d+$/)) {
+            const prescriptionId = destinationPath.match(/\/prescriptions\/(\d+)$/)[1];
+            destinationPath = `/pharmacist/review/${prescriptionId}`;
+          }
+          
+          // 1b. Handle malformed prescription links with non-numeric IDs
+          if (destinationPath.match(/^\/pharmacist\/prescriptions\/[^\d]/)) {
+            // Malformed link - check if notification has prescriptionId
+            if (notification.prescriptionId) {
+              destinationPath = `/pharmacist/review/${notification.prescriptionId}`;
+            } else {
+              // No prescription ID available - go to prescriptions list
+              destinationPath = '/pharmacist/prescriptions';
+              toast('Opening prescriptions page...', { icon: '📋', duration: 2000 });
+            }
+          }
+          
+          // 2. Old order preview link: /customer/orders/{orderId}/preview → /customer/order-preview/{prescriptionId}
+          if (destinationPath.match(/^\/customer\/orders\/\d+\/preview$/)) {
+            if (notification.prescriptionId) {
+              destinationPath = `/customer/order-preview/${notification.prescriptionId}`;
+            } else {
+              // Fallback if prescriptionId not available
+              destinationPath = '/customer/activities';
+              toast('Opening your activities page...', { icon: 'ℹ️', duration: 2000 });
+            }
+          }
+          
+          // 3. Old order status link: /customer/orders/{numericId} → use orderCode if available
+          if (destinationPath.match(/^\/customer\/orders\/\d+$/)) {
+            if (notification.orderCode) {
+              // Use orderCode from notification
+              destinationPath = `/customer/orders/${notification.orderCode}`;
+            } else {
+              // No orderCode available - this is an old notification
+              // Navigate to orders list instead
+              destinationPath = '/customer/orders';
+              toast('Opening your orders page...', { icon: '📦', duration: 2000 });
+            }
+          }
+          
+          // 4. Enhance order preview links with pharmacyId query parameter if available
+          if (destinationPath.startsWith('/customer/order-preview/') && notification.pharmacyId) {
+            const query = new URLSearchParams({ pharmacyId: String(notification.pharmacyId) });
+            destinationPath = `${destinationPath}?${query.toString()}`;
+          }
+          
+          // 4b. Pharmacist pharmacy prescriptions: ensure we preserve query and add state
+          if (destinationPath.startsWith('/pharmacist/prescriptions/pharmacy/')) {
+            // Keep any existing query string (e.g., ?prescriptionId=123)
+            const [basePath, qs] = destinationPath.split('?');
+            const params = new URLSearchParams(qs || '');
+            // If notification carried IDs, ensure they're reflected in state
+            const prescId = notification.prescriptionId || params.get('prescriptionId');
+            // Recompose destinationPath to be safe
+            destinationPath = basePath + (qs ? `?${qs}` : '');
+            // We'll pass state later with prescriptionId/pharmacyId to help the page focus
+            // Save to temp for state payload
+            notification.___prescriptionIdForNav = prescId ? Number(prescId) : undefined;
+          }
+
+          // Validate that the link matches user's role
+          const isCustomerLink = destinationPath.startsWith('/customer');
+          const isPharmacistLink = destinationPath.startsWith('/pharmacist');
+          const isPharmacyAdminLink = destinationPath.startsWith('/pharmacy-admin');
+          
+          // Determine if user has permission for this link
+          const hasPermission = 
+            (isCustomerLink && userType === 'customer') ||
+            (isPharmacistLink && (userType === 'pharmacist' || userType === 'pharmacy-admin')) ||
+            (isPharmacyAdminLink && userType === 'pharmacy-admin');
+
+          if (!hasPermission) {
+            // User doesn't have permission for this link
+            toast.error("You don't have access to this page");
+            
+            // Navigate to user's home page instead
+            const homePage = 
+              userType === 'customer' ? '/customer/dashboard' :
+              userType === 'pharmacy-admin' ? '/pharmacist/dashboard' :
+              userType === 'pharmacist' ? '/pharmacist/dashboard' :
+              '/';
+            
+            navigate(homePage);
+            onClose();
+            return;
+          }
+
+          // Permission validated - navigate using React Router
+          // Pass notification data in state for components that need it
+          const navigationState = {
+            fromNotification: true,
+            notificationId: notification.id,
+          };
+          
+          // Add relevant IDs to state based on notification type
+          const prescIdFromQuery = (() => {
+            try {
+              const url = new URL(destinationPath, window.location.origin);
+              const v = url.searchParams.get('prescriptionId');
+              return v ? Number(v) : undefined;
+            } catch { return undefined; }
+          })();
+          const effectivePrescId = notification.___prescriptionIdForNav || notification.prescriptionId || prescIdFromQuery;
+          if (effectivePrescId) {
+            navigationState.prescriptionId = Number(effectivePrescId);
+            navigationState.fallback = {
+              id: Number(effectivePrescId),
+              submissionId: Number(effectivePrescId),
+            };
+          }
+          if (notification.orderId) {
+            navigationState.orderId = notification.orderId;
+          }
+          if (notification.orderCode) {
+            navigationState.orderCode = notification.orderCode;
+          }
+          if (notification.pharmacyId) {
+            navigationState.pharmacyId = notification.pharmacyId;
+          }
+          
+          navigate(destinationPath, { state: navigationState });
+          onClose(); // Close dropdown after navigation
+        } catch (error) {
+          console.error('Navigation error:', error);
+          toast.error('Unable to navigate. Opening relevant page...');
+          
+          // Navigate to fallback page based on user type and notification context
+          let fallbackPage;
+          
+          if (userType === 'customer') {
+            // For customers, go to activities if it's prescription/order related, otherwise dashboard
+            fallbackPage = notification.prescriptionId || notification.orderId 
+              ? '/customer/activities' 
+              : '/customer/dashboard';
+            
+            // Show helpful message
+            if (notification.prescriptionId) {
+              toast('Opening your prescriptions...', { icon: '📋', duration: 2000 });
+            } else if (notification.orderId) {
+              toast('Opening your orders...', { icon: '📦', duration: 2000 });
+            }
+          } else if (userType === 'pharmacist' || userType === 'pharmacy-admin') {
+            // For pharmacists, go to queue if prescription-related, orders if order-related
+            if (notification.prescriptionId) {
+              fallbackPage = '/pharmacist/queue';
+              toast('Opening prescription queue...', { icon: '💊', duration: 2000 });
+            } else if (notification.orderId) {
+              fallbackPage = '/pharmacist/orders';
+              toast('Opening order history...', { icon: '📦', duration: 2000 });
+            } else {
+              fallbackPage = '/pharmacist/dashboard';
+            }
+          } else {
+            fallbackPage = '/';
+          }
+          
+          navigate(fallbackPage);
+          onClose();
+        }
+      } else {
+        // No link - just close the dropdown
+        onClose();
       }
     };
 

@@ -2,6 +2,7 @@ import React from 'react'
 import PharmacistDashboard from "./PharmacistDashboard"
 import ReviewPrescriptions from "./ReviewPrescriptions"
 import PrescriptionQueueList from "./PrescriptionQueueList"
+import PharmacyPrescriptions from "./PharmacyPrescriptions"
 import OrderHistoryList from "./OrderHistoryList"
 import PastOrder from "./PastOrder"
 import Inventory from "./Inventory"
@@ -16,6 +17,7 @@ const Pharmacist = () => {
             <Route path="/" element={<PharmacistDashboard />} />
             <Route path="/dashboard" element={<PharmacistDashboard />} />
             <Route path="/queue" element={<PrescriptionQueueList />} />
+            <Route path="/prescriptions/pharmacy/:pharmacyId" element={<PharmacyPrescriptions />} />
             <Route path="/orders" element={<OrderHistoryList />} />
             <Route path="/orders/:orderId" element={<PastOrder />} />
             <Route path="/review/:prescriptionId" element={<ReviewPrescriptions />} />

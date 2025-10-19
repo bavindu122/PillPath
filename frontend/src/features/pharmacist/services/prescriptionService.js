@@ -108,6 +108,64 @@ export const prescriptionService = {
     return data;
   },
 
+  /**
+   * Load prescriptions for a specific pharmacy
+   * This is the endpoint used when navigating from "New Prescription" notifications
+   * GET /api/v1/prescriptions/pharmacy/{pharmacyId}
+   */
+  async loadPharmacyPrescriptions(pharmacyId) {
+    const url = `${API_BASE_URL}/prescriptions/pharmacy/${pharmacyId}`;
+    const res = await fetch(url, {
+      headers: {
+        ...tokenUtils.getAuthHeaders(),
+      },
+    });
+
+    const contentType = res.headers.get("content-type");
+    const data =
+      contentType && contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+    if (!res.ok) {
+      const msg =
+        (data && data.message) ||
+        (typeof data === "string" ? data : `HTTP ${res.status}`);
+      throw new Error(msg);
+    }
+
+    // Map response to UI format (similar to loadPrescriptions)
+    const items = Array.isArray(data) ? data : [];
+    return items.map((item) => {
+      const dateObj = item.uploadedAt ? new Date(item.uploadedAt) : null;
+      const date = dateObj ? dateObj.toISOString().slice(0, 10) : "";
+      const time = dateObj
+        ? dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : "";
+      const status = (item.status || "").toLowerCase();
+      const normalizedStatus = status.replace(/\s+/g, "_");
+      const reviewId = item.submissionId ?? item.id ?? item.prescriptionId;
+
+      return {
+        id: item.submissionId ?? item.id ?? reviewId,
+        submissionId: item.submissionId,
+        reviewId,
+        code: item.prescriptionCode,
+        patientName: item.customerName || item.prescriptionCode,
+        customerName: item.customerName || item.prescriptionCode,
+        priority: "Medium Priority",
+        time,
+        date,
+        status: normalizedStatus,
+        imageUrl: item.imageUrl,
+        estimatedTime: "—",
+        note: item.note,
+        claimed: !!item.claimed,
+        assignedPharmacistId: item.assignedPharmacistId,
+      };
+    });
+  },
+
   // Filter configurations for prescriptions
   getFilterConfig() {
     return {
