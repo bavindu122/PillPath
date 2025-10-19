@@ -25,9 +25,13 @@ function onRefreshed(newToken) {
 // Request interceptor to add auth token if available
 api.interceptors.request.use(
   (config) => {
-    const token = tokenUtils.getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Respect pre-set Authorization (e.g., admin endpoints). Only set if missing.
+    if (!config.headers) config.headers = {};
+    if (!config.headers.Authorization) {
+      const token = tokenUtils.getAuthToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -42,6 +46,20 @@ api.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401 && !originalRequest._retry) {
+      const isAdminRequest = originalRequest?.url?.includes("/admin/");
+
+      // If this is an admin endpoint, don't run customer refresh flow; route to admin login.
+      if (isAdminRequest) {
+        try {
+          tokenUtils.removeAdminToken?.();
+        } catch {}
+        // Redirect to admin login page
+        if (typeof window !== "undefined") {
+          window.location.href = "/admin/login";
+        }
+        return Promise.reject(error);
+      }
+
       // Avoid infinite loop
       originalRequest._retry = true;
 

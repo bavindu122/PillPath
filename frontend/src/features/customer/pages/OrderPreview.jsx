@@ -1,7 +1,6 @@
 import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
-  addItems,
   getItemsByPrescription,
   setItemsForPrescriptionAndPharmacy,
 } from "../services/CartService";
@@ -33,14 +32,7 @@ const OrderPreview = () => {
   const [uploadedAt, setUploadedAt] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState("");
   const [medications, setMedications] = React.useState([]);
-  const [totals, setTotals] = React.useState({
-    subtotal: 0,
-    discount: 0,
-    tax: 0,
-    shipping: 0,
-    total: 0,
-    currency: "LKR",
-  });
+  const [totals, setTotals] = React.useState(null);
   const [unavailableMedications, setUnavailableMedications] = React.useState(
     []
   );
@@ -76,16 +68,7 @@ const OrderPreview = () => {
         setUploadedAt(data.uploadedAt || "");
         setImageUrl(data.imageUrl || "");
         setPharmacyName(statePharmacyName || data.pharmacyName || "");
-        setTotals(
-          data.totals || {
-            subtotal: 0,
-            discount: 0,
-            tax: 0,
-            shipping: 0,
-            total: 0,
-            currency: "LKR",
-          }
-        );
+        setTotals(data.totals || null);
         const initialUnavailable = Array.isArray(data.unavailableItems)
           ? data.unavailableItems
           : [];

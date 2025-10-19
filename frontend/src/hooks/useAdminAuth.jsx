@@ -14,29 +14,45 @@ export const useAdminAuth = () => {
 export const AdminAuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("admin_token"));
-  const [loading, setLoading] = useState(false);
+  // Start loading as true so we don't redirect before hydrating admin state
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Check if admin is logged in on app start
   // Check if admin is logged in on app start
   useEffect(() => {
     const initializeAuth = async () => {
-      if (token) {
-        // ✅ First check if we have stored admin data
-        const storedAdminData = localStorage.getItem("admin_data");
-        if (storedAdminData) {
-          try {
-            const adminData = JSON.parse(storedAdminData);
-            console.log("Loading stored admin data:", adminData);
-            setAdmin(adminData);
-            return; // Skip API call if we have valid stored data
-          } catch (error) {
-            console.error("Error parsing stored admin data:", error);
+      try {
+        setLoading(true);
+        if (token) {
+          // ✅ First check if we have stored admin data
+          const storedAdminData = localStorage.getItem("admin_data");
+          if (storedAdminData) {
+            try {
+              const adminData = JSON.parse(storedAdminData);
+              console.log("Loading stored admin data:", adminData);
+              setAdmin(adminData);
+              return; // Skip API call if we have valid stored data
+            } catch (error) {
+              console.error("Error parsing stored admin data:", error);
+            }
           }
-        }
 
-        // ✅ If no stored data, try to get from API
-        await checkAuthStatus();
+          // ✅ If no stored data, hydrate minimal admin from token and attempt API (non-blocking)
+          setAdmin(
+            (prev) =>
+              prev || {
+                id: undefined,
+                username: "admin",
+                adminLevel: "ADMIN",
+                isAuthenticated: true,
+                userType: "admin",
+              }
+          );
+          await checkAuthStatus();
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -45,21 +61,18 @@ export const AdminAuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      setLoading(true);
       const adminData = await AdminService.getAdminProfile();
       console.log("Fetched admin profile:", adminData);
       setAdmin(adminData);
     } catch (error) {
       console.error("Admin auth check failed:", error);
       if (
-        error.message.includes("Invalid credentials") ||
-        error.message.includes("401") ||
-        error.message.includes("Unauthorized")
+        error.message?.includes?.("Invalid credentials") ||
+        error.message?.includes?.("401") ||
+        error.message?.includes?.("Unauthorized")
       ) {
         logout();
       }
-    } finally {
-      setLoading(false);
     }
   };
 
