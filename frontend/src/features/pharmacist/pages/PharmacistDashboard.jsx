@@ -6,7 +6,6 @@ import {
   User,
   Calendar,
   Filter,
-  Plus,
   Search
 } from 'lucide-react';
 import PharmaPageLayout from '../components/PharmaPageLayout';
@@ -148,18 +147,6 @@ const PharmacistDashboard = () => {
             <PatientMessages messages={messages} />
           </div>
         </div>
-      </div>
-
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6">
-        <button
-          className="p-3 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none"
-          style={{
-            backgroundColor: 'var(--pharma-blue)',
-            color: 'var(--pharma-text-light)'
-          }}
-        >
-          <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
-        </button>
       </div>
     </PharmaPageLayout>
   );
