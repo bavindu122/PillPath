@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import AdminWalletService from "../../../services/api/AdminWalletService";
+import AdminService from "../../../services/api/AdminService";
 
 // Dummy Data for Admin Settings
 const dummySettingsData = {
@@ -65,6 +66,8 @@ const Setting = () => {
   const [moderators, setModerators] = useState(dummySettingsData.moderators);
   const [newModeratorUsername, setNewModeratorUsername] = useState("");
   const [newModeratorPassword, setNewModeratorPassword] = useState("");
+  const [addingModerator, setAddingModerator] = useState(false);
+  const [addModMsg, setAddModMsg] = useState("");
   const [generalSettings, setGeneralSettings] = useState(
     dummySettingsData.generalSettings
   );
@@ -88,38 +91,43 @@ const Setting = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutMessage, setLogoutMessage] = useState("");
 
-  const handleAddModerator = (e) => {
+  const handleAddModerator = async (e) => {
     e.preventDefault();
-    if (
-      newModeratorUsername.trim() === "" ||
-      newModeratorPassword.trim() === ""
-    ) {
-      // In a real application, replace alert with a custom modal/toast
-      alert("Username and password cannot be empty.");
+    setAddModMsg("");
+    if (newModeratorUsername.trim() === "") {
+      setAddModMsg("Username is required");
       return;
     }
-
-    const newMod = {
-      id: `mod_${Date.now()}`, // Simple unique ID
-      username: newModeratorUsername,
-      lastLogin: "Never", // New moderator hasn't logged in yet
-    };
-    setModerators([...moderators, newMod]);
-    setAuditLog([
-      {
-        id: `log_${Date.now()}`,
-        action: `Added moderator: ${newModeratorUsername}`,
-        timestamp: new Date().toLocaleString(),
-        admin: "SuperAdmin",
-      },
-      ...auditLog,
-    ]);
-    setNewModeratorUsername("");
-    setNewModeratorPassword("");
-    // In a real application, replace alert with a custom modal/toast
-    alert(
-      `Moderator '${newModeratorUsername}' added successfully! Please ensure the password is stored securely.' (Please note this down securely, as it will not be displayed again).`
-    );
+    // password is optional; backend can generate if omitted
+    try {
+      setAddingModerator(true);
+      const payload = {
+        username: newModeratorUsername.trim(),
+        // if empty, omit password field so backend generates one
+        ...(newModeratorPassword.trim()
+          ? { password: newModeratorPassword.trim() }
+          : {}),
+      };
+      const created = await AdminService.addModerator(payload);
+      // Best-effort normalization
+      const newMod = {
+        id: created?.id || `mod_${Date.now()}`,
+        username: created?.username || newModeratorUsername.trim(),
+        lastLogin: created?.createdAt || "Never",
+      };
+      setModerators((prev) => [newMod, ...prev]);
+      setNewModeratorUsername("");
+      setNewModeratorPassword("");
+      setAddModMsg(
+        created?.temporaryPassword
+          ? `Moderator added. Temporary password: ${created.temporaryPassword}`
+          : "Moderator added successfully."
+      );
+    } catch (err) {
+      setAddModMsg(err?.message || "Failed to add moderator");
+    } finally {
+      setAddingModerator(false);
+    }
   };
 
   const handleDeleteModerator = (id, username) => {
@@ -452,12 +460,21 @@ const Setting = () => {
               required
             />
           </div>
-          <div className="md:col-span-2 flex justify-end">
+          <div className="md:col-span-2 flex items-center justify-between">
+            {addModMsg && (
+              <div className="text-sm text-gray-700 bg-gray-100 rounded px-3 py-2">
+                {addModMsg}
+              </div>
+            )}
             <button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
+              disabled={addingModerator}
+              className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center ${
+                addingModerator ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              <UserPlus className="w-5 h-5 mr-2" /> Add Moderator
+              <UserPlus className="w-5 h-5 mr-2" />
+              {addingModerator ? "Adding..." : "Add Moderator"}
             </button>
           </div>
         </form>

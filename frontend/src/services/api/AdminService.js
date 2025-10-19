@@ -54,6 +54,14 @@ class AdminService {
       method: "GET",
     });
   }
+
+  // Moderators: create a new moderator (admin-only)
+  async addModerator(moderatorData) {
+    return this.request("admin/moderators", {
+      method: "POST",
+      body: moderatorData,
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
