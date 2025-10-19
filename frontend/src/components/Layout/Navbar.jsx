@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { BellDot, Menu, LogOut } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 
 import DesktopNav from "./components/DesktopNav";
 import ProfileDropdown from "./components/ProfileDropdown";
 import MobileFloatingNav from "./components/MobileFloatingNav";
+import NavbarBell from "../Notifications/NavbarBell";
 import { useAuth } from "../../hooks/useAuth";
 import ProfileImage from "../common/ProfileImage";
 
@@ -79,14 +80,7 @@ const Navbar = () => {
               </div>
 
               {/* Notification bell */}
-              <div className="relative group">
-                <div className="p-2 rounded-full navbar-hover-bg navbar-hover-bg-blue cursor-pointer">
-                  <BellDot className="w-5 h-5 navbar-text-secondary group-hover:navbar-blue-text transition-colors duration-200" />
-                </div>
-                <span className="absolute -top-1 -right-1 navbar-notification-badge text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg">
-                  3
-                </span>
-              </div>
+              <NavbarBell position="left" />
 
               {/* Profile section */}
               <div

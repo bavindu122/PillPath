@@ -50,4 +50,9 @@ export async function getOrder(orderCode) {
   return request(`orders/${encodeURIComponent(orderCode)}`, { method: "GET" });
 }
 
-export default { createOrder, getOrder };
+export async function listMyOrders(includeItems = false) {
+  const qs = includeItems ? "?includeItems=true" : "";
+  return request(`orders/my${qs}`, { method: "GET" });
+}
+
+export default { createOrder, getOrder, listMyOrders };
