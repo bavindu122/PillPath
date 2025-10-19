@@ -762,7 +762,7 @@ const Analytics = () => {
         <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-medium text-gray-800">
-              Monthly Pharmacy Performance Report
+              Pharmacy Performance Report
             </h3>
             <button
               onClick={() =>

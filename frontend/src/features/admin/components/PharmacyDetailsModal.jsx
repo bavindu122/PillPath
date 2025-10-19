@@ -7,15 +7,10 @@ import {
   Clock,
   User,
   Building,
-  FileText,
-  Download,
-  Eye,
   Calendar,
   Shield,
   Star,
-  AlertCircle,
 } from "lucide-react";
-import PharmacyService from "../../../services/api/PharmacyService";
 
 const PharmacyDetailsModal = ({
   isOpen,
@@ -23,77 +18,7 @@ const PharmacyDetailsModal = ({
   pharmacy,
   loading = false,
 }) => {
-  const [activeTab, setActiveTab] = useState("details");
-  const [documents, setDocuments] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
-
-  useEffect(() => {
-    if (isOpen && pharmacy?.id) {
-      // Mock documents for preview since backend isn't implemented
-      setLoadingDocs(true);
-      setTimeout(() => {
-        setDocuments([
-          {
-            id: 1,
-            name: "Business License",
-            type: "license",
-            fileName: "business_license.pdf",
-            uploadDate: "2024-01-15",
-            size: 2457600, // 2.4 MB in bytes
-          },
-          {
-            id: 2,
-            name: "Pharmacy Registration Certificate",
-            type: "registration",
-            fileName: "pharmacy_registration.pdf",
-            uploadDate: "2024-01-15",
-            size: 1887436, // 1.8 MB in bytes
-          },
-          {
-            id: 3,
-            name: "Tax Identification Certificate",
-            type: "tax",
-            fileName: "tax_certificate.pdf",
-            uploadDate: "2024-01-16",
-            size: 911360, // 890 KB in bytes
-          },
-          {
-            id: 4,
-            name: "Professional Insurance Document",
-            type: "insurance",
-            fileName: "insurance_document.pdf",
-            uploadDate: "2024-01-16",
-            size: 1258291, // 1.2 MB in bytes
-          },
-          {
-            id: 5,
-            name: "Pharmacist License",
-            type: "pharmacist_license",
-            fileName: "pharmacist_license.pdf",
-            uploadDate: "2024-01-17",
-            size: 1572864, // 1.5 MB in bytes
-          },
-        ]);
-        setLoadingDocs(false);
-      }, 1000); // Simulate API delay
-    }
-  }, [isOpen, pharmacy?.id]);
-
-  const handleDownloadDocument = async (document) => {
-    // Mock download functionality
-    console.log("Download document:", document.fileName);
-    alert(
-      `Download functionality will be implemented. Document: ${document.fileName}`
-    );
-  };
-
-  const handleViewDocument = async (document) => {
-    // Mock view functionality
-    console.log("View document:", document.fileName);
-    alert(
-      `Document viewer will be implemented. Document: ${document.fileName}`
-    );
-  };
+  // Documents section removed
 
   // Helper function to safely get nested properties
   const safeGet = (obj, path, defaultValue = "Not specified") => {
@@ -165,14 +90,6 @@ const PharmacyDetailsModal = ({
     });
   };
 
-  const formatFileSize = (bytes) => {
-    if (!bytes) return "Unknown size";
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    if (bytes === 0) return "0 Bytes";
-    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -216,31 +133,8 @@ const PharmacyDetailsModal = ({
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab("details")}
-              className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === "details"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Pharmacy Details
-            </button>
-            <button
-              onClick={() => setActiveTab("documents")}
-              className={`py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === "documents"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Documents ({documents.length})
-            </button>
-          </nav>
-        </div>
+        {/* Divider */}
+        <div className="border-b border-gray-200" />
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
@@ -253,8 +147,7 @@ const PharmacyDetailsModal = ({
             </div>
           ) : (
             <>
-              {/* Details Tab */}
-              {activeTab === "details" && pharmacy && (
+              {pharmacy && (
                 <div className="space-y-8">
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -475,109 +368,6 @@ const PharmacyDetailsModal = ({
                         {pharmacy.coordinates.lng}
                       </p>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Documents Tab - keep existing documents code */}
-              {activeTab === "documents" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Uploaded Documents
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">
-                        {documents.length} document(s) uploaded
-                      </span>
-                      <div className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                        Preview Mode
-                      </div>
-                    </div>
-                  </div>
-
-                  {loadingDocs ? (
-                    <div className="flex justify-center items-center py-12">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                      <span className="ml-3 text-gray-600">
-                        Loading documents...
-                      </span>
-                    </div>
-                  ) : documents.length === 0 ? (
-                    <div className="text-center py-12">
-                      <FileText
-                        size={48}
-                        className="mx-auto text-gray-400 mb-4"
-                      />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        No documents uploaded
-                      </h3>
-                      <p className="text-gray-500">
-                        This pharmacy hasn't uploaded any documents yet.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <div className="flex items-center space-x-2">
-                          <AlertCircle size={20} className="text-blue-600" />
-                          <div>
-                            <p className="text-blue-800 font-medium">
-                              Preview Mode
-                            </p>
-                            <p className="text-blue-600 text-sm">
-                              These are sample documents for demonstration.
-                              Backend integration pending.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {documents.map((document) => (
-                          <div
-                            key={document.id}
-                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                          >
-                            <div className="flex items-start space-x-3 mb-3">
-                              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <FileText size={20} className="text-blue-600" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900">
-                                  {document.name}
-                                </h4>
-                                <p className="text-sm text-gray-500">
-                                  {document.fileName}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="text-sm text-gray-500 mb-4">
-                              <p>Size: {formatFileSize(document.size)}</p>
-                              <p>Uploaded: {formatDate(document.uploadDate)}</p>
-                            </div>
-
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleViewDocument(document)}
-                                className="flex items-center space-x-1 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                              >
-                                <Eye size={16} />
-                                <span>View</span>
-                              </button>
-                              <button
-                                onClick={() => handleDownloadDocument(document)}
-                                className="flex items-center space-x-1 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                              >
-                                <Download size={16} />
-                                <span>Download</span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
                   )}
                 </div>
               )}
