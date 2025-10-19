@@ -3,17 +3,27 @@
 // Normalize a single message to a consistent shape
 export function normalizeMessage(raw = {}) {
   const timestamp = raw.timestamp || raw.time || raw.createdAt || raw.updatedAt;
-  return {
+  
+  // Extract senderId - prioritize senderId field over sender
+  const senderId = raw.senderId !== undefined && raw.senderId !== null 
+    ? raw.senderId 
+    : (raw.sender !== undefined && raw.sender !== null 
+      ? raw.sender 
+      : (raw.fromUserId ?? raw.authorId));
+  
+  const normalized = {
     id: raw.id || raw.messageId || `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     chatId: raw.chatId || raw.threadId || raw.conversationId,
     content: raw.content ?? raw.text ?? raw.message ?? '',
     messageType: raw.messageType || raw.type || 'text',
-    senderId: raw.senderId ?? raw.sender ?? raw.fromUserId ?? raw.authorId,
+    senderId: senderId,
     senderName: raw.senderName || raw.senderDisplayName || raw.authorName,
     timestamp: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
     status: raw.status || 'delivered',
     metadata: raw.metadata || {},
   };
+  
+  return normalized;
 }
 
 // Normalize a chat/thread item
@@ -30,7 +40,10 @@ export function normalizeChat(raw = {}) {
     pharmacy: raw.pharmacy || raw.pharmacist || null,
     pharmacist: raw.pharmacist || null,
     customer: raw.customer || null,
+    customerName: raw.customerName || raw.customer?.name || raw.customer?.fullName,
+    customerProfilePicture: raw.customerProfilePicture || raw.customer?.profilePictureUrl || raw.customer?.avatar,
     pharmacyName: raw.pharmacyName || raw.pharmacy?.name || raw.pharmacist?.name,
+    pharmacyLogoUrl: raw.pharmacyLogoUrl || raw.pharmacy?.logoUrl || raw.pharmacy?.logo,
     lastMessage,
     lastMessageTime: lastMessage?.timestamp || (raw.lastMessageTime ? new Date(raw.lastMessageTime).toISOString() : undefined),
     unreadCount: raw.unreadCount || 0,

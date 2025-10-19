@@ -7,6 +7,12 @@ import MessageInput from './MessageInput';
 
 const ChatWindow = ({ onBack, className = '' }) => {
   const { user } = useAuth();
+  
+  // TEMPORARY DEBUG
+  useEffect(() => {
+    console.log('🧑 ChatWindow user:', { id: user?.id, name: user?.name });
+  }, [user]);
+  
   const {
     activeChat,
     messages,

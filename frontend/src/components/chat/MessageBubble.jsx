@@ -5,7 +5,22 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   
-  const isOwnMessage = String(message.senderId) === String(currentUser?.id);
+  // Ensure proper comparison - handle null/undefined and convert to string for comparison
+  const messageSenderId = message.senderId !== undefined && message.senderId !== null ? String(message.senderId) : null;
+  const currentUserId = currentUser?.id !== undefined && currentUser?.id !== null ? String(currentUser.id) : null;
+  const isOwnMessage = messageSenderId && currentUserId && messageSenderId === currentUserId;
+  
+  // TEMPORARY DEBUG - Remove after fixing
+  console.log('💬 MessageBubble:', {
+    msgId: message.id?.toString().substring(0, 15),
+    msgSenderId: message.senderId,
+    msgSenderIdStr: messageSenderId,
+    currUserId: currentUser?.id,
+    currUserIdStr: currentUserId,
+    isOwn: isOwnMessage,
+    content: message.content?.substring(0, 15)
+  });
+  
   const rawTs = message.timestamp || message.time;
   const parsedTs = rawTs ? new Date(rawTs) : new Date();
   const timestamp = isNaN(parsedTs.getTime()) ? new Date() : parsedTs;
@@ -193,9 +208,9 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
         {/* Message Bubble */}
         <div className="flex flex-col">
           {/* Sender name for other's messages */}
-          {!isOwnMessage && !isGrouped && (
+          {!isOwnMessage && !isGrouped && message.senderName && (
             <span className="text-xs text-gray-500 mb-1 px-2">
-              {message.senderName || 'Unknown User'}
+              {message.senderName}
             </span>
           )}
 

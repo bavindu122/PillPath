@@ -231,6 +231,14 @@ export const ChatProvider = ({ children }) => {
         status: 'sending',
         metadata,
       });
+      
+      // TEMPORARY DEBUG
+      console.log('✅ Creating optimistic message:', {
+        id: optimisticMessage.id,
+        senderId: optimisticMessage.senderId,
+        userId: user?.id,
+        match: optimisticMessage.senderId === user?.id
+      });
 
       dispatch({
         type: CHAT_ACTIONS.ADD_MESSAGE,
@@ -480,7 +488,23 @@ export const ChatProvider = ({ children }) => {
       const handleNewMessage = (data) => {
         // Normalize different payloads
         const message = normalizeMessage(data);
+        
         if (!message.chatId) return;
+        
+        // Check if this is our own message echoed back
+        // If the senderId matches current user, it might be a duplicate
+        const currentMessages = state.messages[message.chatId] || [];
+        const isDuplicate = currentMessages.some(msg => 
+          msg.id === message.id || 
+          (msg.content === message.content && 
+           String(msg.senderId) === String(message.senderId) && 
+           Math.abs(new Date(msg.timestamp).getTime() - new Date(message.timestamp).getTime()) < 5000)
+        );
+        
+        if (isDuplicate) {
+          return;
+        }
+        
         dispatch({
           type: CHAT_ACTIONS.ADD_MESSAGE,
           payload: { chatId: message.chatId, message }

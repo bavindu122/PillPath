@@ -7,7 +7,18 @@ import { ArrowLeft, Send, User, Wifi, WifiOff, Phone, Video, MoreVertical, Circl
 const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
   const { customerId: paramCustomerId } = useParams();
   const navigate = useNavigate();
+  const { user, token } = useAuth();
   const customerId = propCustomerId || paramCustomerId;
+  
+  // Debug: Log current user
+  useEffect(() => {
+    console.log('Current pharmacy admin user:', {
+      id: user?.id,
+      name: user?.fullName || user?.name,
+      role: user?.role
+    });
+  }, [user]);
+  
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
@@ -15,6 +26,7 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [page, setPage] = useState(0);
+  const [chatDetails, setChatDetails] = useState(null);
   
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -25,8 +37,12 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  // Mock customer info - replace with actual data
-  const customerInfo = {
+  // Customer info from chat details
+  const customerInfo = chatDetails ? {
+    name: chatDetails.customerName || `Customer ${customerId}`,
+    avatar: chatDetails.customerProfilePicture || null,
+    isOnline: connectionStatus === 'connected'
+  } : {
     name: `Customer ${customerId}`,
     avatar: null,
     isOnline: connectionStatus === 'connected'
@@ -40,8 +56,25 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     }
   }, []);
 
+  // Fetch chat details to get customer info
   useEffect(() => {
+    const fetchChatDetails = async () => {
+      try {
+        // Fetch threads and find one that matches the customerId
+        const { data } = await api.get('/v1/chats/threads');
+        const list = Array.isArray(data) ? data : (data?.threads || data?.items || data?.content || []);
+        const found = list.find(t => String(t.customerId) === String(customerId) || String(t.customer?.id) === String(customerId));
+        if (found) {
+          setChatDetails(found);
+          resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch chat details:', e);
+      }
+    };
+
     if (customerId) {
+      fetchChatDetails();
       connectWebSocket();
     }
 
@@ -103,8 +136,6 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     }
   };
 
-  const { user, token } = useAuth();
-
   const connectWebSocket = () => {
     if (ws.current?.readyState === WebSocket.OPEN) return;
 
@@ -142,6 +173,42 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
         };
 
         await resolveChatId();
+
+        // Load message history from API
+        if (resolvedChatIdRef.current) {
+          try {
+            const response = await api.get(`/v1/chats/${resolvedChatIdRef.current}/messages?page=0&size=50`);
+            const messagesData = response.data?.messages || response.data?.content || [];
+            
+            console.log('Loaded messages from API:', messagesData.map(msg => ({
+              id: msg.id,
+              senderId: msg.senderId,
+              senderType: msg.senderType,
+              senderName: msg.senderName,
+              content: msg.content?.substring(0, 30)
+            })));
+            
+            // Convert API messages to component format
+            const formattedMessages = messagesData.map(msg => ({
+              id: msg.id,
+              chatRoomId: msg.chatRoomId,
+              senderId: msg.senderId,
+              senderType: msg.senderType, // Include senderType from backend
+              senderName: msg.senderName,
+              senderAvatar: msg.senderProfilePicture,
+              sender: msg.senderType === 'CUSTOMER' ? 'customer' : 'admin',
+              content: msg.content,
+              text: msg.content,
+              timestamp: msg.timestamp,
+              time: msg.timestamp,
+              isRead: msg.isRead
+            }));
+            
+            setMessages(formattedMessages.reverse()); // Messages are returned newest first, we want oldest first
+          } catch (err) {
+            console.warn('Failed to load message history:', err);
+          }
+        }
 
         // Send join message using resolved chat id when available
         if (ws.current?.readyState === WebSocket.OPEN) {
@@ -224,10 +291,15 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
 
   const addMessage = (messageData) => {
     const newMsg = {
-      id: Date.now() + Math.random(),
+      id: messageData.id || Date.now() + Math.random(),
       customerId: messageData.customerId,
+      senderId: messageData.senderId || user?.id || messageData.sender,
+      senderType: messageData.senderType || (messageData.sender === 'admin' ? 'ADMIN' : 'CUSTOMER'),
       sender: messageData.sender,
+      senderName: messageData.senderName || (messageData.sender === 'admin' ? user?.fullName || user?.name || 'Admin' : chatDetails?.customerName || 'Customer'),
+      senderAvatar: messageData.senderProfilePicture || messageData.senderAvatar || (messageData.sender === 'admin' ? user?.profilePictureUrl : chatDetails?.customerProfilePicture),
       text: messageData.text || messageData.content,
+      content: messageData.content || messageData.text,
       time: messageData.time || messageData.timestamp || new Date().toISOString(),
       timestamp: messageData.time || messageData.timestamp || new Date().toISOString()
     };
@@ -242,6 +314,8 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     setSending(true);
     const messageData = {
       customerId: customerId,
+      senderId: user?.id,
+      senderType: 'ADMIN',
       sender: 'admin',
       text: newMessage.trim(),
       time: new Date().toISOString()
@@ -424,7 +498,7 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
             <MessageBubble
               key={message.id}
               message={message}
-              currentUser={{ id: 'admin', role: 'admin' }}
+              currentUser={user}
               showAvatar={true}
               isGrouped={false}
             />
@@ -504,7 +578,23 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
 
 // MessageBubble Component - identical to customer chat
 const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = false }) => {
-  const isOwnMessage = String(message.senderId) === String(currentUser?.id) || message.sender === 'admin';
+  // Check if message is from current user (pharmacy admin)
+  // Priority: Check senderId match first, then check senderType
+  const isOwnMessage = currentUser?.id 
+    ? String(message.senderId) === String(currentUser.id)
+    : (message.senderType === 'ADMIN' || message.senderType === 'PHARMACY_ADMIN' || message.sender === 'admin');
+  
+  // Debug logging
+  console.log('Message debug:', {
+    messageId: message.id,
+    senderId: message.senderId,
+    senderType: message.senderType,
+    sender: message.sender,
+    currentUserId: currentUser?.id,
+    isOwnMessage,
+    content: message.content?.substring(0, 30)
+  });
+    
   const rawTs = message.timestamp || message.time;
   const parsedTs = rawTs ? new Date(rawTs) : new Date();
   const timestamp = isNaN(parsedTs.getTime()) ? new Date() : parsedTs;
