@@ -137,4 +137,57 @@ export const prescriptionService = {
       },
     };
   },
+
+  // Update submission status via backend
+  async updateStatus(id, status) {
+    const url = `${API_BASE_URL}/prescriptions/${id}/status`;
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...tokenUtils.getAuthHeaders(),
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    // Expect 200 and json body like { id, status }
+    if (res.status === 200) {
+      const data = await res.json().catch(() => ({}));
+      return data;
+    }
+
+    // Provide clearer messages for common cases
+    if (res.status === 409) {
+      throw new Error(
+        "Submission is not editable right now (locked or claimed by another pharmacist)."
+      );
+    }
+
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Failed to update status (HTTP ${res.status})`);
+  },
+
+  // Delete a submission via backend
+  async deleteSubmission(id) {
+    const url = `${API_BASE_URL}/prescriptions/${id}`;
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        ...tokenUtils.getAuthHeaders(),
+      },
+    });
+
+    if (res.status === 204) return true;
+
+    if (res.status === 409) {
+      throw new Error(
+        "Cannot delete: this submission is part of an active order."
+      );
+    }
+
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Failed to delete submission (HTTP ${res.status})`);
+  },
 };

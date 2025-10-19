@@ -18,6 +18,7 @@ export default function CustomerOrderDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const preloaded = location.state?.order;
+  const fromJustPlaced = Boolean(location.state?.justPlaced);
   // Support state and query params for deep-linking / refresh
   const search =
     typeof location.search === "string"
@@ -25,6 +26,8 @@ export default function CustomerOrderDetail() {
       : null;
   const qpPharmacyId = search?.get("pharmacyId") || undefined;
   const qpLocked = search?.get("locked") || undefined;
+  const qpPrescriptionId = search?.get("prescriptionId") || undefined;
+  const qpPharmacyOrderCode = search?.get("pharmacyOrderCode") || undefined;
   const filterPharmacyId = location.state?.filterPharmacyId ?? qpPharmacyId;
   const locked = Boolean(
     location.state?.locked ?? (qpLocked === "1" || qpLocked === "true")
@@ -38,32 +41,90 @@ export default function CustomerOrderDetail() {
     let cancelled = false;
     setLoading(true);
     setError("");
-    OrdersService.getOrder(orderCode)
-      .then((data) => {
-        if (!cancelled) setOrder(data);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e.message || "Failed to load order");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    const isPharmacyOrderCode = /^PO-/.test(orderCode) || !!qpPharmacyOrderCode;
+    if (isPharmacyOrderCode) {
+      const targetPharmacyOrderCode = qpPharmacyOrderCode || orderCode;
+      OrdersService.listMyOrders(true)
+        .then((list) => {
+          if (cancelled) return;
+          const items = Array.isArray(list?.items)
+            ? list.items
+            : Array.isArray(list)
+            ? list
+            : [];
+          const found = items.find(
+            (o) =>
+              Array.isArray(o.pharmacyOrders) &&
+              o.pharmacyOrders.some(
+                (po) => po.orderCode === targetPharmacyOrderCode
+              )
+          );
+          if (found) {
+            setOrder(found);
+            setError("");
+          } else {
+            setError(
+              "Unable to find matching order for this pharmacy order code."
+            );
+          }
+        })
+        .catch((e) => {
+          if (!cancelled) setError(e?.message || "Failed to load order");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    } else {
+      OrdersService.getOrder(orderCode)
+        .then((data) => {
+          if (cancelled) return;
+          const normalized = {
+            ...data,
+            pharmacyOrders: Array.isArray(data?.pharmacyOrders)
+              ? data.pharmacyOrders
+              : Array.isArray(data?.pharmacies)
+              ? data.pharmacies
+              : [],
+          };
+          setOrder(normalized);
+        })
+        .catch((e) => {
+          if (!cancelled) setError(e?.message || "Failed to load order");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }
     return () => {
       cancelled = true;
     };
-  }, [orderCode, preloaded]);
+  }, [orderCode, preloaded, qpPharmacyOrderCode]);
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => {
+    if (fromJustPlaced) {
+      // After placing an order, go to Activities instead of returning to Preview/Checkout
+      navigate("/customer/activities", { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
 
   const totalCurrency = order?.totals?.currency || "LKR";
   const visiblePharmacies = React.useMemo(() => {
     const list = order?.pharmacyOrders || order?.pharmacies || [];
-    if (!filterPharmacyId) return list;
-    // Support string/number ids from backend
-    return list.filter(
-      (po) => String(po.pharmacyId) === String(filterPharmacyId)
-    );
-  }, [order, filterPharmacyId]);
+    if (!list.length) return list;
+    // Prefer explicit pharmacyId filter
+    if (filterPharmacyId) {
+      return list.filter(
+        (po) => String(po.pharmacyId) === String(filterPharmacyId)
+      );
+    }
+    // Else, if a specific pharmacy order code was provided, filter by that
+    if (qpPharmacyOrderCode) {
+      return list.filter((po) => po.orderCode === qpPharmacyOrderCode);
+    }
+    return list;
+  }, [order, filterPharmacyId, qpPharmacyOrderCode]);
 
   return (
     <div className="min-h-screen p-6 relative overflow-hidden">
@@ -75,7 +136,7 @@ export default function CustomerOrderDetail() {
             className="flex items-center space-x-2 text-white/70 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Back</span>
+            <span>{fromJustPlaced ? "Back to Activities" : "Back"}</span>
           </button>
           <h1 className="text-3xl font-bold text-white">Order #{orderCode}</h1>
           <div />
@@ -205,29 +266,31 @@ export default function CustomerOrderDetail() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      {(po.items || []).map((it, i) => (
-                        <div
-                          key={i}
-                          className="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2 border border-white/10"
-                        >
-                          <div>
-                            <div className="text-white text-sm font-medium">
-                              {it.medicineName || it.name || `Item ${i + 1}`}
+                      {(po.items || po.orderItems || po.previewItems || []).map(
+                        (it, i) => (
+                          <div
+                            key={i}
+                            className="flex justify-between items-center bg-white/5 rounded-lg px-3 py-2 border border-white/10"
+                          >
+                            <div>
+                              <div className="text-white text-sm font-medium">
+                                {it.medicineName || it.name || `Item ${i + 1}`}
+                              </div>
+                              <div className="text-white/50 text-xs">
+                                Qty: {it.quantity || 1}
+                              </div>
                             </div>
-                            <div className="text-white/50 text-xs">
-                              Qty: {it.quantity || 1}
-                            </div>
+                            {!locked && (
+                              <div className="text-white font-semibold text-sm">
+                                {totalCurrency}{" "}
+                                {(it.unitPrice ?? it.price ?? 0).toFixed
+                                  ? (it.unitPrice ?? it.price ?? 0).toFixed(2)
+                                  : it.unitPrice ?? it.price ?? 0}
+                              </div>
+                            )}
                           </div>
-                          {!locked && (
-                            <div className="text-white font-semibold text-sm">
-                              {totalCurrency}{" "}
-                              {(it.unitPrice ?? it.price ?? 0).toFixed
-                                ? (it.unitPrice ?? it.price ?? 0).toFixed(2)
-                                : it.unitPrice ?? it.price ?? 0}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        )
+                      )}
                       {(!po.items || po.items.length === 0) && (
                         <div className="text-white/50 text-sm italic">
                           No items

@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { BellDot, ChevronDown, Shield, Building2 } from 'lucide-react';
+import { ChevronDown, Shield, Building2 } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 import { usePharmacyAuth } from '../../../hooks/usePharmacyAuth';
+import NavbarBell from '../../../components/Notifications/NavbarBell';
 
 export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(3);
   const dropdownRef = useRef(null);
   
   const { 
@@ -19,9 +19,16 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+      // If click target is inside the anchor button container, keep dropdown
+      if (dropdownRef.current && dropdownRef.current.contains(event.target)) {
+        return;
       }
+      // If click target is inside the portal dropdown, keep it open
+      const inPortal = event.target.closest?.('[data-profile-dropdown="true"]');
+      if (inPortal) {
+        return;
+      }
+      setShowDropdown(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -72,16 +79,7 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
         </div>
 
         {/* Notification Bell */}
-        <div className="relative group">
-          <button className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 relative">
-            <BellDot className="w-6 h-6 text-gray-500 group-hover:text-gray-700" />
-            {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-lg">
-                {notificationCount > 9 ? '9+' : notificationCount}
-              </span>
-            )}
-          </button>
-        </div>
+        <NavbarBell position="left" />
 
         {/* Profile Section */}
         <div className="relative" ref={dropdownRef}>
@@ -132,6 +130,7 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
           <ProfileDropdown 
             show={showDropdown} 
             onClose={() => setShowDropdown(false)}
+            anchorRef={dropdownRef}
           />
         </div>
       </div>

@@ -9,6 +9,12 @@ import {
   Calendar,
   Pill,
   CreditCard,
+  Loader2,
+  MessageCircle,
+  CheckCircle,
+  XCircle,
+  Package,
+  Eye,
 } from "lucide-react";
 // Payment is handled in unified Checkout page now
 import { getItemsByPrescription } from "../services/CartService";
@@ -53,14 +59,35 @@ const Activities = () => {
             // Only allow payment label when backend marks this slice as accepted
             const canPay =
               !!p.actions?.canProceedToPayment && p.accepted === true;
+            const st = String(p.status || "").toUpperCase();
+            const hasOrder = p.orderStatus != null && !!p.pharmacyOrderCode;
+
+            // Derive a friendly label/type
             let statusLabel = "Pending Review";
             let statusType = "pending";
-            const st = (p.status || "").toUpperCase();
-            if (st.includes("PREPARING") || st.includes("READY")) {
-              statusLabel = st.includes("PREPARING")
-                ? "Preparing order"
-                : "Ready for pickup";
-              statusType = "delivery";
+            if (hasOrder) {
+              // When an order exists, map pharmacy statuses to customer-friendly labels
+              const ost = String(p.orderStatus || "").toUpperCase();
+              if (ost.includes("PREPARING")) {
+                statusLabel = "Preparing order";
+                statusType = "delivery";
+              } else if (ost.includes("READY")) {
+                statusLabel = "Ready for pickup";
+                statusType = "delivery";
+              } else if (ost.includes("RECEIVED")) {
+                // Pharmacy has received the order -> customer sees "Order placed"
+                statusLabel = "Order placed";
+                statusType = "delivery";
+              } else if (ost.includes("COMPLETED") || st === "COMPLETED") {
+                statusLabel = "Completed";
+                statusType = "delivery";
+              } else if (ost.includes("CANCELLED")) {
+                statusLabel = "Cancelled";
+                statusType = "pending";
+              } else {
+                statusLabel = "Order placed";
+                statusType = "delivery";
+              }
             } else if (canPay) {
               statusLabel = "Proceed to payment";
               statusType = "payment";
@@ -103,11 +130,14 @@ const Activities = () => {
               pharmacyId: p.pharmacyId,
               name: p.pharmacyName,
               address: p.address,
-              orderCode: p.orderCode || item.orderCode || undefined,
+              // Use new field from API for per-pharmacy order code
+              orderCode: p.pharmacyOrderCode || undefined,
+              orderStatus: p.orderStatus || null,
               status: statusLabel,
               statusType,
               medications: p.medications || undefined,
               totals: p.totals || undefined,
+              canViewPreview: canView,
             };
           }),
         }));
@@ -132,15 +162,52 @@ const Activities = () => {
     );
   };
 
-  const getStatusIcon = (statusType) => {
-    switch (statusType) {
-      case "pending":
-        return <AlertCircle className="h-4 w-4" />;
-      case "delivery":
-        return <Truck className="h-4 w-4" />;
-      case "payment":
-        return <CreditCard className="h-4 w-4" />;
-    }
+  // Fine-grained icon per status label for better visual differentiation
+  const getStatusIconForStatus = (status) => {
+    const s = String(status || "").toLowerCase();
+    if (s.includes("payment")) return <CreditCard className="h-4 w-4" />;
+    if (s.includes("view order preview")) return <Eye className="h-4 w-4" />;
+    if (s.includes("preparing")) return <Package className="h-4 w-4" />;
+    if (s.includes("order placed")) return <Package className="h-4 w-4" />;
+    if (s.includes("ready")) return <Truck className="h-4 w-4" />;
+    if (s.includes("received") || s.includes("order placed"))
+      return <Package className="h-4 w-4" />;
+    if (s.includes("completed")) return <CheckCircle className="h-4 w-4" />;
+    if (s.includes("cancelled")) return <XCircle className="h-4 w-4" />;
+    if (s.includes("rejected")) return <XCircle className="h-4 w-4" />;
+    if (s.includes("clarification"))
+      return <MessageCircle className="h-4 w-4" />;
+    if (s.includes("progress"))
+      return <Loader2 className="h-4 w-4 animate-spin" />;
+    // default
+    return <AlertCircle className="h-4 w-4" />;
+  };
+
+  // Fine-grained color per status label to differentiate badges
+  const getStatusColorForStatus = (status, fallbackType) => {
+    const s = String(status || "").toLowerCase();
+    if (s.includes("payment"))
+      return "bg-green-500/20 text-green-300 border-green-300/30";
+    if (s.includes("view order preview"))
+      return "bg-blue-500/20 text-blue-300 border-blue-300/30";
+    if (s.includes("preparing") || s.includes("order placed"))
+      return "bg-indigo-500/20 text-indigo-300 border-indigo-300/30";
+    if (s.includes("ready"))
+      return "bg-cyan-500/20 text-cyan-300 border-cyan-300/30";
+    if (s.includes("received") || s.includes("order placed"))
+      return "bg-indigo-500/20 text-indigo-300 border-indigo-300/30";
+    if (s.includes("completed"))
+      return "bg-emerald-500/20 text-emerald-300 border-emerald-300/30";
+    if (s.includes("cancelled") || s.includes("rejected"))
+      return "bg-red-500/20 text-red-300 border-red-300/30";
+    if (s.includes("clarification"))
+      return "bg-yellow-500/20 text-yellow-300 border-yellow-300/30";
+    if (s.includes("progress"))
+      return "bg-violet-500/20 text-violet-300 border-violet-300/30";
+    if (s.includes("pending"))
+      return "bg-gray-500/20 text-gray-300 border-gray-300/30";
+    // fallback to type-based color if provided
+    return getStatusColor(fallbackType);
   };
 
   const getStatusColor = (statusType) => {
@@ -152,6 +219,24 @@ const Activities = () => {
       case "payment":
         return "bg-green-500/20 text-green-300 border-green-300/30";
     }
+  };
+
+  // Helper to navigate to order detail with all needed params
+  const gotoOrderDetail = (prescriptionId, pharmacy) => {
+    const q = new URLSearchParams({
+      pharmacyId: String(pharmacy.pharmacyId),
+      locked: "1",
+      prescriptionId: String(prescriptionId || ""),
+      pharmacyOrderCode: String(pharmacy.orderCode || ""),
+    });
+    navigate(`/customer/orders/${pharmacy.orderCode}?${q.toString()}`, {
+      state: {
+        filterPharmacyId: pharmacy.pharmacyId,
+        locked: true,
+        prescriptionId,
+        pharmacyOrderCode: pharmacy.orderCode,
+      },
+    });
   };
 
   return (
@@ -275,27 +360,28 @@ const Activities = () => {
                       </div>
 
                       {/* Total Price Display - Absolutely centered */}
-                      {pharmacy.status === "View Order Preview" &&
-                        pharmacy.medications && (
-                          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <div className="text-center">
-                              <div className="text-white/60 text-xs mb-1">
-                                Total:
-                              </div>
-                              <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
-                                Rs.{" "}
-                                {calculateTotalPrice(
-                                  pharmacy.medications
-                                ).toFixed(2)}
-                              </div>
+                      {(pharmacy?.totals || pharmacy?.medications) && (
+                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="text-center">
+                            <div className="text-white/60 text-xs mb-1">
+                              Total:
+                            </div>
+                            <div className="text-secondary-green font-bold text-lg whitespace-nowrap">
+                              Rs.{" "}
+                              {(
+                                pharmacy?.totals?.total ??
+                                calculateTotalPrice(pharmacy?.medications || [])
+                              ).toFixed(2)}
                             </div>
                           </div>
-                        )}
+                        </div>
+                      )}
 
                       {/* Status Badge */}
                       <div className="flex items-center space-x-3">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColorForStatus(
+                            pharmacy.status,
                             pharmacy.statusType
                           )} ${
                             pharmacy.status === "View Order Preview" ||
@@ -310,39 +396,24 @@ const Activities = () => {
                               : ""
                           }`}
                           onClick={() => {
-                            const upper = String(
-                              pharmacy.status || ""
-                            ).toUpperCase();
-                            if (pharmacy.status === "View Order Preview") {
+                            const hasOrder =
+                              pharmacy.orderStatus != null &&
+                              !!pharmacy.orderCode;
+                            if (hasOrder) {
+                              gotoOrderDetail(prescription.id, pharmacy);
+                            } else if (
+                              pharmacy.canViewPreview ||
+                              pharmacy.medications
+                            ) {
                               handleViewOrderPreview(
                                 prescription.id,
                                 pharmacy.pharmacyId,
                                 pharmacy.name
                               );
-                            } else if (
-                              (upper.includes("PREPARING") ||
-                                upper.includes("READY")) &&
-                              pharmacy.orderCode
-                            ) {
-                              const q = new URLSearchParams({
-                                pharmacyId: String(pharmacy.pharmacyId),
-                                locked: "1",
-                              });
-                              navigate(
-                                `/customer/orders/${
-                                  pharmacy.orderCode
-                                }?${q.toString()}`,
-                                {
-                                  state: {
-                                    filterPharmacyId: pharmacy.pharmacyId,
-                                    locked: true,
-                                  },
-                                }
-                              );
                             }
                           }}
                         >
-                          {getStatusIcon(pharmacy.statusType)}
+                          {getStatusIconForStatus(pharmacy.status)}
                           <span className="ml-1">{pharmacy.status}</span>
                         </span>
 
@@ -351,34 +422,19 @@ const Activities = () => {
                           whileHover={{ x: 5 }}
                           className="text-white/60 hover:text-white transition-colors cursor-pointer"
                           onClick={() => {
-                            const upper = String(
-                              pharmacy.status || ""
-                            ).toUpperCase();
-                            if (pharmacy.status === "View Order Preview") {
+                            const hasOrder =
+                              pharmacy.orderStatus != null &&
+                              !!pharmacy.orderCode;
+                            if (hasOrder) {
+                              gotoOrderDetail(prescription.id, pharmacy);
+                            } else if (
+                              pharmacy.canViewPreview ||
+                              pharmacy.medications
+                            ) {
                               handleViewOrderPreview(
                                 prescription.id,
                                 pharmacy.pharmacyId,
                                 pharmacy.name
-                              );
-                            } else if (
-                              (upper.includes("PREPARING") ||
-                                upper.includes("READY")) &&
-                              pharmacy.orderCode
-                            ) {
-                              const q = new URLSearchParams({
-                                pharmacyId: String(pharmacy.pharmacyId),
-                                locked: "1",
-                              });
-                              navigate(
-                                `/customer/orders/${
-                                  pharmacy.orderCode
-                                }?${q.toString()}`,
-                                {
-                                  state: {
-                                    filterPharmacyId: pharmacy.pharmacyId,
-                                    locked: true,
-                                  },
-                                }
                               );
                             }
                           }}
