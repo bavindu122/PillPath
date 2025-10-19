@@ -33,6 +33,20 @@ class AdminService {
       }
     );
   }
+
+  // Pharmacy performance (single endpoint, no pagination/sort)
+  async getPharmacyPerformance() {
+    return this.request("admin/analytics/pharmacy-performance", {
+      method: "GET",
+    });
+  }
+
+  // Customer activity (single endpoint, no pagination/sort)
+  async getCustomerActivity() {
+    return this.request("admin/analytics/customer-activity", {
+      method: "GET",
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {

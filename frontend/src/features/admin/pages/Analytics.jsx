@@ -205,6 +205,28 @@ const dummyData = {
   ],
 };
 
+// Helper: format ISO datetime or any date string to YYYY-MM-DD
+const formatDateOnly = (value) => {
+  if (!value) return "";
+  try {
+    const str = String(value);
+    // Fast path for ISO-like strings
+    if (str.includes("T")) {
+      return str.split("T")[0];
+    }
+    const d = new Date(str);
+    if (!isNaN(d)) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+    return str; // fallback: return as-is
+  } catch {
+    return String(value);
+  }
+};
+
 // Helper function to download CSV
 const downloadCSV = (data, filename) => {
   const csvRows = [];
@@ -256,6 +278,16 @@ const Analytics = () => {
   });
   const [chartsLoading, setChartsLoading] = useState(true);
   const [chartsError, setChartsError] = useState("");
+
+  // Pharmacy performance (backend-driven, single endpoint)
+  const [pharmacyPerformance, setPharmacyPerformance] = useState([]);
+  const [pharmacyPerfLoading, setPharmacyPerfLoading] = useState(true);
+  const [pharmacyPerfError, setPharmacyPerfError] = useState("");
+
+  // Customer activity (backend-driven, single endpoint)
+  const [customerActivity, setCustomerActivity] = useState([]);
+  const [customerActivityLoading, setCustomerActivityLoading] = useState(true);
+  const [customerActivityError, setCustomerActivityError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -418,6 +450,76 @@ const Analytics = () => {
       }
     };
     loadCharts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch pharmacy performance
+  useEffect(() => {
+    let isMounted = true;
+    const loadPharmacyPerformance = async () => {
+      try {
+        setPharmacyPerfLoading(true);
+        setPharmacyPerfError("");
+        const data = await AdminService.getPharmacyPerformance();
+        if (Array.isArray(data) && isMounted) {
+          setPharmacyPerformance(data);
+        } else if (isMounted) {
+          setPharmacyPerformance([]);
+        }
+      } catch (err) {
+        console.error("Failed to load pharmacy performance:", err);
+        if (isMounted)
+          setPharmacyPerfError(
+            err?.message || "Failed to load pharmacy performance"
+          );
+      } finally {
+        if (isMounted) setPharmacyPerfLoading(false);
+      }
+    };
+    loadPharmacyPerformance();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch customer activity
+  useEffect(() => {
+    let isMounted = true;
+    const loadCustomerActivity = async () => {
+      try {
+        setCustomerActivityLoading(true);
+        setCustomerActivityError("");
+        const data = await AdminService.getCustomerActivity();
+        if (Array.isArray(data)) {
+          // Normalize fields: prescriptionsUploaded, registrationDate
+          const normalized = data.map((c) => ({
+            customerId: c.customerId ?? c.id ?? undefined,
+            name: c.name ?? c.fullName ?? "",
+            prescriptionsUploaded: Number(
+              c.prescriptionsUploaded ?? c.prescriptions ?? 0
+            ),
+            status: c.status ?? "",
+            registrationDate:
+              c.registrationDate ?? c.createdAt ?? c.registeredAt ?? "",
+            imageUrl: c.imageUrl ?? undefined,
+          }));
+          if (isMounted) setCustomerActivity(normalized);
+        } else if (isMounted) {
+          setCustomerActivity([]);
+        }
+      } catch (err) {
+        console.error("Failed to load customer activity:", err);
+        if (isMounted)
+          setCustomerActivityError(
+            err?.message || "Failed to load customer activity"
+          );
+      } finally {
+        if (isMounted) setCustomerActivityLoading(false);
+      }
+    };
+    loadCustomerActivity();
     return () => {
       isMounted = false;
     };
@@ -767,15 +869,31 @@ const Analytics = () => {
             <button
               onClick={() =>
                 downloadCSV(
-                  dummyData.monthlyPharmacyPerformance,
+                  (pharmacyPerformance || []).map((p) => ({
+                    Name: p.name,
+                    "Orders Fulfilled": p.ordersFulfilled ?? p.orders ?? 0,
+                    Rating: p.rating ?? 0,
+                    Status: p.status ?? "",
+                    "Registration Date": formatDateOnly(
+                      p.registrationDate ?? p.regDate ?? ""
+                    ),
+                  })),
                   "monthly_pharmacy_performance.csv"
                 )
               }
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              disabled={
+                !pharmacyPerformance || pharmacyPerformance.length === 0
+              }
             >
               <FileText className="inline-block mr-2 w-5 h-5" /> Download CSV
             </button>
           </div>
+          {pharmacyPerfError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {pharmacyPerfError}
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -813,33 +931,54 @@ const Analytics = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {dummyData.monthlyPharmacyPerformance.map((pharmacy, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {pharmacy.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pharmacy.orders}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pharmacy.rating}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          pharmacy.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {pharmacy.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pharmacy.regDate}
+                {pharmacyPerfLoading ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={5}>
+                      Loading pharmacy performance…
                     </td>
                   </tr>
-                ))}
+                ) : (pharmacyPerformance || []).length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={5}>
+                      No data available
+                    </td>
+                  </tr>
+                ) : (
+                  (pharmacyPerformance || [])
+                    .slice(0, 5)
+                    .map((pharmacy, index) => (
+                      <tr key={pharmacy.pharmacyId ?? index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {pharmacy.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {pharmacy.ordersFulfilled ?? pharmacy.orders ?? 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {pharmacy.rating ?? 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              (pharmacy.status ?? "").toLowerCase() === "active"
+                                ? "bg-green-100 text-green-800"
+                                : (pharmacy.status ?? "").toLowerCase() ===
+                                  "suspended"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {pharmacy.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDateOnly(
+                            pharmacy.registrationDate ?? pharmacy.regDate ?? ""
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
@@ -854,15 +993,26 @@ const Analytics = () => {
             <button
               onClick={() =>
                 downloadCSV(
-                  dummyData.customerActivity,
+                  (customerActivity || []).map((c) => ({
+                    Name: c.name,
+                    "Prescriptions Uploaded": c.prescriptionsUploaded,
+                    Status: c.status,
+                    "Registration Date": formatDateOnly(c.registrationDate),
+                  })),
                   "customer_activity_report.csv"
                 )
               }
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              disabled={!customerActivity || customerActivity.length === 0}
             >
               <FileText className="inline-block mr-2 w-5 h-5" /> Download CSV
             </button>
           </div>
+          {customerActivityError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {customerActivityError}
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -889,48 +1039,65 @@ const Analytics = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
                   >
-                    Last Login
+                    Registration Date
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {dummyData.customerActivity.map((customer, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center space-x-3">
-                      {customer.imageUrl ? (
-                        <img
-                          src={customer.imageUrl}
-                          alt={customer.name}
-                          className="w-8 h-8 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                          <User className="w-4 h-4 text-gray-500" />
-                        </div>
-                      )}
-                      <span>{customer.name}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {customer.prescriptions}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          customer.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : customer.status === "Loyalty"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {customer.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {customer.lastLogin}
+                {customerActivityLoading ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={4}>
+                      Loading customer activity…
                     </td>
                   </tr>
-                ))}
+                ) : (customerActivity || []).length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={4}>
+                      No data available
+                    </td>
+                  </tr>
+                ) : (
+                  (customerActivity || [])
+                    .slice(0, 5)
+                    .map((customer, index) => (
+                      <tr key={customer.customerId ?? index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center space-x-3">
+                          {customer.imageUrl ? (
+                            <img
+                              src={customer.imageUrl}
+                              alt={customer.name}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                              <User className="w-4 h-4 text-gray-500" />
+                            </div>
+                          )}
+                          <span>{customer.name}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {customer.prescriptionsUploaded}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              (customer.status ?? "").toLowerCase() === "active"
+                                ? "bg-green-100 text-green-800"
+                                : (customer.status ?? "").toLowerCase() ===
+                                  "suspended"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {customer.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDateOnly(customer.registrationDate)}
+                        </td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
@@ -976,12 +1143,6 @@ const Analytics = () => {
                   >
                     Reason
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                  >
-                    Date Suspended
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -995,9 +1156,6 @@ const Analytics = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {account.reason}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {account.date}
                     </td>
                   </tr>
                 ))}
