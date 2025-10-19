@@ -2,6 +2,19 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 class AdminService {
+  // Overview stat cards summary
+  async getOverviewSummary() {
+    return this.request("admin/overview/summary", {
+      method: "GET",
+    });
+  }
+
+  // Overview charts data
+  async getOverviewCharts() {
+    return this.request("admin/overview/charts", {
+      method: "GET",
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
@@ -164,6 +177,29 @@ class AdminService {
     );
   }
 
+  // Get single customer details
+  async getCustomerById(customerId) {
+    return this.request(`admin/customers/${customerId}`, {
+      method: "GET",
+    });
+  }
+
+  // Suspend a customer
+  async suspendCustomer(customerId, reason) {
+    return this.request(`admin/customers/${customerId}/suspend`, {
+      method: "PATCH",
+      body: { reason },
+    });
+  }
+
+  // Activate a customer
+  async activateCustomer(customerId) {
+    return this.request(`admin/customers/${customerId}/activate`, {
+      method: "PATCH",
+      body: {},
+    });
+  }
+
   // ✅ Get all orders
   async getOrders(params = {}) {
     const queryParams = new URLSearchParams(params).toString();
@@ -219,6 +255,48 @@ class AdminService {
         },
       }
     );
+  }
+
+  // ✅ Get all prescriptions
+  async getPrescriptions(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/prescriptions${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // ✅ Get prescription statistics
+  async getPrescriptionStatistics() {
+    return this.request("admin/prescriptions/statistics", {
+      method: "GET",
+    });
+  }
+
+  // ✅ Get single prescription details
+  async getPrescriptionById(prescriptionId) {
+    return this.request(`admin/prescriptions/${prescriptionId}`, {
+      method: "GET",
+    });
+  }
+
+  // ✅ Update prescription status
+  async updatePrescriptionStatus(
+    prescriptionId,
+    status,
+    reason = null,
+    adminNotes = null
+  ) {
+    return this.request(`admin/prescriptions/${prescriptionId}/status`, {
+      method: "PATCH",
+      body: {
+        status,
+        reason,
+        adminNotes,
+      },
+    });
   }
 }
 

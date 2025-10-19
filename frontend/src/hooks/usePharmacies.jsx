@@ -9,7 +9,7 @@ export const usePharmacies = () => {
     pendingApproval: 0,
     suspendedPharmacies: 0,
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState({}); // Track loading for individual actions
   const [bulkLoading, setBulkLoading] = useState(false); // Track bulk operations
