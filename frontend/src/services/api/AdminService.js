@@ -2,6 +2,19 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
 
 class AdminService {
+  // Overview stat cards summary
+  async getOverviewSummary() {
+    return this.request("admin/overview/summary", {
+      method: "GET",
+    });
+  }
+
+  // Overview charts data
+  async getOverviewCharts() {
+    return this.request("admin/overview/charts", {
+      method: "GET",
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {
@@ -270,7 +283,12 @@ class AdminService {
   }
 
   // ✅ Update prescription status
-  async updatePrescriptionStatus(prescriptionId, status, reason = null, adminNotes = null) {
+  async updatePrescriptionStatus(
+    prescriptionId,
+    status,
+    reason = null,
+    adminNotes = null
+  ) {
     return this.request(`admin/prescriptions/${prescriptionId}/status`, {
       method: "PATCH",
       body: {
