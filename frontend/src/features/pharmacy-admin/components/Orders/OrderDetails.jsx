@@ -55,8 +55,12 @@ const OrderDetails = ({ order }) => {
   // Since this component is pure, we'll assume a commissionPercent passed via wallet transactions matching is not available synchronously.
   // We'll compute fees from transactions list if present in wallet hook.
   const pharmacyIdFromOrder = order.pharmacyId || order.pharmacy?.id;
+  const shouldFetchWallet =
+    !order.fees ||
+    (order.fees.platformCommissionAmount == null &&
+      order.fees.platformCommissionPercent == null);
   const { transactions } = usePharmacyWallet({
-    pharmacyId: pharmacyIdFromOrder,
+    pharmacyId: shouldFetchWallet ? pharmacyIdFromOrder : null,
   });
 
   const feeInfo = useMemo(() => {
