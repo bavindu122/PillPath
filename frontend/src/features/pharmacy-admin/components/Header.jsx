@@ -1,20 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Shield, Building2 } from 'lucide-react';
-import ProfileDropdown from './ProfileDropdown';
-import { usePharmacyAuth } from '../../../hooks/usePharmacyAuth';
-import NavbarBell from '../../../components/Notifications/NavbarBell';
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, Shield, Building2 } from "lucide-react";
+import ProfileDropdown from "./ProfileDropdown";
+import { usePharmacyAuth } from "../../../hooks/usePharmacyAuth";
+import NavbarBell from "../../../components/Notifications/NavbarBell";
 
 export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
-  
-  const { 
-    user, 
-    isPharmacyAdmin, 
-    pharmacyName, 
-    position,
-    loading 
-  } = usePharmacyAuth();
+
+  const { user, isPharmacyAdmin, pharmacyName, position, loading } =
+    usePharmacyAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -31,8 +26,8 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
       setShowDropdown(false);
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const toggleDropdown = () => setShowDropdown(!showDropdown);
@@ -46,8 +41,19 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
         <span className="sr-only">Open sidebar</span>
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        <svg
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          />
         </svg>
       </button>
 
@@ -55,12 +61,19 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
       <div className="flex items-center space-x-4">
         <div>
           <h1 className="text-lg font-semibold text-gray-800 hidden md:block">
-            <span className="ml-2 text-sm font-normal text-gray-500">Administrator Panel</span>
+            <span className="ml-2 text-sm font-normal text-gray-500">
+              Administrator Panel
+            </span>
           </h1>
           {pharmacyName && (
             <div className="hidden lg:flex items-center space-x-1 ml-2 mt-1">
               <Building2 className="w-3 h-3 text-gray-400" />
-              <span className="text-xs text-gray-500">{pharmacyName}</span>
+              <span
+                className="text-xs text-gray-500 notranslate"
+                translate="no"
+              >
+                {pharmacyName}
+              </span>
             </div>
           )}
         </div>
@@ -70,9 +83,7 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
       <div className="ml-auto flex items-center space-x-4">
         {/* Welcome message - hidden on small screens */}
         <div className="hidden xl:block text-right">
-          <p className="text-sm text-gray-600">
-            Welcome back,
-          </p>
+          <p className="text-sm text-gray-600">Welcome back,</p>
           <p className="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
             {user?.fullName || "User"}
           </p>
@@ -90,14 +101,14 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
             {/* Profile Image */}
             <div className="relative">
               {user?.profilePictureUrl ? (
-                <img 
-                  src={user.profilePictureUrl} 
-                  alt="Profile" 
+                <img
+                  src={user.profilePictureUrl}
+                  alt="Profile"
                   className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                  {user?.fullName?.charAt(0) || 'U'}
+                  {user?.fullName?.charAt(0) || "U"}
                 </div>
               )}
               {isPharmacyAdmin && (
@@ -123,12 +134,16 @@ export default function Header({ isSidebarOpen, setIsSidebarOpen }) {
             </div>
 
             {/* Dropdown Arrow */}
-            <ChevronDown className={`w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-all duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-all duration-200 ${
+                showDropdown ? "rotate-180" : ""
+              }`}
+            />
           </button>
 
           {/* Profile Dropdown */}
-          <ProfileDropdown 
-            show={showDropdown} 
+          <ProfileDropdown
+            show={showDropdown}
             onClose={() => setShowDropdown(false)}
             anchorRef={dropdownRef}
           />

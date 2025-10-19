@@ -33,6 +33,7 @@ import {
 } from "lucide-react"; // Using lucide-react for icons
 import StatCard from "../components/StatCard";
 import PageHeader from "../components/PageHeader";
+import AdminService from "../../../services/api/AdminService";
 
 // Dummy Data for demonstration purposes
 const dummyData = {
@@ -233,6 +234,195 @@ const downloadCSV = (data, filename) => {
 };
 
 const Analytics = () => {
+  // Analytics KPIs state (backend-driven)
+  const [kpis, setKpis] = useState({
+    totalUsers: 0,
+    totalPharmacies: 0,
+    totalPrescriptionsUploaded: 0,
+    ordersProcessed: 0,
+    activePharmacies: 0,
+    suspendedPharmacies: 0,
+    totalPayments: 0,
+  });
+  const [kpisLoading, setKpisLoading] = useState(true);
+  const [kpisError, setKpisError] = useState("");
+
+  // Analytics charts state (backend-driven)
+  const [charts, setCharts] = useState({
+    prescriptionUploads: [],
+    pharmacyRegistrations: [],
+    growthRegistrations: [],
+    orderFulfillment: [],
+  });
+  const [chartsLoading, setChartsLoading] = useState(true);
+  const [chartsError, setChartsError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadKpis = async () => {
+      try {
+        setKpisLoading(true);
+        setKpisError("");
+        const data = await AdminService.getAnalyticsKpis();
+        // Normalize and fallback just in case backend fields vary
+        const normalized = {
+          totalUsers: Number(data?.totalUsers ?? 0),
+          totalPharmacies: Number(data?.totalPharmacies ?? 0),
+          totalPrescriptionsUploaded: Number(
+            data?.totalPrescriptionsUploaded ?? data?.prescriptionsUploaded ?? 0
+          ),
+          ordersProcessed: Number(data?.ordersProcessed ?? data?.orders ?? 0),
+          activePharmacies: Number(data?.activePharmacies ?? 0),
+          suspendedPharmacies: Number(data?.suspendedPharmacies ?? 0),
+          totalPayments: Number(
+            data?.totalPayments ??
+              data?.paymentsTotal ??
+              data?.monthlyRevenue ??
+              0
+          ),
+        };
+        if (isMounted) setKpis(normalized);
+      } catch (err) {
+        console.error("Failed to load analytics KPIs:", err);
+        if (isMounted) setKpisError(err?.message || "Failed to load KPIs");
+      } finally {
+        if (isMounted) setKpisLoading(false);
+      }
+    };
+    loadKpis();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadCharts = async () => {
+      try {
+        setChartsLoading(true);
+        setChartsError("");
+        const data = await AdminService.getAnalyticsCharts();
+
+        // Normalize backend payload to chart shapes used by UI
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        const puRaw = Array.isArray(data?.prescriptionUploads)
+          ? data.prescriptionUploads
+          : [];
+        const prescriptionUploads = puRaw.map((d) => ({
+          month: String(d?.month ?? ""),
+          uploads: Number(d?.uploads ?? 0),
+        }));
+
+        const prRaw = Array.isArray(data?.pharmacyRegistrations)
+          ? data.pharmacyRegistrations
+          : [];
+        const pharmacyRegistrations = prRaw.map((d) => ({
+          month: String(d?.month ?? ""),
+          registered: Number(d?.registered ?? 0),
+        }));
+
+        const grRaw = Array.isArray(data?.growthRegistrations)
+          ? data.growthRegistrations
+          : Array.isArray(data?.growthTrend)
+          ? data.growthTrend
+          : [];
+        const growthRegistrations = grRaw.map((d) => ({
+          month: String(d?.month ?? ""),
+          customers: Number(d?.customers ?? 0),
+          pharmacies: Number(d?.pharmacies ?? 0),
+        }));
+
+        const statusColors = {
+          delivered: "#10B981",
+          pending: "#F59E0B",
+          cancelled: "#EF4444",
+          canceled: "#EF4444", // tolerate US spelling just in case
+        };
+
+        // Ensure all statuses exist with count 0 if missing
+        const ofRaw = Array.isArray(data?.orderFulfillment)
+          ? data.orderFulfillment
+          : [];
+        const counts = { delivered: 0, pending: 0, cancelled: 0 };
+        for (const item of ofRaw) {
+          const key = String(item?.status || "").toLowerCase();
+          if (key === "canceled") {
+            counts.cancelled += Number(item?.count ?? 0);
+          } else if (key in counts) {
+            counts[key] += Number(item?.count ?? 0);
+          }
+        }
+        const orderFulfillment = [
+          {
+            name: "Delivered",
+            value: counts.delivered,
+            color: statusColors.delivered,
+          },
+          {
+            name: "Pending",
+            value: counts.pending,
+            color: statusColors.pending,
+          },
+          {
+            name: "Cancelled",
+            value: counts.cancelled,
+            color: statusColors.cancelled,
+          },
+        ];
+
+        // Fill missing months with 0 to keep charts consistent (optional but safer)
+        const ensureMonths = (arr, keyMap) => {
+          const byMonth = new Map(arr.map((x) => [x.month, x]));
+          return months.map((m) => {
+            if (byMonth.has(m)) return byMonth.get(m);
+            const base = { month: m };
+            for (const [k, defVal] of Object.entries(keyMap)) base[k] = defVal;
+            return base;
+          });
+        };
+
+        const chartsData = {
+          prescriptionUploads: ensureMonths(prescriptionUploads, {
+            uploads: 0,
+          }),
+          pharmacyRegistrations: ensureMonths(pharmacyRegistrations, {
+            registered: 0,
+          }),
+          growthRegistrations: ensureMonths(growthRegistrations, {
+            customers: 0,
+            pharmacies: 0,
+          }),
+          orderFulfillment,
+        };
+
+        if (isMounted) setCharts(chartsData);
+      } catch (err) {
+        console.error("Failed to load analytics charts:", err);
+        if (isMounted) setChartsError(err?.message || "Failed to load charts");
+      } finally {
+        if (isMounted) setChartsLoading(false);
+      }
+    };
+    loadCharts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 font-inter">
       <PageHeader
@@ -246,43 +436,51 @@ const Analytics = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">
           Overview
         </h2>
+        {kpisError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {kpisError}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <StatCard
             label="Total Users"
-            value={dummyData.kpis.totalUsers}
+            value={kpis.totalUsers}
             icon={<Users size={48} className="text-blue-600" />}
           />
           <StatCard
             label="Total Pharmacies"
-            value={dummyData.kpis.totalPharmacies}
+            value={kpis.totalPharmacies}
             icon={<Building size={48} className="text-green-600" />}
           />
           <StatCard
             label="Prescriptions Uploaded"
-            value={dummyData.kpis.totalPrescriptionsUploaded}
+            value={kpis.totalPrescriptionsUploaded}
             icon={<UploadCloud size={48} className="text-purple-600" />}
           />
           <StatCard
             label="Orders Processed"
-            value={dummyData.kpis.ordersProcessed}
+            value={kpis.ordersProcessed}
             icon={<Package size={48} className="text-indigo-600" />}
           />
           <StatCard
             label="Active Pharmacies"
-            value={dummyData.kpis.activePharmacies}
+            value={kpis.activePharmacies}
             icon={<Activity size={48} className="text-teal-600" />}
           />
           <StatCard
             label="Suspended Pharmacies"
-            value={dummyData.kpis.suspendedPharmacies}
+            value={kpis.suspendedPharmacies}
             icon={<Ban size={48} className="text-red-600" />}
           />
           <StatCard
-            label="Monthly Revenue"
-            value={dummyData.kpis.monthlyRevenue}
+            label="Total Payments"
+            value={kpis.totalPayments}
             icon={<DollarSign size={48} className="text-yellow-600" />}
           />
         </div>
+        {kpisLoading && (
+          <p className="mt-3 text-sm text-gray-500">Loading KPIs…</p>
+        )}
       </section>
 
       {/* Charts Section */}
@@ -290,201 +488,268 @@ const Analytics = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2">
           Performance Charts
         </h2>
+        {chartsError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {chartsError}
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Prescription Uploads Over Time */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-              Prescription Uploads Over Time
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart
-                data={dummyData.prescriptionUploads}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  contentStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="uploads"
-                  stroke="#3B82F6"
-                  activeDot={{ r: 8, fill: "#1D4ED8" }}
-                  strokeWidth={3}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
+          {(() => {
+            const hasPrescriptionUploads = charts.prescriptionUploads?.some(
+              (d) => Number(d.uploads) > 0
+            );
+            return (
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-medium text-gray-800 mb-4">
+                  Prescription Uploads Over Time
+                </h3>
+                {chartsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center text-gray-400">
+                    Loading…
+                  </div>
+                ) : hasPrescriptionUploads ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart
+                      data={charts.prescriptionUploads}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: "transparent" }}
+                        contentStyle={{
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="uploads"
+                        stroke="#3B82F6"
+                        activeDot={{ r: 8, fill: "#1D4ED8" }}
+                        strokeWidth={3}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No prescription uploads data available
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {/* Pharmacy Registrations Trend */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-              Pharmacy Registrations Trend
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={dummyData.pharmacyRegistrations}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  contentStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-                <Bar
-                  dataKey="registered"
-                  fill="#EC4899"
-                  barSize={30}
-                  radius={[10, 10, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {(() => {
+            const hasPharmacyRegistrations = charts.pharmacyRegistrations?.some(
+              (d) => Number(d.registered) > 0
+            );
+            return (
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-medium text-gray-800 mb-4">
+                  Pharmacy Registrations Trend
+                </h3>
+                {chartsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center text-gray-400">
+                    Loading…
+                  </div>
+                ) : hasPharmacyRegistrations ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={charts.pharmacyRegistrations}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: "transparent" }}
+                        contentStyle={{
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="registered"
+                        fill="#EC4899"
+                        barSize={30}
+                        radius={[10, 10, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No pharmacy registrations data available
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Customer vs Pharmacy Growth */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-              Customer vs Pharmacy Growth
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart
-                data={dummyData.growthTrend}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="customers"
-                  stroke="#8B5CF6"
-                  fillOpacity={1}
-                  fill="url(#colorCustomers)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="pharmacies"
-                  stroke="#10B981"
-                  fillOpacity={1}
-                  fill="url(#colorPharmacies)"
-                />
-                <defs>
-                  <linearGradient
-                    id="colorCustomers"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1} />
-                  </linearGradient>
-                  <linearGradient
-                    id="colorPharmacies"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {(() => {
+            const hasGrowth = charts.growthRegistrations?.some(
+              (d) => Number(d.customers) > 0 || Number(d.pharmacies) > 0
+            );
+            return (
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h3 className="text-xl font-medium text-gray-800 mb-4">
+                  Customer vs Pharmacy Growth
+                </h3>
+                {chartsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center text-gray-400">
+                    Loading…
+                  </div>
+                ) : hasGrowth ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart
+                      data={charts.growthRegistrations}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis axisLine={false} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="customers"
+                        stroke="#8B5CF6"
+                        fillOpacity={1}
+                        fill="url(#colorCustomers)"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="pharmacies"
+                        stroke="#10B981"
+                        fillOpacity={1}
+                        fill="url(#colorPharmacies)"
+                      />
+                      <defs>
+                        <linearGradient
+                          id="colorCustomers"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#8B5CF6"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#8B5CF6"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id="colorPharmacies"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#10B981"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#10B981"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                      </defs>
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500">
+                    No registration growth data available
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Order Fulfillment Report (Pie Chart) */}
-          <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-              Order Fulfillment Report
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dummyData.orderFulfillment}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                >
-                  {dummyData.orderFulfillment.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Revenue Analytics */}
-          <div className="bg-white p-6 rounded-xl shadow-lg lg:col-span-2">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-              Monthly Revenue / Commission Earned
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart
-                data={dummyData.revenueAnalytics}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#F97316"
-                  fillOpacity={1}
-                  fill="url(#colorRevenue)"
-                />
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F97316" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#F97316" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {(() => {
+            const totalOF = (charts.orderFulfillment || []).reduce(
+              (sum, x) => sum + Number(x.value || 0),
+              0
+            );
+            const hasOF = totalOF > 0;
+            return (
+              <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center">
+                <h3 className="text-xl font-medium text-gray-800 mb-4">
+                  Order Fulfillment Report
+                </h3>
+                {chartsLoading ? (
+                  <div className="h-[300px] flex items-center justify-center text-gray-400 w-full">
+                    Loading…
+                  </div>
+                ) : hasOF ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={charts.orderFulfillment}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) =>
+                          `${name} ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {charts.orderFulfillment.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-gray-500 w-full">
+                    No order fulfillment data available
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
+        {chartsLoading && (
+          <p className="mt-3 text-sm text-gray-500">Loading charts…</p>
+        )}
       </section>
 
       {/* Reports Section */}
@@ -741,17 +1006,17 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Monthly Revenue Report */}
+        {/* Payments Report */}
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-medium text-gray-800">
-              Monthly Revenue Report
+              Payments Report
             </h3>
             <button
               onClick={() =>
                 downloadCSV(
                   dummyData.monthlyRevenueReport,
-                  "monthly_revenue_report.csv"
+                  "payments_report.csv"
                 )
               }
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"

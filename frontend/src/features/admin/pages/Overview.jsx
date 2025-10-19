@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader";
 import ChartCard from "../components/ChartCard";
 import StatCard from "../components/StatCard";
-import RecentActivityCard from "../components/RecentActivityCard";
 
 import {
   Home,
@@ -328,11 +327,6 @@ const Overview = () => {
         />
       </div>
       {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
-
-      <RecentActivityCard
-        title="Recent Activities"
-        activities={mockDashboardData.recentActivity}
-      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="User Registration Trend">

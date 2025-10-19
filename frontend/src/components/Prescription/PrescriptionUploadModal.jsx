@@ -732,7 +732,12 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <h4 className="font-semibold text-lg text-gray-800">
-                                    {pharmacy.name}
+                                    <span
+                                      className="notranslate"
+                                      translate="no"
+                                    >
+                                      {pharmacy.name}
+                                    </span>
                                   </h4>
                                   {pharmacy.distance <= 1 && (
                                     <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
@@ -832,7 +837,12 @@ const PrescriptionUploadModal = ({ isOpen, onClose }) => {
                               key={p.id}
                               className="flex flex-wrap gap-2 items-center"
                             >
-                              <span className="font-medium">{p.name}</span>
+                              <span
+                                className="font-medium notranslate"
+                                translate="no"
+                              >
+                                {p.name}
+                              </span>
                               <span className="text-gray-600">{p.address}</span>
                               <span className="text-gray-600">
                                 • {p.distance} km

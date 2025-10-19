@@ -156,7 +156,9 @@ const PharmacyList = ({
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-dark">
-                        {pharmacy.name}
+                        <span className="notranslate" translate="no">
+                          {pharmacy.name}
+                        </span>
                       </h3>
                       {pharmacy.isVerified && (
                         <div className="flex items-center gap-1 mt-1">
@@ -268,9 +270,8 @@ const PharmacyList = ({
                       {pharmacy.phone || pharmacy.phoneNumber}
                     </a>
 
-
                     {!isMultiSelect && (
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/pharmacy/${pharmacy.id}`);

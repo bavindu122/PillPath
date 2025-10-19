@@ -15,6 +15,24 @@ class AdminService {
       method: "GET",
     });
   }
+
+  // Analytics KPIs (stat cards on Analytics page)
+  async getAnalyticsKpis() {
+    return this.request("admin/analytics/kpis", {
+      method: "GET",
+    });
+  }
+
+  // Analytics charts (Analytics page)
+  async getAnalyticsCharts(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/analytics/charts${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {

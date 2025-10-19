@@ -87,13 +87,18 @@ export default function PharmacySettings() {
 
       // Merge existing operating hours with defaults (case-insensitive)
       const normalizedOperatingHours = { ...defaultOperatingHours };
-      if (pharmacyProfile.operatingHours && typeof pharmacyProfile.operatingHours === 'object') {
-        Object.entries(pharmacyProfile.operatingHours).forEach(([day, hours]) => {
-          const normalizedDay = day.toLowerCase();
-          if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
-            normalizedOperatingHours[normalizedDay] = hours || "";
+      if (
+        pharmacyProfile.operatingHours &&
+        typeof pharmacyProfile.operatingHours === "object"
+      ) {
+        Object.entries(pharmacyProfile.operatingHours).forEach(
+          ([day, hours]) => {
+            const normalizedDay = day.toLowerCase();
+            if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
+              normalizedOperatingHours[normalizedDay] = hours || "";
+            }
           }
-        });
+        );
       }
 
       setFormData({
@@ -103,7 +108,9 @@ export default function PharmacySettings() {
         latitude: pharmacyProfile.latitude || 6.9271,
         longitude: pharmacyProfile.longitude || 79.8612,
         operatingHours: normalizedOperatingHours,
-        services: Array.isArray(pharmacyProfile.services) ? pharmacyProfile.services : [],
+        services: Array.isArray(pharmacyProfile.services)
+          ? pharmacyProfile.services
+          : [],
         deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
         deliveryRadius: pharmacyProfile.deliveryRadius || 10,
       });
@@ -303,13 +310,18 @@ export default function PharmacySettings() {
 
       // Merge existing operating hours with defaults (case-insensitive)
       const normalizedOperatingHours = { ...defaultOperatingHours };
-      if (pharmacyProfile.operatingHours && typeof pharmacyProfile.operatingHours === 'object') {
-        Object.entries(pharmacyProfile.operatingHours).forEach(([day, hours]) => {
-          const normalizedDay = day.toLowerCase();
-          if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
-            normalizedOperatingHours[normalizedDay] = hours || "";
+      if (
+        pharmacyProfile.operatingHours &&
+        typeof pharmacyProfile.operatingHours === "object"
+      ) {
+        Object.entries(pharmacyProfile.operatingHours).forEach(
+          ([day, hours]) => {
+            const normalizedDay = day.toLowerCase();
+            if (normalizedOperatingHours.hasOwnProperty(normalizedDay)) {
+              normalizedOperatingHours[normalizedDay] = hours || "";
+            }
           }
-        });
+        );
       }
 
       setFormData({
@@ -319,7 +331,9 @@ export default function PharmacySettings() {
         latitude: pharmacyProfile.latitude || 6.9271,
         longitude: pharmacyProfile.longitude || 79.8612,
         operatingHours: normalizedOperatingHours,
-        services: Array.isArray(pharmacyProfile.services) ? pharmacyProfile.services : [],
+        services: Array.isArray(pharmacyProfile.services)
+          ? pharmacyProfile.services
+          : [],
         deliveryAvailable: pharmacyProfile.deliveryAvailable || false,
         deliveryRadius: pharmacyProfile.deliveryRadius || 10,
       });
@@ -489,7 +503,9 @@ export default function PharmacySettings() {
 
                 <div className="pt-8">
                   <h2 className="text-2xl font-bold text-gray-800">
-                    {pharmacyProfile?.name || "Pharmacy Name"}
+                    <span className="notranslate" translate="no">
+                      {pharmacyProfile?.name || "Pharmacy Name"}
+                    </span>
                   </h2>
                   <div className="flex items-center space-x-4 mt-2">
                     {pharmacyProfile?.isVerified && (
@@ -729,29 +745,33 @@ export default function PharmacySettings() {
                     Operating Hours
                   </label>
                   <div className="space-y-2">
-                    {formData.operatingHours && Object.entries(formData.operatingHours).map(
-                      ([day, hours]) => (
-                        <div key={day} className="flex items-center space-x-3">
-                          <div className="w-20 text-sm font-medium text-gray-600 capitalize">
-                            {day}
+                    {formData.operatingHours &&
+                      Object.entries(formData.operatingHours).map(
+                        ([day, hours]) => (
+                          <div
+                            key={day}
+                            className="flex items-center space-x-3"
+                          >
+                            <div className="w-20 text-sm font-medium text-gray-600 capitalize">
+                              {day}
+                            </div>
+                            <input
+                              type="text"
+                              value={hours || ""}
+                              onChange={(e) =>
+                                handleOperatingHoursChange(day, e.target.value)
+                              }
+                              placeholder="e.g. 09:00-18:00"
+                              disabled={!isEditing}
+                              className={`flex-1 px-3 py-2 border rounded-lg text-sm ${
+                                isEditing
+                                  ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
+                                  : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                              }`}
+                            />
                           </div>
-                          <input
-                            type="text"
-                            value={hours || ""}
-                            onChange={(e) =>
-                              handleOperatingHoursChange(day, e.target.value)
-                            }
-                            placeholder="e.g. 09:00-18:00"
-                            disabled={!isEditing}
-                            className={`flex-1 px-3 py-2 border rounded-lg text-sm ${
-                              isEditing
-                                ? "border-blue-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
-                                : "border-gray-200 bg-gray-50 cursor-not-allowed"
-                            }`}
-                          />
-                        </div>
-                      )
-                    )}
+                        )
+                      )}
                   </div>
                 </div>
 
