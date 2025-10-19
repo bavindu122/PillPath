@@ -62,6 +62,21 @@ class AdminService {
       body: moderatorData,
     });
   }
+
+  // Moderators: list all moderators (admin-only)
+  async getModerators() {
+    return this.request("admin/moderators", {
+      method: "GET",
+    });
+  }
+
+  // Moderators: delete a moderator by id (admin-only)
+  async deleteModerator(moderatorId) {
+    if (!moderatorId) throw new Error("moderatorId is required");
+    return this.request(`admin/moderators/${moderatorId}`, {
+      method: "DELETE",
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {

@@ -63,7 +63,9 @@ const dummySettingsData = {
 };
 
 const Setting = () => {
-  const [moderators, setModerators] = useState(dummySettingsData.moderators);
+  const [moderators, setModerators] = useState([]);
+  const [modsLoading, setModsLoading] = useState(false);
+  const [modsError, setModsError] = useState("");
   const [newModeratorUsername, setNewModeratorUsername] = useState("");
   const [newModeratorPassword, setNewModeratorPassword] = useState("");
   const [addingModerator, setAddingModerator] = useState(false);
@@ -122,6 +124,54 @@ const Setting = () => {
     return lvl === "SUPER";
   })();
 
+  // Helper: format date to YYYY-MM-DD
+  const formatDateOnly = (value) => {
+    if (!value) return "";
+    try {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return String(value);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    } catch {
+      return String(value);
+    }
+  };
+
+  // Load moderators from backend when admin can manage
+  useEffect(() => {
+    let mounted = true;
+    const fetchMods = async () => {
+      if (!canManageModerators) return; // don't fetch for STANDARD
+      setModsError("");
+      setModsLoading(true);
+      try {
+        const list = await AdminService.getModerators();
+        if (!mounted) return;
+        const normalized = Array.isArray(list)
+          ? list.map((m) => ({
+              id: m.id || m._id || `mod_${Math.random().toString(36).slice(2)}`,
+              username: m.username || m.name || "",
+              registrationDate: formatDateOnly(
+                m.createdAt || m.registrationDate || m.registeredAt
+              ),
+            }))
+          : [];
+        setModerators(normalized);
+      } catch (e) {
+        if (!mounted) return;
+        setModsError(e?.message || "Failed to load moderators");
+      } finally {
+        if (mounted) setModsLoading(false);
+      }
+    };
+    fetchMods();
+    return () => {
+      mounted = false;
+    };
+  }, [canManageModerators]);
+
   const handleAddModerator = async (e) => {
     e.preventDefault();
     if (!canManageModerators) {
@@ -148,7 +198,9 @@ const Setting = () => {
       const newMod = {
         id: created?.id || `mod_${Date.now()}`,
         username: created?.username || newModeratorUsername.trim(),
-        lastLogin: created?.createdAt || "Never",
+        registrationDate: formatDateOnly(
+          created?.createdAt || created?.registrationDate || new Date()
+        ),
       };
       setModerators((prev) => [newMod, ...prev]);
       setNewModeratorUsername("");
@@ -165,21 +217,26 @@ const Setting = () => {
     }
   };
 
-  const handleDeleteModerator = (id, username) => {
-    // In a real application, replace window.confirm with a custom modal
-    if (
-      window.confirm(`Are you sure you want to delete moderator '${username}'?`)
-    ) {
-      setModerators(moderators.filter((mod) => mod.id !== id));
-      setAuditLog([
+  const handleDeleteModerator = async (id, username) => {
+    if (!canManageModerators) return;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete moderator '${username}'?`
+    );
+    if (!confirmed) return;
+    try {
+      await AdminService.deleteModerator(id);
+      setModerators((prev) => prev.filter((mod) => mod.id !== id));
+      setAuditLog((prev) => [
         {
           id: `log_${Date.now()}`,
           action: `Deleted moderator: ${username}`,
           timestamp: new Date().toLocaleString(),
-          admin: "SuperAdmin",
+          admin: adminProfile?.username || "Admin",
         },
-        ...auditLog,
+        ...prev,
       ]);
+    } catch (e) {
+      alert(e?.message || "Failed to delete moderator");
     }
   };
 
@@ -532,6 +589,12 @@ const Setting = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
                   >
+                    mod_id
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                  >
                     Username
                   </th>
                   <th
@@ -549,26 +612,49 @@ const Setting = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {moderators.map((mod) => (
-                  <tr key={mod.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {mod.username}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {mod.lastLogin}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() =>
-                          handleDeleteModerator(mod.id, mod.username)
-                        }
-                        className="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center"
-                      >
-                        <Trash2 className="w-5 h-5 mr-1" /> Delete
-                      </button>
+                {modsLoading ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={4}>
+                      Loading moderators…
                     </td>
                   </tr>
-                ))}
+                ) : modsError ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-red-600" colSpan={4}>
+                      {modsError}
+                    </td>
+                  </tr>
+                ) : moderators.length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={4}>
+                      No moderators found.
+                    </td>
+                  </tr>
+                ) : (
+                  moderators.map((mod) => (
+                    <tr key={mod.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {mod.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {mod.username}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {mod.registrationDate || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() =>
+                            handleDeleteModerator(mod.id, mod.username)
+                          }
+                          className="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center"
+                        >
+                          <Trash2 className="w-5 h-5 mr-1" /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
