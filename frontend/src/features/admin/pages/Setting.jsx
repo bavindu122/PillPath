@@ -124,8 +124,8 @@ const Setting = () => {
     return lvl === "SUPER";
   })();
 
-  // Helper: format date to YYYY-MM-DD
-  const formatDateOnly = (value) => {
+  // Helper: format date-time to YYYY-MM-DD HH:mm:ss
+  const formatDateTime = (value) => {
     if (!value) return "";
     try {
       const d = new Date(value);
@@ -133,10 +133,22 @@ const Setting = () => {
       const yyyy = d.getFullYear();
       const mm = String(d.getMonth() + 1).padStart(2, "0");
       const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mi = String(d.getMinutes()).padStart(2, "0");
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
     } catch {
       return String(value);
     }
+  };
+
+  // Helper: display moderator ID as MOD_<first-digits>
+  const formatModeratorId = (value) => {
+    if (!value) return "MOD_";
+    const str = String(value);
+    const match = str.match(/\d+/);
+    const digits = match ? match[0] : str.replace(/\D/g, "").slice(0, 6);
+    return `MOD_${digits || str.slice(0, 6)}`;
   };
 
   // Load moderators from backend when admin can manage
@@ -153,7 +165,7 @@ const Setting = () => {
           ? list.map((m) => ({
               id: m.id || m._id || `mod_${Math.random().toString(36).slice(2)}`,
               username: m.username || m.name || "",
-              registrationDate: formatDateOnly(
+              registrationDate: formatDateTime(
                 m.createdAt || m.registrationDate || m.registeredAt
               ),
             }))
@@ -198,7 +210,7 @@ const Setting = () => {
       const newMod = {
         id: created?.id || `mod_${Date.now()}`,
         username: created?.username || newModeratorUsername.trim(),
-        registrationDate: formatDateOnly(
+        registrationDate: formatDateTime(
           created?.createdAt || created?.registrationDate || new Date()
         ),
       };
@@ -634,7 +646,7 @@ const Setting = () => {
                   moderators.map((mod) => (
                     <tr key={mod.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {mod.id}
+                        {formatModeratorId(mod.id)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {mod.username}
