@@ -176,7 +176,7 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
         );
 
       default:
-        return <p className="text-sm whitespace-pre-wrap break-words">{message.content || message.text}</p>;
+        return <p className="text-sm whitespace-pre-wrap break-words text-inherit">{message.content || message.text}</p>;
     }
   };
 
@@ -221,6 +221,7 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
                 ? 'bg-blue-600 text-white rounded-br-sm'
                 : 'bg-gray-100 text-gray-900 rounded-bl-sm'
             } ${isGrouped ? 'mt-1' : ''}`}
+            style={isOwnMessage ? { color: 'white' } : { color: '#111827' }}
           >
             {renderMessageContent()}
           </div>

@@ -10,7 +10,7 @@ const ChatStats = ({ totalChats, unreadCount, activeChats, resolvedChats }) => {
       icon: MessageSquare,
       color: 'blue',
       bgColor: 'from-blue-500 to-blue-600',
-      textColor: 'text-white',
+      textColor: 'text-black',
       iconColor: 'text-white'
     },
     {
@@ -20,7 +20,7 @@ const ChatStats = ({ totalChats, unreadCount, activeChats, resolvedChats }) => {
       icon: Users,
       color: 'red',
       bgColor: 'from-red-500 to-red-600',
-      textColor: 'text-white',
+      textColor: 'text-black',
       iconColor: 'text-white'
     },
     {
@@ -30,7 +30,7 @@ const ChatStats = ({ totalChats, unreadCount, activeChats, resolvedChats }) => {
       icon: Clock,
       color: 'yellow',
       bgColor: 'from-yellow-500 to-yellow-600',
-      textColor: 'text-white',
+      textColor: 'text-black',
       iconColor: 'text-white'
     },
     {
@@ -40,7 +40,7 @@ const ChatStats = ({ totalChats, unreadCount, activeChats, resolvedChats }) => {
       icon: CheckCircle,
       color: 'green',
       bgColor: 'from-green-500 to-green-600',
-      textColor: 'text-white',
+      textColor: 'text-black',
       iconColor: 'text-white'
     }
   ];

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ArrowLeft, Phone, Video, MoreVertical, User, Users, Circle, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, User, Users, Circle, MessageCircle, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useChat } from '../../contexts/ChatContextLive';
 import MessageBubble, { DateSeparator, TypingIndicator } from './MessageBubble';
@@ -31,6 +31,21 @@ const ChatWindow = ({ onBack, className = '' }) => {
 
   // Get current chat messages
   const chatMessages = activeChat ? messages[activeChat.id] || [] : [];
+
+  // TEMPORARY DEBUG: Log messages for this chat
+  useEffect(() => {
+    if (activeChat) {
+      console.log('📨 Chat messages for', activeChat.id, ':', {
+        count: chatMessages.length,
+        messages: chatMessages.map(m => ({
+          id: m.id,
+          senderId: m.senderId,
+          content: m.content?.substring(0, 30),
+          text: m.text?.substring(0, 30)
+        }))
+      });
+    }
+  }, [activeChat, chatMessages]);
 
   // Get other participant information
   const otherParticipant = activeChat ? (
@@ -188,7 +203,7 @@ const ChatWindow = ({ onBack, className = '' }) => {
       <div className={`flex items-center justify-center h-full bg-transparent ${className}`}>
         <div className="text-center">
           <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-gray-400" />
+            <MessageSquare className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No chat selected</h3>
           <p className="text-gray-500">Choose a conversation to start messaging</p>
@@ -198,9 +213,9 @@ const ChatWindow = ({ onBack, className = '' }) => {
   }
 
   return (
-    <div className={`flex flex-col bg-gradient-to-b from-blue-50 to-white border-l border-blue-100 ${className}`} style={{ height: '100%' }}>
+    <div className={`flex flex-col bg-transparent ${className}`} style={{ height: '100%', maxHeight: '100%' }}>
       {/* Chat Header */}
-      <div className="px-4 py-4 border-b border-blue-100 flex items-center justify-between bg-white/90 backdrop-blur-sm flex-shrink-0 shadow-sm">
+      <div className="px-4 py-4 border-b border-white/30 flex items-center justify-between bg-white/60 backdrop-blur-md flex-shrink-0 shadow-sm">
         <div className="flex items-center space-x-3">
           {/* Back Button (Mobile) */}
           <button
@@ -242,7 +257,7 @@ const ChatWindow = ({ onBack, className = '' }) => {
                 className={`w-2 h-2 ${isOtherParticipantOnline ? 'text-green-500 fill-current' : 'text-gray-400'}`} 
               />
               <span className={`text-sm font-medium ${
-                isOtherParticipantTyping ? 'text-blue-600' : 
+                isOtherParticipantTyping ? 'text-gray-900' : 
                 isOtherParticipantOnline ? 'text-green-600' : 'text-gray-500'
               }`}>
                 {isOtherParticipantTyping ? 'Typing...' : 
@@ -279,7 +294,7 @@ const ChatWindow = ({ onBack, className = '' }) => {
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-scroll p-6 space-y-2 bg-gradient-to-b from-blue-50/30 to-transparent min-h-0 chat-messages-container"
+        className="flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Loading more messages indicator */}
@@ -345,9 +360,16 @@ const ChatWindow = ({ onBack, className = '' }) => {
       </div>
 
       {/* Message Input - Fixed at bottom */}
-      <div className="flex-shrink-0 border-t border-blue-100 bg-white/80 backdrop-blur-sm message-input-container" style={{ position: 'sticky', bottom: 0, zIndex: 10 }}>
-        <MessageInput chatId={activeChat?.id} disabled={loading || !activeChat} />
-      </div>
+      <div
+  className="flex-shrink-0 border-t border-white/30 bg-white/60 backdrop-blur-md"
+  style={{ position: 'sticky', bottom: 0, zIndex: 10 }}
+>
+  <MessageInput
+    chatId={activeChat?.id}
+    disabled={loading || !activeChat}
+    className="text-black placeholder:text-gray-500"
+  />
+</div>
     </div>
   );
 };

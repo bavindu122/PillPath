@@ -155,9 +155,9 @@ const Chat = () => {
               animate={{ opacity: 1, x: 0 }}
               className={`lg:col-span-1 ${showMobileChat ? 'hidden lg:block' : 'block'} h-full min-h-0`}
             >
-              <div className="bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 h-full min-h-0 flex flex-col">
+              <div className="bg-white/40 backdrop-blur-xl rounded-lg shadow-xl border border-white/50 h-full min-h-0 flex flex-col">
                 {/* Search (fixed) */}
-                <div className="flex-shrink-0 p-4 border-b border-blue-100">
+                <div className="flex-shrink-0 p-4 border-b border-white/30">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <input
@@ -241,7 +241,7 @@ const Chat = () => {
               animate={{ opacity: 1, x: 0 }}
               className={`lg:col-span-2 ${!showMobileChat ? 'hidden lg:block' : 'block'} h-full min-h-0`}
             >
-              <div className="bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 h-full min-h-0 flex flex-col">
+              <div className="bg-white/40 backdrop-blur-xl rounded-lg shadow-xl border border-white/50 h-full min-h-0 flex flex-col">
                 {activeThread ? (
                   <ChatWindow
                     customerId={activeThread.customerId}

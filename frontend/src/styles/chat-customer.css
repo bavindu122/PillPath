@@ -210,7 +210,7 @@
 }
 
 .chat-window-container .customer-message-input textarea {
-  color: white !important;
+  color: black !important;
 }
 
 .chat-window-container .customer-message-input textarea::placeholder {
@@ -222,7 +222,7 @@
 }
 
 .chat-window-container .customer-message-input button:hover {
-  color: white !important;
+  color: black !important;
   background: rgba(255, 255, 255, 0.1) !important;
 }
 

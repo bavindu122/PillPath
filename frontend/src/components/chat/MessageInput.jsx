@@ -233,7 +233,7 @@ const MessageInput = ({ chatId, disabled = false }) => {
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="flex items-end space-x-3 bg-white rounded-2xl p-2 shadow-sm border border-blue-100">
+      <form onSubmit={handleSubmit} className="flex items-end space-x-3 bg-white/90 backdrop-blur-sm rounded-2xl p-2 shadow-sm border border-blue-100">
         {/* Attachment Button */}
         <div className="relative">
           <button
@@ -281,7 +281,8 @@ const MessageInput = ({ chatId, disabled = false }) => {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Type your message here..."
-            className="w-full px-4 py-3 border-0 bg-transparent focus:outline-none resize-none h-10 text-gray-800 placeholder-gray-500"
+            className="w-full px-4 py-3 border-0 bg-transparent focus:outline-none resize-none h-10 text-gray-900 placeholder-gray-400 font-medium"
+            style={{ color: '#111827' }}
             disabled={disabled}
           />
         </div>
