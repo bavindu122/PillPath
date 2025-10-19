@@ -361,6 +361,9 @@ const Login = () => {
             text="signin_with"
           />
           <div className="text-white/70 text-sm mt-2">Sign in with Google</div>
+          <div className="text-white/60 text-xs mt-1 italic">
+            Note: Google sign in is available for customers only.
+          </div>
         </div>
 
         {/* Create account link */}

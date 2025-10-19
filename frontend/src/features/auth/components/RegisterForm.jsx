@@ -118,6 +118,9 @@ const RegisterForm = ({ role, onBack, onSubmit, showGoogle }) => {
             <div className="text-white/70 text-sm mt-2">
               Sign up with Google
             </div>
+            <div className="text-white/60 text-xs mt-1 italic">
+              Note: Google sign up is available for customers only.
+            </div>
           </div>
         </>
       )}
