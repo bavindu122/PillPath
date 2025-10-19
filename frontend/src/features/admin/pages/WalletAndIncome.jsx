@@ -30,264 +30,44 @@ import {
 } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
+import AdminFinanceService, {
+  listOrderPayments,
+  listCommissions,
+  listPayouts,
+  updateCommissionStatus,
+  uploadPayoutReceipt,
+  updatePayout,
+} from "../../../services/api/AdminFinanceService";
 
-const mockInitialSalesTransactions = [
-  // Customer to Pharmacy (Order Payments - Gross Sales)
-  // Added paymentType to distinguish online vs. on-hand
-  {
-    id: "ORD001",
-    date: "2023-01-10",
-    sender: "Customer A",
-    receiver: "City Pharmacy",
-    amount: 100.0,
-    type: "Order Payment",
-    pharmacyName: "City Pharmacy",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD002",
-    date: "2023-01-12",
-    sender: "Customer B",
-    receiver: "Health Hub",
-    amount: 50.0,
-    type: "Order Payment",
-    pharmacyName: "Health Hub",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD003",
-    date: "2023-02-05",
-    sender: "Customer C",
-    receiver: "MediCare Drugstore",
-    amount: 75.0,
-    type: "Order Payment",
-    pharmacyName: "MediCare Drugstore",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD004",
-    date: "2023-02-15",
-    sender: "Customer D",
-    receiver: "City Pharmacy",
-    amount: 120.0,
-    type: "Order Payment",
-    pharmacyName: "City Pharmacy",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD005",
-    date: "2023-03-01",
-    sender: "Customer E",
-    receiver: "Quick Meds",
-    amount: 90.0,
-    type: "Order Payment",
-    pharmacyName: "Quick Meds",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD006",
-    date: "2023-03-20",
-    sender: "Customer F",
-    receiver: "Health Hub",
-    amount: 65.0,
-    type: "Order Payment",
-    pharmacyName: "Health Hub",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD007",
-    date: "2023-04-08",
-    sender: "Customer G",
-    receiver: "City Pharmacy",
-    amount: 110.0,
-    type: "Order Payment",
-    pharmacyName: "City Pharmacy",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD008",
-    date: "2023-04-25",
-    sender: "Customer H",
-    receiver: "MediCare Drugstore",
-    amount: 80.0,
-    type: "Order Payment",
-    pharmacyName: "MediCare Drugstore",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD009",
-    date: "2023-05-02",
-    sender: "Customer I",
-    receiver: "Quick Meds",
-    amount: 150.0,
-    type: "Order Payment",
-    pharmacyName: "Quick Meds",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD010",
-    date: "2023-05-19",
-    sender: "Customer J",
-    receiver: "Health Hub",
-    amount: 70.0,
-    type: "Order Payment",
-    pharmacyName: "Health Hub",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD011",
-    date: "2023-06-03",
-    sender: "Customer K",
-    receiver: "City Pharmacy",
-    amount: 95.0,
-    type: "Order Payment",
-    pharmacyName: "City Pharmacy",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD012",
-    date: "2023-06-28",
-    sender: "Customer L",
-    receiver: "MediCare Drugstore",
-    amount: 130.0,
-    type: "Order Payment",
-    pharmacyName: "MediCare Drugstore",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD013",
-    date: "2023-07-07",
-    sender: "Customer M",
-    receiver: "Quick Meds",
-    amount: 88.0,
-    type: "Order Payment",
-    pharmacyName: "Quick Meds",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD014",
-    date: "2023-07-14",
-    sender: "Customer N",
-    receiver: "Health Hub",
-    amount: 105.0,
-    type: "Order Payment",
-    pharmacyName: "Health Hub",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD015",
-    date: "2023-07-20",
-    sender: "Customer O",
-    receiver: "City Pharmacy",
-    amount: 60.0,
-    type: "Order Payment",
-    pharmacyName: "City Pharmacy",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD016",
-    date: "2023-07-25",
-    sender: "Customer P",
-    receiver: "MediCare Drugstore",
-    amount: 70.0,
-    type: "Order Payment",
-    pharmacyName: "MediCare Drugstore",
-    paymentType: "On-Hand",
-  },
-  {
-    id: "ORD017",
-    date: "2023-08-01",
-    sender: "Customer Q",
-    receiver: "Health Hub",
-    amount: 115.0,
-    type: "Order Payment",
-    pharmacyName: "Health Hub",
-    paymentType: "Online",
-  },
-  {
-    id: "ORD018",
-    date: "2023-08-05",
-    sender: "Customer R",
-    receiver: "Quick Meds",
-    amount: 85.0,
-    type: "Order Payment",
-    pharmacyName: "Quick Meds",
-    paymentType: "On-Hand",
-  },
-];
-
-const processFinancialData = (transactions, commissionRate = 0.1) => {
-  const processedData = [];
-  const pharmacies = new Set();
-
-  transactions.forEach((tx) => {
-    if (tx.type === "Order Payment") {
-      pharmacies.add(tx.receiver); // Add pharmacy to set
-
-      const commissionAmount = tx.amount * commissionRate;
-      const payoutAmount = tx.amount * (1 - commissionRate);
-      const transactionMonth = new Date(tx.date).toLocaleString("en-US", {
-        month: "2-digit",
-        year: "numeric",
-      }); // MM/YYYY
-
-      // Add the original order payment with its received status
-      processedData.push({
-        ...tx,
-        receivedStatus: tx.paymentType === "Online" ? "Received" : "Unreceived", // Default status
-        commissionAmount: commissionAmount, // Add commission amount for easy display
-      });
-
-      // Add Commission Payment (Pharmacy to PillPath) ONLY for On-Hand payments
-      // Business rule: For Online (card) payments, PillPath retains commission and pays out net; pharmacies do not owe a separate commission payment.
-      if (tx.paymentType === "On-Hand") {
-        processedData.push({
-          id: `COM-${tx.id}`,
-          date: tx.date,
-          sender: tx.receiver, // Pharmacy pays commission
-          receiver: "PillPath",
-          amount: commissionAmount,
-          type: "Commission Payment",
-          pharmacyName: tx.receiver,
-          paymentType: tx.paymentType,
-          commissionStatus: "Unpaid", // Default status for commissions due from pharmacy
-          commissionMonth: transactionMonth,
-          orderId: tx.id, // Link to original order
-        });
-      }
-
-      // Add Payout (PillPath to Pharmacy) only for Online payments
-      if (tx.paymentType === "Online") {
-        processedData.push({
-          id: `PAY-${tx.id}`,
-          date: tx.date,
-          sender: "PillPath",
-          receiver: tx.receiver,
-          amount: payoutAmount,
-          type: "Payout",
-          pharmacyName: tx.receiver,
-          payoutStatus: "Unpaid", // Default status for payouts from PillPath
-          payoutMonth: transactionMonth,
-          receiptUrl: null, // Placeholder for receipt
-        });
-      }
-    }
-  });
-
-  return { processedData, uniquePharmacies: Array.from(pharmacies) };
+// Helpers to map DTOs to UI needs
+const receivedStatusLabel = (order) => {
+  if (order.settlementChannel === "ONLINE") return "Received";
+  if (order.onHandCommissionReceived === true) return "Received";
+  if (order.onHandCommissionReceived === false) return "Unreceived";
+  return "Not Paid"; // null -> NOT_PAID
 };
 
 const WalletAndIncome = () => {
-  const { processedData, uniquePharmacies } = useMemo(
-    () => processFinancialData(mockInitialSalesTransactions),
-    []
-  );
-  const [transactions, setTransactions] = useState(processedData);
+  // Server-backed data
+  const [orders, setOrders] = useState([]); // items from /admin/order-payments
+  const [ordersPage, setOrdersPage] = useState(1);
+  const transactionsPerPage = 10;
+  const [ordersTotal, setOrdersTotal] = useState(0);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  const [paidPayouts, setPaidPayouts] = useState([]); // items from /admin/payouts status=PAID (for current filters)
+  const [paidCommissions, setPaidCommissions] = useState([]); // items from /admin/commissions status=PAID (for current filters)
+  const [auxLoading, setAuxLoading] = useState(false);
+
+  // Modal data
+  const [modalCustomerPayments, setModalCustomerPayments] = useState([]);
+  const [modalPayouts, setModalPayouts] = useState([]);
+  const [modalCommissions, setModalCommissions] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
   const [filterMonth, setFilterMonth] = useState("All");
   const [filterYear, setFilterYear] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const transactionsPerPage = 10;
   const [currentPharmacyPage, setCurrentPharmacyPage] = useState(1);
   const pharmaciesPerPage = 6;
   const [isPharmacyDetailsModalOpen, setIsPharmacyDetailsModalOpen] =
@@ -302,39 +82,85 @@ const WalletAndIncome = () => {
   const [selectedReceiptFile, setSelectedReceiptFile] = useState(null);
   const [receiptPreview, setReceiptPreview] = useState("");
 
-  const filteredTransactions = transactions.filter((tx) => {
-    const txDate = new Date(tx.date);
-    const matchesMonth =
-      filterMonth === "All" ||
-      (txDate.getMonth() + 1).toString() === filterMonth;
-    const matchesYear =
-      filterYear === "All" || txDate.getFullYear().toString() === filterYear;
-    const matchesSearch =
-      searchTerm === "" ||
-      tx.id?.toLowerCase().includes(searchTerm.toLowerCase()) || // Use optional chaining for id
-      tx.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tx.receiver?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesMonth && matchesYear && matchesSearch;
-  });
+  // Fetch orders when filters/search/page change
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setOrdersLoading(true);
+      try {
+        const resp = await listOrderPayments({
+          month: filterMonth !== "All" ? filterMonth : undefined,
+          year: filterYear !== "All" ? filterYear : undefined,
+          q: searchTerm || undefined,
+          page: currentPage,
+          size: transactionsPerPage,
+        });
+        setOrders(resp.items || []);
+        setOrdersTotal(resp.total || 0);
+      } catch (e) {
+        console.error("Failed to fetch order payments", e);
+        setOrders([]);
+        setOrdersTotal(0);
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [filterMonth, filterYear, searchTerm, currentPage]);
 
-  // Pagination Logic (for Customer Payments & Commissions Table)
-  const customerPayments = filteredTransactions.filter(
-    (tx) => tx.type === "Order Payment"
-  );
-  const indexOfLastCustomerPayment = currentPage * transactionsPerPage;
-  const indexOfFirstCustomerPayment =
-    indexOfLastCustomerPayment - transactionsPerPage;
-  const currentCustomerPayments = customerPayments.slice(
-    indexOfFirstCustomerPayment,
-    indexOfLastCustomerPayment
-  );
+  // Fetch paid payouts and commissions for current filters (used for cards and overview)
+  useEffect(() => {
+    const fetchAux = async () => {
+      setAuxLoading(true);
+      try {
+        const mmYYYY =
+          filterMonth !== "All" && filterYear !== "All"
+            ? `${String(filterMonth).padStart(2, "0")}/${filterYear}`
+            : undefined;
+        const [payoutsResp, commissionsResp] = await Promise.all([
+          listPayouts({
+            month: mmYYYY,
+            year: filterYear !== "All" ? filterYear : undefined,
+            status: "PAID",
+            page: 1,
+            size: 1000,
+          }),
+          listCommissions({
+            month: mmYYYY,
+            year: filterYear !== "All" ? filterYear : undefined,
+            status: "PAID",
+            page: 1,
+            size: 1000,
+          }),
+        ]);
+        setPaidPayouts(payoutsResp.items || []);
+        setPaidCommissions(commissionsResp.items || []);
+      } catch (e) {
+        console.error("Failed to fetch payouts/commissions", e);
+        setPaidPayouts([]);
+        setPaidCommissions([]);
+      } finally {
+        setAuxLoading(false);
+      }
+    };
+    fetchAux();
+  }, [filterMonth, filterYear]);
+
+  // Server pagination for orders table
+  const currentCustomerPayments = orders;
   const totalCustomerPaymentPages = Math.ceil(
-    customerPayments.length / transactionsPerPage
+    (ordersTotal || 0) / transactionsPerPage
   );
 
   const paginateCustomerPayments = (pageNumber) => setCurrentPage(pageNumber);
 
   // Pagination Logic for Pharmacy Wallet Overview
+  // Derive unique pharmacies from current orders page
+  const uniquePharmacies = useMemo(() => {
+    const set = new Set();
+    orders.forEach((o) => set.add(o.pharmacyName));
+    return Array.from(set);
+  }, [orders]);
+
   const indexOfLastPharmacy = currentPharmacyPage * pharmaciesPerPage;
   const indexOfFirstPharmacy = indexOfLastPharmacy - pharmaciesPerPage;
   const currentPharmacies = uniquePharmacies.slice(
@@ -348,38 +174,27 @@ const WalletAndIncome = () => {
   const paginatePharmacies = (pageNumber) => setCurrentPharmacyPage(pageNumber);
 
   // Calculate Stat Cards
-  const totalRevenue = filteredTransactions
-    .filter((tx) => tx.type === "Order Payment")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalOnlinePaymentIncome = filteredTransactions
-    .filter((tx) => tx.type === "Order Payment" && tx.paymentType === "Online")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalOnHandPaymentIncome = filteredTransactions
-    .filter((tx) => tx.type === "Order Payment" && tx.paymentType === "On-Hand")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const totalPayoutsToPharmacies = filteredTransactions
-    .filter((tx) => tx.type === "Payout" && tx.payoutStatus === "Paid") // Only count paid payouts
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.grossAmount || 0), 0);
+  const totalOnlinePaymentIncome = orders
+    .filter((o) => o.settlementChannel === "ONLINE")
+    .reduce((sum, o) => sum + (o.grossAmount || 0), 0);
+  const totalOnHandPaymentIncome = orders
+    .filter((o) => o.settlementChannel === "ON_HAND")
+    .reduce((sum, o) => sum + (o.grossAmount || 0), 0);
+  const totalPayoutsToPharmacies = paidPayouts.reduce(
+    (sum, p) => sum + (p.amount || 0),
+    0
+  );
   const currentWalletBalance =
     totalOnlinePaymentIncome - totalPayoutsToPharmacies;
 
   // Prepare data for Top 5 Pharmacies by Commission (Paid, On-Hand only)
-  const commissionByPharmacy = filteredTransactions
-    .filter(
-      (tx) =>
-        tx.type === "Commission Payment" &&
-        tx.pharmacyName &&
-        tx.paymentType === "On-Hand" &&
-        tx.commissionStatus === "Paid"
-    )
-    .reduce((acc, tx) => {
-      acc[tx.pharmacyName] = (acc[tx.pharmacyName] || 0) + tx.amount;
-      return acc;
-    }, {});
+  const commissionByPharmacy = paidCommissions.reduce((acc, c) => {
+    const name = c.pharmacyName;
+    if (!name) return acc;
+    acc[name] = (acc[name] || 0) + (c.amount || 0);
+    return acc;
+  }, {});
 
   const topPharmaciesData = Object.keys(commissionByPharmacy)
     .map((name) => ({
@@ -390,21 +205,18 @@ const WalletAndIncome = () => {
     .slice(0, 5);
 
   // Prepare data for Monthly Online vs. On-Hand Payments Chart
-  const paymentsByMonth = filteredTransactions.reduce((acc, tx) => {
-    if (tx.type === "Order Payment") {
-      // Only consider customer payments for this chart
-      const monthYear = new Date(tx.date).toLocaleString("en-US", {
-        month: "short",
-        year: "numeric",
-      });
-      if (!acc[monthYear]) {
-        acc[monthYear] = { online: 0, onHand: 0 };
-      }
-      if (tx.paymentType === "Online") {
-        acc[monthYear].online += tx.amount;
-      } else {
-        acc[monthYear].onHand += tx.amount;
-      }
+  const paymentsByMonth = orders.reduce((acc, o) => {
+    const monthYear = new Date(o.date).toLocaleString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
+    if (!acc[monthYear]) {
+      acc[monthYear] = { online: 0, onHand: 0 };
+    }
+    if (o.settlementChannel === "ONLINE") {
+      acc[monthYear].online += o.grossAmount || 0;
+    } else {
+      acc[monthYear].onHand += o.grossAmount || 0;
     }
     return acc;
   }, {});
@@ -433,14 +245,17 @@ const WalletAndIncome = () => {
     { value: "12", label: "December" },
   ];
 
-  const years = [
-    "All",
-    ...new Set(
-      transactions.map((tx) => new Date(tx.date).getFullYear().toString())
-    ),
-  ].sort();
+  const years = useMemo(() => {
+    const set = new Set(["All"]);
+    orders.forEach((o) => set.add(new Date(o.date).getFullYear().toString()));
+    return Array.from(set).sort();
+  }, [orders]);
 
   const handleExportData = (reportName, data) => {
+    if (!data || data.length === 0) {
+      alert("No data to export for the selected filters.");
+      return;
+    }
     const csvContent =
       "data:text/csv;charset=utf-8," +
       Object.keys(data[0]).join(",") +
@@ -458,30 +273,65 @@ const WalletAndIncome = () => {
 
   // --- Pharmacy Wallet Details Logic ---
   const getPharmacyWalletSummary = (pharmacyName) => {
-    const pharmacyTransactions = transactions.filter(
-      (tx) => tx.pharmacyName === pharmacyName
-    );
-
-    const totalPaidCommissions = pharmacyTransactions
-      .filter(
-        (tx) =>
-          tx.type === "Commission Payment" && tx.commissionStatus === "Paid"
-      )
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
-    const totalPayoutsReceived = pharmacyTransactions
-      .filter((tx) => tx.type === "Payout" && tx.payoutStatus === "Paid")
-      .reduce((sum, tx) => sum + tx.amount, 0);
-
+    const totalPaidCommissions = paidCommissions
+      .filter((c) => c.pharmacyName === pharmacyName)
+      .reduce((sum, c) => sum + (c.amount || 0), 0);
+    const totalPayoutsReceived = paidPayouts
+      .filter((p) => p.pharmacyName === pharmacyName)
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
     return {
       totalPaidCommissions: totalPaidCommissions.toFixed(2),
       totalPayoutsReceived: totalPayoutsReceived.toFixed(2),
     };
   };
 
-  const handleViewPharmacyDetails = (pharmacyName) => {
+  const handleViewPharmacyDetails = async (pharmacyName) => {
     setSelectedPharmacy(pharmacyName);
     setIsPharmacyDetailsModalOpen(true);
+    setModalLoading(true);
+    try {
+      const mmYYYY =
+        filterMonth !== "All" && filterYear !== "All"
+          ? `${String(filterMonth).padStart(2, "0")}/${filterYear}`
+          : undefined;
+      // Fetch per-pharmacy datasets
+      const [ordersResp, payoutsResp, commissionsResp] = await Promise.all([
+        listOrderPayments({
+          pharmacyId: orders.find((o) => o.pharmacyName === pharmacyName)
+            ?.pharmacyId,
+          month: filterMonth !== "All" ? filterMonth : undefined,
+          year: filterYear !== "All" ? filterYear : undefined,
+          page: 1,
+          size: 100,
+        }),
+        listPayouts({
+          pharmacyId: orders.find((o) => o.pharmacyName === pharmacyName)
+            ?.pharmacyId,
+          month: mmYYYY,
+          year: filterYear !== "All" ? filterYear : undefined,
+          page: 1,
+          size: 100,
+        }),
+        listCommissions({
+          pharmacyId: orders.find((o) => o.pharmacyName === pharmacyName)
+            ?.pharmacyId,
+          month: mmYYYY,
+          year: filterYear !== "All" ? filterYear : undefined,
+          page: 1,
+          size: 100,
+        }),
+      ]);
+      setModalCustomerPayments(ordersResp.items || []);
+      setModalPayouts(payoutsResp.items || []);
+      setModalCommissions(commissionsResp.items || []);
+    } catch (e) {
+      console.error("Failed to fetch pharmacy modal data", e);
+      setModalCustomerPayments([]);
+      setModalPayouts([]);
+      setModalCommissions([]);
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   const handleClosePharmacyDetailsModal = () => {
@@ -537,31 +387,30 @@ const WalletAndIncome = () => {
     }
   };
 
-  const handleConfirmPayoutPaid = () => {
-    if (payoutToMark && selectedReceiptFile) {
-      // In a real application, you would upload the file to your server here
-      // For now, we'll simulate the upload and create a mock URL
-      const mockUploadedUrl = `https://pillpath-receipts.com/uploads/${Date.now()}-${
-        selectedReceiptFile.name
-      }`;
+  const handleConfirmPayoutPaid = async () => {
+    if (!(payoutToMark && selectedReceiptFile)) {
+      alert("Please upload a receipt file before confirming the payout.");
+      return;
+    }
+    try {
+      const uploaded = await uploadPayoutReceipt(selectedReceiptFile);
+      const updated = await updatePayout(payoutToMark.id, {
+        status: "PAID",
+        receiptUrl: uploaded.url,
+        receiptFileName: uploaded.fileName,
+        receiptFileType: uploaded.fileType,
+        paidAt: new Date().toISOString(),
+      });
 
-      setTransactions((prevTransactions) =>
-        prevTransactions.map((tx) =>
-          tx.id === payoutToMark.id
-            ? {
-                ...tx,
-                payoutStatus: "Paid",
-                receiptUrl: mockUploadedUrl,
-                receiptFileName: selectedReceiptFile.name,
-                receiptFileType: selectedReceiptFile.type,
-              }
-            : tx
-        )
+      // Update modal payouts list
+      setModalPayouts((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
       );
-
-      console.log(
-        `Payout ${payoutToMark.id} marked as Paid with receipt file: ${selectedReceiptFile.name}`
-      );
+      // Refresh paidPayouts cache
+      setPaidPayouts((prev) => {
+        const others = prev.filter((p) => p.id !== updated.id);
+        return [...others, updated];
+      });
 
       // Reset modal state
       setIsReceiptUploadModalOpen(false);
@@ -569,46 +418,58 @@ const WalletAndIncome = () => {
       setReceiptUrlInput("");
       setSelectedReceiptFile(null);
       setReceiptPreview("");
-    } else {
-      alert("Please upload a receipt file before confirming the payout.");
+    } catch (e) {
+      console.error("Failed to mark payout as paid", e);
+      alert("Failed to mark payout as paid. Please try again.");
     }
   };
 
-  const handleMarkCommissionStatus = (txId, newStatus) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.map((tx) =>
-        tx.id === txId ? { ...tx, commissionStatus: newStatus } : tx
-      )
-    );
-    console.log(`Commission ${txId} marked as ${newStatus}`);
+  const handleMarkCommissionStatus = async (commissionId, newStatus) => {
+    try {
+      const updated = await updateCommissionStatus(commissionId, {
+        status: newStatus,
+      });
+      // Update modal commissions list
+      setModalCommissions((prev) =>
+        prev.map((c) => (c.id === updated.id ? updated : c))
+      );
+      // Update orders where this commission belongs to
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.commissionId === updated.id
+            ? {
+                ...o,
+                onHandCommissionReceived:
+                  updated.status === "PAID"
+                    ? true
+                    : updated.status === "UNPAID"
+                    ? false
+                    : null,
+              }
+            : o
+        )
+      );
+    } catch (e) {
+      console.error("Failed to update commission status", e);
+      alert("Failed to update commission status. Please try again.");
+    }
   };
 
-  const handleMarkPaymentReceivedStatus = (txId, newStatus) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.map((tx) =>
-        tx.id === txId ? { ...tx, receivedStatus: newStatus } : tx
-      )
-    );
-    console.log(`Order Payment ${txId} marked as ${newStatus}`);
-  };
+  // Payment received status is derived from settlementChannel and commission status.
 
   const getPharmacyDetailedTransactions = (pharmacyName) => {
-    const customerPayments = transactions.filter(
-      (tx) => tx.type === "Order Payment" && tx.receiver === pharmacyName
-    );
-
-    const payoutsFromSystem = transactions.filter(
-      (tx) => tx.type === "Payout" && tx.receiver === pharmacyName
-    );
-
-    const commissionsDue = transactions.filter(
-      (tx) =>
-        tx.type === "Commission Payment" &&
-        tx.sender === pharmacyName &&
-        tx.paymentType === "On-Hand"
-    );
-
-    return { customerPayments, payoutsFromSystem, commissionsDue };
+    // Use modal datasets fetched for this pharmacy
+    return {
+      customerPayments: modalCustomerPayments.filter(
+        (o) => o.pharmacyName === pharmacyName
+      ),
+      payoutsFromSystem: modalPayouts.filter(
+        (p) => p.pharmacyName === pharmacyName
+      ),
+      commissionsDue: modalCommissions.filter(
+        (c) => c.pharmacyName === pharmacyName
+      ),
+    };
   };
 
   return (
@@ -640,7 +501,7 @@ const WalletAndIncome = () => {
             <p className="font-medium">Manual settlements policy</p>
             <p className="mt-1">
               PillPath settles customer card (Online) payments to pharmacies
-              manually. Use the Payouts table in each pharmacy7s details to mark
+              manually. Use the Payouts table in each pharmacy's details to mark
               a payout as Paid and attach the receipt. For On-Hand (cash)
               orders, pharmacies owe PillPath the commission; record incoming
               commission payments in the Commissions Due table.
@@ -783,7 +644,19 @@ const WalletAndIncome = () => {
           </div>
           <button
             onClick={() =>
-              handleExportData("PillPath_Sales", filteredTransactions)
+              handleExportData(
+                "PillPath_Sales",
+                currentCustomerPayments.map((tx) => ({
+                  orderId: tx.orderCode || tx.id,
+                  date: new Date(tx.date).toISOString().slice(0, 10),
+                  customer: tx.customerName,
+                  pharmacy: tx.pharmacyName,
+                  paymentType: tx.settlementChannel,
+                  amount: Number(tx.grossAmount || 0).toFixed(2),
+                  commission: Number(tx.commissionAmount || 0).toFixed(2),
+                  receivedStatus: receivedStatusLabel(tx),
+                }))
+              )
             }
             className="  bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
           >
@@ -923,51 +796,53 @@ const WalletAndIncome = () => {
               currentCustomerPayments.map((tx) => (
                 <tr key={tx.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {tx.id}
+                    {tx.orderCode || tx.id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.date}
+                    {new Date(tx.date).toISOString().slice(0, 10)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.sender}
+                    {tx.customerName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.receiver}
+                    {tx.pharmacyName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        tx.paymentType === "Online"
+                        tx.settlementChannel === "ONLINE"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-purple-100 text-purple-800"
                       }`}
                     >
-                      {tx.paymentType}
+                      {tx.settlementChannel === "ONLINE" ? "Online" : "On-Hand"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.amount.toFixed(2)}
+                    {Number(tx.grossAmount || 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {tx.commissionAmount.toFixed(2)}
+                    {Number(tx.commissionAmount || 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        tx.receivedStatus === "Received"
+                        receivedStatusLabel(tx) === "Received"
                           ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
+                          : receivedStatusLabel(tx) === "Unreceived"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
-                      {tx.receivedStatus}
+                      {receivedStatusLabel(tx)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {tx.paymentType === "On-Hand" &&
-                      tx.receivedStatus === "Unreceived" && (
+                    {tx.settlementChannel === "ON_HAND" &&
+                      receivedStatusLabel(tx) !== "Received" && (
                         <button
                           onClick={() =>
-                            handleMarkPaymentReceivedStatus(tx.id, "Received")
+                            handleMarkCommissionStatus(tx.commissionId, "PAID")
                           }
                           className="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-100 transition-colors"
                           title="Mark as Received"
@@ -975,8 +850,8 @@ const WalletAndIncome = () => {
                           <CheckCircle size={18} />
                         </button>
                       )}
-                    {tx.paymentType === "On-Hand" &&
-                      tx.receivedStatus === "Received" && (
+                    {tx.settlementChannel === "ON_HAND" &&
+                      receivedStatusLabel(tx) === "Received" && (
                         <span className="text-gray-500">N/A</span>
                       )}
                   </td>
@@ -1059,30 +934,32 @@ const WalletAndIncome = () => {
                       ).customerPayments.map((tx) => (
                         <tr key={tx.id}>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {tx.id}
+                            {tx.orderCode || tx.id}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.date}
+                            {new Date(tx.date).toISOString().slice(0, 10)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.sender}
+                            {tx.customerName}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                tx.paymentType === "Online"
+                                tx.settlementChannel === "ONLINE"
                                   ? "bg-blue-100 text-blue-800"
                                   : "bg-purple-100 text-purple-800"
                               }`}
                             >
-                              {tx.paymentType}
+                              {tx.settlementChannel === "ONLINE"
+                                ? "Online"
+                                : "On-Hand"}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.amount.toFixed(2)}
+                            {Number(tx.grossAmount || 0).toFixed(2)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.commissionAmount.toFixed(2)}
+                            {Number(tx.commissionAmount || 0).toFixed(2)}
                           </td>
                         </tr>
                       ))
@@ -1145,10 +1022,10 @@ const WalletAndIncome = () => {
                             {tx.id}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.date}
+                            {tx.paidAt || tx.date || "-"}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.payoutMonth}
+                            {tx.month || tx.payoutMonth}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                             {tx.amount.toFixed(2)}
@@ -1156,12 +1033,12 @@ const WalletAndIncome = () => {
                           <td className="px-4 py-2 whitespace-nowrap text-sm">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                tx.payoutStatus === "Paid"
+                                tx.status === "PAID"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-yellow-100 text-yellow-800"
                               }`}
                             >
-                              {tx.payoutStatus}
+                              {tx.status === "PAID" ? "Paid" : "Unpaid"}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
@@ -1189,7 +1066,7 @@ const WalletAndIncome = () => {
                             )}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm">
-                            {tx.payoutStatus === "Unpaid" && (
+                            {tx.status !== "PAID" && (
                               <button
                                 onClick={() =>
                                   handleMarkPayoutStatusInitiate(tx)
@@ -1264,28 +1141,28 @@ const WalletAndIncome = () => {
                           </td>
 
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.commissionMonth}
+                            {tx.month}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {tx.amount.toFixed(2)}
+                            {Number(tx.amount || 0).toFixed(2)}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                tx.commissionStatus === "Paid"
+                                tx.status === "PAID"
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {tx.commissionStatus}
+                              {tx.status}
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm">
-                            {tx.commissionStatus === "Unpaid" ? (
+                            {tx.status === "UNPAID" ? (
                               <>
                                 <button
                                   onClick={() =>
-                                    handleMarkCommissionStatus(tx.id, "Paid")
+                                    handleMarkCommissionStatus(tx.id, "PAID")
                                   }
                                   className="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-100 transition-colors"
                                   title="Mark as Paid"
@@ -1294,10 +1171,7 @@ const WalletAndIncome = () => {
                                 </button>
                                 <button
                                   onClick={() =>
-                                    handleMarkCommissionStatus(
-                                      tx.id,
-                                      "Not Paid"
-                                    )
+                                    handleMarkCommissionStatus(tx.id, "UNPAID")
                                   }
                                   className="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 transition-colors ml-1"
                                   title="Mark as Not Paid"
