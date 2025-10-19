@@ -198,7 +198,7 @@ const ChatItem = ({ chat, currentUser, isActive, isOnline, onClick, formatTime }
             </div>
           </div>
           <p className="text-sm text-gray-600 truncate mt-1 leading-relaxed">
-            {lastMessage?.content || 'No messages yet'}
+            {lastMessage?.content || ''}
           </p>
         </div>
       </div>

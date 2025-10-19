@@ -185,7 +185,7 @@ const ChatList = () => {
                           </div>
                         </div>
                         <p className="text-sm text-gray-600 truncate mt-1 leading-relaxed">
-                          {thread.lastMessage?.content || 'No messages yet'}
+                          {thread.lastMessage?.content || ''}
                         </p>
                       </div>
                     </div>

@@ -268,7 +268,7 @@ const ChatExampleUsage = () => {
             <h3 className="font-medium mb-2">Messages ({messages[activeChat.id]?.length || 0}):</h3>
             <div className="max-h-40 overflow-y-auto bg-white p-3 border rounded">
               {messages[activeChat.id]?.length === 0 ? (
-                <div className="text-gray-500">No messages yet</div>
+                <div className="text-gray-500"></div>
               ) : (
                 messages[activeChat.id]?.map((message, index) => (
                   <div key={index} className="mb-2">

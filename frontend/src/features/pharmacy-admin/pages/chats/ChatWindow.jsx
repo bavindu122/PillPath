@@ -4,7 +4,7 @@ import { useAuth } from '../../../../hooks/useAuth';
 import api from '../../../../services/api';
 import { ArrowLeft, Send, User, Wifi, WifiOff, Phone, Video, MoreVertical, Circle, MessageCircle, Paperclip, Smile } from 'lucide-react';
 
-const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
+const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead }) => {
   const { customerId: paramCustomerId } = useParams();
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -56,6 +56,21 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     }
   }, []);
 
+  // Mark messages as read
+  const markMessagesAsRead = async (chatId) => {
+    try {
+      await api.post(`/v1/chats/${chatId}/read`);
+      console.log('✅ Messages marked as read for chat:', chatId);
+      
+      // Notify parent component to update unread count
+      if (onMessagesRead) {
+        onMessagesRead(customerId);
+      }
+    } catch (error) {
+      console.warn('Failed to mark messages as read:', error);
+    }
+  };
+
   // Fetch chat details to get customer info
   useEffect(() => {
     const fetchChatDetails = async () => {
@@ -67,6 +82,11 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
         if (found) {
           setChatDetails(found);
           resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
+          
+          // Mark messages as read when opening the chat
+          if (resolvedChatIdRef.current) {
+            markMessagesAsRead(resolvedChatIdRef.current);
+          }
         }
       } catch (e) {
         console.warn('Failed to fetch chat details:', e);
@@ -274,6 +294,11 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
 
         if (matched) {
           addMessage(message);
+          
+          // Auto-mark as read since the chat window is open
+          if (resolvedChatIdRef.current && message.sender !== 'admin') {
+            markMessagesAsRead(resolvedChatIdRef.current);
+          }
         }
         break;
       }

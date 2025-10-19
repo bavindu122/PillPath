@@ -56,6 +56,26 @@ const Chat = () => {
   const handleThreadClick = (thread) => {
     setActiveThread(thread);
     if (window.innerWidth < 1024) setShowMobileChat(true);
+    
+    // Clear unread count for this thread immediately in UI
+    setThreads(prevThreads => 
+      prevThreads.map(t => 
+        t.customerId === thread.customerId 
+          ? { ...t, unreadCount: 0 } 
+          : t
+      )
+    );
+  };
+
+  const handleMessagesRead = (customerId) => {
+    // Update unread count to 0 when messages are read
+    setThreads(prevThreads => 
+      prevThreads.map(t => 
+        t.customerId === customerId 
+          ? { ...t, unreadCount: 0 } 
+          : t
+      )
+    );
   };
 
   const handleBackToChats = () => {
@@ -223,7 +243,7 @@ const Chat = () => {
                                 </div>
                               </div>
                               <p className="text-sm text-gray-600 truncate mt-1 leading-relaxed">
-                                {thread.lastMessage?.content || 'No messages yet'}
+                                {thread.lastMessage?.content || ''}
                               </p>
                             </div>
                           </div>
@@ -247,6 +267,7 @@ const Chat = () => {
                     customerId={activeThread.customerId}
                     onBack={handleBackToChats}
                     thread={activeThread}
+                    onMessagesRead={handleMessagesRead}
                   />
                 ) : (
                   <div className="flex items-center justify-center flex-1">
