@@ -9,6 +9,12 @@ import {
   Calendar,
   Pill,
   CreditCard,
+  Loader2,
+  MessageCircle,
+  CheckCircle,
+  XCircle,
+  Package,
+  Eye,
 } from "lucide-react";
 // Payment is handled in unified Checkout page now
 import { getItemsByPrescription } from "../services/CartService";
@@ -60,15 +66,17 @@ const Activities = () => {
             let statusLabel = "Pending Review";
             let statusType = "pending";
             if (hasOrder) {
-              // When an order exists, prioritize delivery-type statuses
+              // When an order exists, map pharmacy statuses to customer-friendly labels
               const ost = String(p.orderStatus || "").toUpperCase();
               if (ost.includes("PREPARING")) {
                 statusLabel = "Preparing order";
                 statusType = "delivery";
-              } else if (ost.includes("READY") || ost.includes("RECEIVED")) {
-                statusLabel = ost.includes("READY")
-                  ? "Ready for pickup"
-                  : "Order received";
+              } else if (ost.includes("READY")) {
+                statusLabel = "Ready for pickup";
+                statusType = "delivery";
+              } else if (ost.includes("RECEIVED")) {
+                // Pharmacy has received the order -> customer sees "Order placed"
+                statusLabel = "Order placed";
                 statusType = "delivery";
               } else if (ost.includes("COMPLETED") || st === "COMPLETED") {
                 statusLabel = "Completed";
@@ -154,15 +162,52 @@ const Activities = () => {
     );
   };
 
-  const getStatusIcon = (statusType) => {
-    switch (statusType) {
-      case "pending":
-        return <AlertCircle className="h-4 w-4" />;
-      case "delivery":
-        return <Truck className="h-4 w-4" />;
-      case "payment":
-        return <CreditCard className="h-4 w-4" />;
-    }
+  // Fine-grained icon per status label for better visual differentiation
+  const getStatusIconForStatus = (status) => {
+    const s = String(status || "").toLowerCase();
+    if (s.includes("payment")) return <CreditCard className="h-4 w-4" />;
+    if (s.includes("view order preview")) return <Eye className="h-4 w-4" />;
+    if (s.includes("preparing")) return <Package className="h-4 w-4" />;
+    if (s.includes("order placed")) return <Package className="h-4 w-4" />;
+    if (s.includes("ready")) return <Truck className="h-4 w-4" />;
+    if (s.includes("received") || s.includes("order placed"))
+      return <Package className="h-4 w-4" />;
+    if (s.includes("completed")) return <CheckCircle className="h-4 w-4" />;
+    if (s.includes("cancelled")) return <XCircle className="h-4 w-4" />;
+    if (s.includes("rejected")) return <XCircle className="h-4 w-4" />;
+    if (s.includes("clarification"))
+      return <MessageCircle className="h-4 w-4" />;
+    if (s.includes("progress"))
+      return <Loader2 className="h-4 w-4 animate-spin" />;
+    // default
+    return <AlertCircle className="h-4 w-4" />;
+  };
+
+  // Fine-grained color per status label to differentiate badges
+  const getStatusColorForStatus = (status, fallbackType) => {
+    const s = String(status || "").toLowerCase();
+    if (s.includes("payment"))
+      return "bg-green-500/20 text-green-300 border-green-300/30";
+    if (s.includes("view order preview"))
+      return "bg-blue-500/20 text-blue-300 border-blue-300/30";
+    if (s.includes("preparing") || s.includes("order placed"))
+      return "bg-indigo-500/20 text-indigo-300 border-indigo-300/30";
+    if (s.includes("ready"))
+      return "bg-cyan-500/20 text-cyan-300 border-cyan-300/30";
+    if (s.includes("received") || s.includes("order placed"))
+      return "bg-indigo-500/20 text-indigo-300 border-indigo-300/30";
+    if (s.includes("completed"))
+      return "bg-emerald-500/20 text-emerald-300 border-emerald-300/30";
+    if (s.includes("cancelled") || s.includes("rejected"))
+      return "bg-red-500/20 text-red-300 border-red-300/30";
+    if (s.includes("clarification"))
+      return "bg-yellow-500/20 text-yellow-300 border-yellow-300/30";
+    if (s.includes("progress"))
+      return "bg-violet-500/20 text-violet-300 border-violet-300/30";
+    if (s.includes("pending"))
+      return "bg-gray-500/20 text-gray-300 border-gray-300/30";
+    // fallback to type-based color if provided
+    return getStatusColor(fallbackType);
   };
 
   const getStatusColor = (statusType) => {
@@ -335,7 +380,8 @@ const Activities = () => {
                       {/* Status Badge */}
                       <div className="flex items-center space-x-3">
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColorForStatus(
+                            pharmacy.status,
                             pharmacy.statusType
                           )} ${
                             pharmacy.status === "View Order Preview" ||
@@ -367,7 +413,7 @@ const Activities = () => {
                             }
                           }}
                         >
-                          {getStatusIcon(pharmacy.statusType)}
+                          {getStatusIconForStatus(pharmacy.status)}
                           <span className="ml-1">{pharmacy.status}</span>
                         </span>
 

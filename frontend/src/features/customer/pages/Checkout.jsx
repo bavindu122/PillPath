@@ -6,12 +6,7 @@ import {
   clearPrescription,
 } from "../services/CartService";
 import OrdersService from "../../../services/api/OrdersService";
-import {
-  DollarSign,
-  Percent,
-  CreditCard as CreditIcon,
-  Lock,
-} from "lucide-react";
+import { DollarSign, CreditCard as CreditIcon, Lock } from "lucide-react";
 
 // Unified checkout page — single payment across selected pharmacies
 const Checkout = () => {
@@ -44,9 +39,8 @@ const Checkout = () => {
     (sum, it) => sum + it.price * (it.quantity || 1),
     0
   );
-  const discountPercentage = 10; // placeholder
-  const discountAmount = subtotal * (discountPercentage / 100);
-  const total = subtotal - discountAmount;
+  // Totals are shown as derived from items only; no fake discounts
+  const total = subtotal;
 
   const handlePaymentMethodSelect = (method) =>
     setSelectedPaymentMethod(method);
@@ -116,7 +110,8 @@ const Checkout = () => {
       }
       const dto = {
         prescriptionCode: prescriptionId,
-        paymentMethod: selectedPaymentMethod === "card" ? "CARD" : "CASH",
+        paymentMethod:
+          selectedPaymentMethod === "card" ? "CREDIT_CARD" : "CASH",
         pharmacies: pharmacies.map((p) => ({
           pharmacyId: p.pharmacyId,
           items: p.items,
@@ -126,9 +121,31 @@ const Checkout = () => {
       // Expect response.orderCode or similar; attempt to extract robustly
       const orderCode =
         response.orderCode || response.code || response.id || null;
-      // Clear cart for this prescription
-      clearPrescription(prescriptionId);
+      // Trigger pay endpoint as per design
       if (orderCode) {
+        if (selectedPaymentMethod === "cash") {
+          // Cash: call pay immediately at checkout
+          try {
+            await OrdersService.pay(orderCode, { paymentMethod: "CASH" });
+          } catch (err) {
+            console.warn("Cash pay call failed:", err);
+          }
+        } else if (selectedPaymentMethod === "card") {
+          // Card: simulate gateway success for now; in real flow, move this call to gateway success callback
+          const masked = (cardDetails.cardNumber || "").replace(/\s+/g, "");
+          const last4 = masked.slice(-4);
+          try {
+            await OrdersService.pay(orderCode, {
+              paymentMethod: "CREDIT_CARD",
+              gatewayReference: `demo_${Date.now()}`,
+              cardLast4: last4,
+            });
+          } catch (err) {
+            console.warn("Card pay call failed:", err);
+          }
+        }
+        // Clear cart for this prescription then navigate to order detail
+        clearPrescription(prescriptionId);
         navigate(`/customer/orders/${orderCode}`, {
           state: { justPlaced: true, order: response },
           replace: true,
@@ -207,13 +224,6 @@ const Checkout = () => {
             <div className="flex justify-between text-white/70">
               <span>Subtotal:</span>
               <span>Rs. {subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-green-300">
-              <span className="flex items-center">
-                <Percent className="h-4 w-4 mr-1" /> Discount (
-                {discountPercentage}%)
-              </span>
-              <span>-Rs. {discountAmount.toFixed(2)}</span>
             </div>
             <div className="border-t border-white/10 pt-2">
               <div className="flex justify-between text-white text-lg font-bold">

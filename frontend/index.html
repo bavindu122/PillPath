@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PillPath</title>
+    <!-- Google Translate: load the library globally; we will initialize it only on customer pages -->
+    <script>
+      // Safe, no-op initializer the Google script will call once it loads.
+      // We won't render the widget here; customer pages will instantiate it when needed.
+      window.googleTranslateReady = false;
+      function googleTranslateElementInit() {
+        window.googleTranslateReady = true;
+      }
+    </script>
+    <script
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+      defer
+    ></script>
   </head>
   <body>
     <div id="root"></div>

@@ -20,6 +20,99 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [initialized, setInitialized] = useState(false);
 
+  // Social login (Google) moved inside provider so it can use state setters
+  const socialLogin = async ({ provider, idToken }) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
+
+      const normalizedProvider = (provider || "google").toUpperCase();
+
+      const response = await fetch(`${API_BASE_URL}/customers/oauth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          // Some backends expect the ID token in the Authorization header
+          Authorization: `Bearer ${idToken}`,
+        },
+        // Include multiple common shapes: idToken and credential
+        body: JSON.stringify({
+          provider: normalizedProvider,
+          idToken,
+          credential: idToken,
+        }),
+        credentials: "include",
+      });
+
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+      if (!response.ok || (data && data.success === false)) {
+        const detail = typeof data === "string" ? data : data?.message;
+        throw new Error(detail || `Google login failed (${response.status})`);
+      }
+
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
+      const userProfile = data.user || data.userProfile || data.profile;
+      const backendUserType = data.userType || userProfile?.userType;
+
+      if (accessToken) {
+        setToken(accessToken);
+        tokenUtils.setAuthToken(accessToken);
+        localStorage.setItem("auth_token", accessToken);
+      }
+      if (refreshToken) {
+        tokenUtils.setRefreshToken(refreshToken);
+        localStorage.setItem("refresh_token", refreshToken);
+      }
+
+      if (userProfile) {
+        // Map backend userType to frontend
+        let frontendUserType;
+        switch (backendUserType) {
+          case "CUSTOMER":
+            frontendUserType = "customer";
+            break;
+          case "PHARMACY_ADMIN":
+            frontendUserType = "pharmacy-admin";
+            break;
+          case "PHARMACIST":
+            frontendUserType = "pharmacist";
+            break;
+          case "ADMIN":
+            frontendUserType = "admin";
+            break;
+          default:
+            frontendUserType = "customer";
+        }
+
+        setUser({ ...userProfile, userType: frontendUserType });
+        setUserType(frontendUserType);
+        localStorage.setItem("user_type", frontendUserType);
+        localStorage.setItem(
+          "user_data",
+          JSON.stringify({ ...userProfile, userType: frontendUserType })
+        );
+      }
+
+      return data;
+    } catch (error) {
+      setError(error.message || "Google login failed");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ✅ Initialize authentication on app start
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
@@ -395,6 +488,7 @@ export const AuthProvider = ({ children }) => {
     error,
     register,
     login,
+    socialLogin,
     logout,
     updateUser,
     checkAuthStatus,

@@ -113,6 +113,57 @@ body {
   color: var(--color-text-dark);
 }
 
+/* ==== Google Translate Tweaks (hide banner, clean dropdown) ==== */
+#goog-gt-tt,
+.goog-te-banner-frame.skiptranslate,
+body > .skiptranslate { display: none !important; }
+html { margin-top: 0 !important; }
+/* Optional: style the container lightly; actual placement will be in customer navbar */
+.gt-inline-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.goog-te-gadget {
+  font-family: inherit !important;
+}
+.goog-te-gadget .goog-te-combo {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+/* Hide Google branding text/badge next to the dropdown */
+.goog-logo-link { display: none !important; }
+.goog-te-gadget span { display: none !important; }
+
+/* Keep the Google gadget in DOM but hide it from view; we control via custom UI */
+.gt-hidden .goog-te-gadget,
+.gt-hidden .goog-te-gadget span,
+.gt-hidden .goog-te-gadget .goog-te-combo {
+  position: absolute !important;
+  left: -9999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Simple language toggle pill */
+.lang-toggle {
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.lang-toggle button {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.lang-toggle .active {
+  background: var(--navbar-blue-primary);
+  color: white;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 600;

@@ -27,7 +27,10 @@ const Hero2 = () => {
       <div className="w-full text-center mb-8 md:mb-12 fade-in relative z-10">
         <h1 className="flex flex-row sm:flex-row items-center justify-center gap-1 sm:gap-3 relative">
           {/* 3D PILL text with less glow */}
-          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transform transition-all duration-700 animate-title-entrance opacity-0 translate-y-10 ">
+          <span
+            className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transform transition-all duration-700 animate-title-entrance opacity-0 translate-y-10 notranslate"
+            translate="no"
+          >
             PHAR
           </span>
 
@@ -46,7 +49,10 @@ const Hero2 = () => {
           </div>
 
           {/* 3D PATH text with less glow */}
-          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 ">
+          <span
+            className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight text-white transition-all duration-700 delay-300 animate-title-entrance opacity-0 translate-y-10 notranslate"
+            translate="no"
+          >
             MACY
           </span>
         </h1>

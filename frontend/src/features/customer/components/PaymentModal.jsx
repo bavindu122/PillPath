@@ -8,52 +8,53 @@ const PaymentModal = ({
   prescriptionId,
   pharmacyName,
   medications,
-  discountPercentage = 10,
-  onConfirmPayment
+  onConfirmPayment,
 }) => {
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState("");
   const [showNoMedWarning, setShowNoMedWarning] = React.useState(false);
   const [cardDetails, setCardDetails] = React.useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: ''
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
   });
 
-  const totalPrice = medications.reduce((sum, med) => sum + (med.selected ? med.price : 0), 0);
-  const discountAmount = totalPrice * (discountPercentage / 100);
-  const finalTotal = totalPrice - discountAmount;
+  const totalPrice = medications.reduce(
+    (sum, med) => sum + (med.selected ? med.price : 0),
+    0
+  );
+  const finalTotal = totalPrice; // no fake discount
 
   const handlePaymentMethodSelect = (method) => {
     setSelectedPaymentMethod(method);
   };
 
   const handleCardInputChange = (field, value) => {
-    setCardDetails(prev => ({
+    setCardDetails((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     const matches = v.match(/\d{4,16}/g);
-    const match = matches && matches[0] || '';
+    const match = (matches && matches[0]) || "";
     const parts = [];
     for (let i = 0, len = match.length; i < len; i += 4) {
       parts.push(match.substring(i, i + 4));
     }
     if (parts.length) {
-      return parts.join(' ');
+      return parts.join(" ");
     } else {
       return v;
     }
   };
 
   const formatExpiryDate = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
     if (v.length >= 2) {
-      return v.substring(0, 2) + '/' + v.substring(2, 4);
+      return v.substring(0, 2) + "/" + v.substring(2, 4);
     }
     return v;
   };
@@ -63,49 +64,52 @@ const PaymentModal = ({
       setShowNoMedWarning(true);
       return;
     }
-    
-    if (selectedPaymentMethod === 'card') {
+
+    if (selectedPaymentMethod === "card") {
       // Validate card details
       const { cardNumber, expiryDate, cvv, cardholderName } = cardDetails;
       if (!cardNumber || !expiryDate || !cvv || !cardholderName) {
-        alert('Please fill in all card details');
+        alert("Please fill in all card details");
         return;
       }
-      if (cardNumber.replace(/\s/g, '').length < 16) {
-        alert('Please enter a valid card number');
+      if (cardNumber.replace(/\s/g, "").length < 16) {
+        alert("Please enter a valid card number");
         return;
       }
       if (cvv.length < 3) {
-        alert('Please enter a valid CVV');
+        alert("Please enter a valid CVV");
         return;
       }
     }
-    
+
     if (selectedPaymentMethod) {
-      onConfirmPayment(selectedPaymentMethod, finalTotal, selectedPaymentMethod === 'card' ? cardDetails : null);
-      setSelectedPaymentMethod('');
+      onConfirmPayment(
+        selectedPaymentMethod,
+        finalTotal,
+        selectedPaymentMethod === "card" ? cardDetails : null
+      );
+      setSelectedPaymentMethod("");
       setShowNoMedWarning(false);
       setCardDetails({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardholderName: ''
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
       });
     }
   };
 
   const handleClose = () => {
-    setSelectedPaymentMethod('');
+    setSelectedPaymentMethod("");
     setShowNoMedWarning(false);
     setCardDetails({
-      cardNumber: '',
-      expiryDate: '',
-      cvv: '',
-      cardholderName: ''
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
     });
     onClose();
   };
-  
 
   if (!isOpen) return null;
 
@@ -142,8 +146,9 @@ const PaymentModal = ({
         exit={{ scale: 0.95, opacity: 0 }}
         className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 max-w-md w-full max-h-[90vh] overflow-y-auto payment-modal-scroll"
         onClick={(e) => e.stopPropagation()}
-      >{/* Inject custom scrollbar styles scoped to PaymentModal */}
-      
+      >
+        {/* Inject custom scrollbar styles scoped to PaymentModal */}
+
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/10">
           <h2 className="text-2xl font-bold text-white">Payment Details</h2>
@@ -159,7 +164,9 @@ const PaymentModal = ({
         <div className="p-6">
           {/* Prescription Info */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-3">Order Information</h3>
+            <h3 className="text-lg font-semibold text-white mb-3">
+              Order Information
+            </h3>
             <div className="space-y-2 text-white/70">
               <div className="flex justify-between">
                 <span>Prescription ID:</span>
@@ -174,14 +181,23 @@ const PaymentModal = ({
 
           {/* Bill Details */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-3">Bill Details</h3>
+            <h3 className="text-lg font-semibold text-white mb-3">
+              Bill Details
+            </h3>
             <div className="space-y-3">
-              {medications.filter(med => med.selected).map((medication) => (
-                <div key={medication.id} className="flex justify-between items-center p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                  <span className="text-white">{medication.name}</span>
-                  <span className="text-white font-medium">${medication.price.toFixed(2)}</span>
-                </div>
-              ))}
+              {medications
+                .filter((med) => med.selected)
+                .map((medication) => (
+                  <div
+                    key={medication.id}
+                    className="flex justify-between items-center p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10"
+                  >
+                    <span className="text-white">{medication.name}</span>
+                    <span className="text-white font-medium">
+                      ${medication.price.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -191,13 +207,6 @@ const PaymentModal = ({
               <div className="flex justify-between text-white/70">
                 <span>Subtotal:</span>
                 <span>${totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-green-300">
-                <span className="flex items-center">
-                  <Percent className="h-4 w-4 mr-1" />
-                  Discount ({discountPercentage}%):
-                </span>
-                <span>-${discountAmount.toFixed(2)}</span>
               </div>
               <div className="border-t border-white/10 pt-2">
                 <div className="flex justify-between text-white text-lg font-bold">
@@ -210,14 +219,16 @@ const PaymentModal = ({
 
           {/* Payment Method Selection */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-3">Payment Method</h3>
+            <h3 className="text-lg font-semibold text-white mb-3">
+              Payment Method
+            </h3>
             <div className="space-y-3">
               <div
-                onClick={() => handlePaymentMethodSelect('cash')}
+                onClick={() => handlePaymentMethodSelect("cash")}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedPaymentMethod === 'cash'
-                    ? 'bg-blue-500/20 border-blue-400/50 text-blue-300'
-                    : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  selectedPaymentMethod === "cash"
+                    ? "bg-blue-500/20 border-blue-400/50 text-blue-300"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10"
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -226,11 +237,11 @@ const PaymentModal = ({
                 </div>
               </div>
               <div
-                onClick={() => handlePaymentMethodSelect('card')}
+                onClick={() => handlePaymentMethodSelect("card")}
                 className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                  selectedPaymentMethod === 'card'
-                    ? 'bg-blue-500/20 border-blue-400/50 text-blue-300'
-                    : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  selectedPaymentMethod === "card"
+                    ? "bg-blue-500/20 border-blue-400/50 text-blue-300"
+                    : "bg-white/5 border-white/10 text-white hover:bg-white/10"
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -240,25 +251,34 @@ const PaymentModal = ({
               </div>
 
               {/* Card Payment Simulator */}
-              {selectedPaymentMethod === 'card' && (
+              {selectedPaymentMethod === "card" && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4 space-y-4"
                 >
                   <div className="flex items-center space-x-2 mb-3">
                     <Lock className="h-4 w-4 text-green-400" />
-                    <span className="text-green-400 text-sm font-medium">Secure Payment</span>
+                    <span className="text-green-400 text-sm font-medium">
+                      Secure Payment
+                    </span>
                   </div>
 
                   {/* Card Number */}
                   <div>
-                    <label className="block text-white/70 text-sm mb-2">Card Number</label>
+                    <label className="block text-white/70 text-sm mb-2">
+                      Card Number
+                    </label>
                     <input
                       type="text"
                       value={cardDetails.cardNumber}
-                      onChange={(e) => handleCardInputChange('cardNumber', formatCardNumber(e.target.value))}
+                      onChange={(e) =>
+                        handleCardInputChange(
+                          "cardNumber",
+                          formatCardNumber(e.target.value)
+                        )
+                      }
                       placeholder="1234 5678 9012 3456"
                       maxLength="19"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
@@ -268,11 +288,18 @@ const PaymentModal = ({
                   <div className="grid grid-cols-2 gap-4">
                     {/* Expiry Date */}
                     <div>
-                      <label className="block text-white/70 text-sm mb-2">Expiry Date</label>
+                      <label className="block text-white/70 text-sm mb-2">
+                        Expiry Date
+                      </label>
                       <input
                         type="text"
                         value={cardDetails.expiryDate}
-                        onChange={(e) => handleCardInputChange('expiryDate', formatExpiryDate(e.target.value))}
+                        onChange={(e) =>
+                          handleCardInputChange(
+                            "expiryDate",
+                            formatExpiryDate(e.target.value)
+                          )
+                        }
                         placeholder="MM/YY"
                         maxLength="5"
                         className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
@@ -281,11 +308,18 @@ const PaymentModal = ({
 
                     {/* CVV */}
                     <div>
-                      <label className="block text-white/70 text-sm mb-2">CVV</label>
+                      <label className="block text-white/70 text-sm mb-2">
+                        CVV
+                      </label>
                       <input
                         type="text"
                         value={cardDetails.cvv}
-                        onChange={(e) => handleCardInputChange('cvv', e.target.value.replace(/\D/g, '').substring(0, 3))}
+                        onChange={(e) =>
+                          handleCardInputChange(
+                            "cvv",
+                            e.target.value.replace(/\D/g, "").substring(0, 3)
+                          )
+                        }
                         placeholder="123"
                         maxLength="3"
                         className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
@@ -295,11 +329,15 @@ const PaymentModal = ({
 
                   {/* Cardholder Name */}
                   <div>
-                    <label className="block text-white/70 text-sm mb-2">Cardholder Name</label>
+                    <label className="block text-white/70 text-sm mb-2">
+                      Cardholder Name
+                    </label>
                     <input
                       type="text"
                       value={cardDetails.cardholderName}
-                      onChange={(e) => handleCardInputChange('cardholderName', e.target.value)}
+                      onChange={(e) =>
+                        handleCardInputChange("cardholderName", e.target.value)
+                      }
                       placeholder="John Doe"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
                     />
@@ -322,17 +360,17 @@ const PaymentModal = ({
               disabled={!selectedPaymentMethod}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                 selectedPaymentMethod
-                  ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
-                  : 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+                  ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                  : "bg-gray-500/20 text-gray-400 cursor-not-allowed"
               }`}
             >
               Confirm Order
             </button>
             {showNoMedWarning && totalPrice === 0 && (
-  <div style={{ color: 'red', marginTop: 8 }}>
-    Please select at least one medication to proceed with payment.
-  </div>
-)}
+              <div style={{ color: "red", marginTop: 8 }}>
+                Please select at least one medication to proceed with payment.
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
