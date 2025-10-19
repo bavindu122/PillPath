@@ -329,37 +329,45 @@ const Login = () => {
 
         {/* Social login buttons */}
         <div className="flex flex-col items-center relative z-10 animate-fade-in-up delay-800 w-full">
-          <GoogleLogin
-            onSuccess={async (credentialResponse) => {
-              try {
-                if (!credentialResponse || !credentialResponse.credential) {
-                  throw new Error("Google did not return a valid credential.");
-                }
-                const idToken = credentialResponse.credential;
-                // Debug: verify Google ID token payload on login
+          
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
                 try {
-                  const payload = JSON.parse(atob(idToken.split(".")[1]));
-                  console.log("[Google OAuth][Login] idToken payload:", {
-                    aud: payload.aud,
-                    iss: payload.iss,
-                    email: payload.email,
-                    exp: payload.exp,
-                  });
-                } catch (e) {
-                  console.warn(
-                    "[Google OAuth][Login] Failed to decode idToken payload"
-                  );
+                  if (!credentialResponse || !credentialResponse.credential) {
+                    throw new Error(
+                      "Google did not return a valid credential."
+                    );
+                  }
+                  const idToken = credentialResponse.credential;
+                  // Debug: verify Google ID token payload on login
+                  try {
+                    const payload = JSON.parse(atob(idToken.split(".")[1]));
+                    console.log("[Google OAuth][Login] idToken payload:", {
+                      aud: payload.aud,
+                      iss: payload.iss,
+                      email: payload.email,
+                      exp: payload.exp,
+                    });
+                  } catch (e) {
+                    console.warn(
+                      "[Google OAuth][Login] Failed to decode idToken payload"
+                    );
+                  }
+                  await socialLogin({ provider: "google", idToken });
+                  // Navigation handled by useEffect
+                } catch (error) {
+                  setSubmitError(error.message || "Google sign in failed.");
                 }
-                await socialLogin({ provider: "google", idToken });
-                // Navigation handled by useEffect
-              } catch (error) {
-                setSubmitError(error.message || "Google sign in failed.");
-              }
-            }}
-            onError={() => setSubmitError("Google sign in failed.")}
-            width={300}
-            text="signin_with"
-          />
+              }}
+              onError={() => setSubmitError("Google sign in failed.")}
+              width={320}
+              text="continue_with"
+              theme="filled_blue"
+              shape="pill"
+              size="large"
+              logo_alignment="center"
+            />
+         
           <div className="text-white/70 text-sm mt-2">Sign in with Google</div>
         </div>
 
