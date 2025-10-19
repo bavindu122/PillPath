@@ -27,7 +27,7 @@ async function request(endpoint, options = {}) {
  * New backend endpoint expects (POST /api/orders):
  * {
  *   prescriptionCode: string,
- *   paymentMethod: 'CASH' | 'CARD',
+ *   paymentMethod: 'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'DIGITAL_WALLET' | 'INSURANCE',
  *   pharmacies: [
  *     {
  *       pharmacyId: number,
@@ -55,4 +55,12 @@ export async function listMyOrders(includeItems = false) {
   return request(`orders/my${qs}`, { method: "GET" });
 }
 
-export default { createOrder, getOrder, listMyOrders };
+export async function pay(orderCode, body) {
+  if (!orderCode) throw new Error("orderCode required");
+  return request(`orders/${encodeURIComponent(orderCode)}/pay`, {
+    method: "POST",
+    body: JSON.stringify(body || {}),
+  });
+}
+
+export default { createOrder, getOrder, listMyOrders, pay };

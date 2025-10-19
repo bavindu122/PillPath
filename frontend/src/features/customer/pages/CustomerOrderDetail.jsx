@@ -18,6 +18,7 @@ export default function CustomerOrderDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const preloaded = location.state?.order;
+  const fromJustPlaced = Boolean(location.state?.justPlaced);
   // Support state and query params for deep-linking / refresh
   const search =
     typeof location.search === "string"
@@ -99,7 +100,14 @@ export default function CustomerOrderDetail() {
     };
   }, [orderCode, preloaded, qpPharmacyOrderCode]);
 
-  const handleBack = () => navigate(-1);
+  const handleBack = () => {
+    if (fromJustPlaced) {
+      // After placing an order, go to Activities instead of returning to Preview/Checkout
+      navigate("/customer/activities", { replace: true });
+    } else {
+      navigate(-1);
+    }
+  };
 
   const totalCurrency = order?.totals?.currency || "LKR";
   const visiblePharmacies = React.useMemo(() => {
@@ -128,7 +136,7 @@ export default function CustomerOrderDetail() {
             className="flex items-center space-x-2 text-white/70 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span>Back</span>
+            <span>{fromJustPlaced ? "Back to Activities" : "Back"}</span>
           </button>
           <h1 className="text-3xl font-bold text-white">Order #{orderCode}</h1>
           <div />
