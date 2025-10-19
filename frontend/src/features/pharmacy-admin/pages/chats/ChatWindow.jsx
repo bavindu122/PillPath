@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../hooks/useAuth';
+import api from '../../../../services/api';
 import { ArrowLeft, Send, User, Wifi, WifiOff, Phone, Video, MoreVertical, Circle, MessageCircle, Paperclip, Smile } from 'lucide-react';
 
 const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
@@ -17,6 +19,7 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const prevScrollHeight = useRef(0);
+  const resolvedChatIdRef = useRef(null); // will hold the actual chat/thread id when resolved
   const ws = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttempts = useRef(0);
@@ -100,6 +103,8 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     }
   };
 
+  const { user, token } = useAuth();
+
   const connectWebSocket = () => {
     if (ws.current?.readyState === WebSocket.OPEN) return;
 
@@ -108,16 +113,48 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     try {
       ws.current = new WebSocket('ws://localhost:8080/ws/chat');
 
-      ws.current.onopen = () => {
+      ws.current.onopen = async () => {
         setConnectionStatus('connected');
         reconnectAttempts.current = 0;
-        
-        // Send watch message for this customer
-        if (customerId && ws.current?.readyState === WebSocket.OPEN) {
-          ws.current.send(JSON.stringify({
-            type: 'watch',
-            customerId: customerId
-          }));
+        // Authenticate this admin socket if we have a token
+        try {
+          if (token && ws.current?.readyState === WebSocket.OPEN) {
+            ws.current.send(JSON.stringify({ type: 'auth', token, userId: user?.id }));
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        // Resolve actual chat id (thread/conversation id) if the route param is a customerId
+        const resolveChatId = async () => {
+          try {
+            // Fetch threads and find one that matches the customerId
+            const { data } = await api.get('/v1/chats/threads');
+            const list = Array.isArray(data) ? data : (data?.threads || data?.items || data?.content || []);
+            const found = list.find(t => String(t.customerId) === String(customerId) || String(t.customer?.id) === String(customerId));
+            if (found) {
+              resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
+            }
+          } catch (e) {
+            // ignore - leave resolvedChatIdRef null
+            console.warn('Failed to resolve chat id for customer', customerId, e);
+          }
+        };
+
+        await resolveChatId();
+
+        // Send join message using resolved chat id when available
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          try {
+            if (resolvedChatIdRef.current) {
+              ws.current.send(JSON.stringify({ type: 'join_chat', chatId: resolvedChatIdRef.current }));
+            } else {
+              // fallback to watch for legacy backends using customerId
+              ws.current.send(JSON.stringify({ type: 'watch', customerId: customerId }));
+            }
+          } catch (e) {
+            console.warn('Failed to send join/watch for chat', e);
+          }
         }
       };
 
@@ -158,12 +195,21 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
   const handleWebSocketMessage = (message) => {
     switch (message.type) {
       case 'new_message':
-      case 'message':
-        // Only show messages for this customer
-        if (message.customerId === customerId) {
+      case 'message': {
+        // Accept messages that target this chat by chatId, customerId, or threadId
+        const incomingChatId = message.chatId || message.threadId || message.conversationId || null;
+        const incomingCustomerId = message.customerId || message.customerId;
+        const matched = (
+          incomingChatId && String(incomingChatId) === String(resolvedChatIdRef.current)
+        ) || (
+          String(incomingCustomerId) === String(customerId)
+        );
+
+        if (matched) {
           addMessage(message);
         }
         break;
+      }
       case 'watch_success':
         // Successfully watching this customer's messages
         break;
@@ -204,9 +250,31 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     // Add message immediately to UI
     addMessage(messageData);
 
-    // Send via WebSocket
+    // Send via WebSocket using the backend's expected event types
     if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify(messageData));
+      try {
+        // Preferred structured send_message payload
+        ws.current.send(JSON.stringify({
+          type: 'send_message',
+          chatId: customerId,
+          content: messageData.text,
+          messageType: 'text',
+          sender: 'admin',
+          senderId: user?.id,
+          timestamp: messageData.time
+        }));
+
+        // Also send a lightweight legacy payload for compatibility
+        ws.current.send(JSON.stringify({
+          type: 'message',
+          customerId: customerId,
+          sender: 'admin',
+          text: messageData.text,
+          time: messageData.time
+        }));
+      } catch (e) {
+        console.error('Failed to send WS message:', e);
+      }
     }
 
     setNewMessage('');
