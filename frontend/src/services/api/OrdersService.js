@@ -27,7 +27,7 @@ async function request(endpoint, options = {}) {
  * New backend endpoint expects (POST /api/orders):
  * {
  *   prescriptionCode: string,
- *   paymentMethod: 'CASH' | 'CARD',
+ *   paymentMethod: 'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'DIGITAL_WALLET' | 'INSURANCE',
  *   pharmacies: [
  *     {
  *       pharmacyId: number,

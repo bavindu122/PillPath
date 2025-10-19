@@ -268,12 +268,12 @@ const PharmacyList = ({
                       {pharmacy.phone || pharmacy.phoneNumber}
                     </a>
 
-
                     {!isMultiSelect && (
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/pharmacy/${pharmacy.id}`);
+                          // Navigate to the public pharmacy profile route
+                          navigate(`/pharma-profile/${pharmacy.id}`);
                         }}
                         className="text-sm text-primary hover:text-primary-hover font-medium flex items-center"
                       >

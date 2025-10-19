@@ -110,7 +110,8 @@ const Checkout = () => {
       }
       const dto = {
         prescriptionCode: prescriptionId,
-        paymentMethod: selectedPaymentMethod === "card" ? "CARD" : "CASH",
+        paymentMethod:
+          selectedPaymentMethod === "card" ? "CREDIT_CARD" : "CASH",
         pharmacies: pharmacies.map((p) => ({
           pharmacyId: p.pharmacyId,
           items: p.items,
@@ -135,7 +136,7 @@ const Checkout = () => {
           const last4 = masked.slice(-4);
           try {
             await OrdersService.pay(orderCode, {
-              paymentMethod: "CARD",
+              paymentMethod: "CREDIT_CARD",
               gatewayReference: `demo_${Date.now()}`,
               cardLast4: last4,
             });

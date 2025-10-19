@@ -238,20 +238,23 @@ const processFinancialData = (transactions, commissionRate = 0.1) => {
         commissionAmount: commissionAmount, // Add commission amount for easy display
       });
 
-      // Add Commission Payment (Pharmacy to PillPath)
-      processedData.push({
-        id: `COM-${tx.id}`,
-        date: tx.date,
-        sender: tx.receiver, // Pharmacy pays commission
-        receiver: "PillPath",
-        amount: commissionAmount,
-        type: "Commission Payment",
-        pharmacyName: tx.receiver,
-        paymentType: tx.paymentType,
-        commissionStatus: "Unpaid", // Default status for commissions due from pharmacy
-        commissionMonth: transactionMonth,
-        orderId: tx.id, // Link to original order
-      });
+      // Add Commission Payment (Pharmacy to PillPath) ONLY for On-Hand payments
+      // Business rule: For Online (card) payments, PillPath retains commission and pays out net; pharmacies do not owe a separate commission payment.
+      if (tx.paymentType === "On-Hand") {
+        processedData.push({
+          id: `COM-${tx.id}`,
+          date: tx.date,
+          sender: tx.receiver, // Pharmacy pays commission
+          receiver: "PillPath",
+          amount: commissionAmount,
+          type: "Commission Payment",
+          pharmacyName: tx.receiver,
+          paymentType: tx.paymentType,
+          commissionStatus: "Unpaid", // Default status for commissions due from pharmacy
+          commissionMonth: transactionMonth,
+          orderId: tx.id, // Link to original order
+        });
+      }
 
       // Add Payout (PillPath to Pharmacy) only for Online payments
       if (tx.paymentType === "Online") {
@@ -364,9 +367,15 @@ const WalletAndIncome = () => {
   const currentWalletBalance =
     totalOnlinePaymentIncome - totalPayoutsToPharmacies;
 
-  // Prepare data for Top 5 Pharmacies by Commission
+  // Prepare data for Top 5 Pharmacies by Commission (Paid, On-Hand only)
   const commissionByPharmacy = filteredTransactions
-    .filter((tx) => tx.type === "Commission Payment" && tx.pharmacyName)
+    .filter(
+      (tx) =>
+        tx.type === "Commission Payment" &&
+        tx.pharmacyName &&
+        tx.paymentType === "On-Hand" &&
+        tx.commissionStatus === "Paid"
+    )
     .reduce((acc, tx) => {
       acc[tx.pharmacyName] = (acc[tx.pharmacyName] || 0) + tx.amount;
       return acc;
@@ -609,6 +618,36 @@ const WalletAndIncome = () => {
         title="Wallet & Income Overview"
         subtitle="Detailed financial insights into PillPath transactions and earnings"
       />
+
+      {/* Manual payout info banner */}
+      <div className="mt-4 mb-8 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        <div className="flex items-start">
+          <div className="mr-3 mt-0.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-5 w-5"
+            >
+              <path
+                fillRule="evenodd"
+                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm10.5-4.125a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0zM9.75 10.5a.75.75 0 000 1.5h.75v4.125a.75.75 0 001.5 0V12h.75a.75.75 0 000-1.5h-3z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium">Manual settlements policy</p>
+            <p className="mt-1">
+              PillPath settles customer card (Online) payments to pharmacies
+              manually. Use the Payouts table in each pharmacy7s details to mark
+              a payout as Paid and attach the receipt. For On-Hand (cash)
+              orders, pharmacies owe PillPath the commission; record incoming
+              commission payments in the Commissions Due table.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-10">
         <StatCard
