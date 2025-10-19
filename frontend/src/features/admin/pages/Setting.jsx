@@ -482,7 +482,7 @@ const Setting = () => {
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
                 >
-                  Last Login
+                  Registration Date
                 </th>
                 <th
                   scope="col"
@@ -515,71 +515,6 @@ const Setting = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      </section>
-
-      {/* General Settings Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <Settings className="w-6 h-6 mr-2 text-purple-600" /> General Settings
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label
-              htmlFor="siteName"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Site Name
-            </label>
-            <input
-              type="text"
-              id="siteName"
-              name="siteName"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={generalSettings.siteName}
-              onChange={handleGeneralSettingsChange}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="contactEmail"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Contact Email
-            </label>
-            <input
-              type="email"
-              id="contactEmail"
-              name="contactEmail"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={generalSettings.contactEmail}
-              onChange={handleGeneralSettingsChange}
-            />
-          </div>
-          <div className="md:col-span-2 flex items-center">
-            <input
-              type="checkbox"
-              id="notificationsEnabled"
-              name="notificationsEnabled"
-              className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              checked={generalSettings.notificationsEnabled}
-              onChange={handleGeneralSettingsChange}
-            />
-            <label
-              htmlFor="notificationsEnabled"
-              className="ml-2 block text-sm font-medium text-gray-700"
-            >
-              Enable System Notifications
-            </label>
-          </div>
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              onClick={handleUpdateGeneralSettings}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            >
-              <CheckCircle className="w-5 h-5 mr-2" /> Save Settings
-            </button>
-          </div>
         </div>
       </section>
 
@@ -820,133 +755,6 @@ const Setting = () => {
             </div>
           </div>
         )}
-      </section>
-
-      {/* Security Settings Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <Lock className="w-6 h-6 mr-2 text-red-600" /> Security Settings
-        </h2>
-        <form
-          onSubmit={handleChangeAdminPassword}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div>
-            <label
-              htmlFor="oldPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Old Password
-            </label>
-            <input
-              type="password"
-              id="oldPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeOld}
-              onChange={(e) => setPasswordChangeOld(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="newPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              New Password
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeNew}
-              onChange={(e) => setPasswordChangeNew(e.target.value)}
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeConfirm}
-              onChange={(e) => setPasswordChangeConfirm(e.target.value)}
-              required
-            />
-          </div>
-          {passwordChangeMessage && (
-            <div
-              className={`md:col-span-2 p-3 rounded-lg text-sm ${
-                passwordChangeMessage.includes("successfully")
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {passwordChangeMessage}
-            </div>
-          )}
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            >
-              <Lock className="w-5 h-5 mr-2" /> Change Password
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Audit Log Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <List className="w-6 h-6 mr-2 text-blue-600" /> Audit Log
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Timestamp
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Action
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Admin
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {auditLog.map((log) => (
-                <tr key={log.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {log.timestamp}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {log.action}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {log.admin}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
     </div>
   );
