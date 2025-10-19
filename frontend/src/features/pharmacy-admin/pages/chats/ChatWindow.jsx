@@ -307,52 +307,59 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread }) => {
     setMessages(prev => [...prev, newMsg]);
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || connectionStatus !== 'connected') return;
 
     setSending(true);
+    const messageText = newMessage.trim();
     const messageData = {
       customerId: customerId,
       senderId: user?.id,
       senderType: 'ADMIN',
       sender: 'admin',
-      text: newMessage.trim(),
+      text: messageText,
       time: new Date().toISOString()
     };
 
-    // Add message immediately to UI
+    // Add message immediately to UI (optimistic update)
     addMessage(messageData);
-
-    // Send via WebSocket using the backend's expected event types
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      try {
-        // Preferred structured send_message payload
-        ws.current.send(JSON.stringify({
-          type: 'send_message',
-          chatId: customerId,
-          content: messageData.text,
-          messageType: 'text',
-          sender: 'admin',
-          senderId: user?.id,
-          timestamp: messageData.time
-        }));
-
-        // Also send a lightweight legacy payload for compatibility
-        ws.current.send(JSON.stringify({
-          type: 'message',
-          customerId: customerId,
-          sender: 'admin',
-          text: messageData.text,
-          time: messageData.time
-        }));
-      } catch (e) {
-        console.error('Failed to send WS message:', e);
-      }
-    }
-
     setNewMessage('');
-    setSending(false);
+
+    try {
+      // Save message to database via API
+      const chatId = resolvedChatIdRef.current || customerId;
+      
+      await api.post(`/v1/chats/pharmacy-admin/dashboard/chats/${chatId}/messages`, {
+        text: messageText,
+        senderId: user?.id
+      });
+      
+      console.log('✅ Message saved to database successfully');
+
+      // Also send via WebSocket for real-time delivery (optional, as backend broadcasts after saving)
+      if (ws.current?.readyState === WebSocket.OPEN) {
+        try {
+          ws.current.send(JSON.stringify({
+            type: 'send_message',
+            chatId: chatId,
+            content: messageText,
+            messageType: 'text',
+            sender: 'admin',
+            senderId: user?.id,
+            timestamp: messageData.time
+          }));
+        } catch (e) {
+          console.warn('WebSocket send failed, but message saved to DB:', e);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Failed to save message to database:', error);
+      // Optionally: Show error to user or remove the optimistic message
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   const formatTime = (timestamp) => {
