@@ -47,6 +47,13 @@ class AdminService {
       method: "GET",
     });
   }
+
+  // Suspended accounts (single endpoint, no pagination/sort)
+  async getSuspendedAccounts() {
+    return this.request("admin/analytics/suspended-accounts", {
+      method: "GET",
+    });
+  }
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}/${endpoint}`;
     const config = {

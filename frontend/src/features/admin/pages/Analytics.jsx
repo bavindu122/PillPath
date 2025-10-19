@@ -289,6 +289,11 @@ const Analytics = () => {
   const [customerActivityLoading, setCustomerActivityLoading] = useState(true);
   const [customerActivityError, setCustomerActivityError] = useState("");
 
+  // Suspended accounts (backend-driven, single endpoint)
+  const [suspendedAccounts, setSuspendedAccounts] = useState([]);
+  const [suspendedLoading, setSuspendedLoading] = useState(true);
+  const [suspendedError, setSuspendedError] = useState("");
+
   useEffect(() => {
     let isMounted = true;
     const loadKpis = async () => {
@@ -520,6 +525,49 @@ const Analytics = () => {
       }
     };
     loadCustomerActivity();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch suspended accounts
+  useEffect(() => {
+    let isMounted = true;
+    const loadSuspended = async () => {
+      try {
+        setSuspendedLoading(true);
+        setSuspendedError("");
+        const data = await AdminService.getSuspendedAccounts();
+        if (Array.isArray(data)) {
+          const normalized = data.map((a, idx) => ({
+            type:
+              a.type === "User" || a.type === "Pharmacy"
+                ? a.type
+                : String(a.type || "")
+                    .toLowerCase()
+                    .includes("pharm")
+                ? "Pharmacy"
+                : "User",
+            id: a.id ?? a.accountId ?? idx,
+            name: a.name ?? a.fullName ?? "",
+            reason: a.reason ?? a.suspendReason ?? a.suspensionReason ?? "",
+            suspendedAt: a.suspendedAt ?? a.suspensionDate ?? "",
+          }));
+          if (isMounted) setSuspendedAccounts(normalized);
+        } else if (isMounted) {
+          setSuspendedAccounts([]);
+        }
+      } catch (err) {
+        console.error("Failed to load suspended accounts:", err);
+        if (isMounted)
+          setSuspendedError(
+            err?.message || "Failed to load suspended accounts"
+          );
+      } finally {
+        if (isMounted) setSuspendedLoading(false);
+      }
+    };
+    loadSuspended();
     return () => {
       isMounted = false;
     };
@@ -1112,15 +1160,25 @@ const Analytics = () => {
             <button
               onClick={() =>
                 downloadCSV(
-                  dummyData.suspendedAccounts,
+                  (suspendedAccounts || []).map((a) => ({
+                    Type: a.type,
+                    Name: a.name,
+                    Reason: a.reason || "",
+                  })),
                   "suspended_accounts_report.csv"
                 )
               }
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+              disabled={!suspendedAccounts || suspendedAccounts.length === 0}
             >
               <FileText className="inline-block mr-2 w-5 h-5" /> Download CSV
             </button>
           </div>
+          {suspendedError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {suspendedError}
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -1146,19 +1204,35 @@ const Analytics = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {dummyData.suspendedAccounts.map((account, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {account.type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {account.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {account.reason}
+                {suspendedLoading ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={3}>
+                      Loading suspended accounts…
                     </td>
                   </tr>
-                ))}
+                ) : (suspendedAccounts || []).length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-6 text-sm text-gray-500" colSpan={3}>
+                      No data available
+                    </td>
+                  </tr>
+                ) : (
+                  (suspendedAccounts || [])
+                    .slice(0, 5)
+                    .map((account, index) => (
+                      <tr key={account.id ?? index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {account.type}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {account.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {account.reason || ""}
+                        </td>
+                      </tr>
+                    ))
+                )}
               </tbody>
             </table>
           </div>
