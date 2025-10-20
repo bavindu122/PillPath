@@ -42,7 +42,6 @@ class FamilyMemberService {
   async updateFamilyMember(memberId, memberData) {
     try {
       const url = `http://localhost:8080/api/members/family-members/${memberId}`;
-      console.log('PUT Request URL:', url);
       const response = await this.makeDirectRequest(url, {
         method: 'PUT',
         body: memberData
