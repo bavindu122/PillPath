@@ -1,6 +1,6 @@
 import React from 'react';
 
-const RecentOrders = ({ orders }) => {
+const RecentOrders = ({ orders = [] }) => {
   // Helper function to get alert colors based on order status
   const getOrderStatusColor = (status) => {
     switch (status) {
@@ -61,41 +61,51 @@ const RecentOrders = ({ orders }) => {
       </div>
 
       <div className="space-y-3"> {/* For consistent spacing between order items */}
-        {orders.map((order, index) => (
-          <div
-            key={order.id}
-            // Apply similar styling as InventoryAlerts
-            className={`border-l-4 p-4 rounded-lg transition-all duration-300 cursor-pointer transform hover:scale-102 ${getOrderStatusColor(order.status)}`}
-            style={{
-              animationDelay: `${index * 100}ms`,
-              animation: 'slideInRight 0.5s ease-out forwards' // Keep the animation
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 flex-1"> {/* Increased space-x for icon and text */}
-                <div className={`${getOrderStatusTextColor(order.status)} flex-shrink-0`}>
-                  {getOrderIcon(order.status)} {/* Use the new helper for icons */}
+        {orders.length > 0 ? (
+          orders.map((order, index) => (
+            <div
+              key={order.id}
+              // Apply similar styling as InventoryAlerts
+              className={`border-l-4 p-4 rounded-lg transition-all duration-300 cursor-pointer transform hover:scale-102 ${getOrderStatusColor(order.status)}`}
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animation: 'slideInRight 0.5s ease-out forwards' // Keep the animation
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1"> {/* Increased space-x for icon and text */}
+                  <div className={`${getOrderStatusTextColor(order.status)} flex-shrink-0`}>
+                    {getOrderIcon(order.status)} {/* Use the new helper for icons */}
+                  </div>
+                  <div className="flex-1">
+                    {/* Changed to h4 and adjusted text size for consistency */}
+                    <h4 className="font-medium text-gray-900 text-sm mb-1">{order.id}</h4>
+                    {/* Combined customerName and amount, using a slightly different text color for consistency */}
+                    <p className={`text-xs ${getOrderStatusTextColor(order.status)} font-medium`}>
+                      {order.customerName} - {order.amount}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  {/* Changed to h4 and adjusted text size for consistency */}
-                  <h4 className="font-medium text-gray-900 text-sm mb-1">{order.id}</h4>
-                  {/* Combined customerName and amount, using a slightly different text color for consistency */}
-                  <p className={`text-xs ${getOrderStatusTextColor(order.status)} font-medium`}>
-                    {order.customerName} - {order.amount}
-                  </p>
-                </div>
+                {/* Status badge, using similar styling to the 'Reorder' button */}
+                <span className={`px-3 py-1 rounded-lg text-xs font-medium ${
+                  order.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                  order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                  order.status === 'Cancelled' ? 'bg-red-100 text-red-800' : ''
+                }`}>
+                  {order.status}
+                </span>
               </div>
-              {/* Status badge, using similar styling to the 'Reorder' button */}
-              <span className={`px-3 py-1 rounded-lg text-xs font-medium ${
-                order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                order.status === 'Cancelled' ? 'bg-red-100 text-red-800' : ''
-              }`}>
-                {order.status}
-              </span>
             </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p className="text-gray-500 text-sm">No recent orders available</p>
+            <p className="text-gray-400 text-xs mt-1">Recent orders will appear here once available</p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
