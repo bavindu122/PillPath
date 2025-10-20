@@ -591,7 +591,7 @@ const Analytics = () => {
             {kpisError}
           </div>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           <StatCard
             label="Total Users"
             value={kpis.totalUsers}
@@ -622,11 +622,7 @@ const Analytics = () => {
             value={kpis.suspendedPharmacies}
             icon={<Ban size={48} className="text-red-600" />}
           />
-          <StatCard
-            label="Total Payments"
-            value={kpis.totalPayments}
-            icon={<DollarSign size={48} className="text-yellow-600" />}
-          />
+          
         </div>
         {kpisLoading && (
           <p className="mt-3 text-sm text-gray-500">Loading KPIs…</p>
@@ -1242,7 +1238,7 @@ const Analytics = () => {
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-medium text-gray-800">
-              Payments Report
+              Annual Payments Report
             </h3>
             <button
               onClick={() =>

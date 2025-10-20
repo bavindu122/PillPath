@@ -134,10 +134,6 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Bell className="w-6 h-6 cursor-pointer text-blue-600 hover:text-blue-800 transition-colors" />
-              </div>
-
               {/* ✅ Admin Profile Dropdown */}
               <div className="relative">
                 <button

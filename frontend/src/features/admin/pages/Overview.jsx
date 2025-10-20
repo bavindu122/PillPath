@@ -316,15 +316,7 @@ const Overview = () => {
           }
           icon={<ChartLine size={48} className="text-pink-500" />}
         />
-        <StatCard
-          label="Wallet Balance"
-          value={
-            loading
-              ? "..."
-              : `Rs. ${(stats.walletBalance || 0).toLocaleString()}`
-          }
-          icon={<Wallet size={48} className="text-red-500" />}
-        />
+        
       </div>
       {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
 
