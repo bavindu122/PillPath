@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Info } from "lucide-react";
 import { Trash2, Send, Save, CreditCard } from "lucide-react";
 import "../pages/index-pharmacist.css";
 
@@ -8,6 +9,7 @@ const OrderPreview = ({
   onUpdateQuantity,
   onSendOrder,
   onSaveDraft,
+  isUpdating = false,
 }) => {
   const [notes, setNotes] = useState("");
   const [cardPaymentEnabled, setCardPaymentEnabled] = useState(false);
@@ -26,12 +28,21 @@ const OrderPreview = ({
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+      <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Order Preview
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Order Preview
+              </h3>
+              <div className="relative group">
+                <Info className="h-4 w-4 text-emerald-600/80" />
+                <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 rounded-md bg-gray-900 text-white text-xs px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-20">
+                  Review all added items. You can remove items or adjust
+                  quantities before sending the preview to the customer.
+                </div>
+              </div>
+            </div>
           </div>
 
           {items.length === 0 ? (
@@ -184,6 +195,15 @@ const OrderPreview = ({
             </>
           )}
         </div>
+
+        {/* Updating overlay */}
+        {isUpdating && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center">
+            <div className="relative">
+              <div className="h-12 w-12 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Add medicine handled by MedicineSearch component to avoid duplication */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, Plus, X, Minus } from "lucide-react";
+import { Search, Plus, X, Minus, Info } from "lucide-react";
 import "../pages/index-pharmacist.css";
 import { medicineService } from "../services/medicineService";
 import { appConfig } from "../../../config/appConfig";
@@ -165,9 +165,19 @@ const MedicineSearch = ({ onAddMedicine }) => {
     <>
       <div className="pharma-bg-card rounded-xl shadow-lg border pharma-border">
         <div className="p-6">
-          <h3 className="text-lg font-semibold pharma-text-dark mb-4">
-            Add Medicines to Order
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold pharma-text-dark">
+              Add Medicines to Order
+            </h3>
+            <div className="relative group inline-flex items-center">
+              <Info className="h-4 w-4 text-blue-600/80" />
+              <div className="absolute right-0 mt-2 w-64 rounded-md bg-gray-900 text-white text-xs px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-20">
+                Search the medicine name, open a variant, and click Add. You can
+                set dosage, quantity, price, availability, notes and
+                instructions before adding to the order.
+              </div>
+            </div>
+          </div>
 
           {/* Search Input */}
           <div className="flex space-x-3 mb-6">
@@ -237,10 +247,24 @@ const MedicineSearch = ({ onAddMedicine }) => {
                 </div>
               )}
             {isSearching &&
-              searchResults.length === 0 &&
               !error &&
               searchTerm.length >= MIN_SEARCH_LENGTH && (
-                <div className="text-xs text-gray-500">Searching...</div>
+                <div className="space-y-3" aria-live="polite" aria-busy="true">
+                  {[...Array(4)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="border pharma-border rounded-lg overflow-hidden animate-pulse"
+                    >
+                      <div className="p-4 bg-white flex items-center justify-between">
+                        <div className="flex-1 pr-4">
+                          <div className="h-3 w-40 bg-gray-200 rounded mb-2" />
+                          <div className="h-2 w-24 bg-gray-200 rounded" />
+                        </div>
+                        <div className="h-8 w-20 bg-blue-200 rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             {searchResults.length > 0 &&
               (showAll

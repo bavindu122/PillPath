@@ -32,22 +32,23 @@ const FamilyProfiles = () => {
       
       // Transform backend data to match frontend format
       const transformedMembers = Array.isArray(backendMembers) ? backendMembers.map(member => {
-        // Helper function to safely parse JSON strings
-        const safeJsonParse = (jsonString) => {
-          if (jsonString === null || jsonString === undefined || typeof jsonString !== 'string') {
-            return [];
+        // Helper function to ensure we have arrays
+        const ensureArray = (value) => {
+          // If it's already an array, return it
+          if (Array.isArray(value)) {
+            return value;
           }
-          
-          if (jsonString.trim() === '' || jsonString === 'null') {
-            return [];
+          // If it's a string, try to parse it as JSON
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+              return [];
+            }
           }
-          
-          try {
-            return JSON.parse(jsonString);
-          } catch (error) {
-            console.warn('Failed to parse JSON:', jsonString, error);
-            return [];
-          }
+          // Otherwise return empty array
+          return [];
         };
 
         return {
@@ -61,10 +62,10 @@ const FamilyProfiles = () => {
           lastPrescriptionDate: member.lastPrescriptionDate || "Not available",
           activePrescriptions: member.activePrescriptions || 0,
           totalPrescriptions: member.totalPrescriptions || 0,
-          allergies: safeJsonParse(member.allergies),
+          allergies: ensureArray(member.allergies),
           bloodType: member.bloodType || "Unknown",
-          medicalConditions: safeJsonParse(member.medicalConditions),
-          currentMedications: safeJsonParse(member.currentMedications)
+          medicalConditions: ensureArray(member.medicalConditions),
+          currentMedications: ensureArray(member.currentMedications)
         };
       }) : [];
       
@@ -132,32 +133,13 @@ const FamilyProfiles = () => {
     try {
       setLoading(true);
       
-      // Prepare data for backend
-      const backendMemberData = {
-        name: memberToAdd.name,
-        relation: memberToAdd.relation,
-        age: memberToAdd.age,
-        profilePicture: memberToAdd.profilePicture || "",
-        email: memberToAdd.email || "",
-        phone: memberToAdd.phone || "",
-        lastPrescriptionDate: memberToAdd.lastPrescriptionDate || null,
-        activePrescriptions: memberToAdd.activePrescriptions || 0,
-        totalPrescriptions: memberToAdd.totalPrescriptions || 0,
-        allergies: JSON.stringify(memberToAdd.allergies || []),
-        bloodType: memberToAdd.bloodType || "",
-        medicalConditions: JSON.stringify(memberToAdd.medicalConditions || []),
-        currentMedications: JSON.stringify(memberToAdd.currentMedications || [])
-      };
-
-      // Add to backend
-      await FamilyMemberService.addFamilyMember(backendMemberData);
-      
-      // Refresh the family members list
+      // Note: The AddMember component already calls the API to create the member
+      // We just need to refresh the list to show the newly added member
       await fetchFamilyMembers();
       
     } catch (error) {
-      console.error('Failed to add family member:', error);
-      setError('Failed to add family member. Please try again.');
+      console.error('Failed to refresh family members:', error);
+      setError('Failed to refresh family members. Please try again.');
     } finally {
       setLoading(false);
     }

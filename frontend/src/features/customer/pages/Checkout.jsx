@@ -129,6 +129,13 @@ const Checkout = () => {
             await OrdersService.pay(orderCode, { paymentMethod: "CASH" });
           } catch (err) {
             console.warn("Cash pay call failed:", err);
+            const msg =
+              err?.response?.data?.message ||
+              err?.message ||
+              "Cash payment failed. Your order may have been created but was not paid. Please try again or check your Orders page.";
+            setError(msg);
+            setPlacing(false);
+            return; // Stop flow on payment failure
           }
         } else if (selectedPaymentMethod === "card") {
           // Card: simulate gateway success for now; in real flow, move this call to gateway success callback
@@ -142,6 +149,13 @@ const Checkout = () => {
             });
           } catch (err) {
             console.warn("Card pay call failed:", err);
+            const msg =
+              err?.response?.data?.message ||
+              err?.message ||
+              "Card payment failed. Your order may have been created but was not paid. Please try again or use a different method.";
+            setError(msg);
+            setPlacing(false);
+            return; // Stop flow on payment failure
           }
         }
         // Clear cart for this prescription then navigate to order detail
