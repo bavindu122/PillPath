@@ -125,7 +125,11 @@ const PharmacyDetailsModal = ({
                   </span>
                   <div className="flex items-center space-x-1">
                     <Star size={16} />
-                    <span>{safeGet(pharmacy, "rating", "4.2")}</span>
+                    <span>
+                      {Number.isFinite(Number(pharmacy?.averageRating))
+                        ? Number(pharmacy.averageRating).toFixed(1)
+                        : "N/A"}
+                    </span>
                   </div>
                 </div>
               )}
