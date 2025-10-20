@@ -5,6 +5,7 @@ import { pharmacyAdminOrdersService } from "../services/ordersService";
 const useOrdersData = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     dateRange: "all",
@@ -17,14 +18,25 @@ const useOrdersData = () => {
     user?.pharmacy?.id ||
     JSON.parse(localStorage.getItem("user_data") || "{}")?.pharmacyId;
 
+  // ✅ Helper function to determine order type from order code
+  const getOrderTypeFromCode = (orderCode) => {
+    if (!orderCode) return "unknown";
+    const code = orderCode.toString().toUpperCase();
+    if (code.startsWith("PORD")) return "prescription";
+    if (code.startsWith("OTC")) return "otc";
+    return "unknown";
+  };
+
   // Load pharmacy orders from backend
   const loadOrders = useCallback(async () => {
     if (!isAuthenticated || !isPharmacyAdmin || !pharmacyId) {
       setOrders([]);
       setIsLoading(false);
+      setError(null);
       return;
     }
     setIsLoading(true);
+    setError(null);
     try {
       const raw = await pharmacyAdminOrdersService.listOrders(pharmacyId);
       const mapped = (Array.isArray(raw) ? raw : []).map((dto) => ({
@@ -55,6 +67,7 @@ const useOrdersData = () => {
       setOrders(mapped);
     } catch (e) {
       console.error("Failed to load orders", e);
+      setError(e.message || "Failed to load orders");
       setOrders([]);
     } finally {
       setIsLoading(false);
@@ -73,14 +86,14 @@ const useOrdersData = () => {
     }));
   };
 
-  // Apply filters and search
+  // ✅ UPDATED: Apply filters and search with correct order type logic
   const filteredOrders = useMemo(() => {
     if (!orders.length) return [];
 
     return orders.filter((order) => {
-      // Search filter
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
+      // 1. Search filter - search in customer name, order code, and items
+      if (searchTerm && searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase().trim();
         const customerName = (
           order.customer?.name ||
           order.patient?.name ||
@@ -88,15 +101,18 @@ const useOrdersData = () => {
           order.customerName ||
           ""
         ).toLowerCase();
-        const idStr = String(
-          order.id ||
-            order.orderId ||
-            order.orderCode ||
-            order.orderNumber ||
-            ""
+        const customerEmail = (
+          order.customer?.email ||
+          order.customerEmail ||
+          ""
         ).toLowerCase();
-        const matchesCustomer = customerName.includes(searchLower);
-        const matchesId = idStr.includes(searchLower);
+        const idStr = String(
+          order.orderCode ||
+          order.orderNumber ||
+          order.id ||
+          order.orderId ||
+          ""
+        ).toLowerCase();
         const itemsArr = Array.isArray(order.items) ? order.items : [];
         const matchesItems = itemsArr.some((item) =>
           (item.name || item.medicineName || "")
@@ -104,61 +120,74 @@ const useOrdersData = () => {
             .includes(searchLower)
         );
 
-        if (!matchesCustomer && !matchesId && !matchesItems) {
+        const matchesSearch =
+          customerName.includes(searchLower) ||
+          customerEmail.includes(searchLower) ||
+          idStr.includes(searchLower) ||
+          matchesItems;
+
+        if (!matchesSearch) return false;
+      }
+
+      // 2. ✅ Order Type filter - Check order code prefix (PORD/OTC)
+      if (filters.orderType && filters.orderType !== "all") {
+        const orderTypeFromCode = getOrderTypeFromCode(
+          order.orderCode || order.orderNumber || order.id
+        );
+        if (orderTypeFromCode !== filters.orderType) {
           return false;
         }
       }
 
-      // Date range filter
-      if (filters.dateRange !== "all") {
+      // 3. Date range filter
+      if (filters.dateRange && filters.dateRange !== "all") {
         const rawDate = order.orderDate || order.createdAt || order.dateCreated;
         const orderDate = rawDate ? new Date(rawDate) : null;
         if (!orderDate) return false;
+
         const today = new Date();
-        let daysToCompare = 0;
+        today.setHours(0, 0, 0, 0); // Start of today
+        let cutoffDate = new Date(today);
 
         switch (filters.dateRange) {
           case "last7days":
-            daysToCompare = 7;
+            cutoffDate.setDate(today.getDate() - 7);
             break;
           case "last30days":
-            daysToCompare = 30;
+            cutoffDate.setDate(today.getDate() - 30);
             break;
           case "last90days":
-            daysToCompare = 90;
+            cutoffDate.setDate(today.getDate() - 90);
             break;
           default:
-            daysToCompare = 0;
+            cutoffDate = null;
         }
 
-        if (daysToCompare > 0) {
-          const cutoffDate = new Date();
-          cutoffDate.setDate(today.getDate() - daysToCompare);
-          if (orderDate < cutoffDate) {
+        if (cutoffDate) {
+          const orderDateOnly = new Date(orderDate);
+          orderDateOnly.setHours(0, 0, 0, 0);
+          if (orderDateOnly < cutoffDate) {
             return false;
           }
         }
       }
 
-      // Order type filter
-      const orderType = (order.orderType || order.type || "")
-        .toString()
-        .toLowerCase();
-      if (filters.orderType !== "all" && orderType !== filters.orderType) {
-        return false;
-      }
-
-      // Payment method filter (backend may return CASH, CREDIT_CARD, DEBIT_CARD, DIGITAL_WALLET, INSURANCE)
-      if (filters.paymentMethod !== "all") {
-        const rawMethod = (order.paymentMethod || order.payment?.method || "")
+      // 4. ✅ Payment method filter
+      if (filters.paymentMethod && filters.paymentMethod !== "all") {
+        const rawMethod = (
+          order.paymentMethod ||
+          order.payment?.method ||
+          ""
+        )
           .toString()
           .toUpperCase();
-        const methodNorm = rawMethod.replace(/[ _]/g, "");
+
         if (filters.paymentMethod === "cash") {
-          if (!methodNorm.includes("CASH")) return false;
+          // Check if payment method includes "CASH"
+          if (!rawMethod.includes("CASH")) return false;
         } else if (filters.paymentMethod === "credit") {
-          // Interpret as card-based (credit/debit)
-          if (!methodNorm.includes("CARD")) return false;
+          // Check if payment method includes "CARD" (CREDIT_CARD, DEBIT_CARD)
+          if (!rawMethod.includes("CARD")) return false;
         }
       }
 
@@ -241,3 +270,8 @@ const useOrdersData = () => {
 };
 
 export default useOrdersData;
+
+
+
+
+

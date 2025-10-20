@@ -13,6 +13,21 @@ const OrderHistoryList = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
 
+  // ✅ NEW: Helper function to determine order type from order code
+  const getOrderTypeFromCode = (orderCode) => {
+    if (!orderCode) return "prescription"; // default fallback
+    
+    const code = orderCode.toString().toUpperCase();
+    
+    if (code.startsWith("PORD")) {
+      return "prescription";
+    } else if (code.startsWith("OTC")) {
+      return "otc";
+    }
+    
+    return "prescription"; // default fallback
+  };
+
   // Use the new list data hook with order service
   // Local filter config matching mapped order list items
   const orderFilterConfig = {
@@ -45,9 +60,14 @@ const OrderHistoryList = () => {
             return true;
         }
       },
+      // ✅ UPDATED: Check order code prefix instead of item.type
       orderType: (item, value) => {
         if (value === "all") return true;
-        return (item.type || "").toLowerCase() === value.toLowerCase();
+        
+        // Determine order type from order code prefix
+        const orderType = getOrderTypeFromCode(item.orderCode || item.orderNumber || item.id);
+        
+        return orderType.toLowerCase() === value.toLowerCase();
       },
       paymentMethod: (item, value) => {
         if (value === "all") return true;
@@ -62,7 +82,12 @@ const OrderHistoryList = () => {
       patient: (a, b) =>
         (a.patient?.name || "").localeCompare(b.patient?.name || ""),
       total: (a, b) => (b.total || 0) - (a.total || 0),
-      type: (a, b) => (a.type || "").localeCompare(b.type || ""),
+      type: (a, b) => {
+        // ✅ UPDATED: Sort by order code prefix
+        const typeA = getOrderTypeFromCode(a.orderCode || a.orderNumber || a.id);
+        const typeB = getOrderTypeFromCode(b.orderCode || b.orderNumber || b.id);
+        return typeA.localeCompare(typeB);
+      },
     },
   };
 
@@ -199,3 +224,6 @@ const OrderHistoryList = () => {
 };
 
 export default OrderHistoryList;
+
+
+
