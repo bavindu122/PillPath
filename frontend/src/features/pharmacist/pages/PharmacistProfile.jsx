@@ -19,6 +19,7 @@ import {
   CheckCircle,
   AlertCircle,
   Loader,
+  ArrowLeft,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import pharmacistProfileService from "../services/pharmacistProfileService";
@@ -216,17 +217,24 @@ const PharmacistProfile = () => {
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
           <div className="max-w-5xl mx-auto">
+            {/* Back Button */}
+            <button
+              onClick={() => navigate("/pharmacist/dashboard")}
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 mb-4 transition-colors px-3 sm:px-4 py-2 rounded-lg group w-fit"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="font-medium">Back to Dashboard</span>
+            </button>
+
             {/* Header Section */}
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
               <p className="text-gray-600 mt-1">
                 Manage your professional information and settings
               </p>
-            </div>
-
-            {/* Profile Card */}
+            </div>            {/* Profile Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               {/* Cover Section */}
               <div className="h-32 bg-gradient-to-r from-blue-600 to-blue-700"></div>
