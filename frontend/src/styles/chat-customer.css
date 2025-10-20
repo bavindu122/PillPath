@@ -1,274 +1,109 @@
-/* Custom styles for chat components to blend with the existing design */
+  /* Custom styles for chat components to blend with the existing design */
 
-/* Chat List Styling */
-.chat-list-container {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+  /* Keep only neutral scrollbars; let component Tailwind classes decide layout/colors */
+  /* Custom Scrollbar Styles for Messages */
+  .chat-messages-container {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(255, 255, 255, 0.6) rgba(255, 255, 255, 0.1);
+  }
 
-.chat-list-item {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
+  /* Webkit browsers (Chrome, Safari, Edge) - Enhanced visibility */
+  .chat-messages-container::-webkit-scrollbar {
+    width: 12px !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+  }
 
-.chat-list-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
+  .chat-messages-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin: 4px;
+  }
 
-.chat-list-item.active {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: rgba(59, 130, 246, 0.5);
-}
+  .chat-messages-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
 
-/* Chat Window Styling */
-.chat-window-container {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+  .chat-messages-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
 
-.chat-message-bubble.sent {
-  background: rgba(59, 130, 246, 0.8);
-}
+  .chat-messages-container::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
 
-.chat-message-bubble.received {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-}
+  /* Customer dashboard specific enhancements */
+  /* Optionally slightly brighter scrollbars inside chat window container */
+  .chat-window-container .chat-messages-container {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(255, 255, 255, 0.7) rgba(255, 255, 255, 0.15);
+  }
 
-/* Search Modal Styling */
-.pharmacy-search-modal {
-  background: rgba(0, 0, 0, 0.8);
-}
+  .chat-window-container .chat-messages-container::-webkit-scrollbar {
+    width: 14px;
+    background: rgba(255, 255, 255, 0.15);
+  }
 
-.pharmacy-search-content {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-}
+  .chat-window-container .chat-messages-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+  }
 
-/* Input Styling */
-.chat-input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-}
+  .chat-window-container .chat-messages-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2);
+  }
 
-.chat-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
+  .chat-window-container .chat-messages-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
+  }
 
-.chat-input:focus {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
+  .chat-window-container
+    .chat-messages-container::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.9);
+  }
 
-/* Custom Scrollbar Styles for Messages */
-.chat-messages-container {
-  scrollbar-width: auto !important;
-  scrollbar-color: rgba(255, 255, 255, 0.6) rgba(255, 255, 255, 0.1) !important;
-  overflow-y: scroll !important;
-}
+  /* Let layout sizing be controlled by component classes; no forced overflow or heights here */
 
-/* Webkit browsers (Chrome, Safari, Edge) - Enhanced visibility */
-.chat-messages-container::-webkit-scrollbar {
-  width: 12px !important;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-}
+  /* Chat List Scrollbar Styling */
+  .chat-list-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+  }
 
-.chat-messages-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px;
-  margin: 4px;
-}
+  .chat-list-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
 
-.chat-messages-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4) !important;
-  border-radius: 6px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
+  .chat-list-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin: 2px;
+  }
 
-.chat-messages-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
+  .chat-list-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-.chat-messages-container::-webkit-scrollbar-thumb:active {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.3);
-}
+  .chat-list-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 
-/* Customer dashboard specific enhancements */
-.chat-window-container .chat-messages-container {
-  scrollbar-width: auto !important;
-  scrollbar-color: rgba(255, 255, 255, 0.7) rgba(255, 255, 255, 0.15) !important;
-}
-
-.chat-window-container .chat-messages-container::-webkit-scrollbar {
-  width: 14px !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-.chat-window-container .chat-messages-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 7px;
-}
-
-.chat-window-container .chat-messages-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.5) !important;
-  border: 2px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 7px;
-  box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2);
-}
-
-.chat-window-container .chat-messages-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.7) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-.chat-window-container .chat-messages-container::-webkit-scrollbar-thumb:active {
-  background: rgba(255, 255, 255, 0.9) !important;
-}
-
-/* Ensure messages area takes proper space */
-.chat-window-container .chat-messages-container {
-  height: calc(100% - 200px) !important;
-  max-height: calc(100vh - 300px) !important;
-  min-height: 300px !important;
-  flex: 1 1 auto !important;
-}
-
-/* Force scrollable behavior */
-.chat-messages-container {
-  overflow-y: scroll !important;
-  overflow-x: hidden !important;
-}
-
-/* Chat List Scrollbar Styling */
-.chat-list-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
-  overflow-y: auto !important;
-  max-height: 100% !important;
-}
-
-.chat-list-scroll::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-list-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  margin: 2px;
-}
-
-.chat-list-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.chat-list-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.chat-list-scroll::-webkit-scrollbar-thumb:active {
-  background: rgba(255, 255, 255, 0.7);
-}
-
-/* Enhanced chat list container for customer dashboard */
-.chat-window-container .chat-list-scroll {
-  scrollbar-color: rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.1) !important;
-}
-
-.chat-window-container .chat-list-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.4) !important;
-}
-
-.chat-window-container .chat-list-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.6) !important;
-}
-
-/* Customer Message Input Styling */
-.chat-window-container .customer-message-input {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(12px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.chat-window-container .customer-message-input form {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.chat-window-container .customer-message-input textarea {
-  color: black !important;
-}
-
-.chat-window-container .customer-message-input textarea::placeholder {
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.chat-window-container .customer-message-input button {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.chat-window-container .customer-message-input button:hover {
-  color: black !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Message Input Container Styling for Customer Dashboard */
-.chat-window-container .message-input-container {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(12px) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  min-height: 120px !important;
-  flex-shrink: 0 !important;
-}
-
-/* Ensure message input is visible */
-.chat-window-container .message-input {
-  background: transparent !important;
-  padding: 1rem !important;
-}
-
-/* Make sure the input form is visible */
-.chat-window-container .message-input form {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Force message input to always be visible with high specificity */
-.chat-window-container .message-input-container {
-  display: flex !important;
-  flex-direction: column !important;
-  position: relative !important;
-  z-index: 100 !important;
-}
-
-.chat-window-container .customer-message-input {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Ensure proper positioning and visibility */
-.chat-window-container .message-input-container {
-  position: sticky !important;
-  bottom: 0 !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-}
-
-.chat-window-container .customer-message-input {
-  padding: 1rem !important;
-}
+  .chat-list-scroll::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.7);
+  }
+  /* Keep component-specified input and container styling; remove forced overrides */

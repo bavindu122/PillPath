@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ArrowLeft, Phone, Video, MoreVertical, User, Users, Circle, MessageCircle, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, User, Users, Circle, MessageCircle, MessageSquare, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useChat } from '../../contexts/ChatContextLive';
 import MessageBubble, { DateSeparator, TypingIndicator } from './MessageBubble';
@@ -7,11 +7,6 @@ import MessageInput from './MessageInput';
 
 const ChatWindow = ({ onBack, className = '' }) => {
   const { user } = useAuth();
-  
-  // TEMPORARY DEBUG
-  useEffect(() => {
-    console.log('🧑 ChatWindow user:', { id: user?.id, name: user?.name });
-  }, [user]);
   
   const {
     activeChat,
@@ -25,28 +20,14 @@ const ChatWindow = ({ onBack, className = '' }) => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [page, setPage] = useState(0);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+  const [hasNewSinceAway, setHasNewSinceAway] = useState(false);
   
   const messagesContainerRef = useRef(null);
   const prevScrollHeight = useRef(0);
 
   // Get current chat messages
   const chatMessages = activeChat ? messages[activeChat.id] || [] : [];
-
-  // TEMPORARY DEBUG: Log messages for this chat
-  useEffect(() => {
-    if (activeChat) {
-      console.log('� ChatWindow re-rendered! Messages changed for chat', activeChat.id, ':', {
-        count: chatMessages.length,
-        lastMessage: chatMessages[chatMessages.length - 1],
-        messages: chatMessages.map(m => ({
-          id: m.id,
-          senderId: m.senderId,
-          content: m.content?.substring(0, 30),
-          text: m.text?.substring(0, 30)
-        }))
-      });
-    }
-  }, [activeChat, chatMessages]);
 
   // Get other participant information
   const otherParticipant = activeChat ? (
@@ -80,12 +61,26 @@ const ChatWindow = ({ onBack, className = '' }) => {
 
   // Load initial messages when chat changes
   useEffect(() => {
-    if (activeChat && !messages[activeChat.id]) {
-      fetchMessages(activeChat.id, 0);
-      // After initial fetch, scroll bottom on next paint
+    if (!activeChat) return;
+
+    // Reset pagination and state on chat switch
+    setPage(0);
+    setHasMoreMessages(true);
+    setLoadingMessages(false);
+    setShowScrollToBottom(false);
+    setHasNewSinceAway(false);
+
+    // Fetch first page if not present and scroll to bottom
+    if (!messages[activeChat.id]) {
+      fetchMessages(activeChat.id, 0).finally(() => {
+        // After initial fetch, scroll bottom on next paint
+        setTimeout(() => scrollToBottom(false), 50);
+      });
+    } else {
+      // Ensure we're at bottom when switching between existing chats
       setTimeout(() => scrollToBottom(false), 50);
     }
-  }, [activeChat, messages, fetchMessages]);
+  }, [activeChat, messages, fetchMessages, scrollToBottom]);
 
   // Auto-scroll to bottom for new messages
   useEffect(() => {
@@ -95,6 +90,12 @@ const ChatWindow = ({ onBack, className = '' }) => {
         const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop <= 100;
         if (isNearBottom) {
           scrollToBottom();
+          setHasNewSinceAway(false);
+          setShowScrollToBottom(false);
+        } else {
+          // New messages arrived while user is scrolled up
+          setHasNewSinceAway(true);
+          setShowScrollToBottom(true);
         }
       }
     }
@@ -104,6 +105,13 @@ const ChatWindow = ({ onBack, className = '' }) => {
   const handleScroll = useCallback(async () => {
     const container = messagesContainerRef.current;
     if (!container || loadingMessages || !hasMoreMessages || !activeChat) return;
+    // Track scroll-to-bottom button visibility
+    const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop <= 100;
+    setShowScrollToBottom(!isNearBottom);
+    if (isNearBottom) {
+      setHasNewSinceAway(false);
+    }
+
     // Newest at bottom, so older at top; load when reaching top
     const atTop = container.scrollTop <= 0;
     if (atTop) {
@@ -132,30 +140,14 @@ const ChatWindow = ({ onBack, className = '' }) => {
   // Group messages by date and sender (newest at bottom)
   const groupedMessages = React.useMemo(() => {
     if (!chatMessages.length) return [];
-    
-    // Debug logging
-    console.log('🔍 ChatWindow - Original chatMessages:', chatMessages.map(m => ({ 
-      id: m.id,
-      content: m.content,
-      text: m.text,
-      hasContent: !!m.content,
-      hasText: !!m.text,
-      timestamp: m.timestamp || m.time,
-      allKeys: Object.keys(m)
-    })));
-    
+
     // Sort messages by timestamp in ascending order (oldest first, newest last)
     const sorted = [...chatMessages].sort((a, b) => {
       const timeA = new Date(a.timestamp || a.time || 0).getTime();
       const timeB = new Date(b.timestamp || b.time || 0).getTime();
       return timeA - timeB; // ascending order
     });
-    
-    console.log('DEBUG - Sorted messages order:', sorted.map(m => ({ 
-      text: m.text?.substring(0, 30) + '...', 
-      timestamp: m.timestamp || m.time,
-      id: m.id 
-    })));
+
     const groups = [];
     let currentDate = null;
     let currentSender = null;
@@ -218,9 +210,9 @@ const ChatWindow = ({ onBack, className = '' }) => {
   }
 
   return (
-    <div className={`flex flex-col bg-transparent ${className}`} style={{ height: '100%', maxHeight: '100%' }}>
+    <div className={`chat-window-container flex flex-col bg-transparent ${className}`} style={{ height: '100%', maxHeight: '100%' }}>
       {/* Chat Header */}
-      <div className="px-4 py-4 border-b border-white/30 flex items-center justify-between bg-white/60 backdrop-blur-md flex-shrink-0 shadow-sm">
+      <div className="px-4 py-4 border-white/30 flex items-center justify-between bg-white/60 backdrop-blur-md flex-shrink-0 shadow-sm ">
         <div className="flex items-center space-x-3">
           {/* Back Button (Mobile) */}
           <button
@@ -299,7 +291,7 @@ const ChatWindow = ({ onBack, className = '' }) => {
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
+        className="relative flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Loading more messages indicator */}
@@ -358,6 +350,21 @@ const ChatWindow = ({ onBack, className = '' }) => {
             senderName={otherParticipant?.name}
             avatar={otherParticipant?.avatar || otherParticipant?.profileImage}
           />
+        )}
+
+        {/* Scroll to bottom button */}
+        {showScrollToBottom && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom()}
+            className="absolute right-4 bottom-4 flex items-center gap-2 px-3 py-2 rounded-full bg-white/80 backdrop-blur-md shadow-md text-blue-700 hover:text-blue-900 hover:bg-white/90 transition-colors"
+            title="Scroll to latest"
+          >
+            <ChevronDown className="w-5 h-5" />
+            {hasNewSinceAway && (
+              <span className="text-xs font-medium">New</span>
+            )}
+          </button>
         )}
 
         {/* Bottom anchor for scroll */}
