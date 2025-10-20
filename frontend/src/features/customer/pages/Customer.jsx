@@ -8,7 +8,6 @@ import PastOrders from "./PastOrders";
 import Checkout from "./Checkout";
 import CustomerOrderDetail from "./CustomerOrderDetail";
 import FamilyProfiles from "./FamilyProfiles";
-import MedicineInfo from "./MedicineInfo";
 import ChatCustomer from "./ChatCustomer";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
@@ -83,7 +82,6 @@ const Customer = () => {
           <Route path="orders" element={<PastOrders />} />
           <Route path="orders/:orderCode" element={<CustomerOrderDetail />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
-          <Route path="/medicine-info" element={<MedicineInfo />} />
           <Route path="/chats" element={<ChatCustomer />} />
           <Route
             path="/order-preview/:prescriptionId"

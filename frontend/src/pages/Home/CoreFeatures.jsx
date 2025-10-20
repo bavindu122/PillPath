@@ -72,17 +72,7 @@ const features = [
     textColor: "text-secondary-green",
     delay: "delay-500",
   },
-  {
-    id: 6,
-    icon: <BookOpen size={28} strokeWidth={1.5} />,
-    activeIcon: <Pill size={32} strokeWidth={1.5} />,
-    title: "Medicine Information",
-    description:
-      "Access comprehensive medication information, potential interactions, and usage guidelines",
-    color: "from-accent-light to-accent",
-    textColor: "text-accent-purple",
-    delay: "delay-600",
-  },
+  
 ];
 
 const CoreFeatures = () => {

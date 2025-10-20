@@ -55,11 +55,7 @@ const CustomerSidebar = () => {
       label: "Family Profiles",
       icon: <Users size={18} />,
     },
-    {
-      path: "/customer/medicine-info",
-      label: "Medicine Info",
-      icon: <Pill size={18} />,
-    },
+    
     {
       path: "/customer/chats",
       label: "Chats",
