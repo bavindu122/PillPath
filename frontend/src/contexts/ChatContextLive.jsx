@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import chatService from '../services/chatService';
 import PharmacyService from '../services/api/PharmacyService';
-import webSocketService from '../services/websocketService';
+import stompWebSocketService from '../services/stompWebsocketService';
 import { normalizeChatsList, normalizeMessage, normalizeChat } from '../utils/chatNormalize';
 
 // Chat Context
@@ -185,8 +185,23 @@ export const ChatProvider = ({ children }) => {
     
     try {
       const messagesData = await chatService.getMessages(chatId, page);
+      console.log('📥 Raw messages from API:', messagesData);
+      
       const list = Array.isArray(messagesData?.messages) ? messagesData.messages : (messagesData || []);
-      const normalized = list.map(normalizeMessage);
+      console.log('📥 Messages list extracted:', list);
+      
+      const normalized = list.map(msg => {
+        console.log('🔄 Normalizing message:', { 
+          id: msg.id, 
+          content: msg.content, 
+          text: msg.text,
+          rawKeys: Object.keys(msg)
+        });
+        return normalizeMessage(msg);
+      });
+      
+      console.log('📥 Normalized messages:', normalized.map(m => ({ id: m.id, content: m.content, text: m.text })));
+      
       // Merge with existing based on page: page 0 replace; page>0 prepend older
       const existing = state.messages[chatId] || [];
       const existingIds = new Set(existing.map(m => m.id));
@@ -219,13 +234,13 @@ export const ChatProvider = ({ children }) => {
         ...metadata
       };
 
-      // Add optimistic message immediately
+      // Add optimistic message immediately with proper senderId
       const optimisticMessage = normalizeMessage({
         id: `temp-${Date.now()}`,
         chatId,
         content: messageData.content,
         messageType,
-        senderId: user?.id,
+        senderId: user?.id, // This will be normalized to ensure consistency
         senderName: user?.name || user?.firstName || 'You',
         timestamp,
         status: 'sending',
@@ -236,58 +251,52 @@ export const ChatProvider = ({ children }) => {
       console.log('✅ Creating optimistic message:', {
         id: optimisticMessage.id,
         senderId: optimisticMessage.senderId,
-        userId: user?.id,
-        match: optimisticMessage.senderId === user?.id
+        content: optimisticMessage.content,
+        text: optimisticMessage.text,
+        messageType: optimisticMessage.messageType,
+        allKeys: Object.keys(optimisticMessage)
       });
 
       dispatch({
         type: CHAT_ACTIONS.ADD_MESSAGE,
         payload: { chatId, message: optimisticMessage }
       });
+      
+      console.log('✅ Optimistic message added to state, should be visible now');
+      console.log('📊 Current messages count:', (state.messages[chatId] || []).length + 1);
 
       // Send to backend (include required fields for API)
       const apiPayload = {
         // Start with minimal schema most backends accept
-        content: messageData.content
+        content: messageData.content,
+        senderId: user?.id, // Explicitly include senderId
       };
-  const sentRaw = await chatService.sendMessage(chatId, apiPayload);
-  const sentMessage = normalizeMessage({ ...sentRaw, chatId });
-
-      // Also send via WebSocket if connected for realtime delivery
-      try {
-        if (webSocketService.isConnected()) {
-          webSocketService.sendMessage(chatId, messageData.content, messageType, metadata);
-          // Compatibility payload for admin dashboard implementation
-          webSocketService.send({
-            type: 'message',
-            chatId,
-            customerId: user?.id,
-            sender: 'customer',
-            text: messageData.content,
-            time: new Date().toISOString()
-          });
-        }
-      } catch (_) {}
       
-      // Update with real message data
-      if (sentMessage) {
-        // Remove optimistic message and add real one
-        const currentMessages = state.messages[chatId] || [];
-        const updatedMessages = currentMessages.filter(msg => msg.id !== optimisticMessage.id);
-        updatedMessages.push(sentMessage);
-        
-        dispatch({
-          type: CHAT_ACTIONS.SET_MESSAGES,
-          payload: { chatId, messages: updatedMessages }
-        });
-
-        // Update chat last message
-        dispatch({ type: CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE, payload: { chatId, message: sentMessage } });
-      }
-
-      return sentMessage;
+      console.log('📤 Sending customer message to backend:', { chatId, content: messageData.content });
+      const sentRaw = await chatService.sendMessage(chatId, apiPayload);
+      console.log('✅ Message sent to backend:', sentRaw);
+      
+      // The backend will broadcast this message via STOMP to /topic/chat/room/{chatRoomId}
+      // Our STOMP subscription will receive it and replace the optimistic message
+      // No need to manually update here - let STOMP handle it to avoid race conditions
+      
+      return sentRaw;
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Mark optimistic message as failed
+      const currentMessages = state.messages[chatId] || [];
+      const updatedMessages = currentMessages.map(msg => 
+        msg.id === optimisticMessage.id 
+          ? { ...msg, status: 'failed' }
+          : msg
+      );
+      
+      dispatch({
+        type: CHAT_ACTIONS.SET_MESSAGES,
+        payload: { chatId, messages: updatedMessages }
+      });
+      
       dispatch({ type: CHAT_ACTIONS.SET_ERROR, payload: 'Failed to send message' });
       throw error;
     }
@@ -431,9 +440,10 @@ export const ChatProvider = ({ children }) => {
       }
     });
 
-    // Send typing indicator through WebSocket if connected
-    if (state.connected && webSocketService.isConnected()) {
-      webSocketService.sendTypingIndicator(chatId, isTyping);
+    // Send typing indicator through STOMP if connected
+    if (stompConnectedRef.current && stompWebSocketService.isConnected()) {
+      const userName = user.name || user.firstName || 'Customer';
+      stompWebSocketService.sendTypingIndicator(chatId, isTyping, userName);
     }
 
     // Clear typing after 3 seconds
@@ -449,7 +459,7 @@ export const ChatProvider = ({ children }) => {
         });
       }, 3000);
     }
-  }, [user, state.connected]);
+  }, [user]);
 
   // Upload file for chat
   const uploadFile = useCallback(async (file, chatId) => {
@@ -466,97 +476,222 @@ export const ChatProvider = ({ children }) => {
     dispatch({ type: CHAT_ACTIONS.CLEAR_ERROR });
   }, []);
 
-  // WebSocket connection management
+  // Track active chat room subscription
+  const activeSubscriptionRef = useRef(null);
+  const stompConnectedRef = useRef(false);
+
+  // STOMP WebSocket connection management
   useEffect(() => {
     if (user && token) {
-      console.log('🚀 Initializing chat system with WebSocket');
+      console.log('🚀 Initializing customer chat with STOMP WebSocket');
       
-  // Connect to WebSocket with user id and token
-  webSocketService.connect(user.id, token);
-      
-      // Set up WebSocket event listeners
-      const handleConnect = () => {
-        console.log('✅ WebSocket connected');
-        dispatch({ type: CHAT_ACTIONS.SET_CONNECTED, payload: true });
-      };
-      
-      const handleDisconnect = () => {
-        console.log('❌ WebSocket disconnected');
-        dispatch({ type: CHAT_ACTIONS.SET_CONNECTED, payload: false });
-      };
-      
-      const handleNewMessage = (data) => {
-        // Normalize different payloads
-        const message = normalizeMessage(data);
-        
-        if (!message.chatId) return;
-        
-        // Check if this is our own message echoed back
-        // If the senderId matches current user, it might be a duplicate
-        const currentMessages = state.messages[message.chatId] || [];
-        const isDuplicate = currentMessages.some(msg => 
-          msg.id === message.id || 
-          (msg.content === message.content && 
-           String(msg.senderId) === String(message.senderId) && 
-           Math.abs(new Date(msg.timestamp).getTime() - new Date(message.timestamp).getTime()) < 5000)
-        );
-        
-        if (isDuplicate) {
-          return;
+      const initializeChat = async () => {
+        try {
+          // Connect to STOMP WebSocket
+          console.log('🔌 Connecting customer to STOMP...', {
+            userId: user.id,
+            userType: 'CUSTOMER'
+          });
+          
+          await stompWebSocketService.connect(token, user.id, 'CUSTOMER');
+          
+          console.log('✅ Customer STOMP connected successfully');
+          stompConnectedRef.current = true;
+          dispatch({ type: CHAT_ACTIONS.SET_CONNECTED, payload: true });
+
+          // Fetch initial chats
+          await fetchChats();
+          
+        } catch (error) {
+          console.error('❌ Failed to connect customer STOMP:', error);
+          dispatch({ type: CHAT_ACTIONS.SET_CONNECTED, payload: false });
+          stompConnectedRef.current = false;
+          
+          // Retry after 5 seconds
+          setTimeout(() => {
+            console.log('🔄 Retrying customer STOMP connection...');
+            stompConnectedRef.current = false;
+            initializeChat();
+          }, 5000);
         }
+      };
+
+      initializeChat();
+
+      // Cleanup function
+      return () => {
+        console.log('🧹 Cleaning up customer STOMP connection');
+        if (activeSubscriptionRef.current) {
+          stompWebSocketService.unsubscribeFromRoom(activeSubscriptionRef.current);
+          activeSubscriptionRef.current = null;
+        }
+        stompWebSocketService.disconnect();
+        stompConnectedRef.current = false;
+      };
+    }
+  }, [user, token, fetchChats]);
+
+  // Subscribe to active chat room for real-time messages
+  useEffect(() => {
+    if (!state.activeChat || !stompConnectedRef.current) {
+      console.log('⚠️ Cannot subscribe to chat room:', {
+        hasActiveChat: !!state.activeChat,
+        stompConnected: stompConnectedRef.current
+      });
+      return;
+    }
+
+    const chatRoomId = state.activeChat.id || state.activeChat.chatId;
+    if (!chatRoomId) {
+      console.error('❌ Active chat has no chatRoomId:', state.activeChat);
+      return;
+    }
+
+    console.log('📡 Customer subscribing to chat room:', chatRoomId, 'Active chat:', state.activeChat);
+
+    // Unsubscribe from previous room if any
+    if (activeSubscriptionRef.current && activeSubscriptionRef.current !== chatRoomId) {
+      stompWebSocketService.unsubscribeFromRoom(activeSubscriptionRef.current);
+    }
+
+    // Message handler for real-time messages
+    const handleNewMessage = (messageData) => {
+      console.log('📨 Customer received new message via STOMP:', messageData);
+      console.log('📨 Raw message fields:', {
+        id: messageData.id,
+        chatId: messageData.chatId,
+        chatRoomId: messageData.chatRoomId,
+        threadId: messageData.threadId,
+        conversationId: messageData.conversationId,
+        senderId: messageData.senderId,
+        senderType: messageData.senderType,
+        content: messageData.content
+      });
+      
+      // Normalize the message
+      const message = normalizeMessage(messageData);
+      
+      console.log('📨 Normalized message:', {
+        id: message.id,
+        chatId: message.chatId,
+        senderId: message.senderId,
+        senderType: message.senderType,
+        content: message.content
+      });
+      
+      if (!message.chatId) {
+        console.error('❌ Message has no chatId after normalization!', { raw: messageData, normalized: message });
+        return;
+      }
+
+      // Check for duplicates or replace optimistic messages
+      const currentMessages = state.messages[message.chatId] || [];
+      
+      // First check: is this the real version of an optimistic message?
+      const optimisticIndex = currentMessages.findIndex(msg => 
+        msg.id && String(msg.id).startsWith('temp-') &&
+        msg.content === message.content && 
+        String(msg.senderId) === String(message.senderId) && 
+        Math.abs(new Date(msg.timestamp).getTime() - new Date(message.timestamp).getTime()) < 10000
+      );
+      
+      if (optimisticIndex !== -1) {
+        console.log('🔄 Replacing optimistic message with real message:', {
+          optimistic: currentMessages[optimisticIndex].id,
+          real: message.id
+        });
+        
+        // Replace optimistic message with real one
+        const updatedMessages = [...currentMessages];
+        updatedMessages[optimisticIndex] = message;
         
         dispatch({
-          type: CHAT_ACTIONS.ADD_MESSAGE,
-          payload: { chatId: message.chatId, message }
+          type: CHAT_ACTIONS.SET_MESSAGES,
+          payload: { chatId: message.chatId, messages: updatedMessages }
         });
         
         dispatch({
           type: CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE,
           payload: { chatId: message.chatId, message }
         });
-      };
+        return;
+      }
       
-      const handleTypingStatus = ({ chatId, userId, isTyping }) => {
-        dispatch({
-          type: CHAT_ACTIONS.SET_TYPING_STATUS,
-          payload: { chatId, userId, isTyping }
-        });
-      };
-      const handleTypingStart = ({ chatId, userId }) => handleTypingStatus({ chatId, userId, isTyping: true });
-      const handleTypingStop = ({ chatId, userId }) => handleTypingStatus({ chatId, userId, isTyping: false });
+      // Second check: is this an exact duplicate by ID?
+      const isDuplicate = currentMessages.some(msg => msg.id === message.id);
+
+      if (isDuplicate) {
+        console.log('⚠️ Duplicate message ignored:', message.id);
+        return;
+      }
+
+      console.log('✅ Adding message to customer chat');
       
-      const handleUserOnlineStatus = ({ userId, isOnline }) => {
-        dispatch({
-          type: CHAT_ACTIONS.SET_ONLINE_STATUS,
-          payload: { userId, isOnline }
-        });
-      };
+      console.log('📨 Message being dispatched:', {
+        id: message.id,
+        chatId: message.chatId,
+        content: message.content,
+        text: message.text,
+        senderId: message.senderId,
+        senderType: message.senderType,
+        allKeys: Object.keys(message)
+      });
+      
+      dispatch({
+        type: CHAT_ACTIONS.ADD_MESSAGE,
+        payload: { chatId: message.chatId, message }
+      });
 
-  // Register event listeners with correct event names
-  webSocketService.on('connected', handleConnect);
-  webSocketService.on('disconnected', handleDisconnect);
-  webSocketService.on('new_message', handleNewMessage);
-  webSocketService.on('typing_start', handleTypingStart);
-  webSocketService.on('typing_stop', handleTypingStop);
-  webSocketService.on('user_online', handleUserOnlineStatus);
-  webSocketService.on('user_offline', handleUserOnlineStatus);
+      dispatch({
+        type: CHAT_ACTIONS.UPDATE_CHAT_LAST_MESSAGE,
+        payload: { chatId: message.chatId, message }
+      });
+    };
 
-      // Fetch initial data
-      fetchChats();
+    // Typing indicator handler
+    const handleTypingIndicator = (typingData) => {
+      console.log('⌨️ Typing indicator:', typingData);
+      dispatch({
+        type: CHAT_ACTIONS.SET_TYPING_STATUS,
+        payload: { 
+          chatId: chatRoomId, 
+          userId: typingData.userId, 
+          isTyping: typingData.isTyping 
+        }
+      });
+    };
 
-      // Cleanup function
-      return () => {
-        webSocketService.off('connected', handleConnect);
-        webSocketService.off('disconnected', handleDisconnect);
-        webSocketService.off('new_message', handleNewMessage);
-        webSocketService.off('typing_start', handleTypingStart);
-        webSocketService.off('typing_stop', handleTypingStop);
-        webSocketService.off('user_online', handleUserOnlineStatus);
-        webSocketService.off('user_offline', handleUserOnlineStatus);
-        webSocketService.disconnect();
-      };
-    }
-  }, [user, token, fetchChats]);
+    // Presence handler
+    const handlePresenceUpdate = (presenceData) => {
+      console.log('👤 Presence update:', presenceData);
+      dispatch({
+        type: CHAT_ACTIONS.SET_ONLINE_STATUS,
+        payload: { 
+          userId: presenceData.userId, 
+          isOnline: presenceData.action === 'joined' 
+        }
+      });
+    };
+
+    // Subscribe to the chat room
+    stompWebSocketService.subscribeToRoom(
+      chatRoomId,
+      handleNewMessage,
+      handleTypingIndicator,
+      handlePresenceUpdate
+    );
+
+    activeSubscriptionRef.current = chatRoomId;
+
+    // Cleanup when active chat changes
+    return () => {
+      if (activeSubscriptionRef.current === chatRoomId) {
+        console.log('🧹 Unsubscribing from chat room:', chatRoomId);
+        stompWebSocketService.unsubscribeFromRoom(chatRoomId);
+        activeSubscriptionRef.current = null;
+      }
+    };
+  }, [state.activeChat, state.messages]);
 
   const value = {
     // State

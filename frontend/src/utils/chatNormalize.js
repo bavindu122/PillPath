@@ -13,11 +13,13 @@ export function normalizeMessage(raw = {}) {
   
   const normalized = {
     id: raw.id || raw.messageId || `msg-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    chatId: raw.chatId || raw.threadId || raw.conversationId,
+    chatId: raw.chatId || raw.chatRoomId || raw.threadId || raw.conversationId,
     content: raw.content ?? raw.text ?? raw.message ?? '',
+    text: raw.text ?? raw.content ?? raw.message ?? '', // Add text as alias for backward compatibility
     messageType: raw.messageType || raw.type || 'text',
     senderId: senderId,
     senderName: raw.senderName || raw.senderDisplayName || raw.authorName,
+    senderType: raw.senderType,
     timestamp: timestamp ? new Date(timestamp).toISOString() : new Date().toISOString(),
     status: raw.status || 'delivered',
     metadata: raw.metadata || {},

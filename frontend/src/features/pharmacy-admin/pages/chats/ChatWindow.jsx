@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../hooks/useAuth';
 import api from '../../../../services/api';
+import stompWebSocketService from '../../../../services/stompWebsocketService';
 import { ArrowLeft, Send, User, Wifi, WifiOff, Phone, Video, MoreVertical, Circle, MessageCircle, Paperclip, Smile } from 'lucide-react';
 
 const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead }) => {
@@ -32,10 +33,7 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead
   const messagesContainerRef = useRef(null);
   const prevScrollHeight = useRef(0);
   const resolvedChatIdRef = useRef(null); // will hold the actual chat/thread id when resolved
-  const ws = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
+  const stompConnected = useRef(false);
 
   // Customer info from chat details
   const customerInfo = chatDetails ? {
@@ -59,7 +57,7 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead
   // Mark messages as read
   const markMessagesAsRead = async (chatId) => {
     try {
-      await api.post(`/v1/chats/${chatId}/read`);
+      await api.post(`/v1/chats/${chatId}/mark-read`);
       console.log('✅ Messages marked as read for chat:', chatId);
       
       // Notify parent component to update unread count
@@ -67,41 +65,45 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead
         onMessagesRead(customerId);
       }
     } catch (error) {
-      console.warn('Failed to mark messages as read:', error);
+      console.warn('⚠️ Failed to mark messages as read:', error.message);
     }
   };
 
-  // Fetch chat details to get customer info
-  useEffect(() => {
-    const fetchChatDetails = async () => {
-      try {
-        // Fetch threads and find one that matches the customerId
-        const { data } = await api.get('/v1/chats/threads');
-        const list = Array.isArray(data) ? data : (data?.threads || data?.items || data?.content || []);
-        const found = list.find(t => String(t.customerId) === String(customerId) || String(t.customer?.id) === String(customerId));
-        if (found) {
-          setChatDetails(found);
-          resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
-          
-          // Mark messages as read when opening the chat
-          if (resolvedChatIdRef.current) {
-            markMessagesAsRead(resolvedChatIdRef.current);
-          }
+  // Fetch chat details to get customer info and resolve chat ID
+  const fetchChatDetails = async () => {
+    try {
+      // Fetch threads and find one that matches the customerId
+      const { data } = await api.get('/v1/chats/threads');
+      const list = Array.isArray(data) ? data : (data?.threads || data?.items || data?.content || []);
+      const found = list.find(t => String(t.customerId) === String(customerId) || String(t.customer?.id) === String(customerId));
+      
+      if (found) {
+        setChatDetails(found);
+        resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
+        console.log('✅ Resolved chat ID:', resolvedChatIdRef.current, 'for customer:', customerId);
+        
+        // Mark messages as read when opening the chat
+        if (resolvedChatIdRef.current) {
+          markMessagesAsRead(resolvedChatIdRef.current);
         }
-      } catch (e) {
-        console.warn('Failed to fetch chat details:', e);
+      } else {
+        console.warn('⚠️ Chat not found for customer:', customerId);
       }
-    };
+    } catch (e) {
+      console.error('❌ Failed to fetch chat details:', e);
+    }
+  };
 
-    if (customerId) {
-      fetchChatDetails();
-      connectWebSocket();
+  // Connect on mount
+  useEffect(() => {
+    if (customerId && user && token) {
+      connectStompWebSocket();
     }
 
     return () => {
       cleanup();
     };
-  }, [customerId]);
+  }, [customerId, user, token]);
 
   useEffect(() => {
     scrollToBottom();
@@ -147,241 +149,209 @@ const ChatWindow = ({ customerId: propCustomerId, onBack, thread, onMessagesRead
   }, [loadingMessages, hasMoreMessages]);
 
   const cleanup = () => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-    }
-    if (ws.current) {
-      ws.current.close();
-      ws.current = null;
+    // Unsubscribe from chat room
+    if (resolvedChatIdRef.current && stompConnected.current) {
+      stompWebSocketService.unsubscribeFromRoom(resolvedChatIdRef.current);
     }
   };
 
-  const connectWebSocket = () => {
-    if (ws.current?.readyState === WebSocket.OPEN) return;
+  const connectStompWebSocket = async () => {
+    if (stompConnected.current || !user || !token) {
+      console.log('⚠️ Skipping STOMP connection:', { 
+        alreadyConnected: stompConnected.current, 
+        hasUser: !!user, 
+        hasToken: !!token 
+      });
+      return;
+    }
 
     setConnectionStatus('connecting');
 
     try {
-      ws.current = new WebSocket('ws://localhost:8080/ws/chat');
+      // Resolve chat ID first
+      await fetchChatDetails();
 
-      ws.current.onopen = async () => {
-        setConnectionStatus('connected');
-        reconnectAttempts.current = 0;
-        // Authenticate this admin socket if we have a token
-        try {
-          if (token && ws.current?.readyState === WebSocket.OPEN) {
-            ws.current.send(JSON.stringify({ type: 'auth', token, userId: user?.id }));
-          }
-        } catch (e) {
-          // ignore
-        }
-
-        // Resolve actual chat id (thread/conversation id) if the route param is a customerId
-        const resolveChatId = async () => {
-          try {
-            // Fetch threads and find one that matches the customerId
-            const { data } = await api.get('/v1/chats/threads');
-            const list = Array.isArray(data) ? data : (data?.threads || data?.items || data?.content || []);
-            const found = list.find(t => String(t.customerId) === String(customerId) || String(t.customer?.id) === String(customerId));
-            if (found) {
-              resolvedChatIdRef.current = found.id || found.chatId || found.threadId;
-            }
-          } catch (e) {
-            // ignore - leave resolvedChatIdRef null
-            console.warn('Failed to resolve chat id for customer', customerId, e);
-          }
-        };
-
-        await resolveChatId();
-
-        // Load message history from API
-        if (resolvedChatIdRef.current) {
-          try {
-            const response = await api.get(`/v1/chats/${resolvedChatIdRef.current}/messages?page=0&size=50`);
-            const messagesData = response.data?.messages || response.data?.content || [];
-            
-            console.log('Loaded messages from API:', messagesData.map(msg => ({
-              id: msg.id,
-              senderId: msg.senderId,
-              senderType: msg.senderType,
-              senderName: msg.senderName,
-              content: msg.content?.substring(0, 30)
-            })));
-            
-            // Convert API messages to component format
-            const formattedMessages = messagesData.map(msg => ({
-              id: msg.id,
-              chatRoomId: msg.chatRoomId,
-              senderId: msg.senderId,
-              senderType: msg.senderType, // Include senderType from backend
-              senderName: msg.senderName,
-              senderAvatar: msg.senderProfilePicture,
-              sender: msg.senderType === 'CUSTOMER' ? 'customer' : 'admin',
-              content: msg.content,
-              text: msg.content,
-              timestamp: msg.timestamp,
-              time: msg.timestamp,
-              isRead: msg.isRead
-            }));
-            
-            setMessages(formattedMessages.reverse()); // Messages are returned newest first, we want oldest first
-          } catch (err) {
-            console.warn('Failed to load message history:', err);
-          }
-        }
-
-        // Send join message using resolved chat id when available
-        if (ws.current?.readyState === WebSocket.OPEN) {
-          try {
-            if (resolvedChatIdRef.current) {
-              ws.current.send(JSON.stringify({ type: 'join_chat', chatId: resolvedChatIdRef.current }));
-            } else {
-              // fallback to watch for legacy backends using customerId
-              ws.current.send(JSON.stringify({ type: 'watch', customerId: customerId }));
-            }
-          } catch (e) {
-            console.warn('Failed to send join/watch for chat', e);
-          }
-        }
-      };
-
-      ws.current.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          handleWebSocketMessage(message);
-        } catch (error) {
-          console.error('Failed to parse message:', error);
-        }
-      };
-
-      ws.current.onclose = (event) => {
+      if (!resolvedChatIdRef.current) {
+        console.warn('⚠️ Could not resolve chat ID, will retry...');
         setConnectionStatus('disconnected');
-        
-        if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
-          reconnectAttempts.current++;
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current - 1), 30000);
+        return;
+      }
+
+      // Connect to STOMP WebSocket
+      console.log('🔌 Connecting to STOMP WebSocket...', {
+        userId: user.id,
+        userType: 'PHARMACY_ADMIN',
+        chatRoomId: resolvedChatIdRef.current
+      });
+      
+      await stompWebSocketService.connect(token, user.id, 'PHARMACY_ADMIN');
+      
+      console.log('✅ STOMP connected successfully');
+      setConnectionStatus('connected');
+      stompConnected.current = true;
+
+      // Load message history from API
+      if (resolvedChatIdRef.current) {
+        try {
+          const response = await api.get(`/v1/chats/${resolvedChatIdRef.current}/messages?page=0&size=50`);
+          const messagesData = response.data?.messages || response.data?.content || [];
           
-          setConnectionStatus('reconnecting');
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connectWebSocket();
-          }, delay);
+          console.log('📥 Loaded messages from API:', messagesData.map(msg => ({
+            id: msg.id,
+            senderId: msg.senderId,
+            senderType: msg.senderType,
+            senderName: msg.senderName,
+            content: msg.content?.substring(0, 30)
+          })));
+          
+          // Convert API messages to component format
+          const formattedMessages = messagesData.map(msg => ({
+            id: msg.id,
+            chatRoomId: msg.chatRoomId,
+            senderId: msg.senderId,
+            senderType: msg.senderType,
+            senderName: msg.senderName,
+            senderAvatar: msg.senderProfilePicture,
+            sender: msg.senderType === 'CUSTOMER' ? 'customer' : 'admin',
+            content: msg.content,
+            text: msg.content,
+            timestamp: msg.timestamp,
+            time: msg.timestamp,
+            isRead: msg.isRead
+          }));
+          
+          setMessages(formattedMessages.reverse()); // Messages are returned newest first, we want oldest first
+        } catch (err) {
+          console.warn('⚠️ Failed to load message history:', err);
         }
-      };
 
-      ws.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+        // Subscribe to chat room for real-time updates
+        console.log('📡 Subscribing to chat room:', resolvedChatIdRef.current);
+        stompWebSocketService.subscribeToRoom(
+          resolvedChatIdRef.current,
+          handleNewMessage,
+          handleTypingIndicator,
+          handlePresenceUpdate
+        );
+      }
 
     } catch (error) {
-      console.error('Failed to create WebSocket:', error);
+      console.error('❌ Failed to connect STOMP WebSocket:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
       setConnectionStatus('disconnected');
+      stompConnected.current = false;
+      
+      // Retry after 5 seconds
+      setTimeout(() => {
+        console.log('🔄 Retrying STOMP connection...');
+        stompConnected.current = false;
+        connectStompWebSocket();
+      }, 5000);
     }
   };
 
-  const handleWebSocketMessage = (message) => {
-    switch (message.type) {
-      case 'new_message':
-      case 'message': {
-        // Accept messages that target this chat by chatId, customerId, or threadId
-        const incomingChatId = message.chatId || message.threadId || message.conversationId || null;
-        const incomingCustomerId = message.customerId || message.customerId;
-        const matched = (
-          incomingChatId && String(incomingChatId) === String(resolvedChatIdRef.current)
-        ) || (
-          String(incomingCustomerId) === String(customerId)
-        );
-
-        if (matched) {
-          addMessage(message);
-          
-          // Auto-mark as read since the chat window is open
-          if (resolvedChatIdRef.current && message.sender !== 'admin') {
-            markMessagesAsRead(resolvedChatIdRef.current);
-          }
-        }
-        break;
-      }
-      case 'watch_success':
-        // Successfully watching this customer's messages
-        break;
-      case 'error':
-        console.error('WebSocket error:', message.message);
-        break;
-      default:
-        // Ignore unknown message types
-        break;
+  const handleNewMessage = (messageData) => {
+    console.log('📨 Pharmacy Admin received new message via STOMP:', messageData);
+    console.log('📨 Raw message fields:', {
+      id: messageData.id,
+      chatId: messageData.chatId,
+      chatRoomId: messageData.chatRoomId,
+      senderId: messageData.senderId,
+      senderType: messageData.senderType,
+      content: messageData.content
+    });
+    
+    // Add message to UI
+    addMessage(messageData);
+    
+    // Auto-mark as read since the chat window is open
+    if (resolvedChatIdRef.current && messageData.senderType !== 'ADMIN' && messageData.senderType !== 'PHARMACY_ADMIN') {
+      markMessagesAsRead(resolvedChatIdRef.current);
     }
+  };
+
+  const handleTypingIndicator = (typingData) => {
+    console.log('⌨️ Typing indicator:', typingData);
+    // TODO: Implement typing indicator UI
+  };
+
+  const handlePresenceUpdate = (presenceData) => {
+    console.log('👤 Presence update:', presenceData);
+    // TODO: Implement presence tracking UI
   };
 
   const addMessage = (messageData) => {
-    const newMsg = {
-      id: messageData.id || Date.now() + Math.random(),
-      customerId: messageData.customerId,
-      senderId: messageData.senderId || user?.id || messageData.sender,
-      senderType: messageData.senderType || (messageData.sender === 'admin' ? 'ADMIN' : 'CUSTOMER'),
-      sender: messageData.sender,
-      senderName: messageData.senderName || (messageData.sender === 'admin' ? user?.fullName || user?.name || 'Admin' : chatDetails?.customerName || 'Customer'),
-      senderAvatar: messageData.senderProfilePicture || messageData.senderAvatar || (messageData.sender === 'admin' ? user?.profilePictureUrl : chatDetails?.customerProfilePicture),
-      text: messageData.text || messageData.content,
-      content: messageData.content || messageData.text,
-      time: messageData.time || messageData.timestamp || new Date().toISOString(),
-      timestamp: messageData.time || messageData.timestamp || new Date().toISOString()
-    };
+    // Prevent duplicate messages
+    setMessages(prev => {
+      const exists = prev.some(msg => msg.id === messageData.id);
+      if (exists) {
+        console.log('⚠️ Duplicate message ignored:', messageData.id);
+        return prev;
+      }
 
-    setMessages(prev => [...prev, newMsg]);
+      const newMsg = {
+        id: messageData.id || Date.now() + Math.random(),
+        chatRoomId: messageData.chatRoomId,
+        customerId: messageData.customerId,
+        senderId: messageData.senderId || messageData.sender,
+        senderType: messageData.senderType || (messageData.sender === 'admin' ? 'ADMIN' : 'CUSTOMER'),
+        sender: messageData.senderType === 'CUSTOMER' ? 'customer' : 'admin',
+        senderName: messageData.senderName || (messageData.senderType === 'ADMIN' ? user?.fullName || user?.name || 'Admin' : chatDetails?.customerName || 'Customer'),
+        senderAvatar: messageData.senderProfilePicture || messageData.senderAvatar || (messageData.senderType === 'ADMIN' ? user?.profilePictureUrl : chatDetails?.customerProfilePicture),
+        text: messageData.text || messageData.content,
+        content: messageData.content || messageData.text,
+        time: messageData.time || messageData.timestamp || new Date().toISOString(),
+        timestamp: messageData.time || messageData.timestamp || new Date().toISOString()
+      };
+
+      console.log('✅ Adding message:', {
+        id: newMsg.id,
+        senderId: newMsg.senderId,
+        senderType: newMsg.senderType,
+        content: newMsg.content?.substring(0, 30)
+      });
+
+      return [...prev, newMsg];
+    });
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending || connectionStatus !== 'connected') return;
+    if (!newMessage.trim() || sending || connectionStatus !== 'connected' || !resolvedChatIdRef.current) return;
 
     setSending(true);
     const messageText = newMessage.trim();
-    const messageData = {
-      customerId: customerId,
-      senderId: user?.id,
-      senderType: 'ADMIN',
-      sender: 'admin',
-      text: messageText,
-      time: new Date().toISOString()
-    };
+    const chatRoomId = resolvedChatIdRef.current;
 
-    // Add message immediately to UI (optimistic update)
-    addMessage(messageData);
+    // Clear input immediately for better UX
     setNewMessage('');
 
     try {
       // Save message to database via API
-      const chatId = resolvedChatIdRef.current || customerId;
+      // The backend will automatically broadcast via WebSocket after saving
+      console.log('📤 Sending message to chat room:', chatRoomId);
       
-      await api.post(`/v1/chats/pharmacy-admin/dashboard/chats/${chatId}/messages`, {
+      const response = await api.post(`/v1/chats/pharmacy-admin/dashboard/chats/${chatRoomId}/messages`, {
         text: messageText,
         senderId: user?.id
       });
       
-      console.log('✅ Message saved to database successfully');
+      console.log('✅ Message saved and broadcasted:', response.data);
 
-      // Also send via WebSocket for real-time delivery (optional, as backend broadcasts after saving)
-      if (ws.current?.readyState === WebSocket.OPEN) {
-        try {
-          ws.current.send(JSON.stringify({
-            type: 'send_message',
-            chatId: chatId,
-            content: messageText,
-            messageType: 'text',
-            sender: 'admin',
-            senderId: user?.id,
-            timestamp: messageData.time
-          }));
-        } catch (e) {
-          console.warn('WebSocket send failed, but message saved to DB:', e);
-        }
-      }
+      // Note: No need to manually send via STOMP here because:
+      // 1. The backend API saves the message
+      // 2. The backend then broadcasts it via WebSocket
+      // 3. We'll receive it via our subscription and add it to the UI
+      // This prevents duplicate messages
+
     } catch (error) {
-      console.error('❌ Failed to save message to database:', error);
-      // Optionally: Show error to user or remove the optimistic message
+      console.error('❌ Failed to send message:', error);
       alert('Failed to send message. Please try again.');
+      // Restore the message text if failed
+      setNewMessage(messageText);
     } finally {
       setSending(false);
     }

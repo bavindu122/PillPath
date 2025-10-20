@@ -35,8 +35,9 @@ const ChatWindow = ({ onBack, className = '' }) => {
   // TEMPORARY DEBUG: Log messages for this chat
   useEffect(() => {
     if (activeChat) {
-      console.log('📨 Chat messages for', activeChat.id, ':', {
+      console.log('� ChatWindow re-rendered! Messages changed for chat', activeChat.id, ':', {
         count: chatMessages.length,
+        lastMessage: chatMessages[chatMessages.length - 1],
         messages: chatMessages.map(m => ({
           id: m.id,
           senderId: m.senderId,
@@ -133,10 +134,14 @@ const ChatWindow = ({ onBack, className = '' }) => {
     if (!chatMessages.length) return [];
     
     // Debug logging
-    console.log('DEBUG - Original chatMessages order:', chatMessages.map(m => ({ 
-      text: m.text?.substring(0, 30) + '...', 
+    console.log('🔍 ChatWindow - Original chatMessages:', chatMessages.map(m => ({ 
+      id: m.id,
+      content: m.content,
+      text: m.text,
+      hasContent: !!m.content,
+      hasText: !!m.text,
       timestamp: m.timestamp || m.time,
-      id: m.id 
+      allKeys: Object.keys(m)
     })));
     
     // Sort messages by timestamp in ascending order (oldest first, newest last)

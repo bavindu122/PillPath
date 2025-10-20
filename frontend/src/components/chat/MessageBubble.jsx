@@ -5,6 +5,20 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   
+  // DEBUG: Log the entire message object
+  console.log('🔍 MessageBubble received:', {
+    messageId: message.id,
+    content: message.content,
+    text: message.text,
+    hasContent: !!message.content,
+    hasText: !!message.text,
+    contentLength: message.content?.length,
+    textLength: message.text?.length,
+    messageType: message.messageType,
+    allKeys: Object.keys(message),
+    fullMessage: message
+  });
+  
   // Ensure proper comparison - handle null/undefined and convert to string for comparison
   const messageSenderId = message.senderId !== undefined && message.senderId !== null ? String(message.senderId) : null;
   const currentUserId = currentUser?.id !== undefined && currentUser?.id !== null ? String(currentUser.id) : null;
@@ -15,8 +29,10 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
     msgId: message.id?.toString().substring(0, 15),
     msgSenderId: message.senderId,
     msgSenderIdStr: messageSenderId,
+    msgSenderIdType: typeof message.senderId,
     currUserId: currentUser?.id,
     currUserIdStr: currentUserId,
+    currUserIdType: typeof currentUser?.id,
     isOwn: isOwnMessage,
     content: message.content?.substring(0, 15)
   });
@@ -176,7 +192,26 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
         );
 
       default:
-        return <p className="text-sm whitespace-pre-wrap break-words text-inherit">{message.content || message.text}</p>;
+        const messageText = message.content || message.text || '';
+        console.log('📝 Rendering text message:', {
+          hasContent: !!message.content,
+          hasText: !!message.text,
+          finalText: messageText,
+          contentValue: message.content,
+          textValue: message.text,
+          isEmpty: !messageText,
+          messageKeys: Object.keys(message)
+        });
+        
+        if (!messageText) {
+          console.error('❌ EMPTY MESSAGE TEXT!', message);
+        }
+        
+        return (
+          <p className="text-sm whitespace-pre-wrap break-words">
+            {messageText || '[Empty message]'}
+          </p>
+        );
     }
   };
 
@@ -221,7 +256,6 @@ const MessageBubble = ({ message, currentUser, showAvatar = true, isGrouped = fa
                 ? 'bg-blue-600 text-white rounded-br-sm'
                 : 'bg-gray-100 text-gray-900 rounded-bl-sm'
             } ${isGrouped ? 'mt-1' : ''}`}
-            style={isOwnMessage ? { color: 'white' } : { color: '#111827' }}
           >
             {renderMessageContent()}
           </div>

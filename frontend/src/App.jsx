@@ -46,14 +46,17 @@ const AppContent = () => {
   const showFloatingBell = isAuthenticated && userType === "customer" && isCustomerPath;
 
   return (
-    <AuthProvider>
-      <ChatProvider>
-        <div>
-          {!isAdminPath &&
-            !isPharmacistPath &&
-            !isCustomerPath &&
-            !isPharmacyAdminPath && <Navbar />}
-          <Routes>
+    <ChatProvider>
+      <div>
+        {!isAdminPath &&
+          !isPharmacistPath &&
+          !isCustomerPath &&
+          !isPharmacyAdminPath && <Navbar />}
+        
+        {/* Floating Notification Bell - ONLY for customers on customer routes */}
+        {showFloatingBell && <FloatingBell />}
+        
+        <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/otc" element={<Otc />} />
@@ -61,6 +64,8 @@ const AppContent = () => {
           <Route path="/services" element={<Services />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
           <Route
             path="/pharmacist/*"
@@ -92,72 +97,14 @@ const AppContent = () => {
             element={<PharmacyProfile />}
           />
           <Route path="/pharma-profile" element={<PharmacyProfile />} />
-          <Route path="/chat-demo" element={<ChatDemo />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Routes>
         {!isAdminPath &&
           !isPharmacistPath &&
           !isCustomerPath &&
           !isPharmacyAdminPath && <Footer />}
-        </div>
-      </ChatProvider>
-    <div>
-      {!isAdminPath &&
-        !isPharmacistPath &&
-        !isCustomerPath &&
-        !isPharmacyAdminPath && <Navbar />}
-      
-      {/* Floating Notification Bell - ONLY for customers on customer routes */}
-      {showFloatingBell && <FloatingBell />}
-      
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/otc" element={<Otc />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
-        <Route
-          path="/pharmacist/*"
-          element={
-            <RequirePharmacist
-              fallback={<Loading message="Checking access..." />}
-            >
-              <Pharmacist />
-            </RequirePharmacist>
-          }
-        />
-        <Route path="/customer/*" element={<Customer />} />
-        <Route path="/find-pharmacy" element={<FindPharmacy />} />
-        <Route
-          path="/product-stores/:productId"
-          element={<ProductStores />}
-        />
-        <Route
-          path="/admin/*"
-          element={
-            <AdminAuthProvider>
-              <Admin />
-            </AdminAuthProvider>
-          }
-        />
-
-        <Route
-          path="/pharma-profile/:pharmacyId"
-          element={<PharmacyProfile />}
-        />
-        <Route path="/pharma-profile" element={<PharmacyProfile />} />
-        <Route path="*" element={<div>Page Not Found</div>} />
-      </Routes>
-      {!isAdminPath &&
-        !isPharmacistPath &&
-        !isCustomerPath &&
-        !isPharmacyAdminPath && <Footer />}
-    </div>
+      </div>
+    </ChatProvider>
   );
 };
 
