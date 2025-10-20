@@ -45,7 +45,12 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
   };
 
   const handleProfile = () => {
-    navigate("/pharmacy/profile");
+    // Navigate to appropriate profile page based on user type
+    if (isPharmacyAdmin) {
+      navigate("/pharmacy/profile");
+    } else {
+      navigate("/pharmacist/profile");
+    }
     onClose?.();
   };
 

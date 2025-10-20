@@ -7,6 +7,7 @@ import OrderHistoryList from "./OrderHistoryList"
 import PastOrder from "./PastOrder"
 import Inventory from "./Inventory"
 import Chat from "./Chat"
+import PharmacistProfile from "./PharmacistProfile"
 import { Route, Routes } from 'react-router-dom'
 import './index-pharmacist.css'
 
@@ -16,6 +17,7 @@ const Pharmacist = () => {
         <Routes>
             <Route path="/" element={<PharmacistDashboard />} />
             <Route path="/dashboard" element={<PharmacistDashboard />} />
+            <Route path="/profile" element={<PharmacistProfile />} />
             <Route path="/queue" element={<PrescriptionQueueList />} />
             <Route path="/prescriptions/pharmacy/:pharmacyId" element={<PharmacyPrescriptions />} />
             <Route path="/orders" element={<OrderHistoryList />} />
