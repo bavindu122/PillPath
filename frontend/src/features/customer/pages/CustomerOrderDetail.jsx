@@ -488,6 +488,15 @@ export default function CustomerOrderDetail() {
             </div>
           </motion.div>
         )}
+        {/* Return to Home button at the very end of the page */}
+        <div className="mt-10 flex justify-center">
+          <button
+            onClick={() => navigate("/")}
+            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     </div>
   );
