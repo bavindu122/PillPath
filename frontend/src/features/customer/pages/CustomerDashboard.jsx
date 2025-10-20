@@ -19,6 +19,7 @@ import CurrentPrescriptionsCard from "../components/DashboardCards/CurrentPrescr
 import RecentOrdersCard from "../components/DashboardCards/RecentOrdersCard";
 import FamilyProfilesCard from "../components/DashboardCards/FamilyProfilesCard";
 import NearbyPharmaciesCard from "../components/DashboardCards/NearbyPharmaciesCard";
+import LoyaltyRewardsCard from "../components/DashboardCards/LoyaltyRewardsCard";
 import EditProfileModal from "../components/EditProfileModal";
 import DetailCard from "../components/DetailCard";
 import GlassCard from "../../../components/UIs/GlassCard";
@@ -150,53 +151,7 @@ const CustomerProfile = ({ removeBg = false }) => {
 
               {/* Loyalty & Rewards Section */}
               <div className="bg-white/15 backdrop-blur-xl rounded-3xl shadow-xl border border-white/20 p-6 animate-fade-in-up delay-300">
-                <h2 className="text-xl text-white font-bold mb-4 flex items-center">
-                  <span className="bg-yellow-500/20 p-2 rounded-lg mr-2">
-                    <Star size={20} className="text-yellow-400" />
-                  </span>
-                  Loyalty & Rewards
-                </h2>
-
-                <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl p-6 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 opacity-10">
-                    <Award size={120} />
-                  </div>
-                  <div className="relative z-10">
-                    <p className="text-white/80 text-sm uppercase tracking-wider">
-                      Your Balance
-                    </p>
-                    <div className="text-4xl font-bold my-3">1,247 points</div>
-                    <div className="flex items-center text-sm mt-4">
-                      <div className="bg-white/20 rounded-full px-3 py-1">
-                        Gold Member
-                      </div>
-                      <div className="ml-auto">
-                        <Button className="bg-white/20 hover:bg-white/30 text-white text-sm">
-                          Redeem Rewards
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                    <p className="text-white/60 text-sm">Next Reward At</p>
-                    <p className="text-white text-lg font-bold">1,500 points</p>
-                    <div className="w-full bg-white/20 h-2 rounded-full mt-2">
-                      <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full w-4/5"></div>
-                    </div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                    <p className="text-white/60 text-sm">
-                      Points Earned This Month
-                    </p>
-                    <p className="text-white text-lg font-bold">247 points</p>
-                    <p className="text-green-400 text-xs mt-1">
-                      ↑ 12% from last month
-                    </p>
-                  </div>
-                </div>
+                <LoyaltyRewardsCard />
               </div>
             </div>
 

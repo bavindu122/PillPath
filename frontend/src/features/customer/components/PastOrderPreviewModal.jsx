@@ -10,6 +10,40 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [detail, setDetail] = useState(null);
+  const [loyaltyRate, setLoyaltyRate] = useState(1.0);
+
+  // Fetch loyalty rate
+  useEffect(() => {
+    const fetchLoyaltyRate = async () => {
+      if (!isOpen || !order) return;
+      
+      // Check if this is a card payment order
+      const isCardPayment = order?.paymentMethod === 'CREDIT_CARD' || order?.paymentMethod === 'DEBIT_CARD';
+      if (!isCardPayment) return;
+      
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        
+        const response = await fetch('http://localhost:8080/api/v1/customer/loyalty', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setLoyaltyRate(data.pointsRate || 1.0);
+        }
+      } catch (err) {
+        console.error('Error fetching loyalty rate:', err);
+      }
+    };
+    
+    fetchLoyaltyRate();
+  }, [isOpen, order]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,6 +167,47 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order }) => {
                   </div>
                 </div>
               )}
+              
+              {/* Loyalty Points Display for Card Payments */}
+              {(() => {
+                const isCardPayment = order?.paymentMethod === 'CREDIT_CARD' || order?.paymentMethod === 'DEBIT_CARD';
+                const orderTotal = detail?.totals?.total || order.total || 0;
+                const pointsEarned = isCardPayment ? Math.floor(orderTotal * loyaltyRate) : 0;
+                
+                if (isCardPayment && pointsEarned > 0) {
+                  return (
+                    <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-500/30 rounded-lg">
+                            <Package className="h-6 w-6 text-green-300" />
+                          </div>
+                          <div>
+                            <p className="text-green-300 font-semibold text-lg">
+                              Loyalty Points Earned
+                            </p>
+                            <p className="text-white/60 text-sm">
+                              From this card payment order
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-green-400 font-bold text-3xl">
+                            +{pointsEarned.toLocaleString()}
+                          </p>
+                          <p className="text-white/50 text-xs">points</p>
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-white/10">
+                        <p className="text-white/60 text-xs">
+                          💳 Earned at {loyaltyRate} point{loyaltyRate !== 1 ? 's' : ''} per {currency} 1 on card payments
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Pharmacy Orders */}
               <div className="space-y-4">
