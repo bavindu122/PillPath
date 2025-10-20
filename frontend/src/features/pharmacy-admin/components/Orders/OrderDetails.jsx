@@ -14,6 +14,57 @@ import usePharmacyWallet from "../../hooks/usePharmacyWallet";
 import AdminWalletService from "../../../../services/api/AdminWalletService";
 
 const OrderDetails = ({ order }) => {
+  // ✅ NEW: Determine order type based on order code prefix
+  const getOrderTypeFromCode = (orderCode) => {
+    if (!orderCode) return null;
+    
+    const code = orderCode.toString().toUpperCase();
+    
+    if (code.startsWith('PORD')) {
+      return 'prescription';
+    } else if (code.startsWith('OTC')) {
+      return 'otc';
+    }
+    
+    return null;
+  };
+
+  // ✅ NEW: Determine item type based on medicine/item code or name
+  const getItemType = (item) => {
+    // Check if item has explicit category/type
+    if (item.category) {
+      return item.category.toString().toLowerCase();
+    }
+    if (item.type) {
+      return item.type.toString().toLowerCase();
+    }
+    
+    // Check medicine code/ID if available
+    const itemCode = (item.medicineCode || item.itemCode || item.code || item.id || '').toString().toUpperCase();
+    if (itemCode.startsWith('PMED') || itemCode.startsWith('PRESC')) {
+      return 'prescription';
+    }
+    if (itemCode.startsWith('OTC')) {
+      return 'otc';
+    }
+    
+    // Check medicine name for OTC indicators
+    const itemName = (item.name || item.medicineName || '').toString().toUpperCase();
+    if (itemName.includes('OTC')) {
+      return 'otc';
+    }
+    
+    // Since the overall order type is determined by order code,
+    // we can use that as a fallback for all items in the order
+    const orderType = getOrderTypeFromCode(order.orderCode || order.orderNumber || order.id);
+    if (orderType) {
+      return orderType;
+    }
+    
+    // Final fallback
+    return 'prescription';
+  };
+
   // Format date
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -39,7 +90,10 @@ const OrderDetails = ({ order }) => {
     }
   };
 
-  const orderTypeInfo = getOrderTypeInfo(order.orderType || order.type);
+  // ✅ UPDATED: Determine order type from code first, then fallback to orderType field
+  const determinedOrderType = getOrderTypeFromCode(order.orderCode || order.orderNumber || order.id) || 
+                               (order.orderType || order.type);
+  const orderTypeInfo = getOrderTypeInfo(determinedOrderType);
 
   // Get payment method icon - Match with useOrderData
   const pm = (order.paymentMethod || order.payment?.method || "")
@@ -52,8 +106,6 @@ const OrderDetails = ({ order }) => {
   };
 
   // Wallet/fees: derive commission percent from admin settings (pharmacy override if needed)
-  // Since this component is pure, we'll assume a commissionPercent passed via wallet transactions matching is not available synchronously.
-  // We'll compute fees from transactions list if present in wallet hook.
   const pharmacyIdFromOrder = order.pharmacyId || order.pharmacy?.id;
   const shouldFetchWallet =
     !order.fees ||
@@ -64,7 +116,6 @@ const OrderDetails = ({ order }) => {
   });
 
   const feeInfo = useMemo(() => {
-    // Prefer backend provided fees when available
     if (
       order.fees &&
       (order.fees.platformCommissionAmount != null ||
@@ -77,7 +128,6 @@ const OrderDetails = ({ order }) => {
         currency: order.totals?.currency || "LKR",
       };
     }
-    // Try to detect transactions linked to this order by referencing order code/number in description/note
     const code =
       order.orderCode || order.orderNumber || order.id || order.orderId;
     const related = transactions.filter((t) => {
@@ -88,9 +138,6 @@ const OrderDetails = ({ order }) => {
         (needle && desc.includes(needle)) || (needle && ref.includes(needle))
       );
     });
-    // Heuristics:
-    // - Commission accrual to platform is a DEBIT for pharmacy (negative amount) with category/type includes COMMISSION
-    // - Convenience fee typically paid by customer to platform, may not appear per pharmacy; if present, look for CONVENIENCE in description.
     let commissionTxn = related.find((t) =>
       (t.category || t.type || "")
         .toString()
@@ -114,7 +161,6 @@ const OrderDetails = ({ order }) => {
     const convenienceFee = convenienceTxn
       ? Math.abs(Number(convenienceTxn.amount || 0))
       : 0;
-    // Derive percent if total known
     const totalForCalc = Number(order.total || order.totalAmount || 0);
     const commissionPercent =
       totalForCalc > 0 && commissionAmount > 0
@@ -246,7 +292,6 @@ const OrderDetails = ({ order }) => {
                   </p>
                 </div>
               </div>
-              {/* Wallet & Fees */}
               <div className="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
                 <p className="text-sm font-semibold text-gray-700 mb-2">
                   Wallet & Fees
@@ -321,43 +366,44 @@ const OrderDetails = ({ order }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {(order.items || []).map((item, index) => (
-                <tr key={`${item.id}-${index}`} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {item.name || item.medicineName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        (item.category || item.type || "prescription") ===
-                        "prescription"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {(item.category || item.type || "prescription") ===
-                      "prescription"
-                        ? "Prescription"
-                        : "OTC"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                    Rs.{Number(item.price || item.unitPrice || 0).toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                    {item.quantity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                    Rs.
-                    {Number(
-                      item.total ||
-                        item.totalPrice ||
-                        item.unitPrice * item.quantity ||
-                        0
-                    ).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
+              {(order.items || []).map((item, index) => {
+                // ✅ UPDATED: Get accurate item type
+                const itemType = getItemType(item);
+                
+                return (
+                  <tr key={`${item.id}-${index}`} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {item.name || item.medicineName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          itemType === "prescription"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {itemType === "prescription" ? "Prescription" : "OTC"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                      Rs.{Number(item.price || item.unitPrice || 0).toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
+                      {item.quantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                      Rs.
+                      {Number(
+                        item.total ||
+                          item.totalPrice ||
+                          item.unitPrice * item.quantity ||
+                          0
+                      ).toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -401,199 +447,8 @@ const OrderDetails = ({ order }) => {
 
 export default OrderDetails;
 
-// import React from 'react';
-// import {
-//   Calendar,
-//   User,
-//   Mail,
-//   Phone,
-//   CreditCard,
-//   DollarSign,
-//   Package,
-//   FileText,
-//   Printer
-// } from 'lucide-react';
 
-// const OrderDetails = ({ order }) => {
-//   // Format date
-//   const formatDate = (date) => {
-//     return new Date(date).toLocaleDateString('en-US', {
-//       year: 'numeric',
-//       month: 'short',
-//       day: 'numeric',
-//       hour: '2-digit',
-//       minute: '2-digit'
-//     });
-//   };
 
-//   // Get order type badge
-//   const getOrderTypeInfo = (type) => {
-//     switch (type) {
-//       case 'prescription':
-//         return { color: 'bg-blue-100 text-blue-800', label: 'Prescription' };
-//       case 'otc':
-//         return { color: 'bg-green-100 text-green-800', label: 'OTC Items' };
-//       default:
-//         return { color: 'bg-purple-100 text-purple-800', label: 'Mixed Order' };
-//     }
-//   };
 
-//   const orderTypeInfo = getOrderTypeInfo(order.orderType);
 
-//   // Get payment method icon
-//   const PaymentIcon = order.paymentMethod === 'Credit Card' ? CreditCard : DollarSign;
 
-//   const handlePrintOrder = () => {
-//     window.print();
-//   };
-
-//   return (
-//     <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
-//       <div className="p-6 border-b border-gray-200">
-//         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-//           <div>
-//             <h2 className="text-2xl font-bold text-gray-900">Order {order.id}</h2>
-//             <div className="flex items-center mt-2">
-//               <Calendar className="h-4 w-4 text-gray-500 mr-2" />
-//               <span className="text-gray-600">{formatDate(order.orderDate)}</span>
-//             </div>
-//           </div>
-
-//           <div className="mt-4 sm:mt-0 flex items-center">
-//             <span className={`px-3 py-1 rounded-full text-sm font-medium ${orderTypeInfo.color} mr-3`}>
-//               {orderTypeInfo.label}
-//             </span>
-
-//             <button
-//               onClick={handlePrintOrder}
-//               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-//             >
-//               <Printer className="h-4 w-4" />
-//               <span>Print</span>
-//             </button>
-//           </div>
-//         </div>
-
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-//           <div className="border border-gray-200 rounded-lg p-4">
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
-
-//             <div className="space-y-3">
-//               <div className="flex items-start">
-//                 <User className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Name</p>
-//                   <p className="text-base font-medium text-gray-900">{order.customer.name}</p>
-//                 </div>
-//               </div>
-
-//               <div className="flex items-start">
-//                 <Mail className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Email</p>
-//                   <p className="text-base text-gray-900">{order.customer.email}</p>
-//                 </div>
-//               </div>
-
-//               <div className="flex items-start">
-//                 <Phone className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Phone</p>
-//                   <p className="text-base text-gray-900">{order.customer.phone}</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="border border-gray-200 rounded-lg p-4">
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
-
-//             <div className="space-y-3">
-//               <div className="flex items-start">
-//                 <PaymentIcon className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Payment Method</p>
-//                   <p className="text-base font-medium text-gray-900">{order.paymentMethod}</p>
-//                 </div>
-//               </div>
-
-//               <div className="flex items-start">
-//                 <Package className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Items</p>
-//                   <p className="text-base text-gray-900">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
-//                 </div>
-//               </div>
-
-//               <div className="flex items-start">
-//                 <FileText className="h-5 w-5 text-gray-500 mr-3 mt-0.5" />
-//                 <div>
-//                   <p className="text-sm text-gray-500">Processed By</p>
-//                   <p className="text-base text-gray-900">{order.pharmacist}</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="p-6 border-b border-gray-200">
-//         <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-
-//         <div className="overflow-x-auto">
-//           <table className="min-w-full divide-y divide-gray-200">
-//             <thead className="bg-gray-50">
-//               <tr>
-//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-//                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-//                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-//                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-//                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-//               </tr>
-//             </thead>
-//             <tbody className="bg-white divide-y divide-gray-200">
-//               {order.items.map((item, index) => (
-//                 <tr key={`${item.id}-${index}`} className="hover:bg-gray-50">
-//                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
-//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-//                     <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-//                       item.category === 'prescription' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-//                     }`}>
-//                       {item.category === 'prescription' ? 'Prescription' : 'OTC'}
-//                     </span>
-//                   </td>
-//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${item.price.toFixed(2)}</td>
-//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{item.quantity}</td>
-//                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">${item.total.toFixed(2)}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       <div className="p-6">
-//         <div className="flex flex-col items-end">
-//           <div className="w-full md:w-64 space-y-3">
-//             <div className="flex justify-between text-sm">
-//               <span className="text-gray-500">Subtotal:</span>
-//               <span className="text-gray-900 font-medium">${order.subtotal.toFixed(2)}</span>
-//             </div>
-
-//             <div className="flex justify-between text-sm">
-//               <span className="text-gray-500">Tax (7%):</span>
-//               <span className="text-gray-900 font-medium">${order.tax.toFixed(2)}</span>
-//             </div>
-
-//             <div className="pt-3 border-t border-gray-200 flex justify-between">
-//               <span className="text-lg text-gray-900 font-bold">Total:</span>
-//               <span className="text-lg text-gray-900 font-bold">${order.total.toFixed(2)}</span>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default OrderDetails;

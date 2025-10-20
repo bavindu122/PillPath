@@ -42,3 +42,14 @@ export const tokenUtils = {
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 };
+
+// Export individual functions for easier importing
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem("auth_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+export const getAdminAuthHeaders = () => {
+  const token = localStorage.getItem("admin_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};

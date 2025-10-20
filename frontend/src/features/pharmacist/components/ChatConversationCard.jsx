@@ -70,24 +70,27 @@ const ChatConversationCard = ({ conversation, isSelected, onSelect }) => {
   return (
     <div
       onClick={onSelect}
-      className={`chat-conversation-card p-4 border-b cursor-pointer ${
-        isSelected ? 'selected' : ''
+      className={`p-4 border-b border-blue-100 cursor-pointer transition-all duration-200 hover:bg-blue-50/50 ${
+        isSelected ? 'bg-blue-100/70 border-l-4 border-l-blue-600' : 'hover:shadow-sm'
       }`}
-      style={{ borderColor: 'var(--pharma-border)' }}
     >
       <div className="flex items-start space-x-3">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 relative">
           {patientAvatar ? (
             <img
               src={patientAvatar}
               alt={patientName}
-              className="h-10 w-10 rounded-full object-cover"
+              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
             />
           ) : (
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <User className="h-5 w-5 text-blue-600" />
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+              <User className="h-6 w-6 text-white" />
             </div>
+          )}
+          {/* Online indicator for active chats */}
+          {status === 'active' && (
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full animate-pulse shadow-sm"></div>
           )}
         </div>
 
@@ -95,18 +98,18 @@ const ChatConversationCard = ({ conversation, isSelected, onSelect }) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-2">
-              <h4 className="text-sm font-semibold truncate" style={{ color: 'var(--pharma-text-primary)' }}>
+              <h4 className="text-sm font-semibold text-gray-900 truncate">
                 {patientName}
               </h4>
               {getStatusIcon()}
             </div>
             <div className="flex items-center space-x-2">
               {unreadCount > 0 && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white shadow-sm">
                   {unreadCount}
                 </span>
               )}
-              <span className="text-xs" style={{ color: 'var(--pharma-text-secondary)' }}>
+              <span className="text-xs text-gray-500 font-medium">
                 {formatTime(lastMessageTime)}
               </span>
             </div>
@@ -114,21 +117,21 @@ const ChatConversationCard = ({ conversation, isSelected, onSelect }) => {
 
           {/* Prescription ID if available */}
           {prescriptionId && (
-            <p className="text-xs mb-1" style={{ color: 'var(--pharma-text-secondary)' }}>
+            <p className="text-xs mb-1 text-gray-500 font-medium">
               {prescriptionId}
             </p>
           )}
 
           {/* Last Message */}
-          <p className="text-sm truncate mb-2" style={{ color: 'var(--pharma-text-secondary)' }}>
+          <p className="text-sm text-gray-600 truncate mb-2 leading-relaxed">
             {lastMessage.startsWith('You:') ? (
-              <span className="font-medium">You: </span>
+              <span className="font-medium text-blue-600">You: </span>
             ) : null}
             {lastMessage.replace('You: ', '')}
           </p>
 
           {/* Priority Badge */}
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor()}`}>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor()} shadow-sm`}>
             {priority} priority
           </span>
         </div>

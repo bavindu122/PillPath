@@ -1,4 +1,5 @@
 import ApiService from '../../../services/api/AuthService';
+import { getAuthHeaders } from '../../../utils/tokenUtils';
 
 class FamilyMemberService {
   // Get all family members for the current authenticated user
@@ -62,9 +63,8 @@ class FamilyMemberService {
       ...options,
     };
 
-    // Add auth token if available (use centralized token utils)
-    const { getAuthHeaders } = await import("../../../utils/tokenUtils");
-    const authHeaders = getAuthHeaders ? getAuthHeaders() : {};
+    // Add auth token if available
+    const authHeaders = getAuthHeaders();
     if (authHeaders.Authorization && !config.headers.Authorization) {
       config.headers = { ...config.headers, ...authHeaders };
     }
