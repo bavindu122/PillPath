@@ -14,6 +14,7 @@ import PrescriptionQueue from '../components/PrescriptionQueue';
 import InventoryAlerts from '../components/InventoryAlerts';
 import PatientMessages from '../components/PatientMessages';
 import Header from '../components/Header';
+import { prescriptionService } from '../services/prescriptionService';
 import './index-pharmacist.css';
 
 const PharmacistDashboard = () => {
@@ -22,6 +23,7 @@ const PharmacistDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [fadeIn, setFadeIn] = useState(false);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
     setTimeout(() => {
@@ -30,74 +32,76 @@ const PharmacistDashboard = () => {
     }, 300);
   }, []);
 
-  const loadDashboardData = () => {
-    setPrescriptions([
-      {
-        id: 1,
-        patientName: "RX-250714-02",
-        medication: "Amoxicillin 500mg - 30 tablets",
-        priority: "High Priority",
-        date: "2025-07-04",
-        time: "10:30 AM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 2,
-        patientName: "RX-250714-02",
-        medication: "Metformin 850mg - 60 tablets",
-        priority: "Medium Priority",
-        date: "2025-07-04",
-        time: "11:15 AM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 3,
-        patientName: "RX-250714-03",
-        medication: "Lisinopril 10mg - 30 tablets",
-        priority: "Low Priority",
-        date: "2025-07-04",
-        time: "2:45 PM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 4,
-        patientName: "RX-250714-04",
-        medication: "Atorvastatin 20mg - 90 tablets",
-        priority: "Medium Priority",
-        date: "2025-07-04",
-        time: "3:20 PM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 5,
-        patientName: "RX-250714-05",
-        medication: "Omeprazole 40mg - 14 capsules",
-        priority: "High Priority",
-        time: "4:10 PM",
-        date: "2025-07-04",
-        avatar: "/api/placeholder/40/40",
-      }
-    ]);
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Load prescriptions from the API
+      const prescriptionData = await prescriptionService.loadPrescriptions();
+      
+      // Limit to first 5 prescriptions for dashboard display
+      setPrescriptions(prescriptionData.slice(0, 5));
 
-    setInventoryAlerts([
-      { id: 1, medication: "Aspirin 325mg", status: "Only 12 left", type: "low" },
-      { id: 2, medication: "Ibuprofen 200mg", status: "25 remaining", type: "medium" },
-      { id: 3, medication: "Acetaminophen", status: "Critical: 8 left", type: "critical" }
-    ]);
+      // TODO: Replace with actual API calls when available
+      setInventoryAlerts([
+        { id: 1, medication: "Aspirin 325mg", status: "Only 12 left", type: "low" },
+        { id: 2, medication: "Ibuprofen 200mg", status: "25 remaining", type: "medium" },
+        { id: 3, medication: "Acetaminophen", status: "Critical: 8 left", type: "critical" }
+      ]);
 
-    setMessages([
-      { id: 1, name: "Sanath Ranathunga", message: "Question about dosage...", unread: true },
-      { id: 2, name: "Amal Perera", message: "Prescription ready?", unread: false }
-    ]);
+      setMessages([
+        { id: 1, name: "Sanath Ranathunga", message: "Question about dosage...", unread: true },
+        { id: 2, name: "Amal Perera", message: "Prescription ready?", unread: false }
+      ]);
 
-    setIsLoading(false);
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+      setError(err.message || 'Failed to load dashboard data');
+      setPrescriptions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await prescriptionService.updateStatus(id, 'IN_PROGRESS');
+      // Reload data to reflect changes
+      loadDashboardData();
+    } catch (err) {
+      console.error('Error approving prescription:', err);
+      alert(err.message || 'Failed to approve prescription');
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await prescriptionService.updateStatus(id, 'REJECTED');
+      // Reload data to reflect changes
+      loadDashboardData();
+    } catch (err) {
+      console.error('Error rejecting prescription:', err);
+      alert(err.message || 'Failed to reject prescription');
+    }
+  };
+
+  const handleClarify = async (id) => {
+    try {
+      await prescriptionService.updateStatus(id, 'CLARIFICATION_NEEDED');
+      // Reload data to reflect changes
+      loadDashboardData();
+    } catch (err) {
+      console.error('Error requesting clarification:', err);
+      alert(err.message || 'Failed to request clarification');
+    }
   };
 
   const statsData = [
-    { title: "Pending Prescriptions", value: "24", subtitle: "14 from yesterday", color: "blue" },
+    { title: "Pending Prescriptions", value: prescriptions.length.toString(), subtitle: "In queue", color: "blue" },
     { title: "Today's Orders", value: "87", subtitle: "+12% from last week", color: "green" },
-    { title: "Low Stock Alerts", value: "7", subtitle: "Requires attention", color: "orange" },
-    { title: "Patient Messages", value: "15", subtitle: "3 unread", color: "purple" }
+    { title: "Low Stock Alerts", value: inventoryAlerts.length.toString(), subtitle: "Requires attention", color: "orange" },
+    { title: "Patient Messages", value: messages.filter(m => m.unread).length.toString(), subtitle: `${messages.length} total`, color: "purple" }
   ];
   
   if (isLoading) {
@@ -130,12 +134,29 @@ const PharmacistDashboard = () => {
               borderColor: 'var(--pharma-border)'
             }}
           >
-            <PrescriptionQueue 
-              prescriptions={prescriptions}
-              onApprove={(id) => console.log('Approve:', id)}
-              onReject={(id) => console.log('Reject:', id)}
-              onClarify={(id) => console.log('Clarify:', id)}
-            />
+            {error ? (
+              <div className="p-6 text-center">
+                <p className="text-red-600 mb-2">Failed to load prescriptions</p>
+                <p className="text-sm text-gray-600 mb-4">{error}</p>
+                <button
+                  onClick={loadDashboardData}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : prescriptions.length === 0 && !isLoading ? (
+              <div className="p-6 text-center">
+                <p className="text-gray-600">No prescriptions in queue</p>
+              </div>
+            ) : (
+              <PrescriptionQueue 
+                prescriptions={prescriptions}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onClarify={handleClarify}
+              />
+            )}
           </div>
         </div>
         
