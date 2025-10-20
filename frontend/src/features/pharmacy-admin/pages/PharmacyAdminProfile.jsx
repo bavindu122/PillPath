@@ -87,6 +87,25 @@ const PharmacyAdminProfile = () => {
       setProfileData(updatedProfile);
       setEditedData(updatedProfile);
       setIsEditMode(false);
+      
+      // Update localStorage user data to refresh header immediately
+      const storedUser = localStorage.getItem("user_data");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        const updatedUser = { 
+          ...userData, 
+          fullName: updatedProfile.fullName,
+          email: updatedProfile.email,
+          phoneNumber: updatedProfile.phoneNumber,
+          dateOfBirth: updatedProfile.dateOfBirth,
+          address: updatedProfile.address,
+          position: updatedProfile.position
+        };
+        localStorage.setItem('user_data', JSON.stringify(updatedUser));
+        // Trigger a storage event to update header and other components
+        window.dispatchEvent(new Event('storage'));
+      }
+      
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -122,6 +141,17 @@ const PharmacyAdminProfile = () => {
       const result = await pharmacyAdminProfileService.uploadProfilePicture(file);
       setProfileData(result.profile);
       setEditedData(result.profile);
+      
+      // Update localStorage user data to refresh header
+      const storedUser = localStorage.getItem("user_data");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        const updatedUser = { ...userData, profilePictureUrl: result.profile.profilePictureUrl };
+        localStorage.setItem('user_data', JSON.stringify(updatedUser));
+        // Trigger a storage event to update other components
+        window.dispatchEvent(new Event('storage'));
+      }
+      
       toast.success("Profile picture updated successfully!");
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -141,6 +171,17 @@ const PharmacyAdminProfile = () => {
       const result = await pharmacyAdminProfileService.deleteProfilePicture();
       setProfileData(result.profile);
       setEditedData(result.profile);
+      
+      // Update localStorage user data to refresh header
+      const storedUser = localStorage.getItem("user_data");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        const updatedUser = { ...userData, profilePictureUrl: null };
+        localStorage.setItem('user_data', JSON.stringify(updatedUser));
+        // Trigger a storage event to update other components
+        window.dispatchEvent(new Event('storage'));
+      }
+      
       toast.success("Profile picture removed successfully!");
     } catch (error) {
       console.error("Error removing image:", error);
@@ -209,12 +250,9 @@ const PharmacyAdminProfile = () => {
 
         {/* Profile Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Cover Section */}
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-blue-700"></div>
-
           {/* Profile Picture Section */}
-          <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 mb-6">
+          <div className="px-6 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-6">
               <div className="relative">
                 <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gray-200 overflow-hidden">
                   {displayData.profilePictureUrl ? (
