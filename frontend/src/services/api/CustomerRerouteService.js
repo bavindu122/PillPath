@@ -23,9 +23,13 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
-export async function listCandidates(prescriptionId, { excludePharmacyId, lat, lng, radiusKm, limit, offset } = {}) {
+export async function listCandidates(
+  prescriptionId,
+  { excludePharmacyId, lat, lng, radiusKm, limit, offset } = {}
+) {
   const params = new URLSearchParams();
-  if (excludePharmacyId != null) params.set("excludePharmacyId", String(excludePharmacyId));
+  if (excludePharmacyId != null)
+    params.set("excludePharmacyId", String(excludePharmacyId));
   if (lat != null && lng != null) {
     params.set("lat", String(lat));
     params.set("lng", String(lng));
@@ -33,7 +37,10 @@ export async function listCandidates(prescriptionId, { excludePharmacyId, lat, l
   }
   if (limit != null) params.set("limit", String(limit));
   if (offset != null) params.set("offset", String(offset));
-  return request(`prescriptions/customer/${prescriptionId}/reroute/candidates?${params.toString()}`, { method: "GET" });
+  return request(
+    `prescriptions/customer/${prescriptionId}/reroute/candidates?${params.toString()}`,
+    { method: "GET" }
+  );
 }
 
 export async function reroute(prescriptionId, body, { idempotencyKey } = {}) {
