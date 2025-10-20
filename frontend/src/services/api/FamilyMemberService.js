@@ -6,7 +6,25 @@ export const familyMemberService = {
     try {
       console.log('=== UPDATING FAMILY MEMBER PROFILE ===');
       console.log('Family member ID:', familyMemberId);
-      console.log('Profile data:', profileData);
+// Simple logger that checks VITE_ENABLE_LOGGING environment variable
+function logger(...args) {
+  if (import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    console.log(...args);
+  }
+}
+function logError(...args) {
+  if (import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    console.error(...args);
+  }
+}
+
+export const familyMemberService = {
+  // Update family member profile
+  updateFamilyMemberProfile: async (familyMemberId, profileData) => {
+    try {
+      logger('=== UPDATING FAMILY MEMBER PROFILE ===');
+      logger('Family member ID:', familyMemberId);
+      logger('Profile data:', profileData);
       
       // Get token using the same method as ApiService
       const token = localStorage.getItem('auth_token');
