@@ -227,13 +227,6 @@ const CustomerProfile = ({ removeBg = false }) => {
                     </span>
                     Family Profiles
                   </h2>
-                  <Button
-                    size="sm"
-                    className="bg-white/20 hover:bg-white/30 text-white text-xs"
-                    onClick={() => setShowProfileModal(true)}
-                  >
-                    Manage
-                  </Button>
                 </div>
                 <FamilyProfilesCard />
               </div>
