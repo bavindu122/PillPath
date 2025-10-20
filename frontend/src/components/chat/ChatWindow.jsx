@@ -347,8 +347,15 @@ const ChatWindow = ({ onBack, className = "" }) => {
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="relative flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
-        style={{ scrollBehavior: "smooth" }}
+        className="relative p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent chat-messages-container backdrop-blur-sm"
+        style={{ 
+          flex: "1 1 0%",
+          overflowY: "scroll",
+          overflowX: "hidden",
+          maxHeight: "calc(100vh - 300px)",
+          minHeight: "400px",
+          scrollBehavior: "smooth"
+        }}
       >
         {/* Loading more messages indicator */}
         {loadingMessages && (
