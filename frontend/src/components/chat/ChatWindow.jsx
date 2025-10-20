@@ -1,28 +1,39 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ArrowLeft, Phone, Video, MoreVertical, User, Users, Circle, MessageCircle, MessageSquare, ChevronDown } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import { useChat } from '../../contexts/ChatContextLive';
-import MessageBubble, { DateSeparator, TypingIndicator } from './MessageBubble';
-import MessageInput from './MessageInput';
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import {
+  ArrowLeft,
+  Phone,
+  Video,
+  MoreVertical,
+  User,
+  Users,
+  Circle,
+  MessageCircle,
+  MessageSquare,
+  ChevronDown,
+} from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import { useChat } from "../../contexts/ChatContextLive";
+import MessageBubble, { DateSeparator, TypingIndicator } from "./MessageBubble";
+import MessageInput from "./MessageInput";
 
-const ChatWindow = ({ onBack, className = '' }) => {
+const ChatWindow = ({ onBack, className = "" }) => {
   const { user } = useAuth();
-  
+
   const {
     activeChat,
     messages,
     fetchMessages,
     typingUsers,
     onlineUsers,
-    loading
+    loading,
   } = useChat();
-  
+
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [page, setPage] = useState(0);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const [hasNewSinceAway, setHasNewSinceAway] = useState(false);
-  
+
   const messagesContainerRef = useRef(null);
   const prevScrollHeight = useRef(0);
 
@@ -30,32 +41,41 @@ const ChatWindow = ({ onBack, className = '' }) => {
   const chatMessages = activeChat ? messages[activeChat.id] || [] : [];
 
   // Get other participant information
-  const otherParticipant = activeChat ? (
-    user?.role === 'customer' 
-      ? (activeChat.pharmacy || activeChat.pharmacist)
+  const otherParticipant = activeChat
+    ? user?.role === "customer"
+      ? activeChat.pharmacy || activeChat.pharmacist
       : activeChat.customer
-  ) : null;
-  const displayName = otherParticipant?.name 
-    || otherParticipant?.pharmacyName 
-    || otherParticipant?.displayName 
-    || otherParticipant?.title 
-    || activeChat?.pharmacyName 
-    || 'Unknown User';
+    : null;
+  const displayName =
+    otherParticipant?.name ||
+    otherParticipant?.pharmacyName ||
+    otherParticipant?.displayName ||
+    otherParticipant?.title ||
+    activeChat?.pharmacyName ||
+    "Unknown User";
 
   // Check if other participant is online
-  const isOtherParticipantOnline = otherParticipant ? onlineUsers.has(otherParticipant.id) : false;
+  const isOtherParticipantOnline = otherParticipant
+    ? onlineUsers.has(otherParticipant.id)
+    : false;
 
   // Check if other participant is typing
-  const isOtherParticipantTyping = activeChat && typingUsers[activeChat.id] && 
-    Object.keys(typingUsers[activeChat.id]).some(uid => 
-      String(uid) !== String(user?.id) && typingUsers[activeChat.id][uid]
+  const isOtherParticipantTyping =
+    activeChat &&
+    typingUsers[activeChat.id] &&
+    Object.keys(typingUsers[activeChat.id]).some(
+      (uid) =>
+        String(uid) !== String(user?.id) && typingUsers[activeChat.id][uid]
     );
 
   // Scroll to bottom
   const scrollToBottom = useCallback((smooth = true) => {
     const container = messagesContainerRef.current;
     if (container) {
-      container.scrollTo({ top: container.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? "smooth" : "auto",
+      });
     }
   }, []);
 
@@ -87,7 +107,11 @@ const ChatWindow = ({ onBack, className = '' }) => {
     if (chatMessages.length > 0) {
       const container = messagesContainerRef.current;
       if (container) {
-        const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop <= 100;
+        const isNearBottom =
+          container.scrollHeight -
+            container.clientHeight -
+            container.scrollTop <=
+          100;
         if (isNearBottom) {
           scrollToBottom();
           setHasNewSinceAway(false);
@@ -104,9 +128,12 @@ const ChatWindow = ({ onBack, className = '' }) => {
   // Load more messages when scrolling to top
   const handleScroll = useCallback(async () => {
     const container = messagesContainerRef.current;
-    if (!container || loadingMessages || !hasMoreMessages || !activeChat) return;
+    if (!container || loadingMessages || !hasMoreMessages || !activeChat)
+      return;
     // Track scroll-to-bottom button visibility
-    const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop <= 100;
+    const isNearBottom =
+      container.scrollHeight - container.clientHeight - container.scrollTop <=
+      100;
     setShowScrollToBottom(!isNearBottom);
     if (isNearBottom) {
       setHasNewSinceAway(false);
@@ -117,16 +144,16 @@ const ChatWindow = ({ onBack, className = '' }) => {
     if (atTop) {
       setLoadingMessages(true);
       prevScrollHeight.current = container.scrollHeight;
-      
+
       try {
         const newMessages = await fetchMessages(activeChat.id, page + 1);
         if (newMessages.length === 0) {
           setHasMoreMessages(false);
         } else {
-          setPage(prev => prev + 1);
+          setPage((prev) => prev + 1);
         }
       } catch (error) {
-        console.error('Error loading more messages:', error);
+        console.error("Error loading more messages:", error);
       } finally {
         setLoadingMessages(false);
         // Maintain viewport position after prepending
@@ -156,40 +183,46 @@ const ChatWindow = ({ onBack, className = '' }) => {
     sorted.forEach((message, index) => {
       const ts = message.timestamp || message.time || new Date().toISOString();
       const dateObj = new Date(ts);
-      const messageDate = isNaN(dateObj.getTime()) ? new Date().toDateString() : dateObj.toDateString();
+      const messageDate = isNaN(dateObj.getTime())
+        ? new Date().toDateString()
+        : dateObj.toDateString();
 
       if (messageDate !== currentDate) {
         if (currentGroup.length > 0) {
-          groups.push({ type: 'messages', messages: currentGroup });
+          groups.push({ type: "messages", messages: currentGroup });
           currentGroup = [];
         }
-        groups.push({ type: 'date', date: messageDate });
+        groups.push({ type: "date", date: messageDate });
         currentDate = messageDate;
         currentSender = null;
       }
 
-  // Determine grouping relative to previous (ascending order)
+      // Determine grouping relative to previous (ascending order)
       const prev = sorted[index - 1];
-      const currentTime = new Date(message.timestamp || message.time || 0).getTime();
+      const currentTime = new Date(
+        message.timestamp || message.time || 0
+      ).getTime();
       const prevTime = new Date(prev?.timestamp || prev?.time || 0).getTime();
-  const withinFiveMin = currentTime && prevTime && (currentTime - prevTime) < 300000;
-      const shouldGroup = currentSender === message.senderId && index > 0 && withinFiveMin;
+      const withinFiveMin =
+        currentTime && prevTime && currentTime - prevTime < 300000;
+      const shouldGroup =
+        currentSender === message.senderId && index > 0 && withinFiveMin;
 
       if (!shouldGroup && currentGroup.length > 0) {
-        groups.push({ type: 'messages', messages: currentGroup });
+        groups.push({ type: "messages", messages: currentGroup });
         currentGroup = [];
       }
 
       currentGroup.push({
         ...message,
         isGrouped: shouldGroup,
-        showAvatar: !shouldGroup || currentGroup.length === 0
+        showAvatar: !shouldGroup || currentGroup.length === 0,
       });
       currentSender = message.senderId;
     });
 
     if (currentGroup.length > 0) {
-      groups.push({ type: 'messages', messages: currentGroup });
+      groups.push({ type: "messages", messages: currentGroup });
     }
 
     return groups;
@@ -197,20 +230,29 @@ const ChatWindow = ({ onBack, className = '' }) => {
 
   if (!activeChat) {
     return (
-      <div className={`flex items-center justify-center h-full bg-transparent ${className}`}>
+      <div
+        className={`flex items-center justify-center h-full bg-transparent ${className}`}
+      >
         <div className="text-center">
           <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
             <MessageSquare className="w-8 h-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No chat selected</h3>
-          <p className="text-gray-500">Choose a conversation to start messaging</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No chat selected
+          </h3>
+          <p className="text-gray-500">
+            Choose a conversation to start messaging
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`chat-window-container flex flex-col bg-transparent ${className}`} style={{ height: '100%', maxHeight: '100%' }}>
+    <div
+      className={`chat-window-container flex flex-col bg-transparent ${className}`}
+      style={{ height: "100%", maxHeight: "100%" }}
+    >
       {/* Chat Header */}
       <div className="px-4 py-4 border-white/30 flex items-center justify-between bg-white/60 backdrop-blur-md flex-shrink-0 shadow-sm ">
         <div className="flex items-center space-x-3">
@@ -232,14 +274,14 @@ const ChatWindow = ({ onBack, className = '' }) => {
               />
             ) : (
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
-                {user?.role === 'customer' ? (
+                {user?.role === "customer" ? (
                   <Users className="w-6 h-6 text-white" />
                 ) : (
                   <User className="w-6 h-6 text-white" />
                 )}
               </div>
             )}
-            
+
             {/* Online indicator */}
             {isOtherParticipantOnline && (
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full animate-pulse shadow-sm"></div>
@@ -248,17 +290,31 @@ const ChatWindow = ({ onBack, className = '' }) => {
 
           {/* Participant Info */}
           <div>
-            <h3 className="font-semibold text-gray-900 text-lg">{displayName}</h3>
+            <h3 className="font-semibold text-gray-900 text-lg">
+              {displayName}
+            </h3>
             <div className="flex items-center space-x-2">
-              <Circle 
-                className={`w-2 h-2 ${isOtherParticipantOnline ? 'text-green-500 fill-current' : 'text-gray-400'}`} 
+              <Circle
+                className={`w-2 h-2 ${
+                  isOtherParticipantOnline
+                    ? "text-green-500 fill-current"
+                    : "text-gray-400"
+                }`}
               />
-              <span className={`text-sm font-medium ${
-                isOtherParticipantTyping ? 'text-gray-900' : 
-                isOtherParticipantOnline ? 'text-green-600' : 'text-gray-500'
-              }`}>
-                {isOtherParticipantTyping ? 'Typing...' : 
-                 isOtherParticipantOnline ? 'Online' : 'Offline'}
+              <span
+                className={`text-sm font-medium ${
+                  isOtherParticipantTyping
+                    ? "text-gray-900"
+                    : isOtherParticipantOnline
+                    ? "text-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                {isOtherParticipantTyping
+                  ? "Typing..."
+                  : isOtherParticipantOnline
+                  ? "Online"
+                  : "Offline"}
               </span>
             </div>
           </div>
@@ -288,11 +344,11 @@ const ChatWindow = ({ onBack, className = '' }) => {
       </div>
 
       {/* Messages Area - Scrollable content */}
-      <div 
+      <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
         className="relative flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
-        style={{ scrollBehavior: 'smooth' }}
+        style={{ scrollBehavior: "smooth" }}
       >
         {/* Loading more messages indicator */}
         {loadingMessages && (
@@ -304,7 +360,9 @@ const ChatWindow = ({ onBack, className = '' }) => {
         {/* No more messages indicator */}
         {!hasMoreMessages && chatMessages.length > 0 && (
           <div className="text-center py-2">
-            <span className="text-xs text-gray-500">This is the beginning of your conversation</span>
+            <span className="text-xs text-gray-500">
+              This is the beginning of your conversation
+            </span>
           </div>
         )}
 
@@ -315,17 +373,20 @@ const ChatWindow = ({ onBack, className = '' }) => {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <MessageCircle className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Ready to chat!</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">
+                Ready to chat!
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Send your first message to start a conversation with {displayName}. 
-                They're here to help with your health and pharmacy needs.
+                Send your first message to start a conversation with{" "}
+                {displayName}. They're here to help with your health and
+                pharmacy needs.
               </p>
             </div>
           </div>
         ) : (
           groupedMessages.map((group, groupIndex) => (
             <div key={groupIndex}>
-              {group.type === 'date' ? (
+              {group.type === "date" ? (
                 <DateSeparator date={group.date} />
               ) : (
                 <div className="space-y-1">
@@ -373,15 +434,15 @@ const ChatWindow = ({ onBack, className = '' }) => {
 
       {/* Message Input - Fixed at bottom */}
       <div
-  className="flex-shrink-0 border-t border-white/30 bg-white/60 backdrop-blur-md"
-  style={{ position: 'sticky', bottom: 0, zIndex: 10 }}
->
-  <MessageInput
-    chatId={activeChat?.id}
-    disabled={loading || !activeChat}
-    className="text-black placeholder:text-gray-500"
-  />
-</div>
+        className="flex-shrink-0 border-t border-white/30 bg-white/60 backdrop-blur-md"
+        style={{ position: "sticky", bottom: 0, zIndex: 10 }}
+      >
+        <MessageInput
+          chatId={activeChat?.id}
+          disabled={loading || !activeChat}
+          className="text-black placeholder:text-gray-500"
+        />
+      </div>
     </div>
   );
 };
