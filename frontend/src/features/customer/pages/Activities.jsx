@@ -221,6 +221,133 @@ const Activities = () => {
     }
   };
 
+  // Derive a linear progress from pharmacy status/order state
+  const getProgressForPharmacy = (pharmacy) => {
+    const steps = [
+      "Pending Review",
+      "In Progress",
+      "Preview Ready",
+      "Proceed to Payment",
+      "Order Placed",
+      "Preparing",
+      "Ready for Pickup",
+      "Completed",
+    ];
+
+    const s = String(pharmacy.status || "").toLowerCase();
+    const hasOrder = pharmacy.orderStatus != null && !!pharmacy.orderCode;
+    const ost = String(pharmacy.orderStatus || "").toUpperCase();
+
+    // Danger states
+    if (s.includes("cancelled") || s.includes("rejected")) {
+      return {
+        step: steps.length - 1,
+        total: steps.length,
+        percent: 100,
+        label: s.includes("rejected") ? "Rejected" : "Cancelled",
+        variant: "danger",
+      };
+    }
+
+    // Success state
+    if (s.includes("completed") || ost.includes("COMPLETED")) {
+      return {
+        step: steps.length - 1,
+        total: steps.length,
+        percent: 100,
+        label: "Completed",
+        variant: "success",
+      };
+    }
+
+    // Order-related mapping (dominant)
+    if (hasOrder) {
+      if (ost.includes("READY")) {
+        return {
+          step: 6,
+          total: steps.length,
+          percent: (6 / (steps.length - 1)) * 100,
+          label: "Ready for pickup",
+          variant: "normal",
+        };
+      }
+      if (ost.includes("PREPARING")) {
+        return {
+          step: 5,
+          total: steps.length,
+          percent: (5 / (steps.length - 1)) * 100,
+          label: "Preparing order",
+          variant: "normal",
+        };
+      }
+      if (ost.includes("RECEIVED") || s.includes("order placed")) {
+        return {
+          step: 4,
+          total: steps.length,
+          percent: (4 / (steps.length - 1)) * 100,
+          label: "Order placed",
+          variant: "normal",
+        };
+      }
+      // Fallback when order exists but status is vague
+      return {
+        step: 4,
+        total: steps.length,
+        percent: (4 / (steps.length - 1)) * 100,
+        label: "Order placed",
+        variant: "normal",
+      };
+    }
+
+    // Payment available
+    if (s.includes("payment")) {
+      return {
+        step: 3,
+        total: steps.length,
+        percent: (3 / (steps.length - 1)) * 100,
+        label: "Proceed to payment",
+        variant: "normal",
+      };
+    }
+
+    // Preview ready
+    if (
+      s.includes("view order preview") ||
+      pharmacy.canViewPreview ||
+      pharmacy.medications
+    ) {
+      return {
+        step: 2,
+        total: steps.length,
+        percent: (2 / (steps.length - 1)) * 100,
+        label: "Preview ready",
+        variant: "normal",
+      };
+    }
+
+    // Working states
+    if (s.includes("progress") || s.includes("clarification")) {
+      return {
+        step: 1,
+        total: steps.length,
+        percent: (1 / (steps.length - 1)) * 100,
+        label: s.includes("clarification")
+          ? "Clarification needed"
+          : "In progress",
+        variant: "normal",
+      };
+    }
+
+    // Default
+    return {
+      step: 0,
+      total: steps.length,
+      percent: 0,
+      label: "Pending review",
+      variant: "normal",
+    };
+  };
+
   // Helper to navigate to order detail with all needed params
   const gotoOrderDetail = (prescriptionId, pharmacy) => {
     const q = new URLSearchParams({
@@ -454,6 +581,101 @@ const Activities = () => {
                           </svg>
                         </motion.div>
                       </div>
+                    </div>
+                    {/* Bottom stepper showing current status among all steps */}
+                    <div className="pt-3 mt-3 border-t border-white/10">
+                      {(() => {
+                        const prog = getProgressForPharmacy(pharmacy);
+                        const steps = [
+                          {
+                            key: "Pending Review",
+                            icon: <AlertCircle className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "In Progress",
+                            icon: <Loader2 className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Preview Ready",
+                            icon: <Eye className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Proceed to Payment",
+                            icon: <CreditCard className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Order Placed",
+                            icon: <Package className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Preparing",
+                            icon: <Package className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Ready for Pickup",
+                            icon: <Truck className="w-3.5 h-3.5" />,
+                          },
+                          {
+                            key: "Completed",
+                            icon: <CheckCircle className="w-3.5 h-3.5" />,
+                          },
+                        ];
+                        return (
+                          <div className="flex items-center justify-between">
+                            {steps.map((step, idx) => {
+                              const isCurrent = idx === prog.step;
+                              const isDone = idx < prog.step;
+                              const danger = prog.variant === "danger";
+                              const success = prog.variant === "success";
+                              const circleClass = isCurrent
+                                ? danger
+                                  ? "bg-red-500 text-white border-red-400"
+                                  : success
+                                  ? "bg-emerald-500 text-white border-emerald-400"
+                                  : "bg-sky-500/80 text-white border-sky-400"
+                                : isDone
+                                ? danger
+                                  ? "bg-red-500/60 text-white border-red-400/70"
+                                  : "bg-emerald-500/40 text-white border-emerald-400/50"
+                                : "bg-white/10 text-white/60 border-white/20";
+                              const lineClass =
+                                isDone || isCurrent
+                                  ? danger
+                                    ? "bg-red-400"
+                                    : success
+                                    ? "bg-emerald-400"
+                                    : "bg-sky-400"
+                                  : "bg-white/15";
+                              return (
+                                <React.Fragment key={idx}>
+                                  <div className="flex flex-col items-center min-w-0">
+                                    <div
+                                      className={`w-6 h-6 rounded-full border flex items-center justify-center ${circleClass}`}
+                                    >
+                                      {step.icon}
+                                    </div>
+                                    <div
+                                      className={`mt-1 text-[10px] truncate ${
+                                        isCurrent
+                                          ? "text-white"
+                                          : "text-white/60"
+                                      }`}
+                                      style={{ maxWidth: 72 }}
+                                    >
+                                      {step.key}
+                                    </div>
+                                  </div>
+                                  {idx < steps.length - 1 && (
+                                    <div
+                                      className={`flex-1 h-px mx-2 ${lineClass}`}
+                                    />
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </motion.div>
                 ))}

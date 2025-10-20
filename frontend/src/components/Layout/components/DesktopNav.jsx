@@ -5,9 +5,7 @@ const DesktopNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleContactClick = (e) => {
-    e.preventDefault();
-    
+  const handleContactClick = () => {
     if (location.pathname === '/') {
       // If already on home page, just scroll to footer
       const footer = document.querySelector('#contact');
@@ -77,16 +75,28 @@ const DesktopNav = () => {
         >
           <li className="py-1">Find Pharmacies</li>
         </NavLink>
-        <button
-          onClick={handleContactClick}
-          className="px-2 py-1 lg:px-3 rounded-full transition-all duration-300 navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue"
-        >
-          <li className="py-1">Contact</li>
-        </button>
+        <li className="py-1">
+          <button
+            type="button"
+            className="px-2 py-1 lg:px-3 rounded-full transition-all duration-300 navbar-text-primary hover:navbar-blue-text navbar-hover-bg-blue focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            onClick={handleContactClick}
+            aria-label="Navigate to contact section"
+            aria-describedby="contact-description"
+            tabIndex={0}
+            role="button"
+          >
+            Contact
+            <span id="contact-description" className="sr-only">
+              Click to navigate to the contact section at the bottom of the home page
+            </span>
+          </button>
+        </li>
       </ul>
     </div>
   );
 };
 
 export default DesktopNav;
+
+
 

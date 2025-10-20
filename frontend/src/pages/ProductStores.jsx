@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   MapPin,
@@ -17,196 +17,27 @@ import {
   Package,
   CreditCard,
   Timer,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
-
-// Import your actual images
-import allergyReliefImg from "../assets/img/meds/allergy_relief.jpg";
-import antacidImg from "../assets/img/meds/Antacid.jpg";
-import coughSyrupImg from "../assets/img/meds/cough_syrup.jpg";
-import ibuprofenImg from "../assets/img/meds/Ibuprofen.jpg";
-import panadolImg from "../assets/img/meds/Panadol.jpg";
-import paracetamolImg from "../assets/img/meds/paracetamol.webp";
-import vitaminCImg from "../assets/img/meds/Vitamin_c.jpg";
-
-// Mock data for products
-const productData = {
-  1: {
-    id: 1,
-    name: "Paracetamol",
-    description: "Pain reliever and fever reducer",
-    image: paracetamolImg,
-    rating: 4.5,
-    category: "Pain Relief",
-    manufacturer: "Generic Pharma",
-    dosage: "500mg",
-    packSize: "20 tablets",
-  },
-  2: {
-    id: 2,
-    name: "Ibuprofen",
-    description: "Anti-inflammatory pain relief",
-    image: ibuprofenImg,
-    rating: 4.3,
-    category: "Pain Relief",
-    manufacturer: "MediCorp",
-    dosage: "400mg",
-    packSize: "30 tablets",
-  },
-  3: {
-    id: 3,
-    name: "Vitamin C",
-    description: "Immune system support",
-    image: vitaminCImg,
-    rating: 4.7,
-    category: "Vitamins",
-    manufacturer: "VitaPlus",
-    dosage: "1000mg",
-    packSize: "60 tablets",
-  },
-  4: {
-    id: 4,
-    name: "Cough Syrup",
-    description: "Relieves cough and throat irritation",
-    image: coughSyrupImg,
-    rating: 4.2,
-    category: "Cold & Flu",
-    manufacturer: "CoughCare",
-    dosage: "100ml",
-    packSize: "1 bottle",
-  },
-  5: {
-    id: 5,
-    name: "Antacid",
-    description: "Relieves heartburn and indigestion",
-    image: antacidImg,
-    rating: 4.4,
-    category: "Digestive",
-    manufacturer: "DigestEase",
-    dosage: "10ml",
-    packSize: "200ml bottle",
-  },
-  6: {
-    id: 6,
-    name: "Allergy Relief",
-    description: "Reduces allergy symptoms",
-    image: allergyReliefImg,
-    rating: 4.6,
-    category: "Allergy",
-    manufacturer: "AllerCare",
-    dosage: "10mg",
-    packSize: "30 tablets",
-  },
-};
-
-// Mock data for stores with the product
-const mockStores = [
-  {
-    id: 1,
-    name: "HealthPlus Pharmacy",
-    address: "123 Main St, Downtown",
-    distance: "0.5 km",
-    rating: 4.8,
-    reviews: 324,
-    phone: "+1 (555) 123-4567",
-    openTime: "24/7",
-    price: 8.99,
-    originalPrice: 12.99,
-    discount: 31,
-    inStock: true,
-    stockCount: 15,
-    deliveryTime: "30 mins",
-    deliveryFee: 2.99,
-    verified: true,
-    features: [
-      "Free Delivery over $25",
-      "Prescription Available",
-      "Insurance Accepted",
-    ],
-  },
-  {
-    id: 2,
-    name: "MediCare Central",
-    address: "456 Oak Avenue, Midtown",
-    distance: "1.2 km",
-    rating: 4.6,
-    reviews: 198,
-    phone: "+1 (555) 987-6543",
-    openTime: "8 AM - 10 PM",
-    price: 9.49,
-    originalPrice: 11.99,
-    discount: 21,
-    inStock: true,
-    stockCount: 8,
-    deliveryTime: "45 mins",
-    deliveryFee: 3.99,
-    verified: true,
-    features: ["Senior Discounts", "Loyalty Program", "Online Consultation"],
-  },
-  {
-    id: 3,
-    name: "QuickMeds Express",
-    address: "789 Pine Street, Uptown",
-    distance: "2.1 km",
-    rating: 4.4,
-    reviews: 276,
-    phone: "+1 (555) 456-7890",
-    openTime: "7 AM - 11 PM",
-    price: 10.99,
-    originalPrice: 13.99,
-    discount: 21,
-    inStock: true,
-    stockCount: 25,
-    deliveryTime: "25 mins",
-    deliveryFee: 1.99,
-    verified: false,
-    features: ["Fast Delivery", "Mobile App", "Contactless Payment"],
-  },
-  {
-    id: 4,
-    name: "Family Health Store",
-    address: "321 Elm Road, Riverside",
-    distance: "3.5 km",
-    rating: 4.2,
-    reviews: 142,
-    phone: "+1 (555) 321-0987",
-    openTime: "9 AM - 9 PM",
-    price: 7.99,
-    originalPrice: 9.99,
-    discount: 20,
-    inStock: false,
-    stockCount: 0,
-    deliveryTime: "Next Day",
-    deliveryFee: 4.99,
-    verified: true,
-    features: ["Family Owned", "Personal Service", "Health Consultations"],
-  },
-  {
-    id: 5,
-    name: "Metro Pharmacy Chain",
-    address: "654 Broadway, City Center",
-    distance: "4.2 km",
-    rating: 4.7,
-    reviews: 512,
-    phone: "+1 (555) 654-3210",
-    openTime: "24/7",
-    price: 11.49,
-    originalPrice: 14.99,
-    discount: 23,
-    inStock: true,
-    stockCount: 50,
-    deliveryTime: "20 mins",
-    deliveryFee: 0,
-    verified: true,
-    features: ["Free Delivery", "Membership Rewards", "Drive-Through"],
-  },
-];
+import { useProductPharmacies } from "../hooks/useProductPharmacies";
+import { orderService } from "../services/api/OtcOrderService"; // ✅ Import order service
+import { useAuth } from "../hooks/useAuth"; // ✅ Import auth hook
 
 const ProductStores = () => {
-  const { productId } = useParams();
+  const { productName } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [stores, setStores] = useState(mockStores);
-  const [filteredStores, setFilteredStores] = useState(mockStores);
+  const location = useLocation();
+  const product = location.state?.product;
+  const { user } = useAuth(); // ✅ Get logged-in user
+
+  // Decode product name from URL
+  const decodedProductName = decodeURIComponent(productName);
+
+  // Fetch pharmacies with the product
+  const { pharmacies, loading, error } = useProductPharmacies(decodedProductName);
+
+  const [filteredStores, setFilteredStores] = useState([]);
   const [sortBy, setSortBy] = useState("distance");
   const [filterBy, setFilterBy] = useState("all");
   const [selectedStoreState, setSelectedStoreState] = useState(null);
@@ -214,6 +45,7 @@ const ProductStores = () => {
   const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ Add loading state
   const [cardDetails, setCardDetails] = useState({
     cardNumber: "",
     expiryDate: "",
@@ -280,20 +112,9 @@ const ProductStores = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Filter and sort pharmacies
   useEffect(() => {
-    // Get product data
-    const productInfo = productData[productId];
-    if (productInfo) {
-      setProduct(productInfo);
-    } else {
-      // Handle product not found - navigate to home page
-      navigate("/");
-    }
-  }, [productId, navigate]);
-
-  useEffect(() => {
-    // Apply filters and sorting
-    let filtered = [...stores];
+    let filtered = [...pharmacies];
 
     // Apply filters
     if (filterBy === "inStock") {
@@ -326,37 +147,157 @@ const ProductStores = () => {
     });
 
     setFilteredStores(filtered);
-  }, [stores, sortBy, filterBy]);
+  }, [pharmacies, sortBy, filterBy]);
 
   const handleOrderClick = (store) => {
     setSelectedStore(store);
-    setPaymentMethod("cash"); // Reset payment method to default when opening modal
+    setPaymentMethod("cash");
     setShowOrderModal(true);
   };
 
-  const handlePlaceOrder = () => {
-    if (paymentMethod === "cash") {
-      // Handle cash payment - simply close modal and confirm order
-      setShowOrderModal(false);
-      // You can add navigation to order confirmation page or show success message
-    } else {
-      // Show card payment modal
-      setShowPaymentModal(true);
-    }
-  };
 
-  const handleCardPayment = () => {
-    // Handle card payment logic here
-    setShowPaymentModal(false);
-    setShowOrderModal(false);
-    // Reset form
-    setCardDetails({
-      cardNumber: "",
-      expiryDate: "",
-      cvv: "",
-      cardholderName: "",
-    });
-    // You can add navigation to order confirmation page or show success message
+  const handlePlaceOrder = async () => {
+  if (paymentMethod === "cash") {
+    // ✅ Check if user is logged in
+    if (!user || !user.id) {
+      alert('⚠️ Please login to place an order');
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+
+    const orderData = {
+      customerId: user.id,
+      pharmacyId: selectedStore.pharmacyId || selectedStore.id,
+      productId: selectedStore.productId || product?.id,
+      productName: decodedProductName,
+      quantity: quantity,
+      price: selectedStore.price,
+      totalAmount: selectedStore.price * quantity,
+      deliveryFee: selectedStore.deliveryFee,
+      paymentMethod: "CASH",  // ✅ Backend enum: CASH, CREDIT_CARD, DEBIT_CARD, DIGITAL_WALLET, INSURANCE
+      deliveryAddress: user.address || "Default Address",
+      estimatedDeliveryTime: selectedStore.deliveryTime,
+      status: "PENDING",
+    };
+
+    console.log('📦 Placing order:', orderData);
+
+    try {
+      setIsSubmitting(true);
+
+      const response = await orderService.createOrder(orderData);
+
+      console.log('✅ Order created successfully:', response);
+
+      setShowOrderModal(false);
+
+      alert(
+        `✅ Order placed successfully!\n\n` +
+        `Order ID: ${response.orderId || 'N/A'}\n` +
+        `Product: ${decodedProductName}\n` +
+        `Quantity: ${quantity}\n` +
+        `Total: Rs.${(selectedStore.price * quantity).toFixed(2)}\n` +
+        `Delivery Fee: Rs.${selectedStore.deliveryFee.toFixed(2)}\n` +
+        `Estimated Delivery: ${selectedStore.deliveryTime}\n\n` +
+        `Your order will be delivered soon!`
+      );
+
+    } catch (error) {
+      console.error('❌ Error placing order:', error);
+      
+      // ✅ Handle specific error cases
+      if (error.message.includes('login') || error.message.includes('forbidden')) {
+        alert(
+          `🔒 Authentication Required\n\n` +
+          `Please login to place an order.\n\n` +
+          `You will be redirected to the login page.`
+        );
+        navigate('/login', { state: { from: location.pathname } });
+      } else {
+        alert(
+          `❌ Failed to place order\n\n` +
+          `Error: ${error.message}\n\n` +
+          `Please try again or contact support.`
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  } else {
+    setShowPaymentModal(true);
+  }
+};
+
+  // ✅ UPDATED: Handle Card Payment with API call
+  const handleCardPayment = async () => {
+    // Prepare order data for card payment
+    const orderData = {
+      customerId: user?.id || 1,
+      pharmacyId: selectedStore.pharmacyId || selectedStore.id,
+      productId: selectedStore.productId || product?.id,
+      productName: decodedProductName,
+      quantity: quantity,
+      price: selectedStore.price,
+      totalAmount: selectedStore.price * quantity + selectedStore.deliveryFee,
+      deliveryFee: selectedStore.deliveryFee,
+      paymentMethod: "CREDIT_CARD",  // ✅ Backend enum: CASH, CREDIT_CARD, DEBIT_CARD, DIGITAL_WALLET, INSURANCE
+      deliveryAddress: user?.address || "Default Address",
+      estimatedDeliveryTime: selectedStore.deliveryTime,
+      status: "PENDING",
+      // Add card details (you might want to encrypt these)
+      cardDetails: {
+        cardholderName: cardDetails.cardholderName,
+        last4Digits: cardDetails.cardNumber.replace(/\s/g, '').slice(-4),
+        // Don't send full card number, CVV to backend for security
+      }
+    };
+
+    console.log('💳 Processing card payment:', orderData); // Debug log
+
+    try {
+      setIsSubmitting(true);
+
+      // ✅ Call API to create order
+      const response = await orderService.createOrder(orderData);
+
+      console.log('✅ Payment successful:', response);
+
+      // Close modals
+      setShowPaymentModal(false);
+      setShowOrderModal(false);
+
+      // Reset card details
+      setCardDetails({
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+      });
+
+      // Show success message
+      alert(
+        `✅ Payment successful!\n\n` +
+        `Order ID: ${response.orderId || 'N/A'}\n` +
+        `Product: ${decodedProductName}\n` +
+        `Quantity: ${quantity}\n` +
+        `Total Paid: Rs.${(selectedStore.price * quantity + selectedStore.deliveryFee).toFixed(2)}\n` +
+        `Estimated Delivery: ${selectedStore.deliveryTime}\n\n` +
+        `Your order will be delivered soon!`
+      );
+
+      // Optional: Navigate to order confirmation
+      // navigate(`/customer/orders/${response.orderId}`);
+
+    } catch (error) {
+      console.error('❌ Error processing payment:', error);
+      alert(
+        `❌ Payment failed\n\n` +
+        `Error: ${error.message}\n\n` +
+        `Please check your card details and try again.`
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCardInputChange = (field, value) => {
@@ -397,10 +338,35 @@ const ProductStores = () => {
     return stars;
   };
 
-  if (!product) {
+  // Loading State
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-center">
+          <Loader className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
+          <p className="text-white text-lg">Finding pharmacies...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error State
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Oops! Something went wrong
+          </h2>
+          <p className="text-gray-300 mb-6">{error}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -441,7 +407,7 @@ const ProductStores = () => {
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
                   Find{" "}
-                  <span className="text-gradient-primary">{product.name}</span>{" "}
+                  <span className="text-gradient-primary">{decodedProductName}</span>{" "}
                   Near You
                 </h1>
                 <p className="text-gray-300 text-sm">
@@ -450,59 +416,79 @@ const ProductStores = () => {
               </div>
 
               {/* Product Info Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 bg-white/20 rounded-xl p-3 flex-shrink-0">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-contain rounded-lg"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h2 className="text-lg font-bold text-white mb-1">
-                      {product.name}
-                    </h2>
-                    <p className="text-gray-300 text-sm mb-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-center gap-1 mb-3">
-                      {renderStars(product.rating)}
-                      <span className="text-sm text-gray-400 ml-1">
-                        ({product.rating})
-                      </span>
+              {product && (
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-20 h-20 bg-white/20 rounded-xl p-3 flex-shrink-0">
+                      {product.image || (pharmacies.length > 0 && pharmacies[0].productImageUrl) ? (
+                        <img
+                          src={product.image || pharmacies[0].productImageUrl}
+                          alt={product.name || decodedProductName}
+                          className="w-full h-full object-contain rounded-lg"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://via.placeholder.com/100?text=No+Image';
+                          }}
+                        />
+                      ) : (
+                        <Package className="w-full h-full text-white/40" />
+                      )}
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 w-full text-center">
-                    <div>
-                      <span className="text-xs text-gray-400">Category</span>
-                      <p className="text-sm text-white font-medium">
-                        {product.category}
+                    <div className="text-center">
+                      <h2 className="text-lg font-bold text-white mb-1">
+                        {product.name || decodedProductName}
+                      </h2>
+                      <p className="text-gray-300 text-sm mb-2">
+                        {product.description || (pharmacies.length > 0 && pharmacies[0].productDescription)}
                       </p>
+                      {product.rating && (
+                        <div className="flex items-center justify-center gap-1 mb-3">
+                          {renderStars(product.rating)}
+                          <span className="text-sm text-gray-400 ml-1">
+                            ({product.rating})
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <span className="text-xs text-gray-400">Dosage</span>
-                      <p className="text-sm text-white font-medium">
-                        {product.dosage}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-400">Pack Size</span>
-                      <p className="text-sm text-white font-medium">
-                        {product.packSize}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-400">
-                        Manufacturer
-                      </span>
-                      <p className="text-sm text-white font-medium">
-                        {product.manufacturer}
-                      </p>
+                    <div className="grid grid-cols-2 gap-3 w-full text-center">
+                      {product.category && (
+                        <div>
+                          <span className="text-xs text-gray-400">Category</span>
+                          <p className="text-sm text-white font-medium">
+                            {product.category}
+                          </p>
+                        </div>
+                      )}
+                      {product.dosage && (
+                        <div>
+                          <span className="text-xs text-gray-400">Dosage</span>
+                          <p className="text-sm text-white font-medium">
+                            {product.dosage}
+                          </p>
+                        </div>
+                      )}
+                      {product.packSize && (
+                        <div>
+                          <span className="text-xs text-gray-400">Pack Size</span>
+                          <p className="text-sm text-white font-medium">
+                            {product.packSize}
+                          </p>
+                        </div>
+                      )}
+                      {product.manufacturer && (
+                        <div>
+                          <span className="text-xs text-gray-400">
+                            Manufacturer
+                          </span>
+                          <p className="text-sm text-white font-medium">
+                            {product.manufacturer}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Filters and Sort */}
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
@@ -573,135 +559,154 @@ const ProductStores = () => {
             <h2 className="text-2xl font-bold text-white mb-6 text-center">
               Available Stores
             </h2>
-            <div className="h-[calc(120vh-200px)] overflow-y-auto pl-4 space-y-4 scrollbar-hide">
-              {filteredStores.map((store) => (
-                <div
-                  key={store.id}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300"
+
+            {filteredStores.length === 0 ? (
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-12 text-center">
+                <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  No Pharmacies Found
+                </h3>
+                <p className="text-gray-300 mb-6">
+                  This product is currently not available at any pharmacy near you.
+                </p>
+                <button
+                  onClick={() => navigate("/otc")}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <div className="flex flex-col lg:flex-row items-start gap-6">
-                    {/* Store Info */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
+                  Browse Other Products
+                </button>
+              </div>
+            ) : (
+              <div className="h-[calc(120vh-200px)] overflow-y-auto pl-4 space-y-4 scrollbar-hide">
+                {filteredStores.map((store) => (
+                  <div
+                    key={store.id}
+                    className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 hover:bg-white/15 transition-all duration-300"
+                  >
+                    <div className="flex flex-col lg:flex-row items-start gap-6">
+                      {/* Store Info */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-lg font-bold text-white">
+                                {store.name}
+                              </h3>
+                              {store.verified && (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-blue-400"
+                                />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-300">
+                              <div className="flex items-center gap-1">
+                                <MapPin size={14} />
+                                {store.address}
+                              </div>
+                              <span>•</span>
+                              <span>{store.distance}</span>
+                            </div>
+                          </div>
+                          <button className="p-2 text-gray-400 hover:text-white transition-colors">
+                            <Heart size={16} />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              {renderStars(store.rating)}
+                            </div>
+                            <span className="text-sm text-gray-400">
+                              ({store.reviews})
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-300">
+                            <Clock size={14} />
+                            {store.openTime}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-300">
+                            <Phone size={14} />
+                            {store.phone}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-300">
+                            <Truck size={14} />
+                            {store.deliveryTime}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {store.features.map((feature, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Price and Order Section */}
+                      <div className="flex flex-col items-end gap-4 min-w-[200px]">
+                        <div className="text-right">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-bold text-white">
-                              {store.name}
-                            </h3>
-                            {store.verified && (
-                              <CheckCircle
-                                size={16}
-                                className="text-blue-400"
-                              />
+                            <span className="text-lg font-bold text-white">
+                              Rs.{store.price.toFixed(2)}
+                            </span>
+                            {store.originalPrice > store.price && (
+                              <>
+                                <span className="text-sm text-gray-400 line-through">
+                                  Rs.{store.originalPrice.toFixed(2)}
+                                </span>
+                                <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                                  {store.discount}% OFF
+                                </span>
+                              </>
                             )}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-300">
-                            <div className="flex items-center gap-1">
-                              <MapPin size={14} />
-                              {store.address}
+                          <div className="text-xs text-gray-400">
+                            + Rs.{store.deliveryFee.toFixed(2)} delivery
+                          </div>
+                        </div>
+
+                        <div className="text-right text-sm">
+                          {store.inStock ? (
+                            <div className="text-green-400 flex items-center gap-1">
+                              <Package size={14} />
+                              {store.stockCount} in stock
                             </div>
-                            <span>•</span>
-                            <span>{store.distance}</span>
-                          </div>
-                        </div>
-                        <button className="p-2 text-gray-400 hover:text-white transition-colors">
-                          <Heart size={16} />
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            {renderStars(store.rating)}
-                          </div>
-                          <span className="text-sm text-gray-400">
-                            ({store.reviews})
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Clock size={14} />
-                          {store.openTime}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Phone size={14} />
-                          {store.phone}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-300">
-                          <Truck size={14} />
-                          {store.deliveryTime}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {store.features.map((feature, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Price and Order Section */}
-                    <div className="flex flex-col items-end gap-4 min-w-[200px]">
-                      <div className="text-right">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-lg font-bold text-white">
-                            Rs.{store.price}
-                          </span>
-                          {store.originalPrice > store.price && (
-                            <>
-                              <span className="text-sm text-gray-400 line-through">
-                                Rs.{store.originalPrice}
-                              </span>
-                              <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
-                                {store.discount}% OFF
-                              </span>
-                            </>
+                          ) : (
+                            <div className="text-red-400 flex items-center gap-1">
+                              <Package size={14} />
+                              Out of stock
+                            </div>
                           )}
                         </div>
-                        <div className="text-xs text-gray-400">
-                          + Rs.{store.deliveryFee} delivery
-                        </div>
-                      </div>
 
-                      <div className="text-right text-sm">
-                        {store.inStock ? (
-                          <div className="text-green-400 flex items-center gap-1">
-                            <Package size={14} />
-                            {store.stockCount} in stock
-                          </div>
-                        ) : (
-                          <div className="text-red-400 flex items-center gap-1">
-                            <Package size={14} />
-                            Out of stock
-                          </div>
-                        )}
+                        <button
+                          onClick={() => handleOrderClick(store)}
+                          disabled={!store.inStock}
+                          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                            store.inStock
+                              ? "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-lg hover:shadow-xl"
+                              : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          <ShoppingCart size={16} />
+                          {store.inStock ? "Order Now" : "Out of Stock"}
+                        </button>
                       </div>
-
-                      <button
-                        onClick={() => handleOrderClick(store)}
-                        disabled={!store.inStock}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                          store.inStock
-                            ? "bg-gradient-to-r from-blue-500 to-green-500 text-white hover:from-blue-600 hover:to-green-600 shadow-lg hover:shadow-xl"
-                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                        }`}
-                      >
-                        <ShoppingCart size={16} />
-                        {store.inStock ? "Order Now" : "Out of Stock"}
-                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Order Modal */}
+        {/* Order Modal - ✅ UPDATED with loading state */}
         {showOrderModal && selectedStore && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mt-12 max-w-md w-full">
@@ -710,7 +715,7 @@ const ProductStores = () => {
               <div className="space-y-4 mb-6">
                 <div>
                   <span className="text-sm text-gray-400">Product</span>
-                  <p className="text-white font-medium">{product.name}</p>
+                  <p className="text-white font-medium">{decodedProductName}</p>
                 </div>
                 <div>
                   <span className="text-sm text-gray-400">Store</span>
@@ -719,7 +724,7 @@ const ProductStores = () => {
                 <div>
                   <span className="text-sm text-gray-400">Price per item</span>
                   <p className="text-white font-medium">
-                    Rs.{selectedStore.price}
+                    Rs.{selectedStore.price.toFixed(2)}
                   </p>
                 </div>
                 <div>
@@ -796,25 +801,36 @@ const ProductStores = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowOrderModal(false)}
-                  className="flex-1 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handlePlaceOrder}
-                  className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-600 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-600 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CreditCard size={16} />
-                  {paymentMethod === "cash"
-                    ? "Confirm Order"
-                    : "Proceed to Payment"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader size={16} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={16} />
+                      {paymentMethod === "cash"
+                        ? "Confirm Order"
+                        : "Proceed to Payment"}
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Card Payment Modal */}
+        {/* Card Payment Modal - ✅ UPDATED with loading state */}
         {showPaymentModal && selectedStore && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-md w-full mt-16">
@@ -829,7 +845,7 @@ const ProductStores = () => {
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between text-gray-300">
                       <span>
-                        {product.name} x {quantity}
+                        {decodedProductName} x {quantity}
                       </span>
                       <span>
                         Rs.{(selectedStore.price * quantity).toFixed(2)}
@@ -837,7 +853,7 @@ const ProductStores = () => {
                     </div>
                     <div className="flex justify-between text-gray-300">
                       <span>Delivery Fee</span>
-                      <span>Rs.{selectedStore.deliveryFee}</span>
+                      <span>Rs.{selectedStore.deliveryFee.toFixed(2)}</span>
                     </div>
                     <div className="border-t border-white/20 pt-2 mt-2">
                       <div className="flex justify-between text-white font-bold">
@@ -878,7 +894,6 @@ const ProductStores = () => {
                     type="text"
                     value={cardDetails.cardNumber}
                     onChange={(e) => {
-                      // Format card number with spaces
                       const value = e.target.value
                         .replace(/\s+/g, "")
                         .replace(/[^0-9]/gi, "");
@@ -901,24 +916,20 @@ const ProductStores = () => {
                       type="text"
                       value={cardDetails.expiryDate}
                       onChange={(e) => {
-                        // Format as MM/YY and restrict month to 01-12
                         let value = e.target.value.replace(/\D/g, "");
                         if (value.length === 0) {
                           handleCardInputChange("expiryDate", "");
                           return;
                         }
-                        // Only allow up to 4 digits (MMYY)
                         value = value.slice(0, 4);
                         let formattedValue = value;
                         if (value.length >= 2) {
                           let month = value.slice(0, 2);
-                          // Restrict month to 01-12
                           if (parseInt(month, 10) < 1) {
                             month = "01";
                           } else if (parseInt(month, 10) > 12) {
                             month = "12";
                           } else if (month.length === 1) {
-                            // If user types a single digit, don't format yet
                             formattedValue = month;
                           }
                           formattedValue = month;
@@ -969,13 +980,15 @@ const ProductStores = () => {
                       cardholderName: "",
                     });
                   }}
-                  className="flex-1 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleCardPayment}
                   disabled={
+                    isSubmitting ||
                     !cardDetails.cardNumber ||
                     !cardDetails.expiryDate ||
                     !cardDetails.cvv ||
@@ -983,12 +996,21 @@ const ProductStores = () => {
                   }
                   className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg hover:from-blue-600 hover:to-green-600 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <CreditCard size={16} />
-                  Pay Rs.
-                  {(
-                    selectedStore.price * quantity +
-                    selectedStore.deliveryFee
-                  ).toFixed(2)}
+                  {isSubmitting ? (
+                    <>
+                      <Loader size={16} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={16} />
+                      Pay Rs.
+                      {(
+                        selectedStore.price * quantity +
+                        selectedStore.deliveryFee
+                      ).toFixed(2)}
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1000,3 +1022,8 @@ const ProductStores = () => {
 };
 
 export default ProductStores;
+
+
+
+
+
