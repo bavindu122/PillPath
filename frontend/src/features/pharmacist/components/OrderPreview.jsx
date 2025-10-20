@@ -60,6 +60,11 @@ const OrderPreview = ({
                     <h4 className="font-medium text-gray-900">
                       {item.name || "Medicine"}
                     </h4>
+                    {item.isRerouted && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
+                        Rerouted
+                      </span>
+                    )}
                     <p className="text-sm text-gray-600">
                       Qty: {Number(item.quantity) || 0}{" "}
                       {item.dosage && `• ${item.dosage}`}

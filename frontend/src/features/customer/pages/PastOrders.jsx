@@ -14,8 +14,12 @@ import {
 import OrderCard from "../components/OrderCard";
 import OrderPreviewModal from "../components/PastOrderPreviewModal";
 import OrdersService from "../../../services/api/OrdersService";
+import { orderService as OtcOrderService } from "../../../services/api/OtcOrderService";
+import { otcService as OtcService } from "../../../services/api/OtcService";
+import { useAuth } from "../../../hooks/useAuth";
 
 const PastOrders = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Orders");
@@ -31,10 +35,41 @@ const PastOrders = () => {
     (async () => {
       try {
         setLoadingOrders(true);
+        // Fetch prescription orders (existing endpoint)
         const data = await OrdersService.listMyOrders(false);
+
+        // In parallel, try to fetch OTC orders for the logged-in user (if available)
+        let otcOrders = [];
+        try {
+          if (user?.id) {
+            otcOrders = (await OtcOrderService.getCustomerOrders(user.id)) || [];
+          }
+        } catch (e) {
+          // Non-fatal: OTC endpoint may not exist in some environments
+          console.warn("Failed to fetch OTC orders:", e?.message || e);
+          otcOrders = [];
+        }
+
         if (!mounted) return;
-        // Group: one card per customer order (ORD), aggregate pharmacy orders
-        const cards = (data || []).map((co) => {
+
+        // Helper: format date/time
+        const fmt = (iso) => {
+          const d = iso ? new Date(iso) : null;
+          const date = d
+            ? d.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "—";
+          const time = d
+            ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+            : "—";
+          return { date, time };
+        };
+
+        // Group: one card per prescription customer order (ORD), aggregate pharmacy orders
+        const rxCards = (data || []).map((co) => {
           const created = co.createdAt ? new Date(co.createdAt) : null;
           const date = created
             ? created.toLocaleDateString(undefined, {
@@ -86,7 +121,85 @@ const PastOrders = () => {
             raw: co,
           };
         });
-        setPastOrders(cards);
+
+        // Build OTC cards (best-effort, robust to varying backend shapes)
+        // We will attempt to set an OTC product image for the thumbnail.
+        const productImageCache = new Map();
+        const resolveProductImage = async (item) => {
+          const byUrl =
+            item?.productImageUrl || item?.imageUrl || item?.product?.imageUrl;
+          if (byUrl) return byUrl;
+          const pid = item?.otcProductId || item?.productId || item?.id;
+          if (!pid) return null;
+          if (productImageCache.has(pid)) return productImageCache.get(pid);
+          try {
+            const product = await OtcService.getProductById(pid);
+            const url = product?.imageUrl || product?.image || null;
+            productImageCache.set(pid, url);
+            return url;
+          } catch (e) {
+            console.warn("Failed to resolve OTC product image for", pid, e);
+            productImageCache.set(pid, null);
+            return null;
+          }
+        };
+
+        // Map OTC orders to the same card shape
+        const otcCardsPromises = (otcOrders || []).map(async (oo) => {
+          const items = Array.isArray(oo.items) ? oo.items : [];
+          const firstItem = items[0] || {};
+          const createdAt = oo.createdAt || oo.dateCreated || oo.created || null;
+          const { date, time } = fmt(createdAt);
+          const currency =
+            oo.totals?.currency || oo.currency || oo.totalCurrency || "LKR";
+          const totalVal =
+            oo.totals?.total ?? oo.total ?? oo.totalAmount ?? oo.amount ?? 0;
+          const paymentMethod =
+            (oo.payment?.method || oo.paymentMethod || "-").replace(
+              /_/g,
+              " "
+            );
+
+          // Figure out store/pharmacy label
+          const pharmacyName =
+            oo.pharmacyName ||
+            oo.storeName ||
+            firstItem.pharmacyName ||
+            (oo.pharmacyId ? `Pharmacy #${oo.pharmacyId}` : "—");
+
+          // Resolve a representative product image for the OTC order
+          const img = (await resolveProductImage(firstItem)) ||
+            "/src/assets/img/prescription.jpeg";
+
+          return {
+            id: oo.orderCode || oo.id || oo.orderId || `OTC-${Date.now()}`,
+            orderNumber: oo.orderCode || oo.code || oo.id || oo.orderId || "OTC",
+            total: `${currency} ${Number(totalVal ?? 0).toFixed(2)}`,
+            date,
+            time,
+            status: (oo.status || "").replace(/_/g, " "),
+            notes: oo.notes || oo.customerNote || "",
+            pharmacy: pharmacyName,
+            pharmacyCount: 1,
+            itemCount: items.length || 1,
+            prescriptionType: "OTC",
+            paymentMethod,
+            rating: undefined,
+            prescriptionImg: img,
+            raw: oo,
+          };
+        });
+
+        const otcCards = await Promise.all(otcCardsPromises);
+
+        // Combine and sort by date/time descending if possible
+        const combined = [...rxCards, ...otcCards].sort((a, b) => {
+          const aTime = new Date(`${a.date} ${a.time}`).getTime() || 0;
+          const bTime = new Date(`${b.date} ${b.time}`).getTime() || 0;
+          return bTime - aTime;
+        });
+
+        setPastOrders(combined);
       } catch (e) {
         setLoadError(e.message || "Failed to load orders");
         setPastOrders([]);
@@ -97,7 +210,7 @@ const PastOrders = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user?.id]);
 
   const filterOptions = [
     "All Orders",

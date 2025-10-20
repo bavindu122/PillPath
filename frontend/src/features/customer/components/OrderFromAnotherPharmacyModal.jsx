@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Clock, Star, ChevronRight, PlusCircle, Check, Upload, FileText } from 'lucide-react';
 import { ModalScrollContainer } from '../../../components/UIs/ScrollContainer';
+import CustomerRerouteService from '../../../services/api/CustomerRerouteService';
 
 const OrderFromAnotherPharmacyModal = ({ 
   isOpen, 
@@ -15,41 +16,39 @@ const OrderFromAnotherPharmacyModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const modalContentRef = useRef(null);
 
-  // Sample pharmacy data - would be fetched from API in real application
-  const nearbyPharmacies = [
-    { 
-      id: 1, 
-      name: "HealthFirst Pharmacy", 
-      address: "123 Medical Lane, Colombo", 
-      distance: "0.8", 
-      rating: 4.8, 
-      deliveryTime: "30-45" 
-    },
-    { 
-      id: 2, 
-      name: "MediCare Plus", 
-      address: "45 Wellness Road, Colombo", 
-      distance: "1.2", 
-      rating: 4.7, 
-      deliveryTime: "20-30" 
-    },
-    { 
-      id: 3, 
-      name: "Family Care Pharmacy", 
-      address: "78 Health Street, Colombo", 
-      distance: "1.5", 
-      rating: 4.5, 
-      deliveryTime: "40-55" 
-    },
-    { 
-      id: 4, 
-      name: "City Health Pharmacy", 
-      address: "120 Main Street, Colombo", 
-      distance: "2.2", 
-      rating: 4.3, 
-      deliveryTime: "35-50" 
-    }
-  ];
+  // Candidates loaded from API; fallback to a minimal dummy list if API fails
+  const [nearbyPharmacies, setNearbyPharmacies] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!isOpen) return;
+      try {
+        // Optionally pass excludePharmacyId from props/state if you have it
+        const res = await CustomerRerouteService.listCandidates(prescriptionId);
+        const items = Array.isArray(res?.items) ? res.items : [];
+        if (!mounted) return;
+        setNearbyPharmacies(
+          items.map((p, idx) => ({
+            id: p.pharmacyId ?? p.id ?? idx,
+            name: p.name,
+            address: p.address,
+            distance: String(p.distanceKm ?? p.distance ?? ''),
+            rating: p.rating ?? undefined,
+            deliveryTime: p.deliveryEtaMinutes ?? p.deliveryTime ?? undefined,
+          }))
+        );
+      } catch (e) {
+        if (!mounted) return;
+        // graceful fallback
+        setNearbyPharmacies([
+          { id: 1, name: 'HealthFirst Pharmacy', address: '123 Medical Lane, Colombo', distance: '0.8', rating: 4.8, deliveryTime: '30-45' },
+          { id: 2, name: 'MediCare Plus', address: '45 Wellness Road, Colombo', distance: '1.2', rating: 4.7, deliveryTime: '20-30' },
+        ]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isOpen, prescriptionId]);
 
   const handleSubmit = async () => {
     if (!selectedPharmacy) {
@@ -58,16 +57,38 @@ const OrderFromAnotherPharmacyModal = ({
     }
 
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const body = {
+        // TODO: wire originalPharmacyId and parentPreviewId from calling context/state
+        // originalPharmacyId: props.originalPharmacyId,
+        // parentPreviewId: props.parentPreviewId,
+        targetPharmacyId: selectedPharmacy.id,
+        note,
+        items: (unavailableMedications || []).map((m) =>
+          typeof m === 'string'
+            ? { name: m, quantity: 1 }
+            : {
+                previewItemId: m.previewItemId,
+                medicineSetId: m.medicineSetId,
+                name: m.name || String(m),
+                genericName: m.genericName,
+                dosage: m.dosage,
+                quantity: m.quantity || 1,
+                notes: m.notes,
+              }
+        ),
+        strategy: 'SINGLE',
+      };
+      const res = await CustomerRerouteService.reroute(prescriptionId, body);
       setIsLoading(false);
-      alert(`Order request sent to ${selectedPharmacy.name} for unavailable medications`);
-      if (onOrderPlaced) {
-        onOrderPlaced(selectedPharmacy, unavailableMedications);
-      }
+      // Success feedback
+      alert(`Reroute request sent to ${selectedPharmacy.name}`);
+      if (onOrderPlaced) onOrderPlaced(selectedPharmacy, unavailableMedications, res);
       onClose();
-    }, 1500);
+    } catch (e) {
+      setIsLoading(false);
+      alert(e.message || 'Failed to send order request');
+    }
   };
 
   const handleClose = () => {

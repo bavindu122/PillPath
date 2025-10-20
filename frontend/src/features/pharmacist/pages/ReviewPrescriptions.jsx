@@ -89,6 +89,10 @@ const ReviewPrescriptions = () => {
                 price: Number(price),
                 available: (it.available ?? true) === true,
                 notes: it.notes ?? "",
+                isRerouted:
+                  (it.source || it.itemSource || "")
+                    .toString()
+                    .toUpperCase() === "REROUTE" || it.isRerouted === true,
               };
             });
             if (active) setOrderItems(mapped);
@@ -160,6 +164,9 @@ const ReviewPrescriptions = () => {
             price: Number(price),
             available: (it.available ?? true) === true,
             notes: it.notes ?? "",
+            isRerouted:
+              (it.source || it.itemSource || "").toString().toUpperCase() ===
+                "REROUTE" || it.isRerouted === true,
           };
         });
         setOrderItems(mapped);
