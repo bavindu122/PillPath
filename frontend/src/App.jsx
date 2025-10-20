@@ -1,7 +1,8 @@
 import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
-import { AdminAuthProvider } from "./hooks/useAdminAuth";
+import { AdminAuthProvider } from "./hooks/useAdminAuth"; // ✅ Import AdminAuthProvider
+import { ChatProvider } from "./contexts/ChatContextLive"; // ✅ Using Live Chat with Backend Integration
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 
 import Home from "./pages/Home";
@@ -26,6 +27,7 @@ import FindPharmacy from "./pages/FindPharmacies/FindPharmacy";
 import Admin from "./features/admin/Admin";
 import PharmacyProfile from "./pages/FindPharmacies/PharmacyProfile";
 import ProductStores from "./pages/ProductStores";
+import ChatDemo from "./pages/ChatDemo";
 
 /**
  * App Content Component
@@ -44,60 +46,65 @@ const AppContent = () => {
   const showFloatingBell = isAuthenticated && userType === "customer" && isCustomerPath;
 
   return (
-    <div>
-      {!isAdminPath &&
-        !isPharmacistPath &&
-        !isCustomerPath &&
-        !isPharmacyAdminPath && <Navbar />}
-      
-      {/* Floating Notification Bell - ONLY for customers on customer routes */}
-      {showFloatingBell && <FloatingBell />}
-      
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/otc" element={<Otc />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
-        <Route
-          path="/pharmacist/*"
-          element={
-            <RequirePharmacist
-              fallback={<Loading message="Checking access..." />}
-            >
-              <Pharmacist />
-            </RequirePharmacist>
-          }
-        />
-        <Route path="/customer/*" element={<Customer />} />
-        <Route path="/find-pharmacy" element={<FindPharmacy />} />
+    <ChatProvider>
+      <div>
+        {!isAdminPath &&
+          !isPharmacistPath &&
+          !isCustomerPath &&
+          !isPharmacyAdminPath && <Navbar />}
         
-        {/* ✅ FIXED: Use productName instead of productId */}
-        <Route path="/product-stores/:productName" element={<ProductStores />} />
+        {/* Floating Notification Bell - ONLY for customers on customer routes */}
+        {showFloatingBell && <FloatingBell />}
         
-        <Route
-          path="/admin/*"
-          element={
-            <AdminAuthProvider>
-              <Admin />
-            </AdminAuthProvider>
-          }
-        />
-        <Route path="/pharma-profile/:pharmacyId" element={<PharmacyProfile />} />
-        <Route path="/pharma-profile" element={<PharmacyProfile />} />
-        <Route path="*" element={<div>Page Not Found</div>} />
-      </Routes>
-      
-      {!isAdminPath &&
-        !isPharmacistPath &&
-        !isCustomerPath &&
-        !isPharmacyAdminPath && <Footer />}
-    </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/otc" element={<Otc />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/pharmacy/*" element={<PharmacyAdmin />} />
+          <Route
+            path="/pharmacist/*"
+            element={
+              <RequirePharmacist
+                fallback={<Loading message="Checking access..." />}
+              >
+                <Pharmacist />
+              </RequirePharmacist>
+            }
+          />
+          <Route path="/customer/*" element={<Customer />} />
+          <Route path="/find-pharmacy" element={<FindPharmacy />} />
+          <Route
+            path="/product-stores/:productId"
+            element={<ProductStores />}
+          />
+          <Route
+            path="/admin/*"
+            element={
+              <AdminAuthProvider>
+                <Admin />
+              </AdminAuthProvider>
+            }
+          />
+
+          <Route
+            path="/pharma-profile/:pharmacyId"
+            element={<PharmacyProfile />}
+          />
+          <Route path="/pharma-profile" element={<PharmacyProfile />} />
+          <Route path="*" element={<div>Page Not Found</div>} />
+        </Routes>
+        {!isAdminPath &&
+          !isPharmacistPath &&
+          !isCustomerPath &&
+          !isPharmacyAdminPath && <Footer />}
+      </div>
+    </ChatProvider>
   );
 };
 

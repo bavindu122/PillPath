@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
   User,
   Phone,
@@ -15,19 +16,60 @@ import {
   Activity,
   Edit,
   Crown,
-  Trash2
+  Trash2,
+  Package
 } from "lucide-react";
 import EditProfileModal from "../components/EditProfileModal";
+import PrescriptionDetailModal from "./PrescriptionDetailModal";
 import { ModalScrollContainer } from "../../../components/UIs";
 
 
 const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
+  const [prescriptionError, setPrescriptionError] = useState(null);
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
+  const [isPrescriptionDetailOpen, setIsPrescriptionDetailOpen] = useState(false);
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handlePrescriptionClick = (prescription, event) => {
+    // Prevent opening modal if clicking on action buttons
+    if (event.target.closest('.prescription-action-button')) {
+      return;
+    }
+    
+    console.log("Prescription clicked:", prescription);
+    console.log("Prescription ID:", prescription.id);
+    
+    // Open prescription detail modal with prescription ID
+    if (prescription.id) {
+      console.log("Opening prescription detail modal with ID:", prescription.id);
+      setSelectedPrescriptionId(prescription.id);
+      setIsPrescriptionDetailOpen(true);
+    } else {
+      console.log("No prescription ID found");
+      alert("Unable to load prescription details.");
+    }
+  };
+
+  const handleViewOrder = (prescription, event) => {
+    event.stopPropagation();
+    if (prescription.orderCode) {
+      onClose();
+      navigate(`/customer/orders/${prescription.orderCode}`);
+    }
+  };
+
+  const handleClosePrescriptionDetail = () => {
+    setIsPrescriptionDetailOpen(false);
+    setSelectedPrescriptionId(null);
   };
 
   const handleDeleteClick = () => {
@@ -52,6 +94,50 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
       onClose();
     }
   };
+
+  // Fetch prescriptions for the family member
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      if (!selectedProfile || !isOpen || activeTab !== "all-prescriptions") {
+        return;
+      }
+
+      setLoadingPrescriptions(true);
+      setPrescriptionError(null);
+
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          throw new Error("Not authenticated");
+        }
+
+        const url = `http://localhost:8080/api/v1/prescriptions/family-member/${selectedProfile.id}`;
+        
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch prescriptions: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Fetched prescriptions for family member:", data);
+        setPrescriptions(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching prescriptions:", error);
+        setPrescriptionError(error.message);
+        setPrescriptions([]);
+      } finally {
+        setLoadingPrescriptions(false);
+      }
+    };
+
+    fetchPrescriptions();
+  }, [selectedProfile, isOpen, activeTab]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -149,8 +235,8 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
             <div className="flex space-x-1 bg-white/5 rounded-xl p-1">
               {[
                 { id: "overview", label: "Overview", icon: <User size={16} /> },
-                { id: "active-prescriptions", label: "Active Prescriptions", icon: <Pill size={16} /> },
-                { id: "all-prescriptions", label: "All Prescriptions", icon: <FileText size={16} /> },
+                
+                { id: "all-prescriptions", label: "Prescriptions", icon: <FileText size={16} /> },
               ].map((tab) => (
                 <motion.button
                   key={tab.id}
@@ -259,43 +345,93 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
                 className="space-y-6"
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-bold text-white">Prescriptions uploaded</h3>
+                  <h3 className="text-2xl font-bold text-white">Active Prescriptions</h3>
+                  <span className="text-white/60 text-sm">
+                    {loadingPrescriptions ? "Loading..." : `${prescriptions.filter(p => p.status === 'IN_PROGRESS' || p.status === 'PENDING_REVIEW').length} active prescription(s)`}
+                  </span>
                 </div>
 
+                {prescriptionError && (
+                  <div className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-3 rounded-xl">
+                    {prescriptionError}
+                  </div>
+                )}
+
                 <div className="grid gap-4">
-                  {selectedProfile.currentMedications.length > 0 ? (
-                    selectedProfile.currentMedications.map((prescription, index) => (
+                  {loadingPrescriptions ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                      <p className="text-white/60">Loading prescriptions...</p>
+                    </div>
+                  ) : prescriptions.filter(p => p.status === 'IN_PROGRESS' || p.status === 'PENDING_REVIEW').length > 0 ? (
+                    prescriptions.filter(p => p.status === 'IN_PROGRESS' || p.status === 'PENDING_REVIEW').map((prescription, index) => (
                       <motion.div
-                        key={index}
+                        key={prescription.id || index}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-colors"
+                        onClick={(e) => handlePrescriptionClick(prescription, e)}
+                        className="bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-colors cursor-pointer hover:border-blue-400/50"
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h4 className="text-xl font-semibold text-white">{prescription.name}</h4>
+                            <h4 className="text-xl font-semibold text-white">
+                              {prescription.code || `Prescription #${prescription.id}`}
+                            </h4>
+                            {prescription.note && (
+                              <p className="text-white/60 text-sm mt-1">{prescription.note}</p>
+                            )}
                           </div>
-                          
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            prescription.status === 'IN_PROGRESS'
+                              ? 'bg-blue-500/20 text-blue-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {prescription.status?.replace(/_/g, ' ') || 'Unknown'}
+                          </span>
                         </div>
                         
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-white/60">Pharmacy</span>
-                            <p className="text-white font-medium">{prescription.pharmacy || "ABC Pharmacy"}</p>
+                            <p className="text-white font-medium">{prescription.pharmacyName || "N/A"}</p>
                           </div>
                           <div>
-                            <span className="text-white/60">Last Order</span>
-                            <p className="text-white font-medium">{formatDate(prescription.lastRefill)}</p>
+                            <span className="text-white/60">Uploaded</span>
+                            <p className="text-white font-medium">{prescription.createdAt ? formatDate(prescription.createdAt) : "N/A"}</p>
+                          </div>
+                          <div>
+                            <span className="text-white/60">Total Price</span>
+                            <p className="text-white font-medium">
+                              {prescription.totalPrice ? `LKR ${prescription.totalPrice}` : "Pending"}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-white/60">Delivery</span>
+                            <p className="text-white font-medium capitalize">
+                              {prescription.deliveryPreference?.toLowerCase() || "N/A"}
+                            </p>
                           </div>
                         </div>
+
+                        {prescription.imageUrl && (
+                          <div className="mt-4">
+                            <button
+                              onClick={() => window.open(prescription.imageUrl, '_blank')}
+                              className="text-blue-300 hover:text-blue-200 text-sm flex items-center gap-2"
+                            >
+                              <FileText size={16} />
+                              View Prescription Image
+                            </button>
+                          </div>
+                        )}
                       </motion.div>
                     ))
                   ) : (
                     <div className="text-center py-12">
                       <Pill size={48} className="mx-auto text-white/40 mb-4" />
                       <p className="text-white/60 text-lg">No active prescriptions</p>
-                      <p className="text-white/40 text-sm">Upload a prescription to get started</p>
+                      <p className="text-white/40 text-sm">All prescriptions are completed or none assigned yet</p>
                     </div>
                   )}
                 </div>
@@ -310,122 +446,100 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
               >
                 <div className="flex justify-between items-center">
                   <h3 className="text-2xl font-bold text-white">All Prescriptions</h3>
+                  <span className="text-white/60 text-sm">
+                    {loadingPrescriptions ? "Loading..." : `${prescriptions.length} prescription(s)`}
+                  </span>
                 </div>
 
+                {prescriptionError && (
+                  <div className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-3 rounded-xl">
+                    {prescriptionError}
+                  </div>
+                )}
+
                 <div className="grid gap-4">
-                  {selectedProfile.allPrescriptions ? (
-                    selectedProfile.allPrescriptions.map((prescription, index) => (
+                  {loadingPrescriptions ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                      <p className="text-white/60">Loading prescriptions...</p>
+                    </div>
+                  ) : prescriptions.length > 0 ? (
+                    prescriptions.map((prescription, index) => (
                       <motion.div
-                        key={index}
+                        key={prescription.id || index}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-colors"
+                        onClick={(e) => handlePrescriptionClick(prescription, e)}
+                        className="bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-colors cursor-pointer hover:border-blue-400/50"
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h4 className="text-xl font-semibold text-white">{prescription.name}</h4>
-                          </div>
-                          <div className="flex gap-2">
-                            {prescription.isActive && (
-                              <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">
-                                Active
-                              </span>
+                          <div className="flex-1">
+                            <h4 className="text-xl font-semibold text-white">
+                              {prescription.code || `Prescription #${prescription.id}`}
+                            </h4>
+                            {prescription.note && (
+                              <p className="text-white/60 text-sm mt-1">{prescription.note}</p>
                             )}
+                            <p className="text-white/40 text-xs mt-1">Click to view prescription details</p>
+                          </div>
+                          <div className="flex gap-2 flex-shrink-0">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              prescription.status === 'COMPLETED' 
+                                ? 'bg-green-500/20 text-green-400'
+                                : prescription.status === 'IN_PROGRESS'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : prescription.status === 'PENDING_REVIEW'
+                                ? 'bg-yellow-500/20 text-yellow-400'
+                                : 'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {prescription.status?.replace(/_/g, ' ') || 'Unknown'}
+                            </span>
                           </div>
                         </div>
                         
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-white/60">Pharmacy</span>
-                            <p className="text-white font-medium">{prescription.pharmacy || "ABC Pharmacy"}</p>
+                            <p className="text-white font-medium">{prescription.pharmacyName || "N/A"}</p>
                           </div>
                           <div>
-                            <span className="text-white/60">Last Order</span>
-                            <p className="text-white font-medium">{formatDate(prescription.lastRefill)}</p>
+                            <span className="text-white/60">Uploaded</span>
+                            <p className="text-white font-medium">{prescription.createdAt ? formatDate(prescription.createdAt) : "N/A"}</p>
                           </div>
                           <div>
-                            <span className="text-white/60">Status</span>
-                            <p className={`font-medium ${
-                              prescription.isActive ? 'text-green-400' : 'text-gray-400'
-                            }`}>
-                              {prescription.isActive ? 'Active' : 'Inactive'}
+                            <span className="text-white/60">Total Price</span>
+                            <p className="text-white font-medium">
+                              {prescription.totalPrice ? `LKR ${prescription.totalPrice}` : "Pending"}
                             </p>
                           </div>
                           <div>
-                            <span className="text-white/60">Prescribed Date</span>
-                            <p className="text-white font-medium">{formatDate(prescription.prescribedDate || prescription.lastRefill)}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  ) : selectedProfile.currentMedications ? (
-                    // Combine current medications with some sample inactive prescriptions
-                    [
-                      ...selectedProfile.currentMedications.map(med => ({ ...med, isActive: true })),
-                      // Sample inactive prescriptions
-                      {
-                        name: "RX-250719-40",
-                        pharmacy: "HealthPlus Pharmacy",
-                        lastRefill: "2024-06-15",
-                        prescribedDate: "2024-05-01",
-                        isActive: false,
-                        refillsRemaining: 0
-                      },
-                      {
-                        name: "RX-250719-41",
-                        pharmacy: "CareRx Pharmacy",
-                        lastRefill: "2024-05-20",
-                        prescribedDate: "2024-04-10",
-                        isActive: false,
-                        refillsRemaining: 0
-                      },
-                      {
-                        name: "RX-250719-42",
-                        pharmacy: "WellCare Pharmacy",
-                        lastRefill: "2024-07-01",
-                        prescribedDate: "2024-06-15",
-                        isActive: false,
-                        refillsRemaining: 1
-                      }
-                    ].map((prescription, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white/10 rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-colors"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h4 className="text-xl font-semibold text-white">{prescription.name}</h4>
-                          </div>
-                          <div className="flex gap-2">
-                            {prescription.isActive && (
-                              <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">
-                                Active
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <span className="text-white/60">Pharmacy</span>
-                            <p className="text-white font-medium">{prescription.pharmacy || "ABC Pharmacy"}</p>
-                          </div>
-                          <div>
-                            <span className="text-white/60">Last Order</span>
-                            <p className="text-white font-medium">{formatDate(prescription.lastRefill)}</p>
-                          </div>
-                          <div>
-                            <span className="text-white/60">Status</span>
-                            <p className={`font-medium ${
-                              prescription.isActive ? 'text-green-400' : 'text-gray-400'
-                            }`}>
-                              {prescription.isActive ? 'Active' : 'Inactive'}
+                            <span className="text-white/60">Delivery</span>
+                            <p className="text-white font-medium capitalize">
+                              {prescription.deliveryPreference?.toLowerCase() || "N/A"}
                             </p>
                           </div>
+                        </div>
+
+                        <div className="mt-4 flex gap-3 flex-wrap">
+                          {prescription.imageUrl && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); window.open(prescription.imageUrl, '_blank'); }}
+                              className="prescription-action-button text-blue-300 hover:text-blue-200 text-sm flex items-center gap-2"
+                            >
+                              <FileText size={16} />
+                              View Image
+                            </button>
+                          )}
+                          {prescription.orderCode && (
+                            <button
+                              onClick={(e) => handleViewOrder(prescription, e)}
+                              className="prescription-action-button bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                            >
+                              <Package size={16} />
+                              View Order
+                            </button>
+                          )}
                         </div>
                       </motion.div>
                     ))
@@ -526,6 +640,13 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
           selectedProfile={selectedProfile}
         />
       )}
+
+      {/* Prescription Detail Modal */}
+      <PrescriptionDetailModal
+        prescriptionId={selectedPrescriptionId}
+        isOpen={isPrescriptionDetailOpen}
+        onClose={handleClosePrescriptionDetail}
+      />
     </AnimatePresence>
   );
 };

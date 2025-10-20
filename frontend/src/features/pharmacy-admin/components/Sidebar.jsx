@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   Wallet,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -42,6 +43,9 @@ export default function Sidebar() {
     if (path === '/pharmacy/paymentgateway') {
       return 'Payment Gateway';
     }
+    if (path.startsWith('/pharmacy/chats')) {
+      return 'Chats';
+    }
     return 'Dashboard';
   };
 
@@ -58,6 +62,7 @@ export default function Sidebar() {
   // Menu items with their paths
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/pharmacy' },
+    { name: 'Chats', icon: MessageSquare, path: '/pharmacy/chats' },
     { name: 'Pharmacy Profile', icon: Settings, path: '/pharmacy/pharmacyprofile' },
     { name: 'Staff Management', icon: Users, path: '/pharmacy/pharmacystaff' },
     { name: 'Inventory', icon: Package, path: '/pharmacy/pharmacyinventory' },
