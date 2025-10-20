@@ -13,7 +13,11 @@ export const useProfileForm = (initialProfile = null) => {
         username: "",
         email: "",
         fullName: "",
+        name: "",
+        relation: "",
+        age: "",
         phoneNumber: "",
+        phone: "",
         dateOfBirth: "",
         address: "",
         profilePictureUrl: "",
@@ -23,17 +27,22 @@ export const useProfileForm = (initialProfile = null) => {
         medicalConditions: "",
         emergencyContactName: "",
         emergencyContactPhone: "",
+        bloodType: "",
       };
     }
 
     return {
       username: profile.username || "",
       email: profile.email || "",
-      fullName: profile.fullName || "",
-      phoneNumber: profile.phoneNumber || "",
+      fullName: profile.fullName || profile.name || "",
+      name: profile.name || profile.fullName || "",
+      relation: profile.relation || "",
+      age: profile.age || "",
+      phoneNumber: profile.phoneNumber || profile.phone || "",
+      phone: profile.phone || profile.phoneNumber || "",
       dateOfBirth: profile.dateOfBirth || "",
       address: profile.address || "",
-      profilePictureUrl: profile.profilePictureUrl || "",
+      profilePictureUrl: profile.profilePictureUrl || profile.profilePicture || "",
       insuranceProvider: profile.insuranceProvider || "",
       insuranceId: profile.insuranceId || "",
       allergies: Array.isArray(profile.allergies)
@@ -44,6 +53,7 @@ export const useProfileForm = (initialProfile = null) => {
         : profile.medicalConditions || "",
       emergencyContactName: profile.emergencyContactName || "",
       emergencyContactPhone: profile.emergencyContactPhone || "",
+      bloodType: profile.bloodType || "",
     };
   };
 

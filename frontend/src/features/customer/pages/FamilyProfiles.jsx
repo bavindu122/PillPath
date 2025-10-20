@@ -378,6 +378,12 @@ const FamilyProfiles = () => {
         isOpen={!!selectedProfile} 
         onClose={closeModal}
         onDeleteMember={handleDeleteMember}
+        onMemberUpdate={async (updatedMember) => {
+          // Refresh the family members list after update
+          await fetchFamilyMembers();
+          // Close the member details modal
+          setSelectedProfile(null);
+        }}
       />
     </div>
   );
