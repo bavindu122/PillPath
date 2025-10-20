@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
 
 class AdminService {
   // Overview stat cards summary
@@ -267,6 +267,25 @@ class AdminService {
     const queryParams = new URLSearchParams(params).toString();
     return this.request(`admin/orders${queryParams ? `?${queryParams}` : ""}`, {
       method: "GET",
+    });
+  }
+
+  // ✅ Get all reviews (admin)
+  async getReviews(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/reviews${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // Reviews: delete a review by id (admin-only)
+  async deleteReview(reviewId) {
+    if (!reviewId) throw new Error("reviewId is required");
+    return this.request(`admin/reviews/${encodeURIComponent(reviewId)}`, {
+      method: "DELETE",
     });
   }
   async getAnnouncements(params = {}) {

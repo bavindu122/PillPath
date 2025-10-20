@@ -16,6 +16,7 @@ import {
   Shield,
   Wrench,
   Menu,
+  Star,
   X,
   Bell,
   User,
@@ -33,7 +34,9 @@ const navigation = [
   { name: "Sales", href: "/admin/sales", icon: Activity },
   { name: "Wallet", href: "/admin/wallet", icon: Wallet },
   { name: "Announcements", href: "/admin/announcements", icon: Bell },
+  { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+  
 ];
 
 export default function AdminLayout({ children }) {
