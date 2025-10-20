@@ -19,6 +19,7 @@ const ReviewPrescriptions = () => {
   const [orderItems, setOrderItems] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdatingItems, setIsUpdatingItems] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -127,6 +128,7 @@ const ReviewPrescriptions = () => {
           // ignore claim errors; proceed to add
         }
       }
+      setIsUpdatingItems(true);
       const payload = {
         medicineName: medicine.name,
         genericName: medicine.genericName,
@@ -176,9 +178,12 @@ const ReviewPrescriptions = () => {
             notes: payload.notes || "",
           },
         ]);
+      } finally {
+        setTimeout(() => setIsUpdatingItems(false), 350);
       }
     } catch (e) {
       console.error("Add medicine failed", e);
+      setIsUpdatingItems(false);
     }
   };
 
@@ -189,6 +194,7 @@ const ReviewPrescriptions = () => {
 
   const handleRemoveMedicine = async (itemId) => {
     try {
+      setIsUpdatingItems(true);
       const submissionId = prescription?.submissionId || prescription?.id;
       if (!submissionId) return;
       if (!itemId && itemId !== 0) {
@@ -199,11 +205,14 @@ const ReviewPrescriptions = () => {
       setOrderItems((prev) => prev.filter((item) => item.id !== itemId));
     } catch (e) {
       console.error("Remove item failed", e);
+    } finally {
+      setTimeout(() => setIsUpdatingItems(false), 200);
     }
   };
 
   const handleUpdateQuantity = async (itemId, quantity) => {
     try {
+      setIsUpdatingItems(true);
       const submissionId = prescription?.submissionId || prescription?.id;
       if (!submissionId) return;
       const updated = await submissionItemsService.update(
@@ -220,6 +229,8 @@ const ReviewPrescriptions = () => {
       );
     } catch (e) {
       console.error("Update quantity failed", e);
+    } finally {
+      setTimeout(() => setIsUpdatingItems(false), 200);
     }
   };
 
@@ -277,6 +288,20 @@ const ReviewPrescriptions = () => {
         <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-2">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <div className="px-6 pt-4 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-700">
+                  Prescription
+                </h4>
+                <div className="relative group">
+                  <span className="inline-block h-4 w-4 rounded-full bg-sky-500/20 text-sky-600 flex items-center justify-center">
+                    i
+                  </span>
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-md bg-gray-900 text-white text-xs px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-20">
+                    View the uploaded prescription and verify details before
+                    adding medicines.
+                  </div>
+                </div>
+              </div>
               <PrescriptionViewer prescription={prescription} />
             </div>
           </div>
@@ -286,6 +311,18 @@ const ReviewPrescriptions = () => {
         <div className="lg:col-span-2 xl:col-span-1 space-y-4 sm:space-y-6">
           <div className="dashboard-fade-in-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20 glass-hover">
+              <div className="px-6 pt-4 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-slate-700">Chat</h4>
+                <div className="relative group">
+                  <span className="inline-block h-4 w-4 rounded-full bg-violet-500/20 text-violet-600 flex items-center justify-center">
+                    i
+                  </span>
+                  <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-md bg-gray-900 text-white text-xs px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-20">
+                    Chat with the customer to request clarifications or share
+                    instructions.
+                  </div>
+                </div>
+              </div>
               <ChatWidget
                 messages={chatMessages}
                 onSendMessage={handleSendMessage}
@@ -314,6 +351,7 @@ const ReviewPrescriptions = () => {
                 onUpdateQuantity={handleUpdateQuantity}
                 onSendOrder={handleSendOrder}
                 onSaveDraft={handleSaveDraft}
+                isUpdating={isUpdatingItems}
                 onAddMedicine={handleAddMedicine}
               />
             </div>
