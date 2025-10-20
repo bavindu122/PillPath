@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut,
-  Settings,
   User,
   Shield,
   Building2,
@@ -37,11 +36,6 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
       // Force redirect even if logout fails
       navigate("/login", { replace: true });
     }
-  };
-
-  const handleSettings = () => {
-    navigate("/pharmacy/settings");
-    onClose?.();
   };
 
   const handleProfile = () => {
@@ -126,14 +120,6 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
         >
           <User className="w-4 h-4" />
           <span>View Profile</span>
-        </button>
-
-        <button
-          onClick={handleSettings}
-          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-3"
-        >
-          <Settings className="w-4 h-4" />
-          <span>Settings</span>
         </button>
 
         <hr className="my-2 border-gray-100" />
