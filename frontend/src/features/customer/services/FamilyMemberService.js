@@ -46,7 +46,6 @@ class FamilyMemberService {
         method: 'PUT',
         body: memberData
       });
-      console.log('Family member updated successfully:', response);
       return response;
     } catch (error) {
       console.error('Error updating family member:', error);
