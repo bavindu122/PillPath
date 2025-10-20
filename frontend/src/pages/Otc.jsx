@@ -28,18 +28,12 @@ import {
   Mail,
   ArrowRight,
   CheckCircle,
+  Loader,
+  AlertCircle,
 } from "lucide-react";
 import Navbar from "../components/Layout/Navbar";
 import { assets } from "../assets/assets";
-
-// Import your actual images
-import allergyReliefImg from "../assets/img/meds/allergy_relief.jpg";
-import antacidImg from "../assets/img/meds/Antacid.jpg";
-import coughSyrupImg from "../assets/img/meds/cough_syrup.jpg";
-import ibuprofenImg from "../assets/img/meds/Ibuprofen.jpg";
-import panadolImg from "../assets/img/meds/Panadol.jpg";
-import paracetamolImg from "../assets/img/meds/paracetamol.webp";
-import vitaminCImg from "../assets/img/meds/Vitamin_c.jpg";
+import { useOtcProducts } from "../hooks/useOtcProducts";
 
 const otcCategories = [
   {
@@ -108,87 +102,6 @@ const otcCategories = [
   },
 ];
 
-const otcProducts = [
-  {
-    id: 1,
-    name: "Paracetamol 500mg",
-    description: "Fast-acting pain reliever and fever reducer",
-    image: paracetamolImg,
-    rating: 4.5,
-    price: "Rs.8.99",
-    originalPrice: "Rs.12.99",
-    category: "Pain Relief",
-    inStock: true,
-    discount: "31%",
-    brand: "Generic",
-  },
-  {
-    id: 2,
-    name: "Ibuprofen 200mg",
-    description: "Anti-inflammatory pain relief for muscles and joints",
-    image: ibuprofenImg,
-    rating: 4.3,
-    price: "Rs.12.99",
-    originalPrice: "Rs.15.99",
-    category: "Pain Relief",
-    inStock: true,
-    discount: "19%",
-    brand: "Advil",
-  },
-  {
-    id: 3,
-    name: "Vitamin C 1000mg",
-    description: "Immune system support with antioxidants",
-    image: vitaminCImg,
-    rating: 4.7,
-    price: "Rs.15.99",
-    originalPrice: "Rs.19.99",
-    category: "Vitamins",
-    inStock: true,
-    discount: "20%",
-    brand: "Nature Made",
-  },
-  {
-    id: 4,
-    name: "Cough Syrup",
-    description: "Relieves persistent cough and throat irritation",
-    image: coughSyrupImg,
-    rating: 4.2,
-    price: "Rs.9.99",
-    originalPrice: "Rs.13.99",
-    category: "Cold & Flu",
-    inStock: true,
-    discount: "29%",
-    brand: "Robitussin",
-  },
-  {
-    id: 5,
-    name: "Antacid Tablets",
-    description: "Fast relief from heartburn and indigestion",
-    image: antacidImg,
-    rating: 4.4,
-    price: "Rs.7.99",
-    originalPrice: "Rs.10.99",
-    category: "Digestive",
-    inStock: false,
-    discount: "27%",
-    brand: "Tums",
-  },
-  {
-    id: 6,
-    name: "Allergy Relief 24hr",
-    description: "Long-lasting relief from seasonal allergies",
-    image: allergyReliefImg,
-    rating: 4.6,
-    price: "Rs.14.99",
-    originalPrice: "Rs.18.99",
-    category: "Allergy",
-    inStock: true,
-    discount: "21%",
-    brand: "Claritin",
-  },
-];
-
 const features = [
   {
     icon: <Shield size={24} />,
@@ -216,52 +129,101 @@ const Otc = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isFromDashboard = searchParams.get('from') === 'dashboard';
+
+    // ✅ Get category from URL
+  const categoryFromUrl = searchParams.get('category');
   
+  const { products: otcProducts, loading, error } = useOtcProducts();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  // const [selectedCategory, setSelectedCategory] = useState("all");
+    // ✅ Initialize selectedCategory from URL or default to "all"
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || "all");
+
   const [viewMode, setViewMode] = useState("grid");
   const [sortBy, setSortBy] = useState("popular");
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   const scrollContainerRef = useRef(null);
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+    // ✅ Add useEffect to update category when URL changes
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [categoryFromUrl]);
 
   // Auto-scroll for featured products
   useEffect(() => {
+    if (!isAutoScrolling || otcProducts.length === 0) return;
+
     const interval = setInterval(() => {
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current;
-        const cardWidth = 280;
-        const maxScroll = cardWidth * otcProducts.length;
+        const cardWidth = 288; // w-72 = 288px
+        const maxScroll = container.scrollWidth - container.clientWidth;
 
         if (container.scrollLeft >= maxScroll - cardWidth) {
-          container.scrollLeft = 0;
+          container.scrollTo({ left: 0, behavior: "smooth" });
           setCurrentIndex(0);
         } else {
-          container.scrollBy({
-            left: cardWidth,
-            behavior: "smooth",
-          });
-          setCurrentIndex((prev) => prev + 1);
+          container.scrollBy({ left: cardWidth, behavior: "smooth" });
+          setCurrentIndex((prev) => (prev + 1) % otcProducts.length);
         }
       }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAutoScrolling, otcProducts.length]);
 
   const handleProductClick = (productId) => {
     navigate(`/otc-product/${productId}`);
   };
 
-  const handleCategoryClick = (categoryId) => {
-    setSelectedCategory(categoryId);
+  const handleCategoryClick = (categoryName) => {
+    setSelectedCategory(categoryName);
+
+
+        if (categoryName === "all") {
+      navigate('/otc', { replace: true });
+    } else {
+      navigate(`/otc?category=${encodeURIComponent(categoryName)}`, { replace: true });
+    }
+
+
+    window.scrollTo({ top: 800, behavior: 'smooth' });
   };
 
-  const handleFindStoresClick = (e, productId) => {
-    e.stopPropagation(); // Prevent triggering the product click
-    navigate(`/product-stores/${productId}`);
-  };
+
+
+  // Find this function in your Otc.jsx and replace it:
+const handleFindStores = (product) => {
+  console.log('Find Stores clicked for product:', product);
+  console.log('Product ID:', product.id);
+  console.log('Product NAME:', product.name); // ✅ This is what we need
+  
+  if (!product || !product.name) {
+    console.error('❌ Product or product name is missing:', product);
+    alert('Unable to find stores for this product');
+    return;
+  }
+  
+  // ✅ Use product.name instead of product.id
+  const encodedName = encodeURIComponent(product.name);
+  const targetPath = `/product-stores/${encodedName}`;
+  
+  console.log('Navigating to:', targetPath);
+  
+  navigate(targetPath, {
+    state: { product },
+  });
+};
 
   const renderStars = (rating) => {
     const stars = [];
@@ -303,16 +265,61 @@ const Otc = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Sort filtered products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-low":
+        return a.numericPrice - b.numericPrice;
+      case "price-high":
+        return b.numericPrice - a.numericPrice;
+      case "rating":
+        return b.rating - a.rating;
+      case "popular":
+      default:
+        return 0;
+    }
+  });
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] flex items-center justify-center">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+          <p className="text-white text-lg">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] flex items-center justify-center">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center py-20">
+          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+          <p className="text-white text-lg mb-2">Error loading products</p>
+          <p className="text-gray-400 text-sm mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#030B17] via-[#0F172A] to-[#1E1B4B] relative overflow-hidden">
       <Navbar />
 
       {/* Background Elements */}
       <div className="absolute inset-0">
-        {/* Animated grid pattern */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-        {/* Floating particles */}
         <div className="particles-container">
           {[...Array(20)].map((_, i) => (
             <div
@@ -329,13 +336,9 @@ const Otc = () => {
             />
           ))}
         </div>
-
-        {/* Large floating elements */}
         <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-blue-500/5 animate-float-slow"></div>
         <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-green-500/5 animate-float-delay"></div>
         <div className="absolute top-1/2 left-1/4 w-40 h-40 rounded-full bg-purple-500/5 animate-float-gentle"></div>
-
-        {/* Medical icons */}
         <div className="absolute top-32 right-1/4 transform rotate-12 opacity-10">
           <Pill className="w-12 h-12 text-white animate-float-gentle" />
         </div>
@@ -347,7 +350,6 @@ const Otc = () => {
       {/* Hero Section */}
       <section className="relative pt-24 pb-16 px-4 overflow-hidden">
         <div className="container mx-auto max-w-7xl relative z-10">
-          {/* Back to Dashboard Button - Only show when coming from dashboard */}
           {isFromDashboard && (
             <div className="mb-6">
               <Link 
@@ -363,7 +365,6 @@ const Otc = () => {
           )}
           
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
             <div className="space-y-8 animate-fade-in-up">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-sm font-medium border border-green-500/30">
@@ -384,10 +385,11 @@ const Otc = () => {
                 </p>
               </div>
 
-              {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-white mb-1">200+</div>
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {otcProducts.length}+
+                  </div>
                   <div className="text-gray-400 text-sm">Products</div>
                 </div>
                 <div className="text-center">
@@ -400,34 +402,34 @@ const Otc = () => {
                 </div>
               </div>
 
-              {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                <button 
+                  onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                >
                   <ShoppingCart size={20} />
                   Start Shopping
                   <ArrowRight size={16} />
                 </button>
                 <button 
-                onClick={() => navigate("/find-pharmacy")}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
+                  onClick={() => navigate("/find-pharmacy")}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300"
+                >
                   <MapPin size={20} />
                   Find Nearby Pharmacy
                 </button>
               </div>
             </div>
 
-            {/* Right Content - Granny Image */}
             <div className="relative animate-fade-in-up delay-300">
               <div className="relative z-10">
-                {/* Main Image Container */}
                 <div className="relative">
                   <img
                     src={assets.otc}
                     alt="Happy customer shopping for OTC medications"
-                    className="w-full max-w-lg mx-auto "
+                    className="w-full max-w-lg mx-auto"
                   />
 
-                  {/* Floating Elements Around Image */}
                   <div className="absolute -top-6 -left-6 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg animate-float-gentle">
                     <Pill className="w-6 h-6 text-white" />
                   </div>
@@ -444,17 +446,14 @@ const Otc = () => {
                     <Zap className="w-5 h-5 text-white" />
                   </div>
 
-                  {/* Discount Badge */}
                   <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-pulse">
                     30% OFF
                   </div>
                 </div>
 
-                {/* Background Glow */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-green-500/20 rounded-2xl blur-3xl -z-10 animate-pulse"></div>
               </div>
 
-              {/* Decorative Elements */}
               <div className="absolute top-1/4 -left-12 w-24 h-24 border-4 border-blue-500/20 rounded-full animate-spin-slow"></div>
               <div className="absolute bottom-1/4 -right-12 w-32 h-32 border-4 border-green-500/20 rounded-lg rotate-45 animate-float-gentle"></div>
             </div>
@@ -467,7 +466,6 @@ const Otc = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-6 shadow-xl">
             <div className="flex flex-col lg:flex-row gap-6 items-center">
-              {/* Search Bar */}
               <div className="flex-1 relative">
                 <div className="relative">
                   <Search
@@ -484,20 +482,31 @@ const Otc = () => {
                 </div>
               </div>
 
-              {/* Filter Controls */}
               <div className="flex flex-wrap gap-4">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-                >
-                  <option value="all">All Categories</option>
-                  {otcCategories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+ 
+
+                  <select
+    value={selectedCategory}
+    onChange={(e) => {
+      const newCategory = e.target.value;
+      setSelectedCategory(newCategory);
+      
+      // Update URL when dropdown changes
+      if (newCategory === "all") {
+        navigate('/otc', { replace: true });
+      } else {
+        navigate(`/otc?category=${encodeURIComponent(newCategory)}`, { replace: true });
+      }
+    }}
+    className="px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+  >
+    <option value="all">All Categories</option>
+    {otcCategories.map((category) => (
+      <option key={category.id} value={category.name}>
+        {category.name}
+      </option>
+    ))}
+  </select>
 
                 <select
                   value={sortBy}
@@ -571,32 +580,26 @@ const Otc = () => {
                 onMouseEnter={() => setHoveredCategory(category.id)}
                 onMouseLeave={() => setHoveredCategory(null)}
               >
-                {/* Glass highlight effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                {/* Icon container */}
                 <div
                   className={`w-16 h-16 mx-auto rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-all duration-300 shadow-lg relative z-10`}
                 >
                   {category.icon}
                 </div>
 
-                {/* Category name */}
                 <h4 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors duration-300 relative z-10">
                   {category.name}
                 </h4>
 
-                {/* Description */}
                 <p className="text-gray-300 text-sm mb-3 relative z-10">
                   {category.description}
                 </p>
 
-                {/* Count */}
                 <span className="text-sm text-green-400 font-medium relative z-10">
-                  {category.count} products
+                  {otcProducts.filter(p => p.category === category.name).length} products
                 </span>
 
-                {/* Bottom accent line */}
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-green-500 group-hover:w-full transition-all duration-700"></div>
               </div>
             ))}
@@ -604,163 +607,184 @@ const Otc = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
+      {/* Products Section */}
       <section className="py-16 px-4 relative z-10">
         <div className="container mx-auto max-w-7xl">
           <div className="flex items-center justify-between mb-12">
-            <div>
-              <h3 className="text-3xl font-bold text-white mb-2">
-                Featured Products
-              </h3>
-              <p className="text-gray-300">
-                Popular medications at{" "}
-                <span className="text-green-400 font-semibold">
-                  unbeatable prices
-                </span>
-              </p>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => {
-                  if (scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollBy({
-                      left: -280,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-                className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronLeft size={20} className="text-white" />
-              </button>
-              <button
-                onClick={() => {
-                  if (scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollBy({
-                      left: 280,
-                      behavior: "smooth",
-                    });
-                  }
-                }}
-                className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110"
-              >
-                <ChevronRight size={20} className="text-white" />
-              </button>
-            </div>
-          </div>
+              <div>
+    <h3 className="text-3xl font-bold text-white mb-2">
+      {selectedCategory === "all" ? "All Products" : selectedCategory}
+    </h3>
+    <p className="text-gray-300">
+      {filteredProducts.length} products found
+      {selectedCategory !== "all" && (
+        <span className="text-blue-400"> in {selectedCategory}</span>
+      )}
+    </p>
+  </div>
 
-          {/* Products Scroll Container */}
-          <div className="relative">
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {otcProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className={`group cursor-pointer flex-shrink-0 w-72 transition-all duration-500 ${
-                    hoveredProduct === product.id ? "scale-105 z-10" : ""
-                  }`}
-                  onClick={() => handleProductClick(product.id)}
-                  onMouseEnter={() => setHoveredProduct(product.id)}
-                  onMouseLeave={() => setHoveredProduct(null)}
+            {otcProducts.length > 4 && (
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({
+                        left: -288,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                  className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110"
                 >
-                  <div className="rounded-xl bg-white/10 backdrop-blur-md border border-white/10 p-6 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden h-full">
-                    {/* Discount Badge */}
-                    {product.discount && (
-                      <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
-                        -{product.discount}
-                      </div>
-                    )}
-
-
-                    {/* Product Image */}
-                    <div className="flex justify-center mb-6 mt-8">
-                      <div className="w-40 h-40 bg-white/20 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20 transition-all duration-300 group-hover:scale-105">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-contain rounded-lg"
-                          loading="lazy"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="space-y-3 relative z-10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-green-400 font-medium">
-                          {product.category}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {product.brand}
-                        </span>
-                      </div>
-
-                      <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors duration-300 line-clamp-2">
-                        {product.name}
-                      </h3>
-
-                      <p className="text-gray-300 text-sm leading-relaxed line-clamp-2 h-10">
-                        {product.description}
-                      </p>
-
-                      {/* Rating */}
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {renderStars(product.rating)}
-                        </div>
-                        <span className="text-sm text-gray-400">
-                          ({product.rating})
-                        </span>
-                      </div>
-
-                      {/* Price */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-white">
-                          {product.price}
-                        </span>
-                        {product.originalPrice && (
-                          <span className="text-sm text-gray-400 line-through">
-                            {product.originalPrice}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => handleFindStoresClick(e, product.id)}
-                          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
-                            product.inStock
-                              ? hoveredProduct === product.id
-                                ? "bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg"
-                                : "bg-white/20 text-white hover:bg-white/30"
-                              : "bg-gray-500/20 text-gray-400 cursor-not-allowed"
-                          }`}
-                          disabled={!product.inStock}
-                        >
-                          <ShoppingCart size={16} />
-                          {product.inStock ? "Find Stores" : "Out of Stock"}
-                        </button>
-                        <button className="p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-300">
-                          <Heart size={16} className="text-white" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Glass highlight effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                    {/* Bottom accent line */}
-                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-green-500 group-hover:w-full transition-all duration-700"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  <ChevronLeft size={20} className="text-white" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({
+                        left: 288,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                  className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110"
+                >
+                  <ChevronRight size={20} className="text-white" />
+                </button>
+              </div>
+            )}
           </div>
+
+          {sortedProducts.length === 0 ? (
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-12 text-center border border-white/20">
+              <Package className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <p className="text-white text-lg mb-2">No products found</p>
+              <p className="text-gray-400">Try adjusting your search or filter criteria</p>
+            </div>
+          ) : (
+            <div className="relative">
+              <div
+                ref={scrollContainerRef}
+                className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                onMouseEnter={() => setIsAutoScrolling(false)}
+                onMouseLeave={() => setIsAutoScrolling(true)}
+              >
+                {sortedProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className={`group cursor-pointer flex-shrink-0 w-72 transition-all duration-500 ${
+                      hoveredProduct === product.id ? "scale-105 z-10" : ""
+                    }`}
+                    onClick={() => handleProductClick(product.id)}
+                    onMouseEnter={() => setHoveredProduct(product.id)}
+                    onMouseLeave={() => setHoveredProduct(null)}
+                  >
+                    <div className="rounded-xl bg-white/10 backdrop-blur-md border border-white/10 p-6 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden h-full">
+                      {product.discount && (
+                        <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10">
+                          -{product.discount}
+                        </div>
+                      )}
+
+                      <div className="flex justify-center mb-6 mt-8">
+                        <div className="w-40 h-40 bg-white/20 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20 transition-all duration-300 group-hover:scale-105">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-contain rounded-lg"
+                              loading="lazy"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://via.placeholder.com/150?text=No+Image';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-16 h-16 text-white/40" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 relative z-10">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-green-400 font-medium">
+                            {product.category}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {product.brand}
+                          </span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors duration-300 line-clamp-2 min-h-[3.5rem]">
+                          {product.name}
+                        </h3>
+
+                        <p className="text-gray-300 text-sm leading-relaxed line-clamp-2 h-10">
+                          {product.description}
+                        </p>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {renderStars(product.rating)}
+                          </div>
+                          <span className="text-sm text-gray-400">
+                            ({product.rating})
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-white">
+                            {product.price}
+                          </span>
+                          {product.originalPrice && (
+                            <span className="text-sm text-gray-400 line-through">
+                              {product.originalPrice}
+                            </span>
+                          )}
+                        </div>
+
+                        {product.dosage && (
+                          <p className="text-xs text-gray-400">
+                            Dosage: {product.dosage}
+                          </p>
+                        )}
+
+                        <div className="flex gap-2">
+                          <button
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleFindStores(product); // ✅ Change from handleFindStoresClick to handleFindStores
+                              }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 text-sm font-medium ${
+                              product.inStock
+                                ? hoveredProduct === product.id
+                                  ? "bg-gradient-to-r from-blue-500 to-green-500 text-white shadow-lg"
+                                  : "bg-white/20 text-white hover:bg-white/30"
+                                : "bg-gray-500/20 text-gray-400 cursor-not-allowed"
+                            }`}
+                            disabled={!product.inStock}
+                          >
+                            <ShoppingCart size={16} />
+                            {product.inStock ? "Find Stores" : "Out of Stock"}
+                          </button>
+                          <button className="p-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-300">
+                            <Heart size={16} className="text-white" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-green-500 group-hover:w-full transition-all duration-700"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -808,6 +832,13 @@ const Otc = () => {
               healthcare needs. Start shopping today!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-green-600 transition-all duration-300"
+              >
+                <ShoppingCart size={20} />
+                Browse Products
+              </button>
               <button className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
                 <Phone size={20} />
                 Contact Support
@@ -821,3 +852,30 @@ const Otc = () => {
 };
 
 export default Otc;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
