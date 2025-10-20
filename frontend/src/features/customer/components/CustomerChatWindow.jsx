@@ -194,12 +194,7 @@ const CustomerChatWindow = ({ selectedChat, onClose }) => {
       {/* Message Input */}
       <div className="p-4 border-t border-white/20">
         <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-          <button
-            type="button"
-            className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <Paperclip size={18} />
-          </button>
+          
           <div className="flex-1">
             <input
               type="text"

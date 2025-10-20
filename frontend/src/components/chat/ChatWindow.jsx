@@ -320,27 +320,7 @@ const ChatWindow = ({ onBack, className = "" }) => {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center space-x-1">
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="Voice call"
-          >
-            <Phone className="w-5 h-5" />
-          </button>
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="Video call"
-          >
-            <Video className="w-5 h-5" />
-          </button>
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="More options"
-          >
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
+
       </div>
 
       {/* Messages Area - Scrollable content */}

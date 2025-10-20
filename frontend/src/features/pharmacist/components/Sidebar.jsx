@@ -75,12 +75,6 @@ const Sidebar = () => {
       label: "Inventory",
       path: "/pharmacist/inventory",
     },
-    {
-      id: "chat",
-      icon: MessageSquare,
-      label: "Chat",
-      path: "/pharmacist/chat",
-    },
   ];
 
   React.useEffect(() => {

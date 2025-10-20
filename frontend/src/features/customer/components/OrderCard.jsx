@@ -119,10 +119,7 @@ const OrderCard = ({ order, onView }) => {
                   <Eye size={14} />
                   View
                 </button>
-                <button className="bg-white/10 hover:bg-white/20 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                  <Repeat size={14} />
-                  Reorder
-                </button>
+               
               </div>
             </div>
           </div>
