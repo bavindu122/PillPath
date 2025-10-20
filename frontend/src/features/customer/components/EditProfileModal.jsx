@@ -198,7 +198,21 @@ const EditProfileModal = ({
         if (isFamilyMember && familyMember?.id) {
           // Update family member profile
           console.log('Updating family member profile...');
-          console.log('Family member ID:', familyMember.id);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('=== SENDING PROFILE UPDATE ===');
+          console.log('Is family member:', isFamilyMember);
+          console.log('Profile data being sent:', profileUpdateData);
+        }
+
+        let result;
+        
+        // ✅ Different update logic for family members vs current user
+        if (isFamilyMember && familyMember?.id) {
+          // Update family member profile
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Updating family member profile...');
+            console.log('Family member ID:', familyMember.id);
+          }
           
           result = await FamilyMemberService.updateFamilyMemberProfile(familyMember.id, profileUpdateData);
           
