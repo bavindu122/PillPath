@@ -24,6 +24,7 @@ import ContactInfo from "./components/ContactInfo";
 import ServicesSection from "./components/ServicesSection";
 import OpeningHours from "./components/OpeningHours";
 import { usePharmacyProfile } from "./hooks/usePharmacyProfile";
+import ReviewsService from "../../services/api/ReviewsService";
 
 // Import images for mini components
 import panadolImg from "../../assets/img/meds/Panadol.jpg";
@@ -43,6 +44,10 @@ const PharmacyProfile = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [isFromPrescriptionUpload, setIsFromPrescriptionUpload] =
     useState(false);
+  // Mini recent reviews state (fetch from API: newest first, 2 items)
+  const [recentReviews, setRecentReviews] = useState([]);
+  const [recentReviewsLoading, setRecentReviewsLoading] = useState(false);
+  const [recentReviewsError, setRecentReviewsError] = useState("");
 
   // Check if user came from prescription upload flow
   useEffect(() => {
@@ -51,6 +56,45 @@ const PharmacyProfile = () => {
       setIsFromPrescriptionUpload(true);
     }
   }, []);
+
+  // Format ISO timestamps like 2025-10-20T12:51:52.011230Z -> 2025-10-20 12:51:52
+  const formatDateDisplay = (input) => {
+    if (!input) return "";
+    const str = String(input);
+    const replaced = str.replace("T", " ").replace("Z", "");
+    const noMs = replaced.includes(".") ? replaced.split(".")[0] : replaced;
+    const match = noMs.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+    return match ? match[1] : noMs;
+  };
+
+  // Load two recent reviews from API
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!actualPharmacyId) return;
+      setRecentReviewsLoading(true);
+      setRecentReviewsError("");
+      try {
+        const res = await ReviewsService.getPharmacyReviews({
+          pharmacyId: actualPharmacyId,
+          page: 1,
+          pageSize: 2,
+          sort: "newest",
+        });
+        if (!cancelled)
+          setRecentReviews(Array.isArray(res?.items) ? res.items : []);
+      } catch (e) {
+        if (!cancelled)
+          setRecentReviewsError(e?.message || "Failed to load reviews");
+      } finally {
+        if (!cancelled) setRecentReviewsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [actualPharmacyId]);
 
   // Determine back link based on context
   const getBackLink = () => {
@@ -193,9 +237,15 @@ const PharmacyProfile = () => {
         </button>
       </div>
 
-      {reviews?.length > 0 ? (
+      {recentReviewsLoading ? (
+        <div className="text-center py-6 text-gray-600">Loading…</div>
+      ) : recentReviewsError ? (
+        <div className="text-center py-6 text-red-500">
+          {recentReviewsError}
+        </div>
+      ) : recentReviews?.length > 0 ? (
         <div className="space-y-4">
-          {reviews.slice(0, 2).map((review) => (
+          {recentReviews.slice(0, 2).map((review) => (
             <div
               key={review.id}
               className="bg-white/60 rounded-lg p-4 border border-white/30"
@@ -226,7 +276,9 @@ const PharmacyProfile = () => {
                     </div>
                   </div>
                 </div>
-                <span className="text-xs text-gray-500">{review.date}</span>
+                <span className="text-xs text-gray-500">
+                  {formatDateDisplay(review.date)}
+                </span>
               </div>
               <p className="text-gray-700 text-sm line-clamp-2">
                 {review.comment}

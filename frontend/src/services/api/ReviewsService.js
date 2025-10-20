@@ -58,4 +58,32 @@ export async function submitPharmacyReview({
   );
 }
 
-export default { submitPharmacyReview };
+/**
+ * Fetch reviews for a pharmacy with pagination, optional rating filter, and sorting.
+ * GET /pharmacies/{pharmacyId}/reviews?Page&PageSize&rating&sort
+ * sort: newest|oldest|highest|lowest
+ */
+export async function getPharmacyReviews({
+  pharmacyId,
+  page = 1,
+  pageSize = 5,
+  rating,
+  sort = "newest",
+} = {}) {
+  if (!pharmacyId) throw new Error("pharmacyId required");
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("pageSize", String(pageSize));
+  if (rating != null && rating !== "all") {
+    const r = String(rating);
+    params.set("rating", r);
+    // also send 'stars' for compatibility with different backends
+    params.set("stars", r);
+  }
+  if (sort) params.set("sort", sort);
+  return request(
+    `pharmacies/${encodeURIComponent(pharmacyId)}/reviews?${params.toString()}`
+  );
+}
+
+export default { submitPharmacyReview, getPharmacyReviews };

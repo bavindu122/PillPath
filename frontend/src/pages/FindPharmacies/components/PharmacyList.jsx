@@ -120,6 +120,11 @@ const PharmacyList = ({
           const isSelected = isMultiSelect
             ? isPharmacySelected(pharmacy.id)
             : selectedPharmacy?.id === pharmacy.id;
+          // Ensure rating is shown with one decimal place
+          const ratingRaw = pharmacy.rating ?? pharmacy.averageRating ?? 0;
+          const ratingNum = Number.isFinite(Number(ratingRaw))
+            ? Number(ratingRaw)
+            : 0;
 
           return (
             <div
@@ -173,7 +178,7 @@ const PharmacyList = ({
                       <div className="flex items-center text-yellow-500">
                         <Star size={16} className="fill-yellow-500" />
                         <span className="ml-1 text-sm text-dark font-medium">
-                          {pharmacy.rating || pharmacy.averageRating || 0}
+                          {ratingNum.toFixed(1)}
                         </span>
                       </div>
 

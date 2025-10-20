@@ -1,59 +1,128 @@
-import React, { useState } from "react";
-import { Star, ThumbsUp, MessageCircle, Filter, Plus } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Star, ThumbsUp, MessageCircle } from "lucide-react";
+import ReviewsService from "../../../services/api/ReviewsService";
+
+// Format dates like 2025-10-20T12:51:52.011230Z -> 2025-10-20 12:51:52
+function formatDateDisplay(input) {
+  if (!input) return "";
+  const str = String(input);
+  // Replace T with space, drop milliseconds and trailing Z/offset
+  const replaced = str.replace("T", " ").replace("Z", "");
+  // If milliseconds present, cut at first dot
+  const noMs = replaced.includes(".") ? replaced.split(".")[0] : replaced;
+  // Ensure we only keep up to seconds if more content remains
+  const match = noMs.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+  return match ? match[1] : noMs;
+}
 
 const ReviewsSection = ({ reviews, pharmacy }) => {
   const [sortBy, setSortBy] = useState("newest");
   const [filterRating, setFilterRating] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const reviewsPerPage = 5;
-
-  const sortedReviews = [...(reviews || [])].sort((a, b) => {
-    if (sortBy === "newest") return new Date(b.date) - new Date(a.date);
-    if (sortBy === "oldest") return new Date(a.date) - new Date(b.date);
-    if (sortBy === "highest") return b.rating - a.rating;
-    if (sortBy === "lowest") return a.rating - b.rating;
-    return 0;
+  const [pageSize, setPageSize] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [serverData, setServerData] = useState({
+    items: [],
+    page: 1,
+    pageSize: 5,
+    total: 0,
+    totalPages: 0,
   });
 
-  const filteredReviews = filterRating === "all" 
-    ? sortedReviews 
-    : sortedReviews.filter(review => review.rating === parseInt(filterRating));
+  const pharmacyId = pharmacy?.id || pharmacy?.pharmacyId || pharmacy;
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
-  const startIndex = (currentPage - 1) * reviewsPerPage;
-  const endIndex = startIndex + reviewsPerPage;
-  const currentReviews = filteredReviews.slice(startIndex, endIndex);
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+  const fetchReviews = async () => {
+    if (!pharmacyId) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await ReviewsService.getPharmacyReviews({
+        pharmacyId,
+        page: currentPage,
+        pageSize,
+        rating: filterRating === "all" ? undefined : Number(filterRating),
+        sort: sortBy,
+      });
+      // Expected shape: { items, page, pageSize, total, totalPages }
+      setServerData({
+        items: Array.isArray(res.items) ? res.items : [],
+        page: Number(res.page) || currentPage,
+        pageSize: Number(res.pageSize) || pageSize,
+        total:
+          Number(res.total) ||
+          (Array.isArray(res.items) ? res.items.length : 0),
+        totalPages: Number(res.totalPages) || 1,
+      });
+    } catch (e) {
+      setError(e?.message || "Failed to load reviews");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  useEffect(() => {
+    fetchReviews();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pharmacyId, currentPage, pageSize, filterRating, sortBy]);
+
+  // Fallback client-side filtering if server doesn't honor rating filter
+  const currentReviews = React.useMemo(() => {
+    const items = serverData.items || [];
+    if (filterRating === "all") return items;
+    const target = Number(filterRating);
+    if (!Number.isFinite(target)) return items;
+    return items.filter((r) => Number(r.rating) === target);
+  }, [serverData.items, filterRating]);
+  const totalPages = serverData.totalPages || 1;
+  const startIndex = (serverData.page - 1) * serverData.pageSize;
+  const endIndex = startIndex + currentReviews.length;
+
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handlePrevPage = () =>
+    currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () =>
+    currentPage < totalPages && setCurrentPage(currentPage + 1);
 
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl p-8 border border-white/40 shadow-xl">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
-          Customer Reviews ({filteredReviews?.length || 0})
+          Customer Reviews ({serverData.total || 0})
         </h2>
+        <div className="flex items-center gap-3">
+          <select
+            value={filterRating}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setFilterRating(e.target.value);
+            }}
+            className="bg-white/80 border border-gray-300 rounded-lg px-2 py-1 text-sm text-gray-700"
+          >
+            <option value="all">All ratings</option>
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
+          </select>
+        </div>
       </div>
 
       {/* Reviews List */}
       <div className="space-y-6">
-        {currentReviews.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-gray-600">
+            Loading reviews…
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500">{error}</div>
+        ) : currentReviews.length > 0 ? (
           currentReviews.map((review) => (
-            <div key={review.id} className="bg-white/60 rounded-xl p-6 border border-white/30">
+            <div
+              key={review.id}
+              className="bg-white/60 rounded-xl p-6 border border-white/30"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -62,8 +131,12 @@ const ReviewsSection = ({ reviews, pharmacy }) => {
                     </span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800">{review.userName}</h4>
-                    <p className="text-sm text-gray-600">{review.date}</p>
+                    <h4 className="font-semibold text-gray-800">
+                      {review.userName}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {formatDateDisplay(review.date)}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center">
@@ -80,9 +153,9 @@ const ReviewsSection = ({ reviews, pharmacy }) => {
                   ))}
                 </div>
               </div>
-              
+
               <p className="text-gray-700 mb-4">{review.comment}</p>
-              
+
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
                   <ThumbsUp size={14} />
@@ -100,20 +173,20 @@ const ReviewsSection = ({ reviews, pharmacy }) => {
       </div>
 
       {/* Pagination */}
-      {filteredReviews.length > 0 && totalPages > 1 && (
+      {serverData.total > 0 && totalPages > 1 && (
         <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredReviews.length)} of {filteredReviews.length} reviews
+            Showing {startIndex + 1} to {endIndex} of {serverData.total} reviews
           </div>
           <div className="flex items-center space-x-2">
-            <button 
+            <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
               className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               ←
             </button>
-            
+
             {/* Page Numbers */}
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
@@ -128,8 +201,8 @@ const ReviewsSection = ({ reviews, pharmacy }) => {
                 {page}
               </button>
             ))}
-            
-            <button 
+
+            <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
               className="px-3 py-1 text-sm border border-gray-200 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
