@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
 
 class AdminService {
   // Overview stat cards summary
@@ -13,6 +13,68 @@ class AdminService {
   async getOverviewCharts() {
     return this.request("admin/overview/charts", {
       method: "GET",
+    });
+  }
+
+  // Analytics KPIs (stat cards on Analytics page)
+  async getAnalyticsKpis() {
+    return this.request("admin/analytics/kpis", {
+      method: "GET",
+    });
+  }
+
+  // Analytics charts (Analytics page)
+  async getAnalyticsCharts(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/analytics/charts${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // Pharmacy performance (single endpoint, no pagination/sort)
+  async getPharmacyPerformance() {
+    return this.request("admin/analytics/pharmacy-performance", {
+      method: "GET",
+    });
+  }
+
+  // Customer activity (single endpoint, no pagination/sort)
+  async getCustomerActivity() {
+    return this.request("admin/analytics/customer-activity", {
+      method: "GET",
+    });
+  }
+
+  // Suspended accounts (single endpoint, no pagination/sort)
+  async getSuspendedAccounts() {
+    return this.request("admin/analytics/suspended-accounts", {
+      method: "GET",
+    });
+  }
+
+  // Moderators: create a new moderator (admin-only)
+  async addModerator(moderatorData) {
+    return this.request("admin/moderators", {
+      method: "POST",
+      body: moderatorData,
+    });
+  }
+
+  // Moderators: list all moderators (admin-only)
+  async getModerators() {
+    return this.request("admin/moderators", {
+      method: "GET",
+    });
+  }
+
+  // Moderators: delete a moderator by id (admin-only)
+  async deleteModerator(moderatorId) {
+    if (!moderatorId) throw new Error("moderatorId is required");
+    return this.request(`admin/moderators/${moderatorId}`, {
+      method: "DELETE",
     });
   }
   async request(endpoint, options = {}) {
@@ -205,6 +267,25 @@ class AdminService {
     const queryParams = new URLSearchParams(params).toString();
     return this.request(`admin/orders${queryParams ? `?${queryParams}` : ""}`, {
       method: "GET",
+    });
+  }
+
+  // ✅ Get all reviews (admin)
+  async getReviews(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    return this.request(
+      `admin/reviews${queryParams ? `?${queryParams}` : ""}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  // Reviews: delete a review by id (admin-only)
+  async deleteReview(reviewId) {
+    if (!reviewId) throw new Error("reviewId is required");
+    return this.request(`admin/reviews/${encodeURIComponent(reviewId)}`, {
+      method: "DELETE",
     });
   }
   async getAnnouncements(params = {}) {

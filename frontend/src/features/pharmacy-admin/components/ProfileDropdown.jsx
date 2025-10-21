@@ -89,7 +89,9 @@ const ProfileDropdown = ({ show, onClose, anchorRef }) => {
           {pharmacyName && (
             <div className="flex items-center space-x-2 text-gray-600">
               <Building2 className="w-4 h-4" />
-              <span className="truncate">{pharmacyName}</span>
+              <span className="truncate notranslate" translate="no">
+                {pharmacyName}
+              </span>
             </div>
           )}
           {user?.email && (

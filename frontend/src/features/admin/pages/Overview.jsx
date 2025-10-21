@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader";
 import ChartCard from "../components/ChartCard";
 import StatCard from "../components/StatCard";
-import RecentActivityCard from "../components/RecentActivityCard";
 
 import {
   Home,
@@ -21,8 +20,6 @@ import {
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -38,89 +35,6 @@ import {
 import AdminService from "../../../services/api/AdminService";
 
 const COLORS = ["#3B82F6", "#8B5CF6", "#EC4899", "#06B6D4", "#8B5CF6"];
-
-const mockDashboardData = {
-  summary: {
-    totalUsers: 1250,
-    activePharmacies: 85,
-    pendingPrescriptions: 45,
-    completedOrders: 980,
-    totalRevenue: 35000,
-  },
-  userRegistrationTrend: [
-    { name: "Jan", users: 400 },
-    { name: "Feb", users: 300 },
-    { name: "Mar", users: 500 },
-    { name: "Apr", users: 450 },
-    { name: "May", users: 600 },
-    { name: "Jun", users: 700 },
-  ],
-  orderStatusDistribution: [
-    { name: "Pending", value: 150 },
-    { name: "Approved", value: 300 },
-    { name: "Completed", value: 500 },
-    { name: "Rejected", value: 50 },
-  ],
-  recentActivity: [
-    {
-      id: 1,
-      user: "Dr. Sarah Johnson",
-      action: "Uploaded prescription",
-      time: "2 minutes ago",
-      status: "success",
-    },
-    {
-      id: 2,
-      user: "MedPlus Pharmacy",
-      action: "Updated inventory",
-      time: "5 minutes ago",
-      status: "info",
-    },
-    {
-      id: 3,
-      user: "John Smith",
-      action: "Account login",
-      time: "8 minutes ago",
-      status: "info",
-    },
-    {
-      id: 4,
-      user: "System",
-      action: "Backup completed",
-      time: "15 minutes ago",
-      status: "success",
-    },
-    {
-      id: 5,
-      user: "HealthCare Pharmacy",
-      action: "New registration",
-      time: "23 minutes ago",
-      status: "warning",
-    },
-  ],
-  userRolesData: [
-    { name: "Customers", value: 1247, color: "#3B82F6" },
-    { name: "Pharmacists", value: 89, color: "#8B5CF6" },
-    { name: "Pharmacy Admins", value: 34, color: "#EC4899" },
-    { name: "System Admins", value: 8, color: "#06B6D4" },
-  ],
-  monthlyOTCData: [
-    { month: "Jan", sales: 4800 },
-    { month: "Feb", sales: 5200 },
-    { month: "Mar", sales: 4900 },
-    { month: "Apr", sales: 6100 },
-    { month: "May", sales: 5800 },
-    { month: "Jun", sales: 7200 },
-  ],
-  pharmacyOnboardingData: [
-    { month: "Jan", pharmacies: 12 },
-    { month: "Feb", pharmacies: 19 },
-    { month: "Mar", pharmacies: 15 },
-    { month: "Apr", pharmacies: 22 },
-    { month: "May", pharmacies: 28 },
-    { month: "Jun", pharmacies: 35 },
-  ],
-};
 
 const Overview = () => {
   const [stats, setStats] = useState({
@@ -317,22 +231,8 @@ const Overview = () => {
           }
           icon={<ChartLine size={48} className="text-pink-500" />}
         />
-        <StatCard
-          label="Wallet Balance"
-          value={
-            loading
-              ? "..."
-              : `Rs. ${(stats.walletBalance || 0).toLocaleString()}`
-          }
-          icon={<Wallet size={48} className="text-red-500" />}
-        />
       </div>
       {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
-
-      <RecentActivityCard
-        title="Recent Activities"
-        activities={mockDashboardData.recentActivity}
-      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="User Registration Trend">
@@ -388,18 +288,6 @@ const Overview = () => {
               </PieChart>
             </ResponsiveContainer>
           )}
-        </ChartCard>
-
-        <ChartCard title="Monthly OTC Sales">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={mockDashboardData.monthlyOTCData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="sales" fill="#EC4899" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
         </ChartCard>
 
         <ChartCard title="Pharmacy Onboarding Trends">

@@ -16,6 +16,7 @@ import {
   Shield,
   Wrench,
   Menu,
+  Star,
   X,
   Bell,
   User,
@@ -33,7 +34,9 @@ const navigation = [
   { name: "Sales", href: "/admin/sales", icon: Activity },
   { name: "Wallet", href: "/admin/wallet", icon: Wallet },
   { name: "Announcements", href: "/admin/announcements", icon: Bell },
+  { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+  
 ];
 
 export default function AdminLayout({ children }) {
@@ -134,10 +137,6 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Bell className="w-6 h-6 cursor-pointer text-blue-600 hover:text-blue-800 transition-colors" />
-              </div>
-
               {/* ✅ Admin Profile Dropdown */}
               <div className="relative">
                 <button

@@ -24,7 +24,6 @@ import {
   XCircle,
   Upload,
   CreditCard,
-  Hand,
   HandCoins,
   Handshake,
 } from "lucide-react";
@@ -229,27 +228,7 @@ const WalletAndIncome = () => {
     }))
     .sort((a, b) => new Date(a.name) - new Date(b.name)); // Sort by date
 
-  const months = [
-    { value: "All", label: "All Months" },
-    { value: "1", label: "January" },
-    { value: "2", label: "February" },
-    { value: "3", label: "March" },
-    { value: "4", label: "April" },
-    { value: "5", label: "May" },
-    { value: "6", label: "June" },
-    { value: "7", label: "July" },
-    { value: "8", label: "August" },
-    { value: "9", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
-
-  const years = useMemo(() => {
-    const set = new Set(["All"]);
-    orders.forEach((o) => set.add(new Date(o.date).getFullYear().toString()));
-    return Array.from(set).sort();
-  }, [orders]);
+  // Filters removed from UI; default filterMonth/filterYear remain "All" for backend queries
 
   const handleExportData = (reportName, data) => {
     if (!data || data.length === 0) {
@@ -603,7 +582,7 @@ const WalletAndIncome = () => {
       {/* Filters and Search */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full md:w-1/3">
+          <div className="relative w-full md:w-1/2">
             <input
               type="text"
               placeholder="Search by ID, sender, or receiver..."
@@ -615,32 +594,6 @@ const WalletAndIncome = () => {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
               size={20}
             />
-          </div>
-          <div className="w-full md:w-1/4">
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filterMonth}
-              onChange={(e) => setFilterMonth(e.target.value)}
-            >
-              {months.map((month) => (
-                <option key={month.value} value={month.value}>
-                  {month.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="w-full md:w-1/4">
-            <select
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
           </div>
           <button
             onClick={() =>

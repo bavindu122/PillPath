@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import AdminWalletService from "../../../services/api/AdminWalletService";
+import AdminService from "../../../services/api/AdminService";
 
 // Dummy Data for Admin Settings
 const dummySettingsData = {
@@ -62,9 +63,16 @@ const dummySettingsData = {
 };
 
 const Setting = () => {
-  const [moderators, setModerators] = useState(dummySettingsData.moderators);
+  const [moderators, setModerators] = useState([]);
+  const [modsLoading, setModsLoading] = useState(false);
+  const [modsError, setModsError] = useState("");
   const [newModeratorUsername, setNewModeratorUsername] = useState("");
   const [newModeratorPassword, setNewModeratorPassword] = useState("");
+  const [addingModerator, setAddingModerator] = useState(false);
+  const [addModMsg, setAddModMsg] = useState("");
+  // Admin profile (to detect moderator vs admin)
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [adminProfileLoading, setAdminProfileLoading] = useState(true);
   const [generalSettings, setGeneralSettings] = useState(
     dummySettingsData.generalSettings
   );
@@ -88,55 +96,159 @@ const Setting = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutMessage, setLogoutMessage] = useState("");
 
-  const handleAddModerator = (e) => {
-    e.preventDefault();
-    if (
-      newModeratorUsername.trim() === "" ||
-      newModeratorPassword.trim() === ""
-    ) {
-      // In a real application, replace alert with a custom modal/toast
-      alert("Username and password cannot be empty.");
-      return;
-    }
-
-    const newMod = {
-      id: `mod_${Date.now()}`, // Simple unique ID
-      username: newModeratorUsername,
-      lastLogin: "Never", // New moderator hasn't logged in yet
+  // Load admin profile to determine privileges
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setAdminProfileLoading(true);
+        const profile = await AdminService.getAdminProfile();
+        if (!mounted) return;
+        setAdminProfile(profile || null);
+      } catch (e) {
+        if (!mounted) return;
+        setAdminProfile(null);
+      } finally {
+        if (mounted) setAdminProfileLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
     };
-    setModerators([...moderators, newMod]);
-    setAuditLog([
-      {
-        id: `log_${Date.now()}`,
-        action: `Added moderator: ${newModeratorUsername}`,
-        timestamp: new Date().toLocaleString(),
-        admin: "SuperAdmin",
-      },
-      ...auditLog,
-    ]);
-    setNewModeratorUsername("");
-    setNewModeratorPassword("");
-    // In a real application, replace alert with a custom modal/toast
-    alert(
-      `Moderator '${newModeratorUsername}' added successfully! Please ensure the password is stored securely.' (Please note this down securely, as it will not be displayed again).`
-    );
+  }, []);
+
+  // Permission: only full admins can manage moderators
+  const canManageModerators = (() => {
+    const lvl = String(adminProfile?.adminLevel || "").toUpperCase();
+    // Treat SUPER as full admin; STANDARD behaves like moderator for this feature
+    return lvl === "SUPER";
+  })();
+
+  // Helper: format date-time to YYYY-MM-DD HH:mm:ss
+  const formatDateTime = (value) => {
+    if (!value) return "";
+    try {
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return String(value);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mi = String(d.getMinutes()).padStart(2, "0");
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    } catch {
+      return String(value);
+    }
   };
 
-  const handleDeleteModerator = (id, username) => {
-    // In a real application, replace window.confirm with a custom modal
-    if (
-      window.confirm(`Are you sure you want to delete moderator '${username}'?`)
-    ) {
-      setModerators(moderators.filter((mod) => mod.id !== id));
-      setAuditLog([
+  // Helper: display moderator ID as MOD_<first-digits>
+  const formatModeratorId = (value) => {
+    if (!value) return "MOD_";
+    const str = String(value);
+    const match = str.match(/\d+/);
+    const digits = match ? match[0] : str.replace(/\D/g, "").slice(0, 6);
+    return `MOD_${digits || str.slice(0, 6)}`;
+  };
+
+  // Load moderators from backend when admin can manage
+  useEffect(() => {
+    let mounted = true;
+    const fetchMods = async () => {
+      if (!canManageModerators) return; // don't fetch for STANDARD
+      setModsError("");
+      setModsLoading(true);
+      try {
+        const list = await AdminService.getModerators();
+        if (!mounted) return;
+        const normalized = Array.isArray(list)
+          ? list.map((m) => ({
+              id: m.id || m._id || `mod_${Math.random().toString(36).slice(2)}`,
+              username: m.username || m.name || "",
+              registrationDate: formatDateTime(
+                m.createdAt || m.registrationDate || m.registeredAt
+              ),
+            }))
+          : [];
+        setModerators(normalized);
+      } catch (e) {
+        if (!mounted) return;
+        setModsError(e?.message || "Failed to load moderators");
+      } finally {
+        if (mounted) setModsLoading(false);
+      }
+    };
+    fetchMods();
+    return () => {
+      mounted = false;
+    };
+  }, [canManageModerators]);
+
+  const handleAddModerator = async (e) => {
+    e.preventDefault();
+    if (!canManageModerators) {
+      setAddModMsg("You don't have permission to add moderators.");
+      return;
+    }
+    setAddModMsg("");
+    if (newModeratorUsername.trim() === "") {
+      setAddModMsg("Username is required");
+      return;
+    }
+    // password is optional; backend can generate if omitted
+    try {
+      setAddingModerator(true);
+      const payload = {
+        username: newModeratorUsername.trim(),
+        // if empty, omit password field so backend generates one
+        ...(newModeratorPassword.trim()
+          ? { password: newModeratorPassword.trim() }
+          : {}),
+      };
+      const created = await AdminService.addModerator(payload);
+      // Best-effort normalization
+      const newMod = {
+        id: created?.id || `mod_${Date.now()}`,
+        username: created?.username || newModeratorUsername.trim(),
+        registrationDate: formatDateTime(
+          created?.createdAt || created?.registrationDate || new Date()
+        ),
+      };
+      setModerators((prev) => [newMod, ...prev]);
+      setNewModeratorUsername("");
+      setNewModeratorPassword("");
+      setAddModMsg(
+        created?.temporaryPassword
+          ? `Moderator added. Temporary password: ${created.temporaryPassword}`
+          : "Moderator added successfully."
+      );
+    } catch (err) {
+      setAddModMsg(err?.message || "Failed to add moderator");
+    } finally {
+      setAddingModerator(false);
+    }
+  };
+
+  const handleDeleteModerator = async (id, username) => {
+    if (!canManageModerators) return;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete moderator '${username}'?`
+    );
+    if (!confirmed) return;
+    try {
+      await AdminService.deleteModerator(id);
+      setModerators((prev) => prev.filter((mod) => mod.id !== id));
+      setAuditLog((prev) => [
         {
           id: `log_${Date.now()}`,
           action: `Deleted moderator: ${username}`,
           timestamp: new Date().toLocaleString(),
-          admin: "SuperAdmin",
+          admin: adminProfile?.username || "Admin",
         },
-        ...auditLog,
+        ...prev,
       ]);
+    } catch (e) {
+      alert(e?.message || "Failed to delete moderator");
     }
   };
 
@@ -409,179 +521,157 @@ const Setting = () => {
         </button>
       </div>
 
-      {/* Add Moderator Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <UserPlus className="w-6 h-6 mr-2 text-blue-600" /> Add New Moderator
-        </h2>
-        <form
-          onSubmit={handleAddModerator}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div>
-            <label
-              htmlFor="modUsername"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              id="modUsername"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={newModeratorUsername}
-              onChange={(e) => setNewModeratorUsername(e.target.value)}
-              placeholder="Enter moderator username"
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="modPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Password
-            </label>
-            <input
-              type="text" // Changed to 'text' for demonstration to show generated password
-              id="modPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={newModeratorPassword}
-              onChange={(e) => setNewModeratorPassword(e.target.value)}
-              placeholder="Enter temporary password"
-              required
-            />
-          </div>
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            >
-              <UserPlus className="w-5 h-5 mr-2" /> Add Moderator
-            </button>
-          </div>
-        </form>
-      </section>
+      {/* Add Moderator Section (Admins only) */}
+      {canManageModerators && (
+        <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+            <UserPlus className="w-6 h-6 mr-2 text-blue-600" /> Add New
+            Moderator
+          </h2>
+          <form
+            onSubmit={handleAddModerator}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            <div>
+              <label
+                htmlFor="modUsername"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Username
+              </label>
+              <input
+                type="text"
+                id="modUsername"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newModeratorUsername}
+                onChange={(e) => setNewModeratorUsername(e.target.value)}
+                placeholder="Enter moderator username"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="modPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Password
+              </label>
+              <input
+                type="text" // Changed to 'text' for demonstration to show generated password
+                id="modPassword"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={newModeratorPassword}
+                onChange={(e) => setNewModeratorPassword(e.target.value)}
+                placeholder="Enter temporary password"
+                required
+              />
+            </div>
+            <div className="md:col-span-2 flex items-center justify-between">
+              {addModMsg && (
+                <div className="text-sm text-gray-700 bg-gray-100 rounded px-3 py-2">
+                  {addModMsg}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={addingModerator}
+                className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center ${
+                  addingModerator ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                <UserPlus className="w-5 h-5 mr-2" />
+                {addingModerator ? "Adding..." : "Add Moderator"}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
 
-      {/* Existing Moderators Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <List className="w-6 h-6 mr-2 text-blue-600" /> Existing Moderators
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Username
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Last Login
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {moderators.map((mod) => (
-                <tr key={mod.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {mod.username}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {mod.lastLogin}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() =>
-                        handleDeleteModerator(mod.id, mod.username)
-                      }
-                      className="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center"
-                    >
-                      <Trash2 className="w-5 h-5 mr-1" /> Delete
-                    </button>
-                  </td>
+      {/* Existing Moderators Section (Admins only) */}
+      {canManageModerators && (
+        <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+            <List className="w-6 h-6 mr-2 text-blue-600" /> Existing Moderators
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                  >
+                    mod_id
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                  >
+                    Username
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                  >
+                    Registration Date
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                  >
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* General Settings Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <Settings className="w-6 h-6 mr-2 text-purple-600" /> General Settings
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label
-              htmlFor="siteName"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Site Name
-            </label>
-            <input
-              type="text"
-              id="siteName"
-              name="siteName"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={generalSettings.siteName}
-              onChange={handleGeneralSettingsChange}
-            />
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {modsLoading ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={4}>
+                      Loading moderators…
+                    </td>
+                  </tr>
+                ) : modsError ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-red-600" colSpan={4}>
+                      {modsError}
+                    </td>
+                  </tr>
+                ) : moderators.length === 0 ? (
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-500" colSpan={4}>
+                      No moderators found.
+                    </td>
+                  </tr>
+                ) : (
+                  moderators.map((mod) => (
+                    <tr key={mod.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatModeratorId(mod.id)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {mod.username}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {mod.registrationDate || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() =>
+                            handleDeleteModerator(mod.id, mod.username)
+                          }
+                          className="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center"
+                        >
+                          <Trash2 className="w-5 h-5 mr-1" /> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-          <div>
-            <label
-              htmlFor="contactEmail"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Contact Email
-            </label>
-            <input
-              type="email"
-              id="contactEmail"
-              name="contactEmail"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              value={generalSettings.contactEmail}
-              onChange={handleGeneralSettingsChange}
-            />
-          </div>
-          <div className="md:col-span-2 flex items-center">
-            <input
-              type="checkbox"
-              id="notificationsEnabled"
-              name="notificationsEnabled"
-              className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              checked={generalSettings.notificationsEnabled}
-              onChange={handleGeneralSettingsChange}
-            />
-            <label
-              htmlFor="notificationsEnabled"
-              className="ml-2 block text-sm font-medium text-gray-700"
-            >
-              Enable System Notifications
-            </label>
-          </div>
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              onClick={handleUpdateGeneralSettings}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            >
-              <CheckCircle className="w-5 h-5 mr-2" /> Save Settings
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Global Commission & Fees (DB-backed only; hidden until loaded) */}
       <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
@@ -711,243 +801,7 @@ const Setting = () => {
         )}
       </section>
 
-      {/* Pharmacy-specific Commission Override */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <DollarSign className="w-6 h-6 mr-2 text-indigo-600" /> Pharmacy
-          Commission Override
-        </h2>
-        {pharmacyMsg && (
-          <div className="mb-3 p-2 rounded bg-gray-100 text-gray-800 text-sm">
-            {pharmacyMsg}
-          </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Pharmacy ID
-            </label>
-            <input
-              type="text"
-              value={pharmacyIdInput}
-              onChange={(e) => setPharmacyIdInput(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter pharmacy ID"
-            />
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleLoadPharmacyCommission}
-              disabled={pharmacyLoading}
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ${
-                pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-            >
-              Load
-            </button>
-            <button
-              onClick={handleRemovePharmacyCommission}
-              disabled={pharmacyLoading}
-              className={`bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ${
-                pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-            >
-              Remove Override
-            </button>
-          </div>
-        </div>
-
-        {pharmacyCommission !== null && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Existing override summary */}
-            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
-                <div className="text-xs text-gray-500">Commission Override</div>
-                <div className="text-sm font-semibold text-gray-800">
-                  {formatCommission(pharmacyCommission?.commissionPercent)}
-                </div>
-              </div>
-              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
-                <div className="text-xs text-gray-500">Effective Currency</div>
-                <div className="text-sm font-semibold text-gray-800">
-                  {walletSettings?.currency || "LKR"}
-                </div>
-              </div>
-              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
-                <div className="text-xs text-gray-500">Using Global Fee</div>
-                <div className="text-sm font-semibold text-gray-800">
-                  {formatCurrency(
-                    walletSettings?.convenienceFee,
-                    walletSettings?.currency || "LKR"
-                  )}
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Commission Percent
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={pharmacyCommission?.commissionPercent ?? ""}
-                onChange={(e) =>
-                  setPharmacyCommission({
-                    ...pharmacyCommission,
-                    commissionPercent:
-                      e.target.value === ""
-                        ? undefined
-                        : Number(e.target.value),
-                  })
-                }
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="text-xs text-gray-500">
-              Version: {pharmacyCommission?.version ?? 0}
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={handleSavePharmacyCommission}
-                disabled={pharmacyLoading}
-                className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ${
-                  pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-              >
-                <CheckCircle className="w-5 h-5 mr-2 inline" />{" "}
-                {pharmacyLoading ? "Saving..." : "Save Override"}
-              </button>
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* Security Settings Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <Lock className="w-6 h-6 mr-2 text-red-600" /> Security Settings
-        </h2>
-        <form
-          onSubmit={handleChangeAdminPassword}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div>
-            <label
-              htmlFor="oldPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Old Password
-            </label>
-            <input
-              type="password"
-              id="oldPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeOld}
-              onChange={(e) => setPasswordChangeOld(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="newPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              New Password
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeNew}
-              onChange={(e) => setPasswordChangeNew(e.target.value)}
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              value={passwordChangeConfirm}
-              onChange={(e) => setPasswordChangeConfirm(e.target.value)}
-              required
-            />
-          </div>
-          {passwordChangeMessage && (
-            <div
-              className={`md:col-span-2 p-3 rounded-lg text-sm ${
-                passwordChangeMessage.includes("successfully")
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {passwordChangeMessage}
-            </div>
-          )}
-          <div className="md:col-span-2 flex justify-end">
-            <button
-              type="submit"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-            >
-              <Lock className="w-5 h-5 mr-2" /> Change Password
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Audit Log Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
-          <List className="w-6 h-6 mr-2 text-blue-600" /> Audit Log
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Timestamp
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Action
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
-                >
-                  Admin
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {auditLog.map((log) => (
-                <tr key={log.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {log.timestamp}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {log.action}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {log.admin}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      
     </div>
   );
 };

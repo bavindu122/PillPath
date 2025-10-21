@@ -9,6 +9,7 @@ import Prescription from './pages/Prescription';
 import WalletAndIncome from './pages/WalletAndIncome';
 import AdminLogin from './pages/AdminLogin';
 import AdminRoute from '../../components/ProtectedRoute/AdminRoute';
+import Reviews from './pages/Reviews';
 import { ADMIN_ROUTES } from '../../constants/routes'; // ✅ Add this
 
 import Sales from './pages/Sales';
@@ -36,6 +37,7 @@ const Admin = () => {
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<Setting />} />
               <Route path="announcements" element={<Announcements />} />
+              <Route path="reviews" element={<Reviews />} />
             </Routes>
           </AdminLayout>
         </AdminRoute>

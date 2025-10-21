@@ -215,7 +215,7 @@ const PharmacyMap = ({
               <img src="${pharmacy.logoUrl || logo3}" alt="${
           pharmacy.name
         }" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px; border: 1px solid #e0e0e0;" />
-              <span>${pharmacy.name}</span>
+              <span class="notranslate" translate="no">${pharmacy.name}</span>
             </div>
             <div style="padding: 12px 20px; background: white; color: #666; font-size: 14px; line-height: 1.5;">
               <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
