@@ -16,14 +16,29 @@ const RecentOrdersCard = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await OrdersService.listMyOrders(false);
+        // Use unified endpoint; we don't need items details here, keep payload small
+        const data = await OrdersService.listMyOrders({
+          type: "all",
+          includeItems: false,
+        });
         if (!mounted) return;
         const items = Array.isArray(data?.items)
           ? data.items
           : Array.isArray(data)
           ? data
           : [];
-        setOrdersRaw(items);
+        // Deduplicate by composite key: orderCode/id + type
+        const seen = new Set();
+        const deduped = [];
+        for (const co of items) {
+          const type = (co.type || co.orderType || "").toLowerCase();
+          const code = co.orderCode || co.code || String(co.id || "");
+          const key = `${code}-${type || "rx"}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          deduped.push(co);
+        }
+        setOrdersRaw(deduped);
       } catch (e) {
         if (!mounted) return;
         setError(e?.message || "Failed to load orders");
@@ -51,6 +66,8 @@ const RecentOrdersCard = () => {
         co.totals?.grandTotal ?? co.totals?.total ?? co.amount ?? null;
       const pharmacies = Array.isArray(co.pharmacyOrders)
         ? co.pharmacyOrders
+        : Array.isArray(co.pharmacies)
+        ? co.pharmacies
         : [];
       const firstPharmacyName =
         pharmacies[0]?.pharmacyName || pharmacies[0]?.name;
@@ -58,12 +75,19 @@ const RecentOrdersCard = () => {
         pharmacies.length > 1
           ? `${firstPharmacyName || "Multiple"} +${pharmacies.length - 1}`
           : firstPharmacyName || co.pharmacyName || "—";
-      const itemsCount = pharmacies.reduce(
-        (acc, p) => acc + (Array.isArray(p.items) ? p.items.length : 0),
-        0
-      );
+      // Prefer provided itemsCount, else sum pharmacy item counts if present
+      const itemsCount =
+        co.itemsCount ??
+        pharmacies.reduce(
+          (acc, p) => acc + (Array.isArray(p.items) ? p.items.length : 0),
+          0
+        );
+      const type = (co.type || co.orderType || "").toLowerCase() || "rx";
+      const displayId = co.code || co.orderCode || String(co.id || "—");
+      const key = `${displayId}-${type}`;
       return {
-        id: co.code || co.orderCode || String(co.id || "—"),
+        key,
+        id: displayId,
         pharmacy: pharmacyLabel,
         eta: amount != null ? `${currency} ${Number(amount)}` : "—",
         date,
@@ -100,7 +124,7 @@ const RecentOrdersCard = () => {
           !error &&
           orders.map((order) => (
             <motion.div
-              key={order.id}
+              key={order.key}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}

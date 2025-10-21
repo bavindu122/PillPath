@@ -1,106 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Bell, 
-  MessageSquare, 
-  Settings, 
-  User,
-  Calendar,
-  Filter,
-  Plus,
-  Search
-} from 'lucide-react';
-import PharmaPageLayout from '../components/PharmaPageLayout';
-import StatsCards from '../components/StatsCards';
-import PrescriptionQueue from '../components/PrescriptionQueue';
-import InventoryAlerts from '../components/InventoryAlerts';
-import PatientMessages from '../components/PatientMessages';
-import Header from '../components/Header';
-import './index-pharmacist.css';
+import React, { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+import PharmaPageLayout from "../components/PharmaPageLayout";
+import StatsCards from "../components/StatsCards";
+import PrescriptionQueue from "../components/PrescriptionQueue";
+import InventoryAlerts from "../components/InventoryAlerts";
+import "./index-pharmacist.css";
+import { prescriptionService } from "../services/prescriptionService";
+import { getStockAlerts } from "../../../services/api/StockAlertsService";
+import { usePharmacyAuth } from "../../../hooks/usePharmacyAuth";
 
 const PharmacistDashboard = () => {
+  const { user: pharmacyUser } = usePharmacyAuth();
   const [prescriptions, setPrescriptions] = useState([]);
   const [inventoryAlerts, setInventoryAlerts] = useState([]);
-  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [fadeIn, setFadeIn] = useState(false);
-  
+
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       loadDashboardData();
-      setFadeIn(true);
-    }, 300);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
-  const loadDashboardData = () => {
-    setPrescriptions([
-      {
-        id: 1,
-        patientName: "RX-250714-02",
-        medication: "Amoxicillin 500mg - 30 tablets",
-        priority: "High Priority",
-        date: "2025-07-04",
-        time: "10:30 AM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 2,
-        patientName: "RX-250714-02",
-        medication: "Metformin 850mg - 60 tablets",
-        priority: "Medium Priority",
-        date: "2025-07-04",
-        time: "11:15 AM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 3,
-        patientName: "RX-250714-03",
-        medication: "Lisinopril 10mg - 30 tablets",
-        priority: "Low Priority",
-        date: "2025-07-04",
-        time: "2:45 PM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 4,
-        patientName: "RX-250714-04",
-        medication: "Atorvastatin 20mg - 90 tablets",
-        priority: "Medium Priority",
-        date: "2025-07-04",
-        time: "3:20 PM",
-        avatar: "/api/placeholder/40/40"
-      },
-      {
-        id: 5,
-        patientName: "RX-250714-05",
-        medication: "Omeprazole 40mg - 14 capsules",
-        priority: "High Priority",
-        time: "4:10 PM",
-        date: "2025-07-04",
-        avatar: "/api/placeholder/40/40",
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+
+      // 1) Load pharmacist submission queue (includes imageUrl & submission IDs)
+      let queue = [];
+      try {
+        queue = await prescriptionService.loadPrescriptions();
+      } catch (e) {
+        console.error("Failed to load prescription queue:", e);
+        queue = [];
       }
-    ]);
 
-    setInventoryAlerts([
-      { id: 1, medication: "Aspirin 325mg", status: "Only 12 left", type: "low" },
-      { id: 2, medication: "Ibuprofen 200mg", status: "25 remaining", type: "medium" },
-      { id: 3, medication: "Acetaminophen", status: "Critical: 8 left", type: "critical" }
-    ]);
+      const isActive = (s = "") => {
+        const status = String(s).toLowerCase();
+        return (
+          status.includes("pending_review") || status.includes("in_progress")
+        );
+      };
+      const mapPriority = (s = "") => {
+        const status = String(s).toLowerCase();
+        if (status.includes("pending_review")) return "High Priority";
+        if (status.includes("in_progress")) return "Medium Priority";
+        return "Low Priority";
+      };
 
-    setMessages([
-      { id: 1, name: "Sanath Ranathunga", message: "Question about dosage...", unread: true },
-      { id: 2, name: "Amal Perera", message: "Prescription ready?", unread: false }
-    ]);
+      const mapped = (Array.isArray(queue) ? queue : [])
+        .filter((p) => isActive(p.status))
+        .map((p) => ({
+          id: p.id,
+          reviewId: p.reviewId || p.submissionId || p.id,
+          patientName:
+            p.patientName || p.customerName || p.code || "Prescription",
+          medication: p.code || p.patientName || "",
+          priority: mapPriority(p.status),
+          date: p.date || "",
+          time: p.time || "",
+          avatar: "/api/placeholder/40/40",
+          code: p.code,
+          status: p.status,
+          imageUrl: p.imageUrl,
+        }))
+        .slice(0, 4);
 
-    setIsLoading(false);
+      setPrescriptions(mapped);
+
+      // 2) Load inventory alerts for this pharmacy
+      let alerts = [];
+      try {
+        const pharmacyId = pharmacyUser?.pharmacyId;
+        if (pharmacyId) {
+          const rawAlerts = await getStockAlerts(pharmacyId);
+          alerts = (Array.isArray(rawAlerts) ? rawAlerts : []).map((a, idx) => {
+            const stock = a.stock ?? a.remaining ?? a.quantity ?? a.inStock;
+            let type = "low";
+            if (typeof stock === "number") {
+              if (stock <= 10) type = "critical";
+              else if (stock <= 25) type = "low";
+              else type = "medium";
+            } else if (a.type) {
+              type = String(a.type).toLowerCase();
+            }
+            const statusText =
+              typeof stock === "number"
+                ? stock <= 10
+                  ? `Critical: ${stock} left`
+                  : `${stock} remaining`
+                : a.status || "Low stock";
+            return {
+              id: a.id || a.alertId || idx + 1,
+              medication:
+                a.medicineName || a.productName || a.name || "Unknown Item",
+              status: statusText,
+              type,
+            };
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load inventory alerts:", e);
+        alerts = [];
+      }
+      setInventoryAlerts(alerts);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // Stats for header cards
+  const today = new Date().toISOString().slice(0, 10);
+  const pendingCount = prescriptions.filter((p) =>
+    /high/i.test(p.priority)
+  ).length;
+  const todaysOrders = prescriptions.filter((p) =>
+    String(p.date || "").startsWith(today)
+  ).length;
+  const lowStockCount = inventoryAlerts.filter(
+    (a) => a.type === "critical" || a.type === "low"
+  ).length;
   const statsData = [
-    { title: "Pending Prescriptions", value: "24", subtitle: "14 from yesterday", color: "blue" },
-    { title: "Today's Orders", value: "87", subtitle: "+12% from last week", color: "green" },
-    { title: "Low Stock Alerts", value: "7", subtitle: "Requires attention", color: "orange" },
-    { title: "Patient Messages", value: "15", subtitle: "3 unread", color: "purple" }
+    {
+      title: "Pending Prescriptions",
+      value: String(pendingCount),
+      subtitle: "Queue requiring action",
+      color: "blue",
+    },
+    {
+      title: "Today's Orders",
+      value: String(todaysOrders),
+      subtitle: "Created today",
+      color: "green",
+    },
+    {
+      title: "Low Stock Alerts",
+      value: String(lowStockCount),
+      subtitle: "Requires attention",
+      color: "orange",
+    },
   ];
-  
+
   if (isLoading) {
     return (
       <PharmaPageLayout
@@ -121,31 +161,34 @@ const PharmacistDashboard = () => {
       <div className="dashboard-fade-in-2 mb-4 sm:mb-6">
         <StatsCards stats={statsData} />
       </div>
-      
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <div className="xl:col-span-2 dashboard-fade-in-3">
-          <div 
+          <div
             className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border glass-hover"
             style={{
-              backgroundColor: 'var(--pharma-card-bg)',
-              borderColor: 'var(--pharma-border)'
+              backgroundColor: "var(--pharma-card-bg)",
+              borderColor: "var(--pharma-border)",
             }}
           >
-            <PrescriptionQueue 
+            <PrescriptionQueue
               prescriptions={prescriptions}
-              onApprove={(id) => console.log('Approve:', id)}
-              onReject={(id) => console.log('Reject:', id)}
-              onClarify={(id) => console.log('Clarify:', id)}
+              onApprove={(id) => console.log("Approve:", id)}
+              onReject={(id) => console.log("Reject:", id)}
+              onClarify={(id) => console.log("Clarify:", id)}
             />
           </div>
         </div>
-        
+
         <div className="space-y-4 sm:space-y-6 dashboard-fade-in-4">
-          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border glass-hover" style={{ backgroundColor: 'var(--pharma-card-bg)', borderColor: 'var(--pharma-border)' }}>
+          <div
+            className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border glass-hover"
+            style={{
+              backgroundColor: "var(--pharma-card-bg)",
+              borderColor: "var(--pharma-border)",
+            }}
+          >
             <InventoryAlerts alerts={inventoryAlerts} />
-          </div>
-          <div className="backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border glass-hover" style={{ backgroundColor: 'var(--pharma-card-bg)', borderColor: 'var(--pharma-border)' }}>
-            <PatientMessages messages={messages} />
           </div>
         </div>
       </div>
@@ -154,8 +197,8 @@ const PharmacistDashboard = () => {
         <button
           className="p-3 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-110 focus:outline-none"
           style={{
-            backgroundColor: 'var(--pharma-blue)',
-            color: 'var(--pharma-text-light)'
+            backgroundColor: "var(--pharma-blue)",
+            color: "var(--pharma-text-light)",
           }}
         >
           <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
