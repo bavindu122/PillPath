@@ -7,7 +7,8 @@ import {
   ArrowRight,
   Users,
   ChevronDown,
-  Send
+  Star,
+  Send,
 } from "lucide-react";
 import { ScrollContainer } from "../../../components/UIs";
 import OrdersService from "../../../services/api/OrdersService";
