@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import OrdersService from "../../../services/api/OrdersService";
-import { ArrowLeft, Package, Store, Loader2 } from "lucide-react";
+import { ArrowLeft, Package, Store, Loader2, Gift } from "lucide-react";
 
 const statusColors = {
   PENDING: "text-yellow-300",
@@ -35,6 +35,42 @@ export default function CustomerOrderDetail() {
   const [order, setOrder] = React.useState(preloaded || null);
   const [loading, setLoading] = React.useState(!preloaded);
   const [error, setError] = React.useState("");
+  const [loyaltyRate, setLoyaltyRate] = React.useState(1.0);
+
+  // Fetch loyalty rate only if we have an order with card payment
+  React.useEffect(() => {
+    const fetchLoyaltyRate = async () => {
+      // Only fetch if we have an order and it's a card payment
+      if (!order) return;
+      
+      const isCardPayment = order?.paymentMethod === 'CREDIT_CARD' || order?.paymentMethod === 'DEBIT_CARD';
+      if (!isCardPayment) return;
+      
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          console.warn('No auth token found');
+          return;
+        }
+        const response = await fetch('http://localhost:8080/api/v1/customer/loyalty', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setLoyaltyRate(data.pointsRate || 1.0);
+        } else {
+          console.warn('Failed to fetch loyalty rate:', response.status);
+        }
+      } catch (err) {
+        console.error('Error fetching loyalty rate:', err);
+      }
+    };
+    fetchLoyaltyRate();
+  }, [order]);
 
   React.useEffect(() => {
     if (preloaded) return; // already have it
@@ -110,6 +146,12 @@ export default function CustomerOrderDetail() {
   };
 
   const totalCurrency = order?.totals?.currency || "LKR";
+  
+  // Check if this is a card payment order
+  const isCardPayment = order?.paymentMethod === 'CREDIT_CARD' || order?.paymentMethod === 'DEBIT_CARD';
+  const orderTotal = order?.totals?.total || order?.total || 0;
+  const pointsEarned = isCardPayment ? Math.floor(orderTotal * loyaltyRate) : 0;
+  
   const visiblePharmacies = React.useMemo(() => {
     const list = order?.pharmacyOrders || order?.pharmacies || [];
     if (!list.length) return list;
@@ -225,6 +267,38 @@ export default function CustomerOrderDetail() {
                       {totalCurrency}{" "}
                       {order.totals.total?.toFixed?.(2) ?? order.totals.total}
                     </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Loyalty Points Display for Card Payments */}
+              {isCardPayment && pointsEarned > 0 && (
+                <div className="mt-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/30 rounded-lg">
+                        <Gift className="h-6 w-6 text-green-300" />
+                      </div>
+                      <div>
+                        <p className="text-green-300 font-semibold text-lg">
+                          Loyalty Points Earned
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          From this card payment order
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-green-400 font-bold text-3xl">
+                        +{pointsEarned.toLocaleString()}
+                      </p>
+                      <p className="text-white/50 text-xs">points</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-white/10">
+                    <p className="text-white/60 text-xs">
+                      💳 Earned at {loyaltyRate} point{loyaltyRate !== 1 ? 's' : ''} per LKR 1 on card payments
+                    </p>
                   </div>
                 </div>
               )}

@@ -12,6 +12,8 @@ import {
   DollarSign,
   Home,
   LogOut,
+  Gift,
+  Info,
 } from "lucide-react";
 import AdminWalletService from "../../../services/api/AdminWalletService";
 
@@ -78,6 +80,10 @@ const Setting = () => {
   const [pharmacyCommission, setPharmacyCommission] = useState(null);
   const [pharmacyLoading, setPharmacyLoading] = useState(false);
   const [pharmacyMsg, setPharmacyMsg] = useState("");
+  // Loyalty points settings
+  const [loyaltyRate, setLoyaltyRate] = useState(null);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [loyaltyMsg, setLoyaltyMsg] = useState("");
   const [auditLog, setAuditLog] = useState(dummySettingsData.auditLog);
 
   const [passwordChangeOld, setPasswordChangeOld] = useState("");
@@ -162,7 +168,7 @@ const Setting = () => {
     alert("General settings updated!");
   };
 
-  // Load current global wallet settings on mount
+  // Load current global wallet settings and loyalty rate on mount
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -178,6 +184,40 @@ const Setting = () => {
         if (mounted) setWalletLoading(false);
       }
     })();
+    
+    // Load loyalty rate
+    (async () => {
+      try {
+        setLoyaltyLoading(true);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+          console.warn('No admin token found');
+          if (mounted) setLoyaltyLoading(false);
+          return;
+        }
+        
+        const response = await fetch('http://localhost:8080/api/v1/admin/settings/loyalty-rate', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (!mounted) return;
+          setLoyaltyRate({ rate: data });
+        } else {
+          console.error('Failed to load loyalty rate:', response.status);
+        }
+      } catch (e) {
+        console.error('Error loading loyalty rate:', e);
+      } finally {
+        if (mounted) setLoyaltyLoading(false);
+      }
+    })();
+    
     return () => {
       mounted = false;
     };
@@ -283,6 +323,57 @@ const Setting = () => {
       setPharmacyMsg(e.message || "Failed to remove override");
     } finally {
       setPharmacyLoading(false);
+    }
+  };
+
+  const handleSaveLoyaltyRate = async (e) => {
+    e?.preventDefault?.();
+    setLoyaltyMsg("");
+    try {
+      setLoyaltyLoading(true);
+      const token = localStorage.getItem('admin_token');
+      
+      if (!token) {
+        throw new Error("Admin authentication required. Please log in again.");
+      }
+      
+      if (!loyaltyRate || loyaltyRate.rate === undefined || loyaltyRate.rate === null || loyaltyRate.rate === "") {
+        throw new Error("Please enter a valid loyalty rate");
+      }
+      
+      const rateValue = parseFloat(loyaltyRate.rate);
+      if (isNaN(rateValue) || rateValue < 0) {
+        throw new Error("Loyalty rate must be a positive number");
+      }
+      
+      const response = await fetch('http://localhost:8080/api/v1/admin/settings/loyalty-rate', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rate: rateValue })
+      });
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to update loyalty rate';
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMessage = errorData.message;
+          else if (errorData.error) errorMessage = errorData.error;
+        } catch (e) {
+          errorMessage = `${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const updated = await response.json();
+      setLoyaltyRate({ rate: updated });
+      setLoyaltyMsg("✅ Loyalty rate updated successfully!");
+    } catch (e) {
+      setLoyaltyMsg(`❌ ${e.message || "Failed to update loyalty rate"}`);
+    } finally {
+      setLoyaltyLoading(false);
     }
   };
 
@@ -819,6 +910,91 @@ const Setting = () => {
               </button>
             </div>
           </div>
+        )}
+      </section>
+
+      {/* Loyalty Points Settings */}
+      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+          <Gift className="w-6 h-6 mr-2 text-green-600" /> Loyalty Points Settings
+        </h2>
+        
+        {loyaltyMsg && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            loyaltyMsg.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {loyaltyMsg}
+          </div>
+        )}
+        
+        {loyaltyLoading ? (
+          <div className="text-sm text-gray-600">Loading loyalty settings...</div>
+        ) : loyaltyRate ? (
+          <form onSubmit={handleSaveLoyaltyRate} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Points per LKR 1 Spent (Card Payments Only)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={loyaltyRate?.rate ?? ""}
+                  onChange={(e) =>
+                    setLoyaltyRate({
+                      ...loyaltyRate,
+                      rate: e.target.value === "" ? "" : parseFloat(e.target.value)
+                    })
+                  }
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="e.g., 1.0"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Current rate: <strong>{loyaltyRate?.rate || "Not set"}</strong> point(s) per LKR 1
+                </p>
+              </div>
+              
+              <div className="flex items-end">
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200 w-full">
+                  <p className="text-xs text-gray-600 mb-1">Example Calculation</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    LKR 1,000 order = {((loyaltyRate?.rate || 0) * 1000).toFixed(0)} points
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    (Only for credit/debit card payments)
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+                <Info className="w-4 h-4 mr-2" /> How Loyalty Points Work
+              </h3>
+              <ul className="space-y-1 text-sm text-blue-800">
+                <li>• Points are awarded only when customers pay with credit or debit cards</li>
+                <li>• Cash payments do not earn loyalty points</li>
+                <li>• Points are calculated and credited automatically when payment is confirmed</li>
+                <li>• Customers can view their points balance in their dashboard</li>
+              </ul>
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loyaltyLoading}
+                className={`bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center ${
+                  loyaltyLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {loyaltyLoading ? "Saving..." : "Save Loyalty Rate"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="text-sm text-gray-600">No loyalty settings found.</div>
         )}
       </section>
 

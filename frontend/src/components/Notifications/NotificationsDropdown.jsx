@@ -157,12 +157,9 @@ const NotificationsDropdown = forwardRef(
     };
 
     const handleNotificationClick = (notification) => {
+      // Mark as read only - no navigation
       if (!notification.read) {
         markAsRead(notification.id);
-      }
-      // Optional: Navigate to notification link
-      if (notification.link) {
-        window.location.href = notification.link;
       }
     };
 
@@ -276,19 +273,9 @@ const NotificationsDropdown = forwardRef(
                   key={notification.id}
                   className={`
                     group relative px-4 py-3
-                    hover:bg-gray-50 dark:hover:bg-gray-700/50
-                    transition-colors cursor-pointer
+                    transition-colors
                     ${!notification.read ? 'bg-purple-50 dark:bg-purple-900/10' : ''}
                   `}
-                  onClick={() => handleNotificationClick(notification)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleNotificationClick(notification);
-                    }
-                  }}
                   aria-label={`Notification: ${notification.title}`}
                 >
                   <div className="flex gap-3">
@@ -310,7 +297,12 @@ const NotificationsDropdown = forwardRef(
                           {notification.title}
                         </h3>
                         {!notification.read && (
-                          <span className="flex-shrink-0 w-2 h-2 bg-purple-600 rounded-full mt-1"></span>
+                          <button
+                            onClick={() => handleNotificationClick(notification)}
+                            className="flex-shrink-0 w-2 h-2 bg-purple-600 rounded-full mt-1 hover:w-3 hover:h-3 transition-all"
+                            aria-label="Mark as read"
+                            title="Mark as read"
+                          ></button>
                         )}
                       </div>
                       <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">

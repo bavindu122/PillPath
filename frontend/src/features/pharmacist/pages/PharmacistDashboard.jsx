@@ -14,7 +14,6 @@ const PharmacistDashboard = () => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [inventoryAlerts, setInventoryAlerts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       loadDashboardData();

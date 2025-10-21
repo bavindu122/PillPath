@@ -10,6 +10,7 @@ import SalesAnalyticsPage from "./pages/sales-analytics/SalesAnalyticsPage";
 import OrdersPage from "./pages/orders/OrdersPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
 import PaymentGatewayPage from "./pages/PaymentGateway/PaymentGatewayPage";
+import PharmacyAdminProfile from "./pages/PharmacyAdminProfile";
 import Chat from "./pages/chats/Chat";
 
 export const PharmacyAdmin = () => {
@@ -40,6 +41,7 @@ export const PharmacyAdmin = () => {
     <PharmacyAdminLayout>
       <Routes>
         <Route path="" element={<DashboardPage />} />
+        <Route path="profile" element={<PharmacyAdminProfile />} />
         <Route path="pharmacyprofile" element={<PharmacySettings />} />
         <Route path="pharmacystaff" element={<StaffManagement />} />
         <Route path="pharmacyinventory" element={<InventoryManagementPage />} />
