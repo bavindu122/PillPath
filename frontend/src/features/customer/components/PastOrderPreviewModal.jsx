@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Store, Package, ArrowRight, Users, ChevronDown } from "lucide-react";
+import {
+  X,
+  Store,
+  Package,
+  ArrowRight,
+  Users,
+  ChevronDown,
+} from "lucide-react";
 import { ScrollContainer } from "../../../components/UIs";
 import OrdersService from "../../../services/api/OrdersService";
 import FamilyMemberService from "../services/FamilyMemberService";
 import { useNavigate } from "react-router-dom";
 
-const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false }) => {
+const PastOrderPreviewModal = ({
+  isOpen,
+  onClose,
+  order,
+  hideAssignment = false,
+}) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +35,7 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
       if (!isOpen || !order) return;
       setError("");
       setAssignmentSuccess(false);
-      
+
       // prefer raw order if present from caller
       if (order.raw) {
         setDetail(order.raw);
@@ -38,17 +50,18 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
           if (!cancelled) setLoading(false);
         }
       }
-      
+
       // Load family members
       try {
         const members = await FamilyMemberService.getFamilyMembers();
         if (!cancelled) {
           setFamilyMembers(Array.isArray(members) ? members : []);
-          
+
           // Check if order already has a family member assigned
-          const familyMemberId = detail?.familyMemberId || order?.familyMemberId;
+          const familyMemberId =
+            detail?.familyMemberId || order?.familyMemberId;
           if (familyMemberId && members) {
-            const assigned = members.find(m => m.id === familyMemberId);
+            const assigned = members.find((m) => m.id === familyMemberId);
             if (assigned) {
               setAssignedMember(assigned);
             }
@@ -69,17 +82,23 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
     setAssigningMember(true);
     setError("");
     setAssignmentSuccess(false);
-    
+
     try {
       // Get order code (this is what we're viewing)
       const orderCode = order?.orderNumber || detail?.orderCode;
-      
-      console.log("Assigning order:", orderCode, "to family member:", memberId, memberName);
-      
+
+      console.log(
+        "Assigning order:",
+        orderCode,
+        "to family member:",
+        memberId,
+        memberName
+      );
+
       if (!orderCode) {
         throw new Error("Order code not found");
       }
-      
+
       // Call the order assignment API endpoint
       const response = await fetch(
         `http://localhost:8080/api/v1/orders/${orderCode}/assign-family-member`,
@@ -92,28 +111,30 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
           body: JSON.stringify({ familyMemberId: memberId }),
         }
       );
-      
+
       console.log("Assignment response status:", response.status);
-      
+
       if (!response.ok) {
         let errorData;
         try {
           errorData = await response.json();
         } catch (e) {
-          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+          errorData = {
+            error: `HTTP ${response.status}: ${response.statusText}`,
+          };
         }
         throw new Error(errorData.error || "Failed to assign order");
       }
-      
+
       const result = await response.json();
       console.log("Assignment successful:", result);
-      
+
       // Find and set the assigned member
-      const member = familyMembers.find(m => m.id === memberId);
+      const member = familyMembers.find((m) => m.id === memberId);
       if (member) {
         setAssignedMember(member);
       }
-      
+
       setAssignmentSuccess(true);
       setTimeout(() => setAssignmentSuccess(false), 3000);
     } catch (e) {
@@ -131,6 +152,25 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
     ? detail.pharmacyOrders
     : [];
   const createdAt = detail?.createdAt || order.createdAt;
+  const orderType = (
+    detail?.orderType ||
+    order?.raw?.orderType ||
+    order?.raw?.type ||
+    order?.prescriptionType ||
+    ""
+  )
+    .toString()
+    .toUpperCase();
+  const otcImgFromDetail = Array.isArray(detail?.items)
+    ? detail.items[0]?.productImageUrl || detail.items[0]?.imageUrl
+    : undefined;
+  const otcImgFromRaw = Array.isArray(order?.raw?.items)
+    ? order.raw.items[0]?.productImageUrl || order.raw.items[0]?.imageUrl
+    : undefined;
+  const displayImg =
+    orderType === "OTC"
+      ? otcImgFromDetail || otcImgFromRaw || order.prescriptionImg
+      : pharmacies?.[0]?.prescriptionImageUrl || order.prescriptionImg;
 
   return (
     <AnimatePresence>
@@ -181,7 +221,7 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
                 </button>
               </div>
             </div>
-            
+
             {/* Family Member Assignment Section */}
             {!hideAssignment && (
               <div className="px-6 pt-6 pb-2">
@@ -190,99 +230,106 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
                     <div className="flex items-center gap-2">
                       <Users className="h-5 w-5 text-blue-300" />
                       <span className="text-white font-medium">
-                        {assignedMember ? "Assigned to Family Member" : "Assign to Family Member"}
+                        {assignedMember
+                          ? "Assigned to Family Member"
+                          : "Assign to Family Member"}
                       </span>
                     </div>
-                  
-                  {assignedMember ? (
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-600/30 border border-blue-400/50 px-4 py-2 rounded-lg">
-                        <span className="text-white font-medium">
-                          {assignedMember.name}
-                        </span>
-                        {assignedMember.relation && (
-                          <span className="text-white/70 text-sm ml-2">
-                            ({assignedMember.relation})
+
+                    {assignedMember ? (
+                      <div className="flex items-center gap-3">
+                        <div className="bg-blue-600/30 border border-blue-400/50 px-4 py-2 rounded-lg">
+                          <span className="text-white font-medium">
+                            {assignedMember.name}
                           </span>
+                          {assignedMember.relation && (
+                            <span className="text-white/70 text-sm ml-2">
+                              ({assignedMember.relation})
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            setAssignedMember(null);
+                            setAssignmentSuccess(false);
+                          }}
+                          className="text-blue-300 hover:text-blue-200 text-sm underline"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <button
+                          onClick={() =>
+                            setShowFamilyDropdown(!showFamilyDropdown)
+                          }
+                          disabled={assigningMember}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all"
+                        >
+                          {assigningMember ? (
+                            <span>Assigning...</span>
+                          ) : (
+                            <>
+                              Select Member
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform ${
+                                  showFamilyDropdown ? "rotate-180" : ""
+                                }`}
+                              />
+                            </>
+                          )}
+                        </button>
+
+                        {showFamilyDropdown && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            className="absolute right-0 mt-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-20 min-w-[200px] max-h-[300px] overflow-y-auto"
+                          >
+                            {familyMembers.length === 0 ? (
+                              <div className="px-4 py-3 text-white/70 text-sm">
+                                No family members found
+                              </div>
+                            ) : (
+                              familyMembers.map((member) => (
+                                <button
+                                  key={member.id}
+                                  onClick={() =>
+                                    handleAssignToFamilyMember(
+                                      member.id,
+                                      member.name
+                                    )
+                                  }
+                                  className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white first:rounded-t-xl last:rounded-b-xl"
+                                >
+                                  {member.name}
+                                  {member.relation && (
+                                    <span className="text-white/60 text-xs ml-2">
+                                      ({member.relation})
+                                    </span>
+                                  )}
+                                </button>
+                              ))
+                            )}
+                          </motion.div>
                         )}
                       </div>
-                      <button
-                        onClick={() => {
-                          setAssignedMember(null);
-                          setAssignmentSuccess(false);
-                        }}
-                        className="text-blue-300 hover:text-blue-200 text-sm underline"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <button
-                        onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
-                        disabled={assigningMember}
-                        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-all"
-                      >
-                        {assigningMember ? (
-                          <span>Assigning...</span>
-                        ) : (
-                          <>
-                            Select Member
-                            <ChevronDown
-                              className={`h-4 w-4 transition-transform ${
-                                showFamilyDropdown ? "rotate-180" : ""
-                              }`}
-                            />
-                          </>
-                        )}
-                      </button>
-                      
-                      {showFamilyDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          className="absolute right-0 mt-2 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-20 min-w-[200px] max-h-[300px] overflow-y-auto"
-                        >
-                          {familyMembers.length === 0 ? (
-                            <div className="px-4 py-3 text-white/70 text-sm">
-                              No family members found
-                            </div>
-                          ) : (
-                            familyMembers.map((member) => (
-                              <button
-                                key={member.id}
-                                onClick={() =>
-                                  handleAssignToFamilyMember(member.id, member.name)
-                                }
-                                className="w-full text-left px-4 py-2 hover:bg-white/10 transition-colors text-white first:rounded-t-xl last:rounded-b-xl"
-                              >
-                                {member.name}
-                                {member.relation && (
-                                  <span className="text-white/60 text-xs ml-2">
-                                    ({member.relation})
-                                  </span>
-                                )}
-                              </button>
-                            ))
-                          )}
-                        </motion.div>
-                      )}
-                    </div>
+                    )}
+                  </div>
+
+                  {assignmentSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 bg-green-500/20 border border-green-500/40 text-green-200 px-3 py-2 rounded-lg text-sm"
+                    >
+                      ✓ Order assigned successfully!
+                    </motion.div>
                   )}
                 </div>
-                
-                {assignmentSuccess && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 bg-green-500/20 border border-green-500/40 text-green-200 px-3 py-2 rounded-lg text-sm"
-                  >
-                    ✓ Order assigned successfully!
-                  </motion.div>
-                )}
               </div>
-            </div>
             )}
 
             {/* Modal Content */}
@@ -293,14 +340,10 @@ const PastOrderPreviewModal = ({ isOpen, onClose, order, hideAssignment = false 
                   {error}
                 </div>
               )}
-              {/* Prescription Image */}
+              {/* Image: Prescription (Rx) or OTC product */}
               <div className="flex justify-center w-full">
                 <img
-                  src={
-                    detail?.pharmacyOrders?.[0]?.prescriptionImageUrl ||
-                    order.prescriptionImg ||
-                    "/src/assets/img/prescription.jpeg"
-                  }
+                  src={displayImg || "/src/assets/img/prescription.jpeg"}
                   alt="Prescription"
                   className="rounded-xl border border-white/30 shadow-lg max-h-100 object-contain bg-white/10"
                   style={{ width: "auto", maxWidth: "100%" }}

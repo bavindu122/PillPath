@@ -50,9 +50,29 @@ export async function getOrder(orderCode) {
   return request(`orders/${encodeURIComponent(orderCode)}`, { method: "GET" });
 }
 
-export async function listMyOrders(includeItems = false) {
-  const qs = includeItems ? "?includeItems=true" : "";
-  return request(`orders/my${qs}`, { method: "GET" });
+/**
+ * List current user's orders.
+ * Backward-compatible signature:
+ *  - listMyOrders(true|false) -> toggles includeItems (legacy)
+ *  - listMyOrders({ includeItems?: boolean, type?: 'all'|'prescription'|'otc' })
+ *    -> supports new unified endpoint filter
+ */
+export async function listMyOrders(options = false) {
+  // Backward compatibility: boolean means includeItems
+  let includeItems = false;
+  let type;
+  if (typeof options === "boolean") {
+    includeItems = options;
+  } else if (options && typeof options === "object") {
+    includeItems = !!options.includeItems;
+    type = options.type;
+  }
+
+  const params = new URLSearchParams();
+  if (includeItems) params.append("includeItems", "true");
+  if (type) params.append("type", type);
+  const qs = params.toString();
+  return request(`orders/my${qs ? `?${qs}` : ""}`, { method: "GET" });
 }
 
 export async function pay(orderCode, body) {

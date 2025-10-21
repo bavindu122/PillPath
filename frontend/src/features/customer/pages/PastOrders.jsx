@@ -14,8 +14,10 @@ import {
 import OrderCard from "../components/OrderCard";
 import OrderPreviewModal from "../components/PastOrderPreviewModal";
 import OrdersService from "../../../services/api/OrdersService";
+import { useAuth } from "../../../hooks/useAuth";
 
 const PastOrders = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All Orders");
@@ -31,10 +33,26 @@ const PastOrders = () => {
     (async () => {
       try {
         setLoadingOrders(true);
-        const data = await OrdersService.listMyOrders(false);
+        setLoadError("");
+        // Use unified endpoint with includeItems for consistent mapping
+        const resp = await OrdersService.listMyOrders({
+          includeItems: true,
+          type: "all",
+        });
+
         if (!mounted) return;
-        // Group: one card per customer order (ORD), aggregate pharmacy orders
-        const cards = (data || []).map((co) => {
+
+        const list = Array.isArray(resp?.items)
+          ? resp.items
+          : Array.isArray(resp)
+          ? resp
+          : [];
+
+        const toCard = (co) => {
+          const orderType = (co.orderType || co.type || "")
+            .toString()
+            .toUpperCase();
+          const isOtc = orderType === "OTC";
           const created = co.createdAt ? new Date(co.createdAt) : null;
           const date = created
             ? created.toLocaleDateString(undefined, {
@@ -52,40 +70,89 @@ const PastOrders = () => {
           const currency = co.totals?.currency || co.currency || "LKR";
           const pharmacies = Array.isArray(co.pharmacyOrders)
             ? co.pharmacyOrders
+            : Array.isArray(co.pharmacies)
+            ? co.pharmacies
             : [];
-          const firstPharmacyName = pharmacies[0]?.pharmacyName;
-          const pharmacyLabel =
-            pharmacies.length > 1
-              ? `${
-                  firstPharmacyName ||
-                  `Pharmacy #${pharmacies[0]?.pharmacyId || 1}`
-                } +${pharmacies.length - 1} more`
-              : firstPharmacyName ||
-                (pharmacies[0]
-                  ? `Pharmacy #${pharmacies[0]?.pharmacyId}`
-                  : "—");
+          // Build pharmacy label
+          let pharmacyLabel;
+          if (isOtc) {
+            pharmacyLabel =
+              co.pharmacyName ||
+              (co.pharmacyId ? `Pharmacy #${co.pharmacyId}` : "—");
+          } else {
+            const firstPharmacyName = pharmacies[0]?.pharmacyName;
+            pharmacyLabel =
+              pharmacies.length > 1
+                ? `${
+                    firstPharmacyName ||
+                    `Pharmacy #${pharmacies[0]?.pharmacyId || 1}`
+                  } +${pharmacies.length - 1} more`
+                : firstPharmacyName ||
+                  (pharmacies[0]
+                    ? `Pharmacy #${pharmacies[0]?.pharmacyId}`
+                    : "—");
+          }
+
+          // Prefer provided image urls
+          // For Rx: prescriptionImageUrl; For OTC: first item productImageUrl
+          const firstOtcImg = isOtc
+            ? (Array.isArray(co.items) && co.items[0]?.productImageUrl) ||
+              (Array.isArray(co.items) && co.items[0]?.imageUrl)
+            : undefined;
+          const dtoImage =
+            firstOtcImg ||
+            co.thumbnailImageUrl ||
+            pharmacies[0]?.prescriptionImageUrl ||
+            pharmacies[0]?.imageUrl ||
+            co.imageUrl;
 
           return {
-            id: co.orderCode,
-            orderNumber: co.orderCode,
-            total: `${currency} ${Number(co.totals?.total ?? 0).toFixed(2)}`,
+            id: co.orderCode || co.id,
+            orderNumber: co.orderCode || co.id,
+            total: `${currency} ${Number(
+              co.totals?.total ?? co.total ?? 0
+            ).toFixed(2)}`,
             date,
             time,
             status: (co.status || "").replace(/_/g, " "),
-            notes: co.customerNote || "",
+            notes: co.customerNote || co.notes || "",
             pharmacy: pharmacyLabel,
-            pharmacyCount: pharmacies.length,
-            // itemCount left undefined (can be computed in detail if needed)
-            prescriptionType: "Prescription",
-            paymentMethod: (co.payment?.method || "-").replace(/_/g, " "),
+            pharmacyCount: isOtc ? 1 : pharmacies.length || 1,
+            itemCount: Array.isArray(co.items) ? co.items.length : undefined,
+            prescriptionType: isOtc ? "OTC" : "Prescription",
+            paymentMethod: (
+              co.payment?.method ||
+              co.paymentMethod ||
+              "-"
+            ).replace(/_/g, " "),
             rating: undefined,
-            prescriptionImg:
-              pharmacies[0]?.prescriptionImageUrl ||
-              "/src/assets/img/prescription.jpeg",
-            // pass through for modal usage
+            prescriptionImg: dtoImage || "/src/assets/img/prescription.jpeg",
             raw: co,
           };
+        };
+
+        // Map and sort recent first
+        // Deduplicate by composite key (orderNumber + type)
+        const seen = new Set();
+        const cards = [];
+        for (const co of list) {
+          const card = toCard(co);
+          const type =
+            (co.orderType || co.type || "").toString().toLowerCase() ||
+            (card.prescriptionType === "OTC" ? "otc" : "rx");
+          const num = card.orderNumber || card.id || "";
+          const key = `${num}-${type}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          cards.push({ ...card, _key: key });
+        }
+        // Sort recent first
+        cards.sort((a, b) => {
+          const aTime = new Date(`${a.date} ${a.time}`).getTime() || 0;
+          const bTime = new Date(`${b.date} ${b.time}`).getTime() || 0;
+          return bTime - aTime;
         });
+
         setPastOrders(cards);
       } catch (e) {
         setLoadError(e.message || "Failed to load orders");
@@ -97,7 +164,7 @@ const PastOrders = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user?.id]);
 
   const filterOptions = [
     "All Orders",
@@ -225,7 +292,7 @@ const PastOrders = () => {
       >
         {filteredOrders.map((order, index) => (
           <motion.div
-            key={order.id}
+            key={order._key || `${order.id}-${order.prescriptionType}`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
