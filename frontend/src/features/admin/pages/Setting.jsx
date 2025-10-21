@@ -765,7 +765,7 @@ const Setting = () => {
       )}
 
       {/* Global Commission & Fees (DB-backed only; hidden until loaded) */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+    {/*}  <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
           <DollarSign className="w-6 h-6 mr-2 text-indigo-600" /> Platform
           Commission & Fees
@@ -789,7 +789,7 @@ const Setting = () => {
             onSubmit={handleSaveWalletSettings}
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            {/* Current platform settings summary */}
+            
             <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
               <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
                 <div className="text-xs text-gray-500">Currency</div>
@@ -890,10 +890,10 @@ const Setting = () => {
             No platform settings found.
           </div>
         )}
-      </section>
+      </section>*/}
 
       {/* Pharmacy-specific Commission Override */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+     {/*} <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
           <DollarSign className="w-6 h-6 mr-2 text-indigo-600" /> Pharmacy
           Commission Override
@@ -940,7 +940,7 @@ const Setting = () => {
 
         {pharmacyCommission !== null && (
           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Existing override summary */}
+            
             <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
                 <div className="text-xs text-gray-500">Commission Override</div>
@@ -1001,7 +1001,7 @@ const Setting = () => {
             </div>
           </div>
         )}
-      </section>
+      </section>/*}
 
       {/* Loyalty Points Settings */}
       <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
@@ -1089,7 +1089,7 @@ const Setting = () => {
       </section>
 
       {/* Security Settings Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+      {/*<section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
           <Lock className="w-6 h-6 mr-2 text-red-600" /> Security Settings
         </h2>
@@ -1165,10 +1165,10 @@ const Setting = () => {
             </button>
           </div>
         </form>
-      </section>
+      </section>*/}
 
       {/* Audit Log Section */}
-      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+     {/* <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
           <List className="w-6 h-6 mr-2 text-blue-600" /> Audit Log
         </h2>
@@ -1213,7 +1213,7 @@ const Setting = () => {
             </tbody>
           </table>
         </div>
-      </section>
+      </section>*/}
     </div>
   );
 };
