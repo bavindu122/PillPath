@@ -283,53 +283,6 @@ const serviceFeatures = [
       "Special promotional events",
     ],
   },
-  {
-    id: 6,
-    icon: <Pill size={32} strokeWidth={1.5} />,
-    title: "Medicine Information",
-    description:
-      "Access comprehensive medication information, potential interactions, and usage guidelines.",
-    color: "from-accent-light to-accent",
-    textColor: "text-accent-purple",
-    bgColor: "bg-accent/5",
-    guideBook: [
-      "Search for medications by name or category.",
-      "Review dosage, side effects, and interactions carefully.",
-      "Save important medications to your personal library.",
-      "Consult pharmacists for any questions or clarifications.",
-      "Use printable guides for offline reference.",
-    ],
-    steps: [
-      {
-        title: "Search medication database",
-        description: "Find detailed information on thousands of medications",
-        icon: <Search size={20} />,
-      },
-      {
-        title: "View comprehensive details",
-        description: "Access dosage, side effects, and usage instructions",
-        icon: <BookOpen size={20} />,
-      },
-      {
-        title: "Check for interactions",
-        description:
-          "Verify potential interactions with your current medications",
-        icon: <AlertCircle size={20} />,
-      },
-      {
-        title: "Save to your medication library",
-        description:
-          "Keep important information accessible for future reference",
-        icon: <Settings size={20} />,
-      },
-    ],
-    benefits: [
-      "Expert-reviewed content",
-      "Medication reminder schedules",
-      "Alternative medication suggestions",
-      "Printable medication guides",
-    ],
-  },
 ];
 
 const Services = () => {

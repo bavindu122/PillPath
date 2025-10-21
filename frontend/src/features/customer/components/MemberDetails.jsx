@@ -24,7 +24,7 @@ import PrescriptionDetailModal from "./PrescriptionDetailModal";
 import { ModalScrollContainer } from "../../../components/UIs";
 
 
-const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => {
+const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember, onMemberUpdate }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,6 +37,14 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+  };
+
+  const handleEditSuccess = (updatedMember) => {
+    setIsEditModalOpen(false);
+    // Notify parent component to refresh data
+    if (onMemberUpdate) {
+      onMemberUpdate(updatedMember);
+    }
   };
 
   const handlePrescriptionClick = (prescription, event) => {
@@ -160,13 +168,15 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        onClick={handleMainModalClick}
-      >
+      {isOpen && selectedProfile && (
+        <motion.div
+          key="member-details-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={handleMainModalClick}
+        >
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -560,14 +570,7 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
           <div className="px-8 py-6 border-t border-white/10 bg-white/5 flex-shrink-0 rounded-b-3xl">
             {!showDeleteConfirmation ? (
               <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 rounded-xl font-medium transition-all duration-300 shadow-lg flex items-center justify-center gap-2"
-                >
-                  <Upload size={18} />
-                  Upload New Prescription
-                </motion.button>
+                
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -631,22 +634,28 @@ const MemberDetails = ({ selectedProfile, isOpen, onClose, onDeleteMember }) => 
           </div>
         </motion.div>
       </motion.div>
+      )}
 
       {/* Edit Profile Modal - Outside main modal */}
       {isEditModalOpen && (
         <EditProfileModal 
+          key="edit-profile-modal"
           isOpen={isEditModalOpen}
           onClose={handleCloseEditModal}
           selectedProfile={selectedProfile}
+          onSuccess={handleEditSuccess}
         />
       )}
 
       {/* Prescription Detail Modal */}
-      <PrescriptionDetailModal
-        prescriptionId={selectedPrescriptionId}
-        isOpen={isPrescriptionDetailOpen}
-        onClose={handleClosePrescriptionDetail}
-      />
+      {isPrescriptionDetailOpen && (
+        <PrescriptionDetailModal
+          key="prescription-detail-modal"
+          prescriptionId={selectedPrescriptionId}
+          isOpen={isPrescriptionDetailOpen}
+          onClose={handleClosePrescriptionDetail}
+        />
+      )}
     </AnimatePresence>
   );
 };

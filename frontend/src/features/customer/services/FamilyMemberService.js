@@ -38,6 +38,21 @@ class FamilyMemberService {
     }
   }
 
+  // Update an existing family member
+  async updateFamilyMember(memberId, memberData) {
+    try {
+      const url = `http://localhost:8080/api/members/family-members/${memberId}`;
+      const response = await this.makeDirectRequest(url, {
+        method: 'PUT',
+        body: memberData
+      });
+      return response;
+    } catch (error) {
+      console.error('Error updating family member:', error);
+      throw error;
+    }
+  }
+
   // Delete a family member
   async deleteFamilyMember(memberId) {
     try {
@@ -86,7 +101,7 @@ class FamilyMemberService {
         data = await response.text();
       }
 
-      console.log("Direct API response:", response.status, data);
+      console.log("Direct API response:", response.status, response.statusText, data);
 
       if (!response.ok) {
         // Handle different error formats from backend
@@ -97,7 +112,7 @@ class FamilyMemberService {
             throw new Error(data.error);
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${typeof data === 'string' ? data : JSON.stringify(data)}`);
       }
 
       return data;

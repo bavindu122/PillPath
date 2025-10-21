@@ -320,35 +320,22 @@ const ChatWindow = ({ onBack, className = "" }) => {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center space-x-1">
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="Voice call"
-          >
-            <Phone className="w-5 h-5" />
-          </button>
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="Video call"
-          >
-            <Video className="w-5 h-5" />
-          </button>
-          <button
-            className="p-3 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-all duration-200 transform hover:scale-110"
-            title="More options"
-          >
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
+
       </div>
 
       {/* Messages Area - Scrollable content */}
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="relative flex-1 overflow-y-auto p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent min-h-0 chat-messages-container backdrop-blur-sm"
-        style={{ scrollBehavior: "smooth" }}
+        className="relative p-6 space-y-2 bg-gradient-to-b from-white/20 to-transparent chat-messages-container backdrop-blur-sm"
+        style={{ 
+          flex: "1 1 0%",
+          overflowY: "scroll",
+          overflowX: "hidden",
+          maxHeight: "calc(100vh - 300px)",
+          minHeight: "400px",
+          scrollBehavior: "smooth"
+        }}
       >
         {/* Loading more messages indicator */}
         {loadingMessages && (
