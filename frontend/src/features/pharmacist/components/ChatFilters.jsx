@@ -10,37 +10,29 @@ const ChatFilters = ({
   onSortChange
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+    <div className="bg-gradient-to-b from-blue-50 to-white rounded-lg shadow-sm border border-blue-100 p-4 space-y-4">
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={{ color: 'var(--pharma-text-secondary)' }} />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           type="text"
           placeholder="Search conversations..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          style={{ 
-            borderColor: 'var(--pharma-border)',
-            backgroundColor: 'var(--pharma-bg-light)'
-          }}
+          className="w-full pl-10 pr-4 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white/80 backdrop-blur-sm"
         />
       </div>
 
       {/* Status Filter */}
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--pharma-text-primary)' }}>
+        <label className="block text-sm font-medium mb-2 text-gray-700">
           <Filter className="inline h-4 w-4 mr-1" />
           Status
         </label>
         <select
           value={filterStatus}
           onChange={(e) => onFilterStatusChange(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          style={{ 
-            borderColor: 'var(--pharma-border)',
-            backgroundColor: 'var(--pharma-bg-light)'
-          }}
+          className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white/80 backdrop-blur-sm"
         >
           <option value="">All Conversations</option>
           <option value="active">Active</option>
@@ -51,18 +43,14 @@ const ChatFilters = ({
 
       {/* Sort Options */}
       <div>
-        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--pharma-text-primary)' }}>
+        <label className="block text-sm font-medium mb-2 text-gray-700">
           <ArrowUpDown className="inline h-4 w-4 mr-1" />
           Sort By
         </label>
         <select
           value={sortBy}
           onChange={(e) => onSortChange(e.target.value)}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          style={{ 
-            borderColor: 'var(--pharma-border)',
-            backgroundColor: 'var(--pharma-bg-light)'
-          }}
+          className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white/80 backdrop-blur-sm"
         >
           <option value="recent">Most Recent</option>
           <option value="patient">Patient Name</option>

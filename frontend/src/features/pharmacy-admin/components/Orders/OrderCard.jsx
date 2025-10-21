@@ -29,6 +29,21 @@ const OrderCard = ({ order }) => {
     });
   };
 
+  // ✅ NEW: Determine order type based on order code prefix
+  const getOrderTypeFromCode = (orderCode) => {
+    if (!orderCode) return "unknown";
+    
+    const code = orderCode.toString().toUpperCase();
+    
+    if (code.startsWith('PORD')) {
+      return 'prescription';
+    } else if (code.startsWith('OTC')) {
+      return 'otc';
+    }
+    
+    return 'unknown';
+  };
+
   // Get order type badge (only prescription and otc)
   const getOrderTypeBadge = (type) => {
     switch (type) {
@@ -52,6 +67,10 @@ const OrderCard = ({ order }) => {
         );
     }
   };
+
+  // ✅ UPDATED: Get order type - first check order code, then fallback to orderType field
+  const orderType = getOrderTypeFromCode(order.orderCode || order.orderNumber || order.id) || 
+                    (order.orderType || order.type || "").toString().toLowerCase();
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 overflow-hidden">
@@ -85,9 +104,8 @@ const OrderCard = ({ order }) => {
           </div>
 
           <div className="flex items-center">
-            {getOrderTypeBadge(
-              (order.orderType || order.type || "").toString().toLowerCase()
-            )}
+            {/* ✅ UPDATED: Use the determined orderType */}
+            {getOrderTypeBadge(orderType)}
           </div>
         </div>
 
@@ -145,3 +163,4 @@ const OrderCard = ({ order }) => {
 };
 
 export default OrderCard;
+

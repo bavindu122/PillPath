@@ -18,5 +18,9 @@ export default defineConfig(({ mode }) => {
           }
         : undefined,
     },
+    define: {
+      // Fix for SockJS: Define global variable for browser environment
+      global: 'globalThis',
+    },
   };
 });
