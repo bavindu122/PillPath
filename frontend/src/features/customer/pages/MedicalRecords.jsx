@@ -1,5 +1,4 @@
 import React from "react";
-import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/Layout/Navbar";
 import { assets } from "../../../assets/assets";
@@ -56,16 +55,6 @@ const MedicalRecords = () => {
                 onClick={handleCardClick}
               />
             ))}
-          </div>
-          {/* Add New Record Button */}
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={handleAddRecord}
-              className="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-              title="Add new medical record"
-            >
-              <Plus size={24} />
-            </button>
           </div>
         </div>
       </div>

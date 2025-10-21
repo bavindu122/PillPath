@@ -63,12 +63,9 @@ const NotificationBell = () => {
   };
 
   const handleNotificationClick = (notification) => {
+    // Only mark as read, no navigation
     if (!notification.read) {
       markAsRead(notification.id);
-    }
-    // Optional: Navigate to notification target
-    if (notification.link) {
-      window.location.href = notification.link;
     }
   };
 

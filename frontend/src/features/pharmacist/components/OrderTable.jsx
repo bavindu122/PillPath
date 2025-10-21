@@ -66,7 +66,7 @@ const OrderTable = ({ orders, onPrintOrder }) => {
             💵 Cash
           </span>
         );
-      case "credit card":
+      case "credit_card":
       case "card":
         return (
           <span

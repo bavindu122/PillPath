@@ -33,6 +33,27 @@ const ReviewPrescriptions = () => {
           fallback?.submissionId ||
           fallback?.id;
 
+        // Validate submissionId before making API calls
+        if (!submissionId || typeof submissionId !== "number") {
+          console.error("Invalid submissionId:", { prescriptionId, idForApi, submissionId, fallback });
+          if (active) {
+            setPrescription({
+              id: prescriptionId,
+              submissionId: null,
+              code: `INVALID`,
+              customerName: "Unknown",
+              patientName: "Unknown",
+              status: "UNKNOWN",
+              imageUrl: "",
+              dateUploaded: "",
+              items: [],
+            });
+            setOrderItems([]);
+          }
+          setIsLoading(false);
+          return;
+        }
+
         // Compose minimal prescription from fallback; if none, use a stub
         if (active) {
           setPrescription({

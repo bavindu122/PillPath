@@ -10,6 +10,7 @@ import CustomerOrderDetail from "./CustomerOrderDetail";
 import FamilyProfiles from "./FamilyProfiles";
 import MedicineInfo from "./MedicineInfo";
 import ChatCustomer from "./ChatCustomer";
+import LoyaltyHistory from "./LoyaltyHistory";
 import CustomerSidebar from "../components/CustomerSidebar";
 import { Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useSidebarWidth } from "../hooks";
@@ -83,6 +84,7 @@ const Customer = () => {
           <Route path="orders" element={<PastOrders />} />
           <Route path="orders/:orderCode" element={<CustomerOrderDetail />} />
           <Route path="/family-profiles" element={<FamilyProfiles />} />
+          <Route path="/loyalty-history" element={<LoyaltyHistory />} />
           <Route path="/medicine-info" element={<MedicineInfo />} />
           <Route path="/chats" element={<ChatCustomer />} />
           <Route

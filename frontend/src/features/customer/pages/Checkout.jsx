@@ -6,7 +6,7 @@ import {
   clearPrescription,
 } from "../services/CartService";
 import OrdersService from "../../../services/api/OrdersService";
-import { DollarSign, CreditCard as CreditIcon, Lock } from "lucide-react";
+import { DollarSign, CreditCard as CreditIcon, Lock, Gift } from "lucide-react";
 
 // Unified checkout page — single payment across selected pharmacies
 const Checkout = () => {
@@ -23,6 +23,34 @@ const Checkout = () => {
   });
   const [placing, setPlacing] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [loyaltyRate, setLoyaltyRate] = React.useState(1.0);
+
+  // Fetch loyalty rate on component mount
+  React.useEffect(() => {
+    const fetchLoyaltyRate = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          console.warn('No auth token found');
+          return;
+        }
+        const response = await fetch('http://localhost:8080/api/v1/customer/loyalty', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setLoyaltyRate(data.pointsRate || 1.0);
+        }
+      } catch (err) {
+        console.error('Error fetching loyalty rate:', err);
+      }
+    };
+    fetchLoyaltyRate();
+  }, []);
 
   const allItems =
     Array.isArray(state.items) && state.items.length > 0
@@ -41,6 +69,7 @@ const Checkout = () => {
   );
   // Totals are shown as derived from items only; no fake discounts
   const total = subtotal;
+  const estimatedPoints = selectedPaymentMethod === "card" ? Math.floor(total * loyaltyRate) : 0;
 
   const handlePaymentMethodSelect = (method) =>
     setSelectedPaymentMethod(method);
@@ -245,6 +274,28 @@ const Checkout = () => {
                 <span>Rs. {total.toFixed(2)}</span>
               </div>
             </div>
+            
+            {/* Loyalty Points Preview */}
+            {selectedPaymentMethod === "card" && estimatedPoints > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="border-t border-white/10 pt-3 mt-2"
+              >
+                <div className="flex items-center justify-between bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg p-3 border border-green-400/30">
+                  <div className="flex items-center gap-2">
+                    <Gift className="h-5 w-5 text-green-400" />
+                    <span className="text-white text-sm font-medium">You'll Earn:</span>
+                  </div>
+                  <div className="text-green-400 font-bold text-lg">
+                    +{estimatedPoints.toLocaleString()} points
+                  </div>
+                </div>
+                <p className="text-white/50 text-xs mt-2 text-center">
+                  Loyalty points for card payment
+                </p>
+              </motion.div>
+            )}
           </div>
 
           <h3 className="text-lg font-semibold text-white mb-3">

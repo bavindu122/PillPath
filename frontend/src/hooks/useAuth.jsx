@@ -143,6 +143,24 @@ export const AuthProvider = ({ children }) => {
     setInitialized(true);
   }, []);
 
+  // Listen for storage changes (for profile updates)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem("user_data");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        } catch (error) {
+          console.error("Failed to parse updated user data:", error);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const checkAuthStatus = async () => {
     try {
       setLoading(true);

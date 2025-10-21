@@ -69,18 +69,18 @@ const Sidebar = () => {
       label: "Order History",
       path: "/pharmacist/orders",
     },
-    {
-      id: "inventory",
-      icon: Package,
-      label: "Inventory",
-      path: "/pharmacist/inventory",
-    },
-    {
-      id: "chat",
-      icon: MessageSquare,
-      label: "Chat",
-      path: "/pharmacist/chat",
-    },
+    // {
+    //   id: "inventory",
+    //   icon: Package,
+    //   label: "Inventory",
+    //   path: "/pharmacist/inventory",
+    // },
+    // {
+    //   id: "chat",
+    //   icon: MessageSquare,
+    //   label: "Chat",
+    //   path: "/pharmacist/chat",
+    // },
   ];
 
   React.useEffect(() => {

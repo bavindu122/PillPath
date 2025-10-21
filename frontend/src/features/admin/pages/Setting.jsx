@@ -12,6 +12,8 @@ import {
   DollarSign,
   Home,
   LogOut,
+  Gift,
+  Info,
 } from "lucide-react";
 import AdminWalletService from "../../../services/api/AdminWalletService";
 import AdminService from "../../../services/api/AdminService";
@@ -86,6 +88,10 @@ const Setting = () => {
   const [pharmacyCommission, setPharmacyCommission] = useState(null);
   const [pharmacyLoading, setPharmacyLoading] = useState(false);
   const [pharmacyMsg, setPharmacyMsg] = useState("");
+  // Loyalty points settings
+  const [loyaltyRate, setLoyaltyRate] = useState(null);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [loyaltyMsg, setLoyaltyMsg] = useState("");
   const [auditLog, setAuditLog] = useState(dummySettingsData.auditLog);
 
   const [passwordChangeOld, setPasswordChangeOld] = useState("");
@@ -274,7 +280,7 @@ const Setting = () => {
     alert("General settings updated!");
   };
 
-  // Load current global wallet settings on mount
+  // Load current global wallet settings and loyalty rate on mount
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -290,6 +296,40 @@ const Setting = () => {
         if (mounted) setWalletLoading(false);
       }
     })();
+    
+    // Load loyalty rate
+    (async () => {
+      try {
+        setLoyaltyLoading(true);
+        const token = localStorage.getItem('admin_token');
+        if (!token) {
+          console.warn('No admin token found');
+          if (mounted) setLoyaltyLoading(false);
+          return;
+        }
+        
+        const response = await fetch('http://localhost:8080/api/v1/admin/settings/loyalty-rate', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (!mounted) return;
+          setLoyaltyRate({ rate: data });
+        } else {
+          console.error('Failed to load loyalty rate:', response.status);
+        }
+      } catch (e) {
+        console.error('Error loading loyalty rate:', e);
+      } finally {
+        if (mounted) setLoyaltyLoading(false);
+      }
+    })();
+    
     return () => {
       mounted = false;
     };
@@ -395,6 +435,57 @@ const Setting = () => {
       setPharmacyMsg(e.message || "Failed to remove override");
     } finally {
       setPharmacyLoading(false);
+    }
+  };
+
+  const handleSaveLoyaltyRate = async (e) => {
+    e?.preventDefault?.();
+    setLoyaltyMsg("");
+    try {
+      setLoyaltyLoading(true);
+      const token = localStorage.getItem('admin_token');
+      
+      if (!token) {
+        throw new Error("Admin authentication required. Please log in again.");
+      }
+      
+      if (!loyaltyRate || loyaltyRate.rate === undefined || loyaltyRate.rate === null || loyaltyRate.rate === "") {
+        throw new Error("Please enter a valid loyalty rate");
+      }
+      
+      const rateValue = parseFloat(loyaltyRate.rate);
+      if (isNaN(rateValue) || rateValue < 0) {
+        throw new Error("Loyalty rate must be a positive number");
+      }
+      
+      const response = await fetch('http://localhost:8080/api/v1/admin/settings/loyalty-rate', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rate: rateValue })
+      });
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to update loyalty rate';
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMessage = errorData.message;
+          else if (errorData.error) errorMessage = errorData.error;
+        } catch (e) {
+          errorMessage = `${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const updated = await response.json();
+      setLoyaltyRate({ rate: updated });
+      setLoyaltyMsg("✅ Loyalty rate updated successfully!");
+    } catch (e) {
+      setLoyaltyMsg(`❌ ${e.message || "Failed to update loyalty rate"}`);
+    } finally {
+      setLoyaltyLoading(false);
     }
   };
 
@@ -801,7 +892,328 @@ const Setting = () => {
         )}
       </section>
 
-      
+      {/* Pharmacy-specific Commission Override */}
+      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+          <DollarSign className="w-6 h-6 mr-2 text-indigo-600" /> Pharmacy
+          Commission Override
+        </h2>
+        {pharmacyMsg && (
+          <div className="mb-3 p-2 rounded bg-gray-100 text-gray-800 text-sm">
+            {pharmacyMsg}
+          </div>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Pharmacy ID
+            </label>
+            <input
+              type="text"
+              value={pharmacyIdInput}
+              onChange={(e) => setPharmacyIdInput(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter pharmacy ID"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleLoadPharmacyCommission}
+              disabled={pharmacyLoading}
+              className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ${
+                pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              Load
+            </button>
+            <button
+              onClick={handleRemovePharmacyCommission}
+              disabled={pharmacyLoading}
+              className={`bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ${
+                pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              Remove Override
+            </button>
+          </div>
+        </div>
+
+        {pharmacyCommission !== null && (
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* Existing override summary */}
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="text-xs text-gray-500">Commission Override</div>
+                <div className="text-sm font-semibold text-gray-800">
+                  {formatCommission(pharmacyCommission?.commissionPercent)}
+                </div>
+              </div>
+              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="text-xs text-gray-500">Effective Currency</div>
+                <div className="text-sm font-semibold text-gray-800">
+                  {walletSettings?.currency || "LKR"}
+                </div>
+              </div>
+              <div className="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="text-xs text-gray-500">Using Global Fee</div>
+                <div className="text-sm font-semibold text-gray-800">
+                  {formatCurrency(
+                    walletSettings?.convenienceFee,
+                    walletSettings?.currency || "LKR"
+                  )}
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Commission Percent
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={pharmacyCommission?.commissionPercent ?? ""}
+                onChange={(e) =>
+                  setPharmacyCommission({
+                    ...pharmacyCommission,
+                    commissionPercent:
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
+                  })
+                }
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="text-xs text-gray-500">
+              Version: {pharmacyCommission?.version ?? 0}
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={handleSavePharmacyCommission}
+                disabled={pharmacyLoading}
+                className={`bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ${
+                  pharmacyLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                <CheckCircle className="w-5 h-5 mr-2 inline" />{" "}
+                {pharmacyLoading ? "Saving..." : "Save Override"}
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Loyalty Points Settings */}
+      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+          <Gift className="w-6 h-6 mr-2 text-green-600" /> Loyalty Points Settings
+        </h2>
+        
+        {loyaltyMsg && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            loyaltyMsg.includes('success') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
+            {loyaltyMsg}
+          </div>
+        )}
+        
+        {loyaltyLoading ? (
+          <div className="text-sm text-gray-600">Loading loyalty settings...</div>
+        ) : loyaltyRate ? (
+          <form onSubmit={handleSaveLoyaltyRate} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Points per LKR 1 Spent (Card Payments Only)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={loyaltyRate?.rate ?? ""}
+                  onChange={(e) =>
+                    setLoyaltyRate({
+                      ...loyaltyRate,
+                      rate: e.target.value === "" ? "" : parseFloat(e.target.value)
+                    })
+                  }
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="e.g., 1.0"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Current rate: <strong>{loyaltyRate?.rate || "Not set"}</strong> point(s) per LKR 1
+                </p>
+              </div>
+              
+              <div className="flex items-end">
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200 w-full">
+                  <p className="text-xs text-gray-600 mb-1">Example Calculation</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    LKR 1,000 order = {((loyaltyRate?.rate || 0) * 1000).toFixed(0)} points
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    (Only for credit/debit card payments)
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+                <Info className="w-4 h-4 mr-2" /> How Loyalty Points Work
+              </h3>
+              <ul className="space-y-1 text-sm text-blue-800">
+                <li>• Points are awarded only when customers pay with credit or debit cards</li>
+                <li>• Cash payments do not earn loyalty points</li>
+                <li>• Points are calculated and credited automatically when payment is confirmed</li>
+                <li>• Customers can view their points balance in their dashboard</li>
+              </ul>
+            </div>
+            
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loyaltyLoading}
+                className={`bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center ${
+                  loyaltyLoading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {loyaltyLoading ? "Saving..." : "Save Loyalty Rate"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="text-sm text-gray-600">No loyalty settings found.</div>
+        )}
+      </section>
+
+      {/* Security Settings Section */}
+      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+          <Lock className="w-6 h-6 mr-2 text-red-600" /> Security Settings
+        </h2>
+        <form
+          onSubmit={handleChangeAdminPassword}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          <div>
+            <label
+              htmlFor="oldPassword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Old Password
+            </label>
+            <input
+              type="password"
+              id="oldPassword"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              value={passwordChangeOld}
+              onChange={(e) => setPasswordChangeOld(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="newPassword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              New Password
+            </label>
+            <input
+              type="password"
+              id="newPassword"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              value={passwordChangeNew}
+              onChange={(e) => setPasswordChangeNew(e.target.value)}
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+              value={passwordChangeConfirm}
+              onChange={(e) => setPasswordChangeConfirm(e.target.value)}
+              required
+            />
+          </div>
+          {passwordChangeMessage && (
+            <div
+              className={`md:col-span-2 p-3 rounded-lg text-sm ${
+                passwordChangeMessage.includes("successfully")
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {passwordChangeMessage}
+            </div>
+          )}
+          <div className="md:col-span-2 flex justify-end">
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
+            >
+              <Lock className="w-5 h-5 mr-2" /> Change Password
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {/* Audit Log Section */}
+      <section className="mb-12 bg-white p-6 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 flex items-center">
+          <List className="w-6 h-6 mr-2 text-blue-600" /> Audit Log
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                >
+                  Timestamp
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                >
+                  Action
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-blue-500 uppercase tracking-wider"
+                >
+                  Admin
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {auditLog.map((log) => (
+                <tr key={log.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {log.timestamp}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {log.action}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {log.admin}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 };
